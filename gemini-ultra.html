@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Gemini ULTRA VIP | TERMINAL</title>
+
+    <script>
+        if (window.location.pathname.endsWith('.html')) {
+            const cleanUrl = window.location.pathname.replace('.html', '');
+            window.history.replaceState(null, '', cleanUrl);
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
+            authDomain: "my-software-portal.firebaseapp.com",
+            projectId: "my-software-portal",
+            appId: "1:1072405993700:web:b66ca016c8de667d46f4f1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = "index.html"; return; }
+            const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
+            const now = new Date().getTime();
+            if (!userDoc.exists() || (userDoc.data().expiry !== 'LIFETIME' && userDoc.data().expiry < now)) {
+                window.location.href = "index.html";
+                return;
+            }
+            document.body.style.display = "block";
+        });
+    </script>
+
+    <style>
+        /* GLOBAL VIP THEME */
+        body { margin: 0; background: #0a0a0f; font-family: Arial, sans-serif; color: #fff; overflow-x: hidden; display: none; }
+        
+        /* 3. THE EXIT TERMINAL BUTTON */
+        .exit-nav { position: fixed; top: 15px; right: 15px; z-index: 1000; }
+        .exit-btn { 
+            background: rgba(255, 255, 255, 0.05); color: #fff; padding: 6px 12px; 
+            border-radius: 6px; text-decoration: none; font-weight: bold; 
+            border: 1px solid rgba(255, 255, 255, 0.2); font-size: 11px; transition: 0.3s; 
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .exit-btn:hover { background: #fff; color: #000; }
+
+        .title-container { text-align: center; padding: 30px 0 10px 0; }
+        .title-container h1 { font-size: 32px; font-weight: 900; background: linear-gradient(90deg, #00e5ff, #ff2d55); -webkit-background-clip: text; color: transparent; margin: 0; }
+        
+        .app-container { width: 95%; max-width: 480px; margin: 0 auto; padding-bottom: 40px; }
+
+        /* MAIN PREDICTION PANEL */
+        #prediction { width: 100%; padding: 22px; text-align: center; font-size: 28px; font-weight: 900; border-radius: 16px; margin-bottom: 8px; transition: 0.3s ease; box-sizing: border-box; }
+        .pred-placeholder { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #666; font-size: 18px !important; }
+
+        .pred-PLAYER { background: linear-gradient(270deg, #0088cc, #00e5ff, #4deaff, #0088cc); background-size: 600% 600%; animation: gradientMove 8s ease infinite; box-shadow: 0 0 20px rgba(0,229,255,0.5); color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .pred-BANKER { background: linear-gradient(270deg, #c4004f, #ff2d55, #ff6b9e, #c4004f); background-size: 600% 600%; animation: gradientMove 8s ease infinite; box-shadow: 0 0 20px rgba(255,45,85,0.5); color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+
+        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        #extraInfo { text-align: center; margin-bottom: 20px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 0 0 16px 16px; border: 1px solid rgba(255,255,255,0.05); border-top: none; }
+        .extra-line { font-size: 13px; margin: 3px 0; color: #888; }
+        .pattern-id { color: #00e5ff; font-weight: bold; }
+        .confidence-value { color: #ff2d55; font-weight: bold; }
+
+        #history { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; justify-content: center; min-height: 35px; }
+        .history-chip { padding: 6px 10px; border-radius: 6px; color: #fff; font-weight: bold; font-size: 12px; }
+        .history-P { background: #00cfff; box-shadow: 0 0 8px rgba(0,207,255,0.3); }
+        .history-B { background: #ff3d6e; box-shadow: 0 0 8px rgba(255,61,110,0.3); }
+
+        .btn-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+        button { padding: 16px; border: none; font-size: 18px; border-radius: 12px; color: #fff; cursor: pointer; font-weight: 900; transition: 0.2s ease; text-transform: uppercase; }
+        #btnPlayer { background: linear-gradient(90deg, #00bfff, #00e5ff); text-shadow: 0 0 10px rgba(0,0,0,0.2); }
+        #btnBanker { background: linear-gradient(90deg, #ff2d55, #ff6b9e); text-shadow: 0 0 10px rgba(0,0,0,0.2); }
+        #btnUndo { background: #333; font-size: 14px; }
+        #btnReset { background: #1a1a1a; font-size: 14px; color: #666; }
+        button:active { transform: scale(0.96); }
+
+        .pattern-block { display: none; padding: 16px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); }
+        .pattern-row { display: flex; align-items: center; margin-bottom: 8px; }
+        .row-label { width: 35px; text-align: left; color: #555; font-size: 10px; font-weight: bold; }
+        .row-cells { display: flex; gap: 5px; }
+        .col { width: 24px; height: 24px; border-radius: 4px; display: flex; justify-content: center; align-items: center; font-weight: 900; font-size: 11px; }
+        .P { background: rgba(0, 207, 255, 0.2); color: #00cfff; border: 1px solid rgba(0,207,255,0.3); }
+        .B { background: rgba(255, 61, 110, 0.2); color: #ff3d6e; border: 1px solid rgba(255,61,110,0.3); }
+        .highlight { border: 2px solid #ffd700; background: #ffd700 !important; color: #000 !important; }
+
+        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; backdrop-filter: blur(10px); background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .loader { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-top-color: #00e5ff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="exit-nav">
+    <a href="index.html" class="exit-btn">EXIT TERMINAL</a>
+</div>
+
+<div class="title-container">
+    <h1>Gemini ULTRA VIP</h1>
+</div>
+
+<div class="app-container">
+    <div id="prediction" class="pred-placeholder">
+        SYNCING ENGINE...
+    </div>
+
+    <div id="extraInfo">
+        <div class="extra-line">NEURAL ID: <span class="pattern-id" id="patternId">---</span></div>
+        <div class="extra-line">CONFIDENCE: <span class="confidence-value" id="confidenceValue">---</span></div>
+    </div>
+
+    <div id="history"></div>
+
+    <div class="btn-container">
+        <button id="btnPlayer">Player</button>
+        <button id="btnBanker">Banker</button>
+        <button id="btnUndo">Undo</button>
+        <button id="btnReset">Reset</button>
+    </div>
+
+    <div id="patternBlock" class="pattern-block"></div>
+    <div id="loadingOverlay"><div class="loader"></div></div>
+</div>
+
+<script>
+    let history = [];
+    let predHistory = [];
+    const MAX_HISTORY = 10;
+
+    function updateHistory() {
+        const hist = document.getElementById("history");
+        hist.innerHTML = "";
+        history.slice(-MAX_HISTORY).forEach(item => {
+            const chip = document.createElement("div");
+            chip.className = `history-chip history-${item}`;
+            chip.textContent = item;
+            hist.appendChild(chip);
+        });
+    }
+
+    function showLoading() {
+        const overlay = document.getElementById("loadingOverlay");
+        overlay.style.display = "flex";
+        setTimeout(() => overlay.style.display = "none", 800);
+    }
+
+    function updatePrediction() {
+        const predEl = document.getElementById("prediction");
+        const patternBlock = document.getElementById("patternBlock");
+        predEl.classList.remove("pred-PLAYER", "pred-BANKER");
+
+        if (history.length >= MAX_HISTORY) {
+            showLoading();
+            setTimeout(() => {
+                const pred = predHistory[predHistory.length - 1];
+                predEl.textContent = pred;
+                predEl.classList.add(pred === "PLAYER" ? "pred-PLAYER" : "pred-BANKER");
+                generatePatterns(pred);
+                patternBlock.style.display = "block";
+                document.getElementById("patternId").textContent = "VIP-" + (1000 + Math.floor(Math.random() * 8999));
+                document.getElementById("confidenceValue").textContent = Math.floor(78 + Math.random() * 19) + "%";
+            }, 400);
+        } else {
+            predEl.textContent = `NEED ${MAX_HISTORY - history.length} ENTRIES`;
+            predEl.className = "pred-placeholder";
+            patternBlock.style.display = "none";
+            document.getElementById("patternId").textContent = "---";
+            document.getElementById("confidenceValue").textContent = "---";
+        }
+    }
+
+    function setResult(val) {
+        history.push(val);
+        const pred = Math.random() < 0.5 ? "PLAYER" : "BANKER";
+        predHistory.push(pred);
+        updateHistory();
+        updatePrediction();
+    }
+
+    function undo() {
+        if (!history.length) return;
+        history.pop();
+        predHistory.pop();
+        updateHistory();
+        updatePrediction();
+    }
+
+    function resetAll() {
+        if(confirm("Reset VIP Neural Engine?")) {
+            history = [];
+            predHistory = [];
+            updateHistory();
+            updatePrediction();
+        }
+    }
+
+    function generatePatterns(pred) {
+        const block = document.getElementById("patternBlock");
+        block.innerHTML = "";
+        const center = pred === "PLAYER" ? "P" : "B";
+        for (let r = 0; r < 8; r++) {
+            const row = document.createElement("div");
+            row.className = "pattern-row";
+            const label = document.createElement("div");
+            label.className = "row-label";
+            label.textContent = "LYR-" + (r + 1);
+            row.appendChild(label);
+            const cells = document.createElement("div");
+            cells.className = "row-cells";
+            for (let c = 0; c < 10; c++) {
+                const col = document.createElement("div");
+                col.className = "col";
+                let char = c === 5 ? center : (Math.random() < 0.5 ? "P" : "B");
+                col.textContent = char;
+                col.classList.add(char);
+                if (c === 5) col.classList.add("highlight");
+                cells.appendChild(col);
+            }
+            row.appendChild(cells);
+            block.appendChild(row);
+        }
+    }
+
+    document.getElementById("btnPlayer").addEventListener("click", () => setResult("P"));
+    document.getElementById("btnBanker").addEventListener("click", () => setResult("B"));
+    document.getElementById("btnUndo").addEventListener("click", undo);
+    document.getElementById("btnReset").addEventListener("click", resetAll);
+
+    updateHistory();
+    updatePrediction();
+</script>
+</body>
+</html>
