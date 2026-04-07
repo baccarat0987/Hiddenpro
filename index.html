@@ -22,68 +22,66 @@ body::before {
     z-index: -1;
 }
 .top-bar {
-    width: 100%; padding: 25px 60px;
-    background: rgba(0,0,0,0.8); backdrop-filter: blur(25px);
+    width: 100%; padding: 20px 40px;
+    background: rgba(0,0,0,0.8); backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(0, 255, 255, 0.2);
     display: flex; justify-content: space-between; align-items: center;
     position: sticky; top: 0; z-index: 100;
 }
 .logo-section { display: flex; flex-direction: column; }
-.logo { font-size: 26px; letter-spacing: 10px; font-weight: 900; color: #fff; }
+.logo { font-size: 24px; letter-spacing: 8px; font-weight: 900; color: #fff; }
 .status-text { font-size: 11px; color: var(--neon); letter-spacing: 3px; font-weight: 600; }
 #topAuthBtn {
-    background: #fff; color: #000; border: none; padding: 12px 20px;
+    background: #fff; color: #000; border: none; padding: 10px 18px;
     border-radius: 8px; font-weight: 800; cursor: pointer;
-    display: flex; align-items: center; gap: 10px; font-size: 13px;
+    display: flex; align-items: center; gap: 8px; font-size: 13px;
     transition: 0.3s;
 }
 #topAuthBtn:hover { background: var(--neon); transform: translateY(-2px); }
 .main-content {
-    padding: 60px; flex-grow: 1;
+    padding: 40px; flex-grow: 1;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 30px; max-width: 1600px; margin: 0 auto; width: 100%;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px; max-width: 1200px; margin: 0 auto; width: 100%;
 }
 .sw-card {
     background: var(--panel-bg);
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 25px; padding: 35px;
+    border-radius: 25px; padding: 30px;
     transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex; flex-direction: column; justify-content: space-between;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
 }
 .sw-card:hover { border-color: var(--neon); transform: translateY(-5px); }
 .sw-card h2 { font-size: 20px; margin: 0 0 10px 0; letter-spacing: 1px; color: #fff; }
-.sw-card p { font-size: 13px; color: #777; line-height: 1.6; margin-bottom: 25px; }
+.sw-card p { font-size: 13px; color: #777; line-height: 1.6; margin-bottom: 20px; }
 .engine-btn {
     background: transparent; border: 2px solid #333; color: #fff;
-    padding: 14px; border-radius: 10px; font-weight: 800; font-size: 12px;
-    text-align: center; text-transform: uppercase; letter-spacing: 3px;
+    padding: 12px; border-radius: 10px; font-weight: 800; font-size: 12px;
+    text-align: center; text-transform: uppercase; letter-spacing: 2px;
     cursor: pointer; transition: 0.3s;
 }
-.engine-btn:hover { border-color: var(--neon); background: rgba(0, 255, 255, 0.05); color: var(--neon); }
+.engine-btn:hover { border-color: var(--neon); background: rgba(0,255,255,0.05); color: var(--neon); }
 body.premium-active .engine-btn { 
     border-color: var(--neon); color: #000; background: var(--neon);
-    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+    box-shadow: 0 0 15px rgba(0,255,255,0.3);
 }
 #overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.98);
+    position: fixed; inset: 0; background: rgba(0,0,0,0.95);
     display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200;
     backdrop-filter: blur(20px);
 }
 .overlay-content { text-align: center; max-width: 900px; }
-.card-wrap { display: flex; gap: 30px; margin-top: 40px; flex-wrap: wrap; justify-content: center; }
-.p-card {
-    background: #050a15; border: 1px solid #222; border-radius: 25px;
-    padding: 50px 35px; width: 260px; cursor: pointer; transition: 0.3s;
+.active-members {
+    position: fixed; top: 10px; right: 20px; color: #0f0;
+    font-weight: bold; font-size: 14px; letter-spacing: 1px;
+    background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 10px;
 }
-.p-card:hover { border-color: var(--neon); transform: scale(1.05); }
-.p-card h3 { font-size: 13px; letter-spacing: 4px; color: #666; margin-bottom: 20px; }
-.p-card .price { font-size: 50px; font-weight: 900; margin-bottom: 20px; }
-.p-card .btn-buy { background: var(--neon); color: #000; padding: 12px; border-radius: 8px; font-weight: bold; }
 </style>
 </head>
 <body id="mainBody">
+
+<div class="active-members">Active Members: <span id="activeCount">345</span></div>
 
 <nav class="top-bar">
     <div class="logo-section">
@@ -96,18 +94,18 @@ body.premium-active .engine-btn {
     </button>
 </nav>
 
-<main class="main-content">
+<main class="main-content" id="softwareList">
     <!-- 10 software engines -->
-    <div class="sw-card"><div><h2>Viper Roulette</h2><p>Advanced cycle prediction and neighbor sector logic.</p></div><div class="engine-btn" onclick="handleEngineClick('5Kc84iBFrKx1Paf51KBcuuq6LiGKt6KYZ8q8hxtm8DEz')">Start Engine</div></div>
-    <div class="sw-card"><div><h2>AI Baccarat Trend</h2><p>Real-time pattern recognition for shoe transitions.</p></div><div class="engine-btn" onclick="handleEngineClick('6sdftyu78sdjfjsdkfjosdjf89')">Start Engine</div></div>
-    <div class="sw-card"><div><h2>Baccarat Analysis</h2><p>Mathematical edge and probability tracker.</p></div><div class="engine-btn" onclick="handleEngineClick('iausgdhiuashdi2s8f7ji')">Start Engine</div></div>
-    <div class="sw-card"><div><h2>Baccarat Predictor</h2><p>Real-time banker/player advantage signal.</p></div><div class="engine-btn" onclick="handleEngineClick('ajihsdiashdnasuisd')">Start Engine</div></div>
-    <div class="sw-card"><div><h2>Baccarat PRO</h2><p>Professional grade analytical toolset.</p></div><div class="engine-btn" onclick="handleEngineClick('podjkmapoda983oisjad')">Start Engine</div></div>
-    <div class="sw-card"><div><h2>Roulette PRO</h2><p>Sector-based tracking and visual prediction.</p></div><div class="engine-btn" onclick="handleEngineClick('s98f7dahijhdf87siou')">Start Engine</div></div>
-    <div class="sw-card"><div><h2>Card Counting</h2><p>Digital deck penetration and count metrics.</p></div><div class="engine-btn" onclick="handleEngineClick('asoda9s8d72398e93')">Start Engine</div></div>
-    <div class="sw-card"><div><h2>Gemini Ultra</h2><p>Neural network assisted game state logic.</p></div><div class="engine-btn" onclick="handleEngineClick('aonhdiay8923hiasjdh98')">Start Engine</div></div>
-    <div class="sw-card"><div><h2>Google AI</h2><p>Integrated search-probability correlation.</p></div><div class="engine-btn" onclick="handleEngineClick('986sdijfh89327husdf')">Start Engine</div></div>
-    <div class="sw-card"><div><h2>VisionWave Baccarat</h2><p>Visual trend-line and wave analysis.</p></div><div class="engine-btn" onclick="handleEngineClick('0921374sidfy8734sah')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>Viper Roulette</h2><p>Advanced cycle prediction and neighbor sector logic.</p></div><div class="engine-btn" onclick="handleEngineClick('ViperRoulette')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>AI Baccarat Trend</h2><p>Real-time pattern recognition for shoe transitions.</p></div><div class="engine-btn" onclick="handleEngineClick('AIBaccaratTrend')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>Baccarat Analysis</h2><p>Mathematical edge and probability tracker.</p></div><div class="engine-btn" onclick="handleEngineClick('BaccaratAnalysis')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>Baccarat Predictor</h2><p>Real-time banker/player advantage signal.</p></div><div class="engine-btn" onclick="handleEngineClick('BaccaratPredictor')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>Baccarat PRO</h2><p>Professional grade analytical toolset.</p></div><div class="engine-btn" onclick="handleEngineClick('BaccaratPRO')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>Roulette PRO</h2><p>Sector-based tracking and visual prediction.</p></div><div class="engine-btn" onclick="handleEngineClick('RoulettePRO')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>Card Counting</h2><p>Digital deck penetration and count metrics.</p></div><div class="engine-btn" onclick="handleEngineClick('CardCounting')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>Gemini Ultra</h2><p>Neural network assisted game state logic.</p></div><div class="engine-btn" onclick="handleEngineClick('GeminiUltra')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>Google AI</h2><p>Integrated search-probability correlation.</p></div><div class="engine-btn" onclick="handleEngineClick('GoogleAI')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>VisionWave Baccarat</h2><p>Visual trend-line and wave analysis.</p></div><div class="engine-btn" onclick="handleEngineClick('VisionWaveBaccarat')">Start Engine</div></div>
 </main>
 
 <div id="overlay">
@@ -115,26 +113,25 @@ body.premium-active .engine-btn {
     <button onclick="closeOverlay()" style="margin-top: 40px; background: none; border: none; color: #444; cursor: pointer; letter-spacing: 5px; font-weight: bold;">CLOSE TERMINAL</button>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.15.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.15.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.15.0/firebase-firestore.js";
+<!-- Firebase CDN (compat) -->
+<script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
 
-// --- FIREBASE CONFIG ---
+<script>
 const firebaseConfig = {
   apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
   authDomain: "my-software-portal.firebaseapp.com",
   projectId: "my-software-portal",
-  storageBucket: "my-software-portal.appspot.com",
+  storageBucket: "my-software-portal.firebasestorage.app",
   messagingSenderId: "1072405993700",
   appId: "1:1072405993700:web:b66ca016c8de667d46f4f1",
   measurementId: "G-KCJEWVQM61"
 };
+firebase.initializeApp(firebaseConfig);
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-const db = getFirestore(app);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
 const overlay = document.getElementById('overlay');
 const overlayContent = document.getElementById('overlayContent');
@@ -142,26 +139,24 @@ const mainBody = document.getElementById('mainBody');
 const statusMsg = document.getElementById('statusMsg');
 const topAuthBtn = document.getElementById('topAuthBtn');
 
-// LOGIN
 async function executeLogin() {
     try {
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-        await checkAccess(user);
+        const provider = new firebase.auth.GoogleAuthProvider();
+        const result = await auth.signInWithPopup(provider);
+        await checkAccess(result.user);
     } catch (err) {
         console.error("Login Error:", err);
     }
 }
 
-// CHECK ACCESS
 async function checkAccess(user) {
     if (!user) return;
     topAuthBtn.innerHTML = `<span>${user.email.split('@')[0].toUpperCase()}</span>`;
     statusMsg.textContent = "CONNECTED: " + user.email.toUpperCase();
-    const userRef = doc(db, "users", user.email);
-    const userSnap = await getDoc(userRef);
+    const userRef = db.collection("users").doc(user.email);
+    const userSnap = await userRef.get();
 
-    if (userSnap.exists() && userSnap.data().expiresAt.toDate() > new Date()) {
+    if (userSnap.exists && userSnap.data().expiresAt && userSnap.data().expiresAt.toDate() > new Date()) {
         mainBody.classList.add('premium-active');
         statusMsg.style.color = "var(--neon)";
         overlay.style.display = "none";
@@ -171,52 +166,46 @@ async function checkAccess(user) {
     }
 }
 
-// ENGINE CLICK
 window.handleEngineClick = async (appCode) => {
     const user = auth.currentUser;
     if (!user) { executeLogin(); return; }
     if (mainBody.classList.contains('premium-active')) {
-        window.location.href = appCode + ".html";
+        alert("Opening Engine: " + appCode); // Replace with real redirect
     } else {
         showPricingView();
     }
 };
 
-// SHOW PRICING
 function showPricingView() {
     overlay.style.display = "flex";
     overlayContent.innerHTML = `
         <h1 style="letter-spacing: 10px; margin-bottom: 10px;">ACCESS EXPIRED</h1>
         <p style="color: var(--neon); margin-bottom: 40px;">Select a license plan to reactivate all engines.</p>
-        <div class="card-wrap">
-            <div class="p-card" onclick="buy(250)">
-                <h3>30 DAYS</h3><div class="price">$250</div><div class="btn-buy">PURCHASE PASS</div>
+        <div style="display:flex; gap:20px; justify-content:center;">
+            <div style="background:#050a15;padding:20px;border-radius:20px;cursor:pointer;" onclick="buy(250)">
+                <h3>30 DAYS</h3><div>$250</div>
             </div>
-            <div class="p-card" style="border-color: var(--neon);" onclick="buy(400)">
-                <h3 style="color:var(--neon)">90 DAYS</h3><div class="price">$400</div><div class="btn-buy">MOST POPULAR</div>
+            <div style="background:#050a15;padding:20px;border-radius:20px;cursor:pointer;" onclick="buy(400)">
+                <h3>90 DAYS</h3><div>$400</div>
             </div>
-            <div class="p-card" onclick="buy(800)">
-                <h3>365 DAYS</h3><div class="price">$800</div><div class="btn-buy">FULL LICENSE</div>
+            <div style="background:#050a15;padding:20px;border-radius:20px;cursor:pointer;" onclick="buy(800)">
+                <h3>365 DAYS</h3><div>$800</div>
             </div>
         </div>
     `;
 }
 
-// PAYPAL BUY
 window.buy = (amt) => {
-    const email = auth.currentUser.email;
-    const paypalURL = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=YOUR_PAYPAL@GMAIL.COM&amount=${amt}&currency_code=USD&item_name=HiddenPro_Access&custom=${email}&return=https://hiddenpro.qzz.io`;
+    const email = auth.currentUser ? auth.currentUser.email : "unknown";
+    const paypalURL = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=edzelkeith0@gmail.com&amount=${amt}&currency_code=USD&item_name=HiddenPro_Access&custom=${email}&return=https://hiddenpro.qzz.io`;
     window.location.href = paypalURL;
 };
 
-// CLOSE OVERLAY
 window.closeOverlay = () => { overlay.style.display = "none"; };
 
-// TOP BUTTON
 topAuthBtn.addEventListener('click', () => { if (!auth.currentUser) executeLogin(); });
 
-// AUTO CHECK LOGIN
-onAuthStateChanged(auth, (user) => { if (user) checkAccess(user); });
+auth.onAuthStateChanged((user) => { if (user) checkAccess(user); });
 </script>
 
 </body>
