@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HIDDEN PRO | COMMAND CENTER</title>
+<style>
+:root { --neon:#00ffff; --panel-bg: rgba(6,11,25,0.9); --danger: #ff4444; --success: #00ff88; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { font-family:'Segoe UI',sans-serif; background:#000; color:#fff; padding:20px; min-height:100vh; overflow-x: hidden; }
+body::before { content:""; position:fixed; inset:0; background: radial-gradient(circle at 50% 50%, #001f3f 0%, #000 100%); z-index:-1; }
+
+.container { max-width: 1200px; margin: 0 auto; }
+
+/* Success Toast */
+#successToast {
+    position: fixed; top: 20px; right: 20px; background: var(--neon); color: #000;
+    padding: 15px 30px; border-radius: 8px; font-weight: 900; letter-spacing: 2px;
+    box-shadow: 0 0 20px var(--neon); z-index: 1000; display: none;
+    animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+@keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
+
+/* Loading Spinner */
+.spinner {
+    width: 14px; height: 14px; border: 2px solid rgba(0,0,0,0.2); border-top: 2px solid #000;
+    border-radius: 50%; display: inline-block; animation: spin 0.8s linear infinite;
+    vertical-align: middle; margin-right: 10px;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Pricing Editor */
+.pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+.price-card { background: var(--panel-bg); border: 1px solid #333; padding: 20px; border-radius: 12px; backdrop-filter: blur(10px); }
+label { display: block; font-size: 10px; color: var(--neon); margin-bottom: 8px; letter-spacing: 2px; font-weight: bold; }
+input, select { background: #0a0a0a; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 6px; margin-bottom: 10px; font-size: 14px; outline: none; }
+input:focus { border-color: var(--neon); }
+
+button { transition: 0.3s; cursor: pointer; }
+button:disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(1); }
+
+.save-btn { background: var(--neon); color: #000; border: none; padding: 15px; width: 100%; font-weight: 900; border-radius: 6px; text-transform: uppercase; letter-spacing: 2px; }
+.save-btn:hover:not(:disabled) { box-shadow: 0 0 20px var(--neon); transform: translateY(-2px); }
+
+/* User List */
+.user-card { background: var(--panel-bg); border: 1px solid #222; border-radius: 15px; padding: 25px; margin-top: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.add-user-bar { display: flex; gap: 15px; margin-bottom: 30px; align-items: flex-end; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; color: #555; font-size: 11px; padding: 15px; border-bottom: 1px solid #222; letter-spacing: 1px; text-transform: uppercase; }
+td { padding: 18px 15px; border-bottom: 1px solid #111; font-size: 14px; position: relative; }
+
+.timer-text { font-family: 'Consolas', monospace; color: var(--neon); font-weight: bold; font-size: 15px; }
+.lifetime-text { color: #f1c40f; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
+
+/* 3-Dots Menu */
+.menu-container { position: relative; display: inline-block; }
+.dots { cursor: pointer; padding: 5px 12px; color: #666; font-size: 22px; transition: 0.2s; }
+.dots:hover { color: #fff; }
+.dropdown-content { display: none; position: absolute; right: 0; top: 30px; background: #151515; border: 1px solid #333; z-index: 100; border-radius: 8px; width: 140px; box-shadow: 0 5px 20px rgba(0,0,0,0.8); overflow: hidden; }
+.dropdown-content button { width: 100%; padding: 12px 15px; background: none; border: none; color: #fff; text-align: left; cursor: pointer; font-size: 12px; font-weight: 600; }
+.dropdown-content button:hover { background: var(--neon); color: #000; }
+.dropdown-content button.ban-option { color: var(--danger); }
+</style>
+</head>
+<body>
+
+<div id="successToast">SUCCESS: ACTION COMPLETED</div>
+
+<div class="container">
+    <header style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1 style="letter-spacing:10px; margin:0;">ADMIN TERMINAL</h1>
+            <p style="color:var(--neon); font-size:11px; margin-top:5px; font-weight:bold;">SECURE ACCESS CONTROL // v2.2</p>
+        </div>
+        <div id="adminStatus" style="font-size:12px; color:#555;">SYSTEM LINKED</div>
+    </header>
+
+    <div class="pricing-grid">
+        <div class="price-card"><label>1 MONTH (30D)</label><input type="number" id="p1" placeholder="300"></div>
+        <div class="price-card">
+            <label>3 MONTHS (SLASH/NEW)</label>
+            <div style="display:flex; gap:5px;"><input type="number" id="p3_old" placeholder="500"><input type="number" id="p3_new" placeholder="400"></div>
+        </div>
+        <div class="price-card">
+            <label>1 YEAR (SLASH/NEW)</label>
+            <div style="display:flex; gap:5px;"><input type="number" id="p12_old" placeholder="2000"><input type="number" id="p12_new" placeholder="1600"></div>
+        </div>
+        <div class="price-card"><label>LIFETIME ACCESS</label><input type="number" id="p_life" placeholder="5000"></div>
+    </div>
+    <button id="savePricingBtn" class="save-btn" onclick="updatePricing()">Apply Pricing to Main Index</button>
+
+    <div class="user-card">
+        <h2 style="margin-bottom:20px; font-size:18px; letter-spacing:2px;">PAID SUBSCRIBERS</h2>
+        <div class="add-user-bar">
+            <div style="flex:2"><label>GMAIL ADDRESS</label><input type="text" id="addEmail" placeholder="user@gmail.com" style="margin:0;"></div>
+            <div style="flex:1">
+                <label>PLANS</label>
+                <select id="addDuration" style="margin:0;">
+                    <option value="30">1 Month (30 Days)</option>
+                    <option value="90">3 Months (90 Days)</option>
+                    <option value="365">1 Year (365 Days)</option>
+                    <option value="99999">LIFETIME ACCESS</option>
+                </select>
+            </div>
+            <button id="grantBtn" onclick="grantAccess()" style="padding:12px 25px; background:var(--neon); border:none; font-weight:900; height:45px; cursor:pointer; border-radius:6px; margin-bottom:10px;">GRANT ACCESS</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr><th>USER EMAIL</th><th>TIME REMAINING (LIVE)</th><th>EXPIRY DATE</th><th style="text-align:right;">ACTIONS</th></tr>
+            </thead>
+            <tbody id="userList"></tbody>
+        </table>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
+    authDomain: "my-software-portal.firebaseapp.com",
+    projectId: "my-software-portal",
+    appId: "1:1072405993700:web:b66ca016c8de667d46f4f1"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Helper: Show Toast
+function showSuccess(msg) {
+    const toast = document.getElementById('successToast');
+    toast.textContent = "SUCCESS: " + msg;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 3000);
+}
+
+// Load Pricing
+(async () => {
+    const pDoc = await getDoc(doc(db, "settings", "pricing"));
+    if(pDoc.exists()){
+        const d = pDoc.data();
+        document.getElementById('p1').value = d.p1 || "";
+        document.getElementById('p3_old').value = d.p3_old || "";
+        document.getElementById('p3_new').value = d.p3_new || "";
+        document.getElementById('p12_old').value = d.p12_old || "";
+        document.getElementById('p12_new').value = d.p12_new || "";
+        document.getElementById('p_life').value = d.p_life || "";
+    }
+})();
+
+window.updatePricing = async () => {
+    const btn = document.getElementById('savePricingBtn');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner"></span> DEPLOYING...`;
+
+    try {
+        await setDoc(doc(db, "settings", "pricing"), {
+            p1: document.getElementById('p1').value,
+            p3_old: document.getElementById('p3_old').value,
+            p3_new: document.getElementById('p3_new').value,
+            p12_old: document.getElementById('p12_old').value,
+            p12_new: document.getElementById('p12_new').value,
+            p_life: document.getElementById('p_life').value
+        });
+        showSuccess("PRICING DEPLOYED");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+};
+
+window.grantAccess = async () => {
+    const email = document.getElementById('addEmail').value.toLowerCase().trim();
+    const days = parseInt(document.getElementById('addDuration').value);
+    const btn = document.getElementById('grantBtn');
+    
+    if(!email) return;
+
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner"></span> ACTIVATING...`;
+
+    try {
+        const expiry = new Date();
+        expiry.setDate(expiry.getDate() + days);
+        await setDoc(doc(db, "users", email), {
+            email: email,
+            expiry: days > 30000 ? 'LIFETIME' : expiry.getTime(),
+            isPaid: true
+        });
+        document.getElementById('addEmail').value = "";
+        showSuccess("ACCESS GRANTED");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+};
+
+// Timer Loop
+setInterval(() => {
+    const now = new Date().getTime();
+    document.querySelectorAll('.timer-text').forEach(async el => {
+        const expiry = el.dataset.expiry;
+        if(expiry === 'LIFETIME') return;
+        const distance = parseInt(expiry) - now;
+        if (distance < 0) {
+            await deleteDoc(doc(db, "users", el.dataset.email));
+            return;
+        }
+        const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((distance % (1000 * 60)) / 1000);
+        el.innerHTML = `${d}D ${h}H ${m}M ${s}S`;
+    });
+}, 1000);
+
+onSnapshot(collection(db, "users"), (snapshot) => {
+    const list = document.getElementById('userList');
+    list.innerHTML = "";
+    snapshot.forEach(docSnap => {
+        const u = docSnap.data();
+        const isLife = u.expiry === 'LIFETIME';
+        list.innerHTML += `
+            <tr>
+                <td><strong>${u.email}</strong></td>
+                <td><span class="timer-text ${isLife ? 'lifetime-text' : ''}" data-expiry="${u.expiry}" data-email="${u.email}">${isLife ? '∞ INFINITE' : 'SYNCING...'}</span></td>
+                <td style="color:#777;">${isLife ? 'NEVER' : new Date(u.expiry).toLocaleDateString()}</td>
+                <td style="text-align:right">
+                    <div class="menu-container">
+                        <span class="dots" onclick="toggleMenu('${u.email}')">⋮</span>
+                        <div class="dropdown-content" id="drop-${u.email.replace(/[@.]/g, '')}">
+                            <button class="ban-option" onclick="banUser('${u.email}')">BAN / REMOVE</button>
+                            <button onclick="this.parentElement.style.display='none'">CANCEL</button>
+                        </div>
+                    </div>
+                </td>
+            </tr>`;
+    });
+});
+
+window.toggleMenu = (email) => {
+    const id = "drop-" + email.replace(/[@.]/g, '');
+    const menu = document.getElementById(id);
+    document.querySelectorAll('.dropdown-content').forEach(d => { if(d.id !== id) d.style.display='none'; });
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+};
+
+window.banUser = async (email) => {
+    if(confirm(`Remove ${email}?`)) {
+        await deleteDoc(doc(db, "users", email));
+        showSuccess("USER REMOVED");
+    }
+};
+
+window.onclick = (e) => { if (!e.target.matches('.dots')) document.querySelectorAll('.dropdown-content').forEach(d => d.style.display='none'); };
+</script>
+</body>
+</html>
