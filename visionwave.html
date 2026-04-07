@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>VisionWave PRO | TERMINAL</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <script>
+        if (window.location.pathname.endsWith('.html')) {
+            const cleanUrl = window.location.pathname.replace('.html', '');
+            window.history.replaceState(null, '', cleanUrl);
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
+            authDomain: "my-software-portal.firebaseapp.com",
+            projectId: "my-software-portal",
+            appId: "1:1072405993700:web:b66ca016c8de667d46f4f1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = "index.html"; return; }
+            const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
+            const now = new Date().getTime();
+            if (!userDoc.exists() || (userDoc.data().expiry !== 'LIFETIME' && userDoc.data().expiry < now)) {
+                window.location.href = "index.html";
+                return;
+            }
+            document.body.style.display = "flex";
+        });
+    </script>
+
+    <style>
+        :root{
+            --bg1:#060709;
+            --bg2:#0b1220;
+            --accent:#00bfff;
+            --accent2:#00ffff;
+            --muted:#9aa0a6;
+            --base-font: 16px;
+            --scale:1;
+        }
+
+        html{font-size:var(--base-font);}
+        body{
+            font-family:'Orbitron',sans-serif;
+            background:radial-gradient(1200px 600px at 10% 10%,rgba(0,43,60,.35) 0%,transparent 10%), 
+                       linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 100%);
+            color:#e9f6ff;
+            display:none; /* Controlled by Guard */
+            justify-content:center;
+            align-items:center;
+            min-height:100vh;
+            margin:0;
+        }
+
+        /* 3. THE EXIT TERMINAL BUTTON */
+        .exit-nav { position: fixed; top: 15px; right: 15px; z-index: 1000; }
+        .exit-btn { 
+            background: rgba(0, 191, 255, 0.1); color: var(--accent); padding: 8px 14px; 
+            border-radius: 4px; text-decoration: none; font-weight: 700; 
+            border: 1px solid var(--accent); font-size: 11px; transition: 0.3s; 
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .exit-btn:hover { background: var(--accent); color: #000; }
+
+        .container{
+            width:92%;
+            max-width:450px;
+            background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));
+            border-radius:20px;
+            padding:calc(25px * var(--scale));
+            box-shadow:0 15px 50px rgba(0,0,0,.8), 0 0 30px rgba(0,191,255,0.05) inset;
+            border:1px solid rgba(0,191,255,.15);
+            backdrop-filter:blur(10px);
+            position:relative;
+            overflow:hidden;
+        }
+
+        .title{font-size:calc(22px * var(--scale)); text-align:center; color:var(--accent); margin-bottom:20px; letter-spacing: 1px;}
+        
+        .progress-bar-outer{height:12px; background:rgba(0,0,0,0.4); border-radius:10px; overflow:hidden; border:1px solid rgba(0,191,255,0.1);}
+        .progress-bar{height:100%; width:0%; background:linear-gradient(90deg, var(--accent), var(--accent2)); transition:width .4s ease;}
+        .progress-text{margin-top:8px; text-align:center; color:var(--muted); font-size:11px; text-transform: uppercase;}
+
+        .history{margin-top:20px; background:rgba(0,0,0,0.3); border-radius:12px; padding:15px; min-height:50px; display:flex; justify-content:center; flex-wrap:wrap; gap:8px; border:1px solid rgba(255,255,255,0.03);}
+        .pill{padding:6px 10px; border-radius:4px; font-weight:700; font-size:14px;}
+        .pill.p{background: #1e88e5; box-shadow: 0 0 10px rgba(30,136,229,0.4);}
+        .pill.b{background: #d32f2f; box-shadow: 0 0 10px rgba(211,47,47,0.4);}
+
+        .prediction{margin-top:20px; padding:20px; border-radius:12px; background:rgba(0,191,255,0.05); border:1px solid rgba(0,191,255,0.2); display:none; flex-direction:column; align-items:center;}
+        .prediction .pred{font-size:32px; font-weight:700; color:#fff; text-shadow:0 0 15px var(--accent);}
+        .suggestion{margin-top:5px; color:var(--accent2); font-size:14px;}
+
+        .message{margin-top:20px; text-align:center; font-size:16px; min-height:30px;}
+        .message .win{color:#00ffd1; font-weight:800; text-transform: uppercase;}
+        .message .fail{color:#ff6b6b; font-weight:800; text-transform: uppercase;}
+
+        .controls{display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:20px;}
+        .controls button{padding:18px; border-radius:10px; border:none; cursor:pointer; font-weight:800; font-family:'Orbitron'; font-size:14px; transition: 0.2s;}
+        .btn-p{background:linear-gradient(180deg,#5fb7ff,#1e88e5); color:#001224}
+        .btn-b{background:linear-gradient(180deg,#ff9b9b,#d32f2f); color:#210000}
+        .util-row { grid-column: span 2; display: flex; gap: 10px; margin-top: 5px; }
+        .util-row button { flex:1; padding: 12px; font-size: 11px; background: #1a1a1a; color: #666; border: 1px solid #333; }
+        
+        .reset-only{display:flex; justify-content:center; margin-top:20px; width: 100%;}
+        .reset-only button{width: 100%; background:var(--accent); color:#000;}
+
+        @media (max-width:450px){ html{--scale:0.9; } }
+    </style>
+</head>
+<body>
+
+    <div class="exit-nav">
+        <a href="index.html" class="exit-btn">EXIT TERMINAL</a>
+    </div>
+
+    <div class="container" id="app">
+        <div class="title">VISIONWAVE PRO</div>
+        
+        <div id="progressContainer">
+            <div class="progress-bar-outer"><div class="progress-bar" id="progressBar"></div></div>
+            <div class="progress-text" id="progressText">0% - SCANNING SHOE</div>
+        </div>
+
+        <div class="history" id="historyArea">
+            <div id="historyDisplay" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"></div>
+        </div>
+
+        <div class="prediction" id="predictionCard">
+            <div class="pred" id="predictionText"></div>
+            <div class="suggestion" id="suggestionText"></div>
+        </div>
+
+        <div class="message" id="messageArea"></div>
+
+        <div class="controls" id="controlsRow">
+            <button class="btn-p" id="btnP">PLAYER</button>
+            <button class="btn-b" id="btnB">BANKER</button>
+            <div class="util-row">
+                <button class="btn-undo" id="btnUndo">UNDO</button>
+                <button class="btn-reset" id="btnReset">RESET</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function(){
+            const MAX_ENTRIES = 25, steps = [100, 200, 600, 1400, 3000, 6200];
+            let hist = [], step = 0, pred = "", done = false, undoStack = [];
+
+            const bar = document.getElementById("progressBar"),
+                  barTxt = document.getElementById("progressText"),
+                  histDisp = document.getElementById("historyDisplay"),
+                  predCard = document.getElementById("predictionCard"),
+                  predTxt = document.getElementById("predictionText"),
+                  suggTxt = document.getElementById("suggestionText"),
+                  msg = document.getElementById("messageArea"),
+                  ctr = document.getElementById("controlsRow"),
+                  prog = document.getElementById("progressContainer"),
+                  histBox = document.getElementById("historyArea");
+
+            function snap(){ 
+                return { 
+                    h:[...hist], step, pred, done, 
+                    ui:{ 
+                        w:bar.style.width, t:barTxt.textContent, h:histDisp.innerHTML, 
+                        show:predCard.style.display, text:predTxt.textContent, sug:suggTxt.textContent, 
+                        msg:msg.innerHTML, ctrl:ctr.innerHTML, prog:prog.style.display, his:histBox.style.display 
+                    } 
+                }; 
+            }
+
+            function restore(s){ 
+                hist=[...s.h]; step=s.step; pred=s.pred; done=s.done; 
+                bar.style.width=s.ui.w; barTxt.textContent=s.ui.t; histDisp.innerHTML=s.ui.h; 
+                predCard.style.display=s.ui.show; predTxt.textContent=s.ui.text; 
+                suggTxt.textContent=s.ui.sug; msg.innerHTML=s.ui.msg; ctr.innerHTML=s.ui.ctrl; 
+                prog.style.display=s.ui.prog; histBox.style.display=s.ui.his; 
+                bind(); 
+            }
+
+            function ui(){
+                const last8 = hist.slice(-8);
+                histDisp.innerHTML = last8.map(v => `<div class="pill ${v==='P'?'p':'b'}">${v}</div>`).join("");
+                const pct = Math.min(Math.round(hist.length/MAX_ENTRIES*100), 100);
+                bar.style.width = pct + "%";
+                barTxt.textContent = hist.length < MAX_ENTRIES ? `${pct}% - NEED ${MAX_ENTRIES - hist.length} MORE` : "WAVE ANALYSIS READY";
+                
+                if(pred){ 
+                    predTxt.textContent = pred; 
+                    suggTxt.textContent = `BET: ${steps[step]}`; 
+                    predCard.style.display = "flex"; 
+                } else { 
+                    predCard.style.display = "none"; 
+                }
+                if(!done) msg.innerHTML = "";
+            }
+
+            function makePred(){
+                const trend = hist.slice(-MAX_ENTRIES);
+                if(trend.length < MAX_ENTRIES) return;
+                let momentum = trend.reduce((acc,val,i)=> acc + (val==='P'?1:-1)*(i+1),0);
+                let score = momentum >= 0 ? "Player" : "Banker";
+                pred = score;
+                ui();
+            }
+
+            function end(text,type){
+                msg.innerHTML = `<div class="${type}">${text}</div>`;
+                prog.style.display = "none"; histBox.style.display = "none"; predCard.style.display = "none";
+                ctr.innerHTML = `<div class="reset-only"><button class="btn-reset" id="endReset">NEW SHOE</button></div>`;
+                document.getElementById("endReset").onclick = reset;
+                done = true;
+            }
+
+            function record(r){
+                if(done) return;
+                undoStack.push(snap());
+                hist.push(r); 
+                ui();
+                if(hist.length >= MAX_ENTRIES && !pred){ makePred(); return; }
+                if(pred){
+                    const win = (pred==="Player" && r==="P") || (pred==="Banker" && r==="B");
+                    if(win){ end("TARGET REACHED","win"); return; }
+                    step++;
+                    if(step >= steps.length){ end("LIMIT EXCEEDED","fail"); return; }
+                    makePred();
+                }
+            }
+
+            function undo(){ if(!undoStack.length) return; restore(undoStack.pop()); }
+
+            function reset(){
+                hist=[]; step=0; pred=""; done=false; undoStack=[];
+                prog.style.display=""; histBox.style.display="";
+                ctr.innerHTML = `<button class="btn-p" id="btnP">PLAYER</button>
+                                <button class="btn-b" id="btnB">BANKER</button>
+                                <div class="util-row">
+                                    <button id="btnUndo">UNDO</button>
+                                    <button id="btnReset">RESET</button>
+                                </div>`;
+                bind(); ui();
+            }
+
+            function bind(){
+                const p=document.getElementById("btnP"), b=document.getElementById("btnB"), 
+                      u=document.getElementById("btnUndo"), r=document.getElementById("btnReset");
+                if(p) p.onclick = () => record("P");
+                if(b) b.onclick = () => record("B");
+                if(u) u.onclick = undo;
+                if(r) r.onclick = reset;
+            }
+
+            bind(); ui();
+        })();
+    </script>
+</body>
+</html>
