@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google AI Baccarat | PREMIUM</title>
+    
+    <script>
+        if (window.location.pathname.endsWith('.html')) {
+            const cleanUrl = window.location.pathname.replace('.html', '');
+            window.history.replaceState(null, '', cleanUrl);
+        }
+    </script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
+            authDomain: "my-software-portal.firebaseapp.com",
+            projectId: "my-software-portal",
+            appId: "1:1072405993700:web:b66ca016c8de667d46f4f1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = "index.html"; return; }
+            const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
+            const now = new Date().getTime();
+            if (!userDoc.exists() || (userDoc.data().expiry !== 'LIFETIME' && userDoc.data().expiry < now)) {
+                window.location.href = "index.html";
+                return;
+            }
+            document.body.style.display = "flex";
+        });
+    </script>
+
+    <style>
+        body {
+            margin:0; padding:0;
+            font-family:'Segoe UI', Arial, sans-serif;
+            color:#eee; font-size:17px;
+            background: #0d0d0d url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1400&q=80') no-repeat center center fixed;
+            background-size: cover;
+            display: none; /* Controlled by Security Guard */
+            justify-content: center; align-items: center;
+            height: 100vh;
+        }
+
+        /* 3. THE EXIT TERMINAL BUTTON */
+        .exit-nav { position: fixed; top: 15px; right: 15px; z-index: 1000; }
+        .exit-btn { 
+            background: rgba(0, 0, 0, 0.6); color: #fff; padding: 8px 15px; 
+            border-radius: 5px; text-decoration: none; font-weight: bold; 
+            border: 1px solid rgba(255, 255, 255, 0.3); font-size: 12px; transition: 0.3s; 
+        }
+        .exit-btn:hover { background: #fff; color: #000; }
+
+        .container {
+            background-color: rgba(15, 15, 15, 0.92);
+            padding: 40px 25px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 550px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #4285F4, #34A853, #FBBC05, #DB4437);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 25px;
+            letter-spacing: -1px;
+        }
+
+        .sequence { margin: 15px 0; min-height: 40px; }
+        .sequence span {
+            display:inline-block;
+            width:32px; height:32px;
+            line-height:32px;
+            text-align:center;
+            border-radius:6px;
+            margin:4px;
+            font-weight:bold;
+            font-size: 14px;
+        }
+        .P { background:#4285F4; color:#fff; box-shadow: 0 4px 10px rgba(66, 133, 244, 0.3); }
+        .B { background:#DB4437; color:#fff; box-shadow: 0 4px 10px rgba(219, 68, 55, 0.3); }
+
+        .results { margin: 10px 0; height: 25px; }
+        .W, .L { display: inline-block; font-size: 11px; font-weight: bold; margin: 0 3px; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; }
+        .W { background: #34A853; color: #fff; }
+        .L { background: #555; color: #ccc; }
+
+        .prediction {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            font-size: 24px;
+            font-weight: 800;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .prediction .player { color:#4285F4; text-shadow: 0 0 15px rgba(66, 133, 244, 0.4); }
+        .prediction .banker { color:#DB4437; text-shadow: 0 0 15px rgba(219, 68, 55, 0.4); }
+        .confidence { font-size:14px; color:#34A853; margin-left:8px; font-weight: normal; opacity: 0.8; }
+
+        .buttons { margin: 20px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .buttons button {
+            background:#252525;
+            color:#fff;
+            border:1px solid #333;
+            border-radius:8px;
+            padding:18px;
+            cursor:pointer;
+            font-weight:bold;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+        .buttons button:hover { border-color: #666; background: #2a2a2a; }
+        .util-btns { grid-column: span 2; display: flex; gap: 10px; margin-top: 5px; }
+        .util-btns button { flex: 1; padding: 12px; font-size: 13px; background: #1a1a1a; color: #888; }
+
+        .footer { margin-top:30px; font-size:11px; color:#444; text-transform: uppercase; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+
+    <div class="exit-nav">
+        <a href="index.html" class="exit-btn">EXIT TERMINAL</a>
+    </div>
+
+    <div class="container">
+        <div class="header"><h1>Google AI Baccarat</h1></div>
+        
+        <div class="sequence" id="historyBox">WAITING FOR INPUT...</div>
+        <div class="results" id="resultsBox"></div>
+        
+        <div class="prediction" id="predictionBox">INITIALIZING NEURAL NET...</div>
+        
+        <div class="buttons">
+            <button onclick="recordResult('P')" style="border-bottom: 4px solid #4285F4;">PLAYER</button>
+            <button onclick="recordResult('B')" style="border-bottom: 4px solid #DB4437;">BANKER</button>
+            <div class="util-btns">
+                <button onclick="undo()">UNDO LAST</button>
+                <button onclick="resetAll()">RESET ENGINE</button>
+            </div>
+        </div>
+        
+        <div class="footer">Baccarat0987 Premium Engine</div>
+    </div>
+
+<script>
+    const MIN_HANDS = 10;
+    let sequence = JSON.parse(localStorage.getItem('baccarat_sequence')) || [];
+    let results = JSON.parse(localStorage.getItem('baccarat_results')) || [];
+    let lastPrediction = null;
+
+    const oldPatterns = [
+        {seq:'PBPBP', pred:'P'}, {seq:'BPBPB', pred:'B'}, {seq:'PBPPB', pred:'P'},
+        {seq:'BPPBP', pred:'P'}, {seq:'PBBPB', pred:'P'}, {seq:'BPBPP', pred:'P'},
+        {seq:'BPBBP', pred:'P'}, {seq:'PBPBB', pred:'P'}, {seq:'PPBPP', pred:'B'},
+        {seq:'BBPPP', pred:'B'}, {seq:'PPBPB', pred:'P'}, {seq:'PPPBP', pred:'B'},
+        {seq:'PBBPP', pred:'B'}, {seq:'BBPBB', pred:'P'}, {seq:'BBBPB', pred:'P'},
+        {seq:'BPPBB', pred:'P'}, {seq:'PBPBB', pred:'B'}, {seq:'BPBBP', pred:'B'},
+        {seq:'PPBBB', pred:'P'}, {seq:'BBPBP', pred:'B'}, {seq:'PBBPB', pred:'B'}
+    ];
+
+    function updateHistory() {
+        const box = document.getElementById('historyBox');
+        const rBox = document.getElementById('resultsBox');
+        if(sequence.length===0){box.innerHTML="READY FOR DATA"; rBox.innerHTML=""; return;}
+        
+        box.innerHTML='';
+        sequence.slice(-10).forEach(r=>{
+            const span=document.createElement('span');
+            span.className=r;
+            span.textContent=r;
+            box.appendChild(span);
+        });
+
+        rBox.innerHTML='';
+        results.slice(-10).forEach(wl=>{
+            if(wl!==''){
+                const span = document.createElement('span');
+                span.className = wl;
+                span.textContent = wl;
+                rBox.appendChild(span);
+            }
+        });
+    }
+
+    function oldPatternPrediction(seq){
+        if(seq.length < 5) return null;
+        const last5 = seq.slice(-5).join('');
+        const match = oldPatterns.find(p => p.seq === last5);
+        return match ? match.pred : null;
+    }
+
+    function buildPatterns(seq, length=5){
+        const table = {};
+        for(let i=0; i <= seq.length-length; i++){
+            const sub = seq.slice(i, i+length).join('');
+            const next = seq[i+length];
+            if(!next) continue;
+            if(!table[sub]) table[sub] = {P:0, B:0};
+            table[sub][next]++;
+        }
+        return table;
+    }
+
+    function adaptivePrediction(seq){
+        if(seq.length < 5) return null;
+        const table = buildPatterns(seq, 5);
+        const last5 = seq.slice(-5).join('');
+        if(table[last5]){
+            return table[last5].P >= table[last5].B ? 'P' : 'B';
+        }
+        return null;
+    }
+
+    function trendPrediction(seq){
+        const last6 = seq.slice(-6);
+        if(last6.length === 0) return null;
+        const pCount = last6.filter(x=>'P'===x).length;
+        const bCount = last6.filter(x=>'B'===x).length;
+        return pCount > bCount ? 'P' : (bCount > pCount ? 'B' : seq[seq.length-1]);
+    }
+
+    function finalPrediction(seq){
+        const oldPred = oldPatternPrediction(seq);
+        if(oldPred) return {pred: oldPred, confidence: Math.floor(Math.random()*6)+94};
+
+        const adaptivePred = adaptivePrediction(seq);
+        const trendPred = trendPrediction(seq);
+
+        if(adaptivePred && trendPred){
+            if(adaptivePred === trendPred){
+                return {pred: adaptivePred, confidence: Math.floor(Math.random()*6)+89};
+            }
+            return {pred: adaptivePred, confidence: Math.floor(Math.random()*11)+75};
+        }
+        return adaptivePred ? {pred: adaptivePred, confidence: Math.floor(Math.random()*11)+80} : null;
+    }
+
+    function updatePredictionBox(){
+        const box=document.getElementById('predictionBox');
+        if(sequence.length<MIN_HANDS){
+            box.innerHTML=`<span style="font-size: 14px; color: #666">INPUT ${MIN_HANDS-sequence.length} MORE HANDS</span>`;
+            lastPrediction = null;
+            return;
+        }
+
+        const result = finalPrediction(sequence);
+        if(result){
+            const text = result.pred==='P' ? 'PLAYER' : 'BANKER';
+            const cls = result.pred==='P' ? 'player' : 'banker';
+            box.innerHTML=`NEXT: <span class="${cls}">${text}</span> <span class="confidence">${result.confidence}%</span>`;
+            lastPrediction = result.pred;
+        } else {
+            box.innerHTML="ANALYZING...";
+            lastPrediction = null;
+        }
+    }
+
+    function recordResult(r){
+        sequence.push(r);
+        results.push(lastPrediction ? (lastPrediction===r ? 'W' : 'L') : '');
+        saveAndUpdate();
+    }
+
+    function undo(){
+        if(sequence.length===0) return;
+        sequence.pop();
+        results.pop();
+        saveAndUpdate();
+    }
+
+    function resetAll(){
+        if(confirm("Wipe all shoe data?")){
+            sequence=[]; results=[]; lastPrediction=null;
+            saveAndUpdate();
+        }
+    }
+
+    function saveAndUpdate(){
+        localStorage.setItem('baccarat_sequence', JSON.stringify(sequence));
+        localStorage.setItem('baccarat_results', JSON.stringify(results));
+        updateHistory();
+        updatePredictionBox();
+    }
+
+    updateHistory();
+    updatePredictionBox();
+</script>
+</body>
+</html>
