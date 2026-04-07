@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neural Engine PRO | TERMINAL</title>
+    <title>Baccarat Neural Engine</title>
+    <link rel="icon" href="icon.ico" type="image/x-icon">
     
     <script>
         if (window.location.pathname.endsWith('.html')) {
@@ -36,23 +36,34 @@
                 window.location.href = "index.html";
                 return;
             }
-            document.body.style.display = "flex";
+            document.body.style.display = "flex"; // Show app after auth
         });
     </script>
 
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
-        body{
-            font-family:'Segoe UI', sans-serif;
-            height:100vh;
-            display:none; 
-            justify-content:center;
-            align-items:center;
-            background:radial-gradient(circle at center,#050b14,#00101f);
-            color:#d6e6ff;
+        body{  
+            font-family:'Segoe UI',sans-serif;  
+            height:100vh;  
+            display:none; /* Hidden by default for Security Guard */
+            justify-content:center;  
+            align-items:center;  
+            background:radial-gradient(circle at center,#050b14,#00101f);  
+            color:#d6e6ff;  
             overflow:hidden;
         }
-
+        body::before{  
+            content:"";  
+            position:absolute;  
+            inset:0;  
+            background-image:    
+                linear-gradient(rgba(0,150,255,0.05) 1px, transparent 1px),    
+                linear-gradient(90deg, rgba(0,150,255,0.05) 1px, transparent 1px);  
+            background-size:40px 40px;  
+            z-index:0;
+        }
+        
+        /* THE EXIT TERMINAL BUTTON */
         .exit-nav { position: fixed; top: 15px; right: 15px; z-index: 1000; }
         .exit-btn { 
             background: rgba(0, 200, 255, 0.1); color: #00e5ff; padding: 8px 15px; 
@@ -62,106 +73,44 @@
         }
         .exit-btn:hover { background: #00e5ff; color: #000; }
 
-        .container{
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            width:420px;
-            max-width:95%;
-            backdrop-filter:blur(12px);
-            background:rgba(0,20,35,0.7);
-            border:2px solid rgba(0,200,255,0.4);
-            border-radius:20px;
-            padding:25px;
-            z-index:1;
-            position: relative;
+        .container{  
+            display:flex;  
+            flex-direction:column;  
+            align-items:center;  
+            width:420px;  
+            max-width:95%;  
+            backdrop-filter:blur(12px);  
+            background:rgba(0,20,35,0.6);  
+            border:2px solid rgba(0,200,255,0.4);  
+            border-radius:20px;  
+            box-shadow:0 0 30px rgba(0,200,255,0.3);  
+            padding:20px;  
+            z-index:1;  
+            animation:glowPulse 3s infinite alternate;
         }
-
-        .header{
-            font-size:22px;
-            font-weight:700;
-            letter-spacing:3px;
-            color:#00e5ff;
-            text-shadow:0 0 10px #00e5ff;
-            margin-bottom:20px;
-            text-align:center;
-            text-transform: uppercase;
-        }
-
-        .totals{
-            display:flex;
-            justify-content:space-between;
-            width:100%;
-            margin-bottom:20px;
-            padding:12px;
-            background:rgba(0,0,0,0.4);
-            border:1px solid rgba(0,200,255,0.2);
-            border-radius:10px;
-        }
-        .totals div{ font-size:11px; font-weight:bold; color: #66b2ff; }
-
-        .prediction{ font-size:52px; font-weight:900; text-align:center; margin-bottom:15px; min-height: 70px; }
-        .player{color:#4fc3ff; text-shadow:0 0 25px #1e90ff;}
-        .banker{color:#ff5252; text-shadow:0 0 25px #ff3b3b;}
-
-        .confidence-container{ width:100%; margin-bottom:25px; height:8px; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden;}
-        .confidence-bar{ width:0%; height:100%; background:#00e5ff; box-shadow:0 0 15px #00e5ff; transition:width 0.8s ease; }
-
-        .history-panel{
-            width:100%;
-            background:rgba(0,0,0,0.3);
-            border:1px solid rgba(0,200,255,0.2);
-            border-radius:10px;
-            padding:12px;
-            margin-bottom:15px;
-        }
-        .sequence-row{ display:flex; gap:6px; justify-content: center; min-height: 30px; }
-        .sequence-row span{ width:28px; height:28px; display:flex; justify-content:center; align-items:center; border-radius:5px; font-weight:900; font-size:12px; }
-        .P{background:#1e90ff; color:#fff;}
-        .B{background:#ff3b3b; color:#fff;}
-
-        .live-feed{
-            width:100%;
-            height:100px;
-            overflow-y:auto;
-            font-family:'Courier New', monospace;
-            font-size:10px;
-            color:#00ffea;
-            background:rgba(0,0,0,0.5);
-            border-radius:8px;
-            padding:10px;
-            margin-bottom:20px;
-            border: 1px solid rgba(0,200,255,0.1);
-        }
-
-        .controls{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; width: 100%; }
-        .controls button{
-            padding:18px;
-            font-weight:900;
-            font-size:14px;
-            color:#fff;
-            background:rgba(255,255,255,0.05);
-            border:1px solid rgba(0,200,255,0.3);
-            border-radius:12px;
-            cursor:pointer;
-            transition:0.2s;
-            text-transform: uppercase;
-        }
-        .controls button:active { transform: scale(0.95); }
-        .btn-p:hover { background: #1e90ff; border-color: #1e90ff; }
-        .btn-b:hover { background: #ff3b3b; border-color: #ff3b3b; }
-        
-        .util-btns { grid-column: span 2; display: flex; gap: 10px; margin-top: 5px; }
-        .util-btns button { flex: 1; padding: 10px; font-size: 11px; background: transparent; color: #444; border-color: #222; }
-
-        .scan-line{
-            position:absolute;
-            top:0; left:0; width:100%; height:2px;
-            background:linear-gradient(90deg,transparent,#00e5ff,transparent);
-            animation:scan 3s linear infinite;
-            pointer-events: none;
-        }
-        @keyframes scan{ 0%{top:0%;} 100%{top:100%;} }
+        @keyframes glowPulse{  0%{box-shadow:0 0 20px rgba(0,200,255,0.3);}  100%{box-shadow:0 0 40px rgba(0,200,255,0.6);}}
+        .header{  font-size:24px;  font-weight:700;  letter-spacing:2px;  color:#00e5ff;  text-shadow:0 0 10px #00e5ff;  margin-bottom:15px;  text-align:center;}
+        .totals{  display:flex;  justify-content:space-between;  width:100%;  margin-bottom:20px;  padding:10px;  backdrop-filter:blur(10px);  background:rgba(0,0,20,0.4);  border:1px solid rgba(0,200,255,0.3);  border-radius:12px;}
+        .totals div{  font-size:14px;  font-weight:bold;  text-align:center;}
+        .prediction{  font-size:50px;  font-weight:900;  letter-spacing:2px;  text-align:center;  margin-bottom:15px; min-height: 70px;}
+        .player{color:#4fc3ff;text-shadow:0 0 25px #1e90ff,0 0 50px #00ffff;}
+        .banker{color:#ff5252;text-shadow:0 0 25px #ff3b3b,0 0 50px #ff7b7b;}
+        .confidence-container{  width:80%;  margin-bottom:20px;  height:16px;  background:rgba(255,255,255,0.1);  border-radius:8px;  overflow:hidden;}
+        .confidence-bar{  width:0%;  height:100%;  background:#00e5ff;  box-shadow:0 0 20px #00e5ff;  transition:width 0.8s ease, background 0.5s ease;}
+        .history-panel{  width:100%;  max-height:150px;  overflow-x:auto;  overflow-y:hidden;  backdrop-filter:blur(10px);  background:rgba(0,0,20,0.4);  border:1px solid rgba(0,200,255,0.3);  border-radius:12px;  padding:10px;  margin-bottom:10px;  display:flex;  flex-direction:column;  gap:4px;}
+        .sequence-row, .result-row{  display:flex;  gap:4px;}
+        .sequence-row span, .result-row span{  width:28px;  height:28px;  display:flex;  justify-content:center;  align-items:center;  border-radius:5px;  font-weight:bold;  font-size:12px;}
+        .result-row span{  width:18px;  height:18px;  font-size:10px;  border-radius:50%;}
+        .P{background:#1e90ff;color:#fff;}
+        .B{background:#ff3b3b;color:#fff;}
+        .W{background:#00ffaa;color:#000;}
+        .L{background:#ff4d4d;color:#fff;}
+        .live-feed{  width:100%;  max-height:120px;  overflow-y:auto;  font-family:'Courier New',monospace;  font-size:12px;  color:#00ffea;  background:rgba(0,0,0,0.3);  border:1px solid rgba(0,200,255,0.4);  border-radius:12px;  padding:8px;  margin-bottom:15px;  backdrop-filter:blur(6px);}
+        .controls{  display:flex;  justify-content:center;  gap:15px;}
+        .controls button{  padding:12px 28px;  font-weight:bold;  font-size:14px;  color:#d6e6ff;  background:rgba(0,20,35,0.5);  border:1px solid rgba(0,200,255,0.5);  border-radius:12px;  cursor:pointer;  transition:0.3s;}
+        .controls button:hover{  background:#00e5ff;  color:#000;  box-shadow:0 0 20px #00e5ff;}
+        .scan-line{  position:absolute;  top:0;  left:0;  width:100%;  height:2px;  background:linear-gradient(90deg,transparent,#00e5ff,transparent);  animation:scan 2s infinite;}
+        @keyframes scan{  0%{transform:translateY(0);}  100%{transform:translateY(100%);}}
     </style>
 </head>
 <body>
@@ -170,39 +119,33 @@
     <a href="index.html" class="exit-btn">EXIT TERMINAL</a>
 </div>
 
-<div class="container">
-    <div class="scan-line"></div>
-    <div class="header">Neural Engine PRO</div>
-
-    <div class="totals">
-        <div>P: <span id="playerTotal">0</span></div>
-        <div>B: <span id="bankerTotal">0</span></div>
-        <div>ROUNDS: <span id="totalRounds">0</span></div>
+<div class="container">  
+    <div class="scan-line"></div>  
+    <div class="header">Baccarat Neural Engine</div>
+    <div class="totals">    
+        <div>PLAYER: <span id="playerTotal">0</span></div>    
+        <div>BANKER: <span id="bankerTotal">0</span></div>    
+        <div>TOTAL ROUNDS: <span id="totalRounds">0</span></div>  
     </div>
-
-    <div class="prediction" id="predictionBox">STANDBY</div>
-    <div class="confidence-container">
-        <div class="confidence-bar" id="confidenceBar"></div>
+    <div class="prediction" id="predictionBox">STANDBY</div>  
+    <div class="confidence-container">    
+        <div class="confidence-bar" id="confidenceBar"></div>  
     </div>
-
-    <div class="history-panel">
-        <div class="sequence-row" id="historySequence"></div>
+    <div class="history-panel" id="historyPanel">    
+        <div class="sequence-row" id="historySequence"></div>    
+        <div class="result-row" id="historyResult"></div>  
     </div>
-
     <div class="live-feed" id="liveFeed"></div>
-
-    <div class="controls">
-        <button class="btn-p" onclick="recordResult('P')">Player</button>
-        <button class="btn-b" onclick="recordResult('B')">Banker</button>
-        <div class="util-btns">
-            <button onclick="undo()">UNDO</button>
-            <button onclick="resetAll()">RESET</button>
-        </div>
+    <div class="controls">    
+        <button onclick="recordResult('P')">PLAYER</button>    
+        <button onclick="recordResult('B')">BANKER</button>    
+        <button onclick="undo()">UNDO</button>    
+        <button onclick="resetAll()">RESET</button>  
     </div>
 </div>
 
 <script>
-/* 100% ORIGINAL LOGIC INTEGRATION */
+/* 100% ORIGINAL LOGIC */
 const MIN_HANDS = 10;
 let sequence = JSON.parse(localStorage.getItem('baccarat_sequence')) || [];
 let results = JSON.parse(localStorage.getItem('baccarat_results')) || [];
@@ -225,111 +168,48 @@ function oldPatternPrediction(seq){if(seq.length<5)return null;const last5=seq.s
 function buildPatterns(seq,length=5){const table={};for(let i=0;i<=seq.length-length;i++){const sub=seq.slice(i,i+length).join('');const next=seq[i+length];if(!next)continue;if(!table[sub])table[sub]={P:0,B:0};table[sub][next]++;}return table;}
 function adaptivePrediction(seq){if(seq.length<5)return null;const table=buildPatterns(seq,5);const last5=seq.slice(-5).join('');if(table[last5]) return table[last5].P>=table[last5].B?'P':'B';return null;}
 function trendPrediction(seq){const last6=seq.slice(-6);if(last6.length===0)return null;const p=last6.filter(x=>'P'===x).length;const b=last6.filter(x=>'B'===x).length;if(p>b)return'P';if(b>p)return'B';return seq[seq.length-1];}
+function finalPrediction(seq){const oldPred=oldPatternPrediction(seq);if(oldPred) return{pred:oldPred,confidence:90};const adaptivePred=adaptivePrediction(seq);const trendPred=trendPrediction(seq);const pred=adaptivePred||trendPred;return pred?{pred,confidence:85}:null;}
 
-function finalPrediction(seq){
-    const oldPred=oldPatternPrediction(seq);
-    if(oldPred) return{pred:oldPred,confidence:90};
-    const adaptivePred=adaptivePrediction(seq);
-    const trendPred=trendPrediction(seq);
-    const pred=adaptivePred||trendPred;
-    return pred?{pred,confidence:85}:null;
+function updatePredictionBox(){
+    const box=document.getElementById("predictionBox");const bar=document.getElementById("confidenceBar");
+    if(sequence.length<MIN_HANDS){box.innerHTML="STANDBY";bar.style.width="0%";lastPrediction=null;return;}
+    const result=finalPrediction(sequence);if(!result){box.innerHTML="NO OUTPUT";return;}
+    let pred=result.pred;
+    pred=applyPatternMemory(pred,sequence);pred=shadowCheck(sequence,pred);pred=quantumDrift(sequence,pred);pred=neuralShoe(sequence,pred);pred=chaosDetector(sequence,pred);
+    if(pred==="WAIT"){box.innerHTML="WAIT";bar.style.width="0%";lastPrediction=null;return;}
+    lastPrediction=pred;
+    const text=pred==='P'?'PLAYER':'BANKER';const cls=pred==='P'?'player':'banker';
+    box.innerHTML=`<span class="${cls}">${text}</span>`;bar.style.width=result.confidence+"%";
+}
+
+function updateHistory(){
+    const seqRow=document.getElementById('historySequence');const resRow=document.getElementById('historyResult');
+    const visibleSeq=sequence.slice(-10);
+    seqRow.innerHTML='';visibleSeq.forEach(val=>{const s=document.createElement('span');s.className=val;s.textContent=val;seqRow.appendChild(s);});
+    document.getElementById('playerTotal').textContent=sequence.filter(x=>'P'===x).length;
+    document.getElementById('bankerTotal').textContent=sequence.filter(x=>'B'===x).length;
+    document.getElementById('totalRounds').textContent=sequence.length;
 }
 
 function recordResult(r){
-    if(lastPrediction){
-        storePatternMemory(sequence, lastPrediction, r);
-        shadowStore(sequence, lastPrediction, r);
-        results.push(lastPrediction === r ? 'W' : 'L');
-    } else {
-        results.push('');
-    }
     sequence.push(r);
-    saveData();
-    updateUI();
-    triggerLiveFeed();
+    if(lastPrediction){
+        const wl=(lastPrediction===r)?'W':'L';results.push(wl);
+        storePatternMemory(sequence.slice(0,-1),lastPrediction,r);shadowStore(sequence.slice(0,-1),lastPrediction,r);
+    }else{results.push('');}
+    localStorage.setItem('baccarat_sequence',JSON.stringify(sequence));localStorage.setItem('baccarat_results',JSON.stringify(results));
+    updateHistory();updatePredictionBox();triggerLiveFeed();
 }
 
-function undo(){
-    sequence.pop(); results.pop();
-    saveData(); updateUI();
-}
-
-function resetAll(){
-    if(confirm("Factory Reset Neural Engine?")){
-        localStorage.clear(); sequence=[]; results=[];
-        document.getElementById("liveFeed").innerHTML = "";
-        updateUI();
-    }
-}
-
-function saveData(){
-    localStorage.setItem('baccarat_sequence', JSON.stringify(sequence));
-    localStorage.setItem('baccarat_results', JSON.stringify(results));
-}
+function undo(){if(sequence.length===0)return;sequence.pop();results.pop();updateHistory();updatePredictionBox();}
+function resetAll(){if(confirm("Reset software?")){sequence=[];results=[];lastPrediction=null;localStorage.clear();updateHistory();updatePredictionBox();document.getElementById("liveFeed").innerHTML = "";}}
 
 function triggerLiveFeed(){
-    if(sequence.length < MIN_HANDS) return;
-    const feed = document.getElementById('liveFeed');
+    if(sequence.length<MIN_HANDS) return;
+    const liveFeed=document.getElementById('liveFeed');
     const msgs=["SCANNING TABLE...","AI PATTERN ANALYSIS RUNNING...","NEURAL NETWORK ADJUSTMENT...","TACTICAL ENGINE UPDATED..."];
-    msgs.forEach((m,i)=>{
-        setTimeout(()=>{
-            const div = document.createElement("div");
-            div.textContent = "> " + m;
-            feed.appendChild(div);
-            feed.scrollTop = feed.scrollHeight;
-        }, i*400);
-    });
+    msgs.forEach((m,i)=>{setTimeout(()=>{const div=document.createElement("div");div.textContent="> "+m;liveFeed.appendChild(div);liveFeed.scrollTop=liveFeed.scrollHeight;},i*600);});
 }
 
-function updateUI(){
-    document.getElementById('playerTotal').textContent = sequence.filter(x=>'P'===x).length;
-    document.getElementById('bankerTotal').textContent = sequence.filter(x=>'B'===x).length;
-    document.getElementById('totalRounds').textContent = sequence.length;
-
-    const seqRow = document.getElementById('historySequence');
-    seqRow.innerHTML = '';
-    sequence.slice(-10).forEach(val => {
-        const s = document.createElement('span');
-        s.className = val; s.textContent = val;
-        seqRow.appendChild(s);
-    });
-
-    const box = document.getElementById("predictionBox");
-    const bar = document.getElementById("confidenceBar");
-
-    if(sequence.length < MIN_HANDS){
-        box.innerHTML = `<span style="font-size:14px; color:#444">NEED ${MIN_HANDS-sequence.length} MORE</span>`;
-        bar.style.width = "0%";
-        lastPrediction = null;
-        return;
-    }
-
-    const result = finalPrediction(sequence);
-    if(!result){
-        box.innerHTML = "NO OUTPUT";
-        bar.style.width = "0%";
-        return;
-    }
-
-    let pred = result.pred;
-    pred = applyPatternMemory(pred, sequence);
-    pred = shadowCheck(sequence, pred);
-    pred = quantumDrift(sequence, pred);
-    pred = neuralShoe(sequence, pred);
-    pred = chaosDetector(sequence, pred);
-
-    if(pred === "WAIT"){
-        box.innerHTML = "WAIT";
-        bar.style.width = "0%";
-        lastPrediction = null;
-    } else {
-        lastPrediction = pred;
-        box.innerHTML = `<span class="${pred==='P'?'player':'banker'}">${pred==='P'?'PLAYER':'BANKER'}</span>`;
-        bar.style.width = result.confidence + "%";
-    }
-}
-
-updateUI();
-</script>
-</body>
-</html>
+updateHistory();updatePredictionBox();
+</script></body></html>
