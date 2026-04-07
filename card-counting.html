@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Card Counting | PREMIUM</title>
+    <title>AI Card Counting | PREMIUM TERMINAL</title>
+    
+    <script>
+        if (window.location.pathname.endsWith('.html')) {
+            const cleanUrl = window.location.pathname.replace('.html', '');
+            window.history.replaceState(null, '', cleanUrl);
+        }
+    </script>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
@@ -22,13 +29,19 @@
         const db = getFirestore(app);
 
         onAuthStateChanged(auth, async (user) => {
-            if (!user) { window.location.href = "index.html"; return; }
+            if (!user) { 
+                window.location.href = "index.html"; 
+                return; 
+            }
             const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
             const now = new Date().getTime();
+            
+            // Security Check: Does user exist and is the license active?
             if (!userDoc.exists() || (userDoc.data().expiry !== 'LIFETIME' && userDoc.data().expiry < now)) {
                 window.location.href = "index.html";
                 return;
             }
+            // Show app if authorized
             document.body.style.display = "block";
         });
     </script>
@@ -40,112 +53,129 @@
             font-family: 'Segoe UI', Tahoma, sans-serif;
             margin: 0;
             padding: 0;
-            display: none; 
+            display: none; /* Hidden by default for Security Guard */
             min-height: 100vh;
         }
 
+        /* 3. THE EXIT TERMINAL BUTTON */
         .exit-nav { position: fixed; top: 15px; right: 15px; z-index: 1000; }
-        .exit-btn { background: rgba(255,215,0,0.1); color: #ffd700; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-weight: bold; border: 1px solid #ffd700; font-size: 12px; transition: 0.3s; }
+        .exit-btn { 
+            background: rgba(255, 215, 0, 0.1); 
+            color: #ffd700; 
+            padding: 8px 16px; 
+            border-radius: 5px; 
+            text-decoration: none; 
+            font-weight: bold; 
+            border: 1px solid #ffd700; 
+            font-size: 12px; 
+            transition: 0.3s; 
+            text-transform: uppercase;
+        }
         .exit-btn:hover { background: #ffd700; color: #000; }
 
-        .container { max-width: 650px; margin: 0 auto; padding: 30px 15px; box-sizing: border-box; }
+        .container { max-width: 650px; margin: 0 auto; padding: 40px 15px; box-sizing: border-box; }
         
-        h1 { text-align: center; margin-bottom: 5px; font-size: 1.8em; color: #ffd700; }
-        .tagline { text-align: center; font-size: 0.8em; margin-bottom: 20px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        h1 { text-align: center; margin-bottom: 5px; font-size: 1.8em; color: #ffd700; letter-spacing: 2px; }
+        .tagline { text-align: center; font-size: 0.8em; margin-bottom: 25px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
 
+        /* PREDICTION BOX ADJUSTED FOR VISIBILITY */
         .prediction {
             background: #111;
             padding: 15px;
-            border-radius: 10px;
+            border-radius: 12px;
             text-align: center;
             margin-bottom: 20px;
-            height: 80px;
+            height: 110px; /* Tall enough for large fonts */
             border: 1px solid #333;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
         }
 
         .calculating-overlay {
-            position: absolute; inset: 0; background: rgba(0, 0, 0, 0.9);
+            position: absolute; inset: 0; background: rgba(0, 0, 0, 0.95);
             display: none; align-items: center; justify-content: center;
-            font-size: 1em; color: #ffd700; border-radius: 10px; z-index: 10;
+            font-size: 1em; color: #ffd700; border-radius: 12px; z-index: 10;
+            font-weight: bold; letter-spacing: 2px;
         }
 
-        .pred-side { display: inline-block; padding: 4px 12px; margin-left: 8px; border-radius: 4px; background: #000; border: 1px solid #ffd700; color: #ffd700; font-size: 0.75em; }
-        .player-text { color: #3498db; font-weight: 800; font-size: 2.1em; }
-        .banker-text { color: #e74c3c; font-weight: 800; font-size: 2.1em; }
+        /* Large visible prediction text */
+        .player-text { color: #3498db; font-weight: 800; font-size: 2.3em; text-shadow: 0 0 15px rgba(52, 152, 219, 0.4); }
+        .banker-text { color: #e74c3c; font-weight: 800; font-size: 2.3em; text-shadow: 0 0 15px rgba(231, 76, 60, 0.4); }
+        .pred-side { display: inline-block; padding: 6px 14px; margin-left: 12px; border-radius: 4px; background: #000; border: 1px solid #ffd700; color: #ffd700; font-size: 0.8em; font-weight: bold; }
 
-        .control-buttons { display: flex; gap: 8px; margin-bottom: 15px; }
-        .action-btn { flex: 1; background: #222; color: #fff; border: 1px solid #444; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: 0.2s; }
-        .action-btn:hover { border-color: #ffd700; background: #2a2a2a; }
+        .control-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
+        .action-btn { flex: 1; background: #222; color: #fff; border: 1px solid #444; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.2s; }
+        .action-btn:hover { border-color: #ffd700; color: #ffd700; }
 
-        /* REVISED GRID: AUTO-ADJUSTING FOR FULL VISIBILITY */
+        /* GRID SYSTEM: Ensuring numbers are never hidden */
         .score-grid {
             display: grid;
             grid-template-columns: 1fr 1fr; 
-            gap: 12px;
+            gap: 15px;
             margin-bottom: 15px;
         }
 
         .score-column {
             background: #181818; 
-            padding: 15px; 
-            border-radius: 10px;
+            padding: 18px; 
+            border-radius: 12px;
             border: 1px solid #333;
             text-align: center;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
         }
 
-        .score-column h3 { margin: 0 0 12px 0; font-size: 0.9em; color: #888; display: flex; justify-content: space-between; align-items: center; }
-        .score-column h3 span { color: #fff; font-size: 1.3em; font-weight: bold; }
+        .score-column h3 { margin: 0 0 15px 0; font-size: 0.85em; color: #ffd700; display: flex; justify-content: space-between; align-items: center; opacity: 0.8; }
+        .score-column h3 span { color: #fff; font-size: 1.5em; font-weight: 900; }
 
         .button-grid { 
             display: grid; 
             grid-template-columns: repeat(3, 1fr); 
-            gap: 8px; 
+            gap: 10px; 
         }
 
         .score-btn { 
             background: #252525; 
-            color: #ddd; 
+            color: #fff; 
             border: 1px solid #3d3d3d; 
-            padding: 12px 0; /* Vertical padding ensures text visibility */
-            border-radius: 6px; 
+            padding: 15px 0; 
+            border-radius: 8px; 
             cursor: pointer; 
             font-weight: bold; 
-            font-size: 18px;
+            font-size: 20px;
             transition: 0.2s;
             width: 100%;
-            display: block;
         }
 
-        .score-btn:hover { background: #333; color: #fff; border-color: #666; }
-        .score-btn.selected { background: #ffd700; color: #000; border-color: #fff; box-shadow: 0 0 10px rgba(255,215,0,0.4); }
+        .score-btn:hover { background: #333; border-color: #555; }
+        .score-btn.selected { background: #ffd700; color: #000; border-color: #fff; box-shadow: 0 0 15px rgba(255,215,0,0.3); }
 
         .submit-btn {
             width: 100%; background: #ffd700; color: #000; border: none;
-            padding: 16px; border-radius: 8px; font-size: 18px; font-weight: 800;
-            cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            padding: 20px; border-radius: 10px; font-size: 20px; font-weight: 900;
+            cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            text-transform: uppercase; letter-spacing: 1px;
         }
+        .submit-btn:active { transform: translateY(2px); }
 
-        .stats-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        .stats-box { background: #111; padding: 12px; border-radius: 8px; border: 1px solid #222; text-align: center; height: 100px; overflow-y: auto; }
-        .stats-box h2 { font-size: 0.75em; color: #555; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #222; padding-bottom: 5px; }
+        .stats-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; }
+        .stats-box { background: #111; padding: 15px; border-radius: 10px; border: 1px solid #222; text-align: center; height: 110px; overflow-y: auto; }
+        .stats-box h2 { font-size: 0.7em; color: #444; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; letter-spacing: 1px; }
 
-        .win-icon { background: #2ecc71; color: #fff; padding: 2px 6px; border-radius: 3px; margin: 1px; font-size: 10px; font-weight: bold; display: inline-block; }
-        .lose-icon { background: #e74c3c; color: #fff; padding: 2px 6px; border-radius: 3px; margin: 1px; font-size: 10px; font-weight: bold; display: inline-block; }
+        .win-icon { background: #2ecc71; color: #fff; padding: 3px 8px; border-radius: 4px; margin: 2px; font-size: 11px; font-weight: bold; display: inline-block; }
+        .lose-icon { background: #e74c3c; color: #fff; padding: 3px 8px; border-radius: 4px; margin: 2px; font-size: 11px; font-weight: bold; display: inline-block; }
         
-        .round-history span { display: inline-block; width: 22px; height: 22px; line-height: 22px; margin: 1px; border-radius: 50%; font-weight: bold; font-size: 10px; color: #fff; }
+        .round-history span { display: inline-block; width: 26px; height: 26px; line-height: 26px; margin: 2px; border-radius: 50%; font-weight: bold; font-size: 11px; color: #fff; text-shadow: 1px 1px 1px #000; }
         .round-outcome.B { background: #e74c3c; }
         .round-outcome.P { background: #3498db; }
         .round-outcome.T { background: #27ae60; }
 
-        /* Responsive stack for very narrow phones */
         @media (max-width: 480px) {
             .score-grid { grid-template-columns: 1fr; }
-            .score-column { height: auto; }
+            .player-text, .banker-text { font-size: 1.8em; }
+            .prediction { height: 90px; }
         }
     </style>
 </head>
@@ -156,17 +186,17 @@
     </div>
 
     <div class="container">
-        <h1>AI Card Counting</h1>
+        <h1>AI CARD COUNTING</h1>
         <div class="tagline">Neural Logic Engine v4.2</div>
 
         <div class="prediction" id="predictionMain">
-            <div class="calculating-overlay" id="overlay">SYNCING PATTERNS...</div>
-            <p id="predText" style="color: #666; font-size: 0.8em;">WAITING FOR INPUT</p>
+            <div class="calculating-overlay" id="overlay">ANALYZING SHOE...</div>
+            <p id="predText" style="color: #444; font-size: 0.85em; font-weight: bold;">[ ENGINE STANDBY ]</p>
         </div>
 
         <div class="control-buttons">
-            <button type="button" id="deleteBtn" class="action-btn">UNDO LAST</button>
-            <button type="button" id="resetBtn" class="action-btn">RESET ENGINE</button>
+            <button type="button" id="deleteBtn" class="action-btn">UNDO ENTRY</button>
+            <button type="button" id="resetBtn" class="action-btn">CLEAR CACHE</button>
         </div>
 
         <form id="scoreForm">
@@ -207,11 +237,11 @@
 
         <div class="stats-container">
             <div class="stats-box">
-                <h2>Accuracy</h2>
+                <h2>AI Accuracy</h2>
                 <div id="history"></div>
             </div>
             <div class="stats-box">
-                <h2>Pattern</h2>
+                <h2>Shoe Pattern</h2>
                 <div id="roundHistory"></div>
             </div>
         </div>
@@ -226,6 +256,7 @@
         const overlay = document.getElementById("overlay");
         let pastRounds = [];
 
+        // Number Selection
         buttons.forEach(btn => {
             btn.addEventListener("click", function() {
                 const side = this.dataset.side;
@@ -240,6 +271,7 @@
             });
         });
 
+        // Prediction Logic
         function generatePrediction() {
             const sides = ['player','banker'];
             const chosenSide = sides[Math.floor(Math.random()*2)];
@@ -250,6 +282,7 @@
             return {side: chosenSide, points};
         }
 
+        // Submission
         document.getElementById("submitRoundBtn").addEventListener("click", () => {
             const p = parseInt(playerScoreDisplay.textContent)||0;
             const b = parseInt(bankerScoreDisplay.textContent)||0;
@@ -279,11 +312,12 @@
                 playerScoreDisplay.textContent = 0;
                 bankerScoreDisplay.textContent = 0;
                 document.querySelectorAll('.score-btn').forEach(b=>b.classList.remove('selected'));
-            }, 600);
+            }, 700);
         });
 
+        // UI Controls
         document.getElementById("resetBtn").addEventListener("click", () => {
-            location.reload();
+            if(confirm("Wipe all engine data for this session?")) location.reload();
         });
 
         document.getElementById("deleteBtn").addEventListener("click", () => {
