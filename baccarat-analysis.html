@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baccarat Analysis Ultra | PREMIUM</title>
+    
+    <script>
+        if (window.location.pathname.endsWith('.html')) {
+            const cleanUrl = window.location.pathname.replace('.html', '');
+            window.history.replaceState(null, '', cleanUrl);
+        }
+    </script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
+            authDomain: "my-software-portal.firebaseapp.com",
+            projectId: "my-software-portal",
+            appId: "1:1072405993700:web:b66ca016c8de667d46f4f1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = "index.html"; return; }
+            const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
+            const now = new Date().getTime();
+            if (!userDoc.exists() || (userDoc.data().expiry !== 'LIFETIME' && userDoc.data().expiry < now)) {
+                window.location.href = "index.html";
+                return;
+            }
+            document.body.style.display = "block";
+        });
+    </script>
+
+    <style>
+        :root {
+            --bg1:#0c0c0c; --bg2:#1a1a1a; --bg3:#2a2a2a;
+            --panel:rgba(32,32,32,0.85); --border:#444444;
+            --text:#e8e8e8; --muted:#aaaaaa; --gold:#f7d14b;
+            --player:#00d4ff; --player-dark:#00aaff;
+            --banker:#ff6aa6; --banker-dark:#ff2d5a;
+            --reset:#ffc857; --reset-dark:#f39c12;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+            color: var(--text); font-size: 14px;
+            display: none; /* Hidden by Security Guard */
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        /* EXIT BUTTON */
+        .exit-nav { position: fixed; top: 20px; right: 20px; z-index: 1000; }
+        .exit-btn { background: #444; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; border: 1px solid #666; font-size: 13px; }
+        .exit-btn:hover { background: var(--player); color: #000; border-color: #fff; }
+
+        .title { text-align: center; padding: 40px 0 18px; }
+        .title h1 {
+            font-size: 34px; letter-spacing: 3px; margin: 0;
+            background: linear-gradient(90deg, var(--player), var(--banker));
+            -webkit-background-clip: text; color: transparent;
+            text-shadow: 0 0 10px rgba(0,212,255,0.55);
+        }
+        .slogan { font-style: italic; color: var(--muted); margin-top: 6px; }
+
+        #container {
+            width: 600px; margin: 0 auto;
+            background: var(--panel); padding: 24px;
+            border-radius: 16px; border: 1px solid var(--border);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+        }
+
+        .char-count { text-align: center; margin-bottom: 10px; color: var(--gold); font-weight: bold; }
+        #display {
+            background: #000; border: 1px solid var(--border);
+            border-radius: 10px; margin: 10px 0 14px; padding: 15px;
+            text-align: center; font-size: 22px; letter-spacing: 5px; color: var(--gold);
+            min-height: 60px;
+        }
+
+        .input-row { display: flex; justify-content: center; gap: 12px; margin-bottom: 12px; }
+        button {
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; padding: 14px 22px; font-size: 20px; font-weight: 700;
+            cursor: pointer; color: #fff; transition: all 0.2s;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        button[value=P] { background: linear-gradient(135deg, var(--player), var(--player-dark)); }
+        button[value=B] { background: linear-gradient(135deg, var(--banker), var(--banker-dark)); }
+        .btn-back { background: transparent; border: 1px dashed var(--gold); color: var(--gold); width: 60px; }
+        .btn-reset { background: linear-gradient(135deg, var(--reset), var(--reset-dark)); color: #000; }
+
+        .bet-box { 
+            background: var(--panel); color: #fff; border: 1px solid var(--border); 
+            border-radius: 16px; padding: 20px; text-align: center; 
+            margin: 20px 0; box-shadow: 0 6px 22px rgba(0,0,0,0.35);
+            font-size: 24px; font-weight: 900; letter-spacing: 2px;
+        }
+        .player-pred { background: linear-gradient(135deg, var(--player), var(--player-dark)); text-shadow: 1px 1px 2px #000; }
+        .banker-pred { background: linear-gradient(135deg, var(--banker), var(--banker-dark)); text-shadow: 1px 1px 2px #000; }
+
+        .results { width: 100%; margin-top: 20px; }
+        .history-table { width: 100%; border-collapse: collapse; }
+        .history-table th, .history-table td { border: 1px solid var(--border); padding: 10px; text-align: center; }
+        .history-table th { background: #111; color: var(--player); }
+        .strategy { font-family: monospace; font-size: 11px; color: var(--muted); word-break: break-all; }
+        .badge { padding: 4px 10px; border-radius: 50%; font-weight: bold; }
+        .win { background: #0fa23f; } .lose { background: #c62828; }
+    </style>
+</head>
+<body>
+
+    <div class="exit-nav">
+        <a href="index.html" class="exit-btn">EXIT TERMINAL</a>
+    </div>
+
+    <div class="title">
+        <h1>Baccarat Analysis Ultra</h1>
+        <div class="slogan">💡 High-Precision Pattern Recognition Engine</div>
+    </div>
+
+    <div id="container">
+        <div class="char-count" id="charCount">Entered <span id="entered-count">0</span> / 30</div>
+        <div id="display"></div>
+
+        <div class="input-row">
+            <button id="btnP" value="P">P</button>
+            <button id="btnB" value="B">B</button>
+            <button id="btnBack" class="btn-back" disabled>⌫</button>
+            <button id="btnReset" class="btn-reset">Reset</button>
+        </div>
+
+        <div id="predictionBox" class="bet-box" style="display:none;">
+            <span id="predictionText"></span>
+        </div>
+
+        <div class="results" id="historyContainer" style="display:none;">
+            <table class="history-table">
+                <thead>
+                    <tr><th>Round</th><th>Strategy Sequence</th><th>Result</th></tr>
+                </thead>
+                <tbody id="historyBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+<script>
+    const display = document.getElementById('display');
+    const enteredCount = document.getElementById('entered-count');
+    const btnP = document.getElementById('btnP');
+    const btnB = document.getElementById('btnB');
+    const btnBack = document.getElementById('btnBack');
+    const btnReset = document.getElementById('btnReset');
+    const predictionBox = document.getElementById('predictionBox');
+    const predictionText = document.getElementById('predictionText');
+    const historyContainer = document.getElementById('historyContainer');
+    const historyBody = document.getElementById('historyBody');
+
+    let results = [];
+    let historyData = [];
+    let firstPredictionShown = false;
+    let snapshots = [];
+    const MAX_ENTRIES = 30;
+
+    function randomPrediction() { return Math.random() < 0.5 ? "P" : "B"; }
+    function randomStrategy() { 
+        let s = ""; 
+        for(let i=0; i<30; i++) s += Math.random() < 0.5 ? "P" : "B"; 
+        return s; 
+    }
+
+    function updateDisplay() {
+        display.textContent = results.join('');
+        enteredCount.textContent = results.length;
+        btnBack.disabled = snapshots.length === 0;
+    }
+
+    function showPrediction() {
+        const pred = randomPrediction();
+        predictionText.textContent = pred === "P" ? "PLAYER" : "BANKER";
+        predictionBox.style.display = 'block';
+        predictionBox.className = 'bet-box ' + (pred === "P" ? "player-pred" : "banker-pred");
+    }
+
+    function updateHistory() {
+        if(historyData.length === 0) { historyContainer.style.display = 'none'; return; }
+        historyContainer.style.display = 'block';
+        historyBody.innerHTML = "";
+        historyData.slice(-5).reverse().forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.round}</td>
+                <td class="strategy">${item.strategy}</td>
+                <td><span class="badge ${item.prediction === item.result ? 'win' : 'lose'}">${item.prediction === item.result ? '✔' : 'X'}</span></td>
+            `;
+            historyBody.appendChild(row);
+        });
+    }
+
+    function saveSnapshot() {
+        snapshots.push({
+            results: [...results],
+            historyData: [...historyData],
+            firstPredictionShown,
+            predictionText: predictionText.textContent,
+            predictionVisible: predictionBox.style.display
+        });
+        if(snapshots.length > 50) snapshots.shift();
+    }
+
+    function restoreSnapshot() {
+        if(snapshots.length === 0) return;
+        const snap = snapshots.pop();
+        results = snap.results;
+        historyData = snap.historyData;
+        firstPredictionShown = snap.firstPredictionShown;
+        predictionText.textContent = snap.predictionText;
+        predictionBox.style.display = snap.predictionVisible;
+        if(firstPredictionShown && predictionBox.style.display === 'block') {
+            predictionBox.className = 'bet-box ' + (predictionText.textContent === 'PLAYER' ? 'player-pred' : 'banker-pred');
+        }
+        updateDisplay();
+        updateHistory();
+    }
+
+    function addResult(val) {
+        saveSnapshot();
+        if(results.length >= MAX_ENTRIES) results.shift();
+        results.push(val);
+        updateDisplay();
+
+        if(results.length >= MAX_ENTRIES && !firstPredictionShown) {
+            firstPredictionShown = true;
+            showPrediction();
+            return;
+        }
+
+        if(firstPredictionShown) {
+            const lastPred = predictionText.textContent === 'PLAYER' ? 'P' : 'B';
+            historyData.push({
+                round: historyData.length + 1,
+                strategy: randomStrategy(),
+                prediction: lastPred,
+                result: val
+            });
+            updateHistory();
+            showPrediction();
+        }
+    }
+
+    btnP.addEventListener('click', () => addResult('P'));
+    btnB.addEventListener('click', () => addResult('B'));
+    btnBack.addEventListener('click', restoreSnapshot);
+    btnReset.addEventListener('click', () => {
+        results = []; historyData = []; firstPredictionShown = false; snapshots = [];
+        predictionBox.style.display = 'none'; updateDisplay(); updateHistory();
+    });
+</script>
+</body>
+</html>
