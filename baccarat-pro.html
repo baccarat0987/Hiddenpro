@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baccarat PREDICTOR | PREMIUM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <script>
+        if (window.location.pathname.endsWith('.html')) {
+            const cleanUrl = window.location.pathname.replace('.html', '');
+            window.history.replaceState(null, '', cleanUrl);
+        }
+    </script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
+            authDomain: "my-software-portal.firebaseapp.com",
+            projectId: "my-software-portal",
+            appId: "1:1072405993700:web:b66ca016c8de667d46f4f1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = "index.html"; return; }
+            const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
+            const now = new Date().getTime();
+            if (!userDoc.exists() || (userDoc.data().expiry !== 'LIFETIME' && userDoc.data().expiry < now)) {
+                window.location.href = "index.html";
+                return;
+            }
+            document.body.style.display = "block";
+        });
+    </script>
+
+    <style>
+        body {
+            margin:0; padding:0;
+            font-family:'Roboto',sans-serif;
+            color:#eee; font-size:17px;
+            display: none; /* Guard hidden */
+            background: linear-gradient(-45deg, #1a0026, #2e004f, #4b0082, #310652);
+            background-size: 400% 400%;
+            animation: galaxy 15s ease infinite;
+            min-height: 100vh;
+        }
+        @keyframes galaxy {
+            0% {background-position: 0% 50%;}
+            50% {background-position: 100% 50%;}
+            100% {background-position: 0% 50%;}
+        }
+
+        /* EXIT BUTTON */
+        .exit-nav { position: fixed; top: 15px; right: 15px; z-index: 1000; }
+        .exit-btn { background: rgba(255,255,255,0.1); color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); font-size: 12px; font-family: 'Orbitron'; }
+        .exit-btn:hover { background: #8a2be2; border-color: #fff; }
+
+        .header {text-align:center; padding:30px 0; background:rgba(0,0,0,0.6); border-bottom:1px solid rgba(255,255,255,0.1);}
+        .header h1 {
+            font-family:'Orbitron',sans-serif; font-size:36px; color:#ffffff; margin:0; font-weight:bold; letter-spacing:3px;
+            text-shadow:0 0 15px #bb86fc;
+        }
+
+        .container {max-width:850px; margin:20px auto; padding:25px; background:rgba(15, 15, 25, 0.9); border:1px solid #444; border-radius:15px; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,0.8);}
+        
+        .sequence {margin:15px 0; min-height: 40px; display: flex; justify-content: center; flex-wrap: wrap; gap: 5px;}
+        .sequence span {display:inline-block; width:30px; height:30px; line-height:30px; text-align:center; border-radius:50%; font-weight:bold; font-size: 14px;}
+        .p { background:#2196f3; color:#fff; box-shadow: 0 0 10px #2196f3;} 
+        .b { background:#f44336; color:#fff; box-shadow: 0 0 10px #f44336;}
+        .t { background:#ffc107; color:#000;}
+
+        .prediction {margin:25px 0; font-size:32px; font-weight:900; font-family: 'Orbitron'; height: 50px;}
+        .prediction .pred-p {color:#2196f3; text-shadow: 0 0 15px #2196f3;}
+        .prediction .pred-b {color:#f44336; text-shadow: 0 0 15px #f44336;}
+
+        .buttons {margin:20px 0; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;}
+        .buttons button {background:#111; color:#fff; border:1px solid #555; border-radius:8px; padding:12px 20px; font-size:14px; font-family:'Orbitron'; cursor:pointer; transition: 0.2s;}
+        .buttons button:hover {background:#333; border-color: #bb86fc; transform: scale(1.05);}
+        .btn-reset { border-color: #ffc107 !important; color: #ffc107 !important; }
+
+        .capital-table table {width:100%; border-collapse:collapse; margin-top: 20px; background:#111; border:1px solid #333;}
+        .capital-table th, .capital-table td {padding:12px; font-size:14px; border:1px solid #333;}
+        .capital-table th {background:#222; font-family: 'Orbitron'; font-size: 12px; color: #bb86fc;}
+        
+        .highlight {background:#ffc107 !important; color:#000 !important; font-weight:bold; animation: pulse 1s infinite;}
+        .highlight-win {color:#00f693 !important; font-weight:bold;}
+        @keyframes pulse { 0% {opacity: 1;} 50% {opacity: 0.6;} 100% {opacity: 1;} }
+
+        .message-box {margin-top:20px; font-size:22px; font-weight:bold; font-family: 'Orbitron';}
+        .success {color:#00f693;} .fail {color:#f44336;}
+    </style>
+</head>
+<body>
+
+    <div class="exit-nav">
+        <a href="index.html" class="exit-btn">EXIT TERMINAL</a>
+    </div>
+
+    <div class="header"><h1>Baccarat PREDICTOR</h1></div>
+
+    <div class="container">
+        <div class="sequence" id="historyBox"></div>
+        <div id="predictionBox" class="prediction"></div>
+
+        <div class="buttons">
+            <button onclick="recordResult('P')">PLAYER</button>
+            <button onclick="recordResult('B')">BANKER</button>
+            <button onclick="recordResult('T')">TIE</button>
+            <button onclick="undo()">UNDO</button>
+            <button onclick="resetAll()" class="btn-reset">RESET</button>
+        </div>
+
+        <div class="capital-table" id="betTableBox">
+            <table id="betTable">
+                <thead>
+                    <tr>
+                        <th>Bet 1</th><th>Bet 2</th><th>Bet 3</th><th>Bet 4</th><th>Bet 5</th><th>Bet 6</th><th>Bet 7</th><th>WIN</th>
+                    </tr>
+                </thead>
+                <tbody id="betBody"></tbody>
+            </table>
+        </div>
+        <div id="finalMessage" class="message-box"></div>
+    </div>
+
+<script>
+    let sequence = [];
+    let currentPrediction = null;
+    let currentRow = 0;
+    let currentCol = 0;
+    const maxCols = 7;
+    const maxRows = 10;
+    const betValues = ["100", "200", "600", "1400", "3000", "6200", "MAX"];
+
+    function initBetTable() {
+        const tbody = document.getElementById('betBody');
+        tbody.innerHTML = '';
+        for (let r=0; r<maxRows; r++) {
+            const tr = document.createElement('tr');
+            for (let c=0; c<maxCols; c++) {
+                const td = document.createElement('td');
+                td.textContent = betValues[c];
+                tr.appendChild(td);
+            }
+            const winTd = document.createElement('td');
+            winTd.textContent = '';
+            tr.appendChild(winTd);
+            tbody.appendChild(tr);
+        }
+    }
+
+    function updateHistory() {
+        const box = document.getElementById('historyBox');
+        box.innerHTML = '';
+        sequence.forEach(r => {
+            const span = document.createElement('span');
+            span.className = r.toLowerCase();
+            span.textContent = r;
+            box.appendChild(span);
+        });
+    }
+
+    function updatePrediction() {
+        const box = document.getElementById('predictionBox');
+        if (sequence.length < 7) {
+            currentPrediction = null;
+            box.innerHTML = "<span style='font-size:14px; color:#666;'>WAITING FOR DATA (NEED 7)</span>";
+            updateBetTable();
+            return;
+        }
+        
+        const windowSizes = [5,4,3];
+        let found = false;
+        let nextChoices = [];
+        for (let w of windowSizes) {
+            if (sequence.length >= w) {
+                const lastForm = sequence.slice(-w).join("-");
+                for (let i=0; i <= sequence.length - w - 1; i++) {
+                    if (sequence.slice(i, i+w).join("-") === lastForm) {
+                        const nextVal = sequence[i+w];
+                        if (nextVal && nextVal !== 'T') nextChoices.push(nextVal);
+                    }
+                }
+                if (nextChoices.length > 0) { found = true; break; }
+            }
+        }
+        
+        currentPrediction = found ? (nextChoices.filter(x=>x==='P').length >= nextChoices.filter(x=>x==='B').length ? 'P' : 'B') : 'B';
+        
+        if (currentPrediction === 'P') {
+            box.innerHTML = "<span class='pred-p'>PLAYER</span>";
+        } else {
+            box.innerHTML = "<span class='pred-b'>BANKER</span>";
+        }
+        updateBetTable();
+    }
+
+    function updateBetTable() {
+        const rows = document.getElementById('betBody').rows;
+        for (let r=0; r<maxRows; r++) {
+            for (let c=0; c<maxCols; c++) rows[r].cells[c].classList.remove('highlight');
+        }
+        if (currentPrediction && sequence.length >= 7 && rows[currentRow]) {
+            rows[currentRow].cells[currentCol].classList.add('highlight');
+        }
+    }
+
+    function markWin(rowIndex) {
+        const rows = document.getElementById('betBody').rows;
+        if (rows[rowIndex]) {
+            rows[rowIndex].cells[maxCols].innerHTML = "✔";
+            rows[rowIndex].cells[maxCols].classList.add('highlight-win');
+        }
+    }
+
+    function recordResult(res) {
+        const prevPrediction = currentPrediction;
+        if (prevPrediction && (res==='P'||res==='B')) {
+            if (res === prevPrediction) {
+                markWin(currentRow);
+                currentRow++; currentCol=0;
+                if (currentRow >= maxRows) {
+                    document.getElementById('betTableBox').style.display="none";
+                    document.getElementById('finalMessage').innerHTML = "🎉 TARGET REACHED!";
+                    document.getElementById('finalMessage').className = "message-box success";
+                    return;
+                }
+            } else {
+                currentCol++;
+                if (currentCol >= maxCols) {
+                    document.getElementById('betTableBox').style.display="none";
+                    document.getElementById('finalMessage').innerHTML = "❌ LIMIT REACHED";
+                    document.getElementById('finalMessage').className = "message-box fail";
+                    return;
+                }
+            }
+        }
+        sequence.push(res);
+        updateHistory();
+        updatePrediction();
+    }
+
+    function undo() {
+        if (sequence.length === 0) return;
+        sequence.pop();
+        
+        const tempSeq = [...sequence];
+        resetAll();
+        tempSeq.forEach(r => recordResult(r));
+    }
+
+    function resetAll() {
+        sequence=[]; currentPrediction=null; currentRow=0; currentCol=0;
+        initBetTable();
+        document.getElementById('betTableBox').style.display="block";
+        document.getElementById('finalMessage').textContent="";
+        updateHistory(); updatePrediction();
+    }
+
+    initBetTable(); updateHistory(); updatePrediction();
+</script>
+</body>
+</html>
