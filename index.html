@@ -5,36 +5,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HIDDEN PRO | ELITE TERMINAL</title>
 <style>
-:root { --neon:#00ffff; --panel-bg: rgba(6,11,25,0.9);}
+:root { --neon:#00ffff; --panel-bg: rgba(6,11,25,0.9); --discount: #ff4444; }
 * { box-sizing: border-box; margin:0; padding:0; }
 body { font-family:'Segoe UI',sans-serif; color:#fff; min-height:100vh; background:#000; display:flex; flex-direction:column; overflow-x:hidden; }
 body::before { content:""; position:fixed; inset:0; background: radial-gradient(circle at 20% 30%, #001f3f 0%, #000 70%); z-index:-1; }
 
+/* Top Bar */
 .top-bar { width:100%; padding:15px 30px; background:rgba(0,0,0,0.8); backdrop-filter:blur(25px); border-bottom:1px solid rgba(0,255,255,0.2); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100;}
 .logo-section { display:flex; flex-direction:column; }
 .logo { font-size:26px; letter-spacing:10px; font-weight:900; color:#fff; }
 .status-text { font-size:11px; color:var(--neon); letter-spacing:3px; font-weight:600; }
+
 #topAuthBtn { background:#fff; color:#000; border:none; padding:10px 16px; border-radius:8px; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:8px; font-size:13px; transition:.3s;}
-#topAuthBtn:hover { background:var(--neon); transform:translateY(-2px); }
+#topAuthBtn.logged-in { background: var(--discount); color: #fff; }
+#topAuthBtn:hover { transform:translateY(-2px); box-shadow: 0 0 15px var(--neon); }
 
-.main-content { padding:40px; display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:20px; max-width:1200px; margin:0 auto;}
+/* Main Grid */
+.main-content { padding:40px; display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:25px; max-width:1400px; margin:0 auto;}
+.sw-card { background:var(--panel-bg); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:25px; display:flex; flex-direction:column; justify-content:space-between; transition:.3s; position:relative; overflow:hidden;}
+.sw-card::after { content:''; position:absolute; top:0; left:0; width:100%; height:2px; background:var(--neon); opacity:0; transition:.3s;}
+.sw-card:hover::after { opacity:1; }
+.sw-card:hover { border-color:var(--neon); transform:translateY(-5px); background:rgba(10,20,40,0.95);}
+.sw-card h2 { font-size:18px; margin-bottom:10px; color:var(--neon); letter-spacing:1px;}
+.sw-card p { font-size:13px; color:#aaa; line-height:1.5; margin-bottom:20px; min-height:60px;}
+.sw-card button { background:transparent; border:1px solid var(--neon); color:var(--neon); padding:10px; border-radius:6px; font-weight:bold; cursor:pointer; transition:.2s; text-transform:uppercase; letter-spacing:1px;}
+.sw-card button:hover { background:var(--neon); color:#000;}
 
-.sw-card { background:var(--panel-bg); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:25px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 5px 20px rgba(0,0,0,0.5); transition:.3s;}
-.sw-card:hover { border-color:var(--neon); transform:translateY(-5px);}
-.sw-card h2 { font-size:16px; margin:0 0 5px 0; color:#fff; }
-.sw-card p { font-size:12px; color:#777; line-height:1.4; margin-bottom:15px;}
-.sw-card button { background:var(--neon); border:none; color:#000; padding:8px; border-radius:6px; font-weight:bold; cursor:pointer; transition:.2s;}
-.sw-card button:hover { background:#0ff;}
+/* Pricing Overlay */
+#overlay { position:fixed; inset:0; background:rgba(0,0,0,0.95); display:none; flex-direction:column; align-items:center; z-index:200; backdrop-filter:blur(20px); overflow-y:auto; padding:40px 20px;}
+.overlay-content { text-align:center; max-width:1100px; width:100%; }
+.card-wrap { display:flex; gap:20px; margin:30px 0; flex-wrap:wrap; justify-content:center;}
 
-#overlay { position:fixed; inset:0; background:rgba(0,0,0,0.98); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:200; backdrop-filter:blur(20px); overflow-y:auto; padding:20px;}
-.overlay-content { text-align:center; max-width:900px; width:100%; }
-.card-wrap { display:flex; gap:20px; margin-top:20px; flex-wrap:wrap; justify-content:center;}
-.p-card { background:var(--panel-bg); border:1px solid #222; border-radius:20px; padding:20px; width:240px; cursor:pointer; transition:.3s; }
-.p-card:hover { border-color:var(--neon); transform:scale(1.05);}
-.p-card h3 { font-size:13px; letter-spacing:3px; color:#aaa; margin-bottom:10px; }
-.p-card .price { font-size:30px; font-weight:900; margin-bottom:10px; }
-.p-card .btn-buy { background:var(--neon); color:#000; padding:8px; border-radius:6px; font-weight:bold; }
-.close-btn { margin-top:30px; background:none; border:none; color:#444; cursor:pointer; letter-spacing:5px; font-weight:bold; }
+.p-card { background:rgba(255,255,255,0.03); border:1px solid #333; border-radius:24px; padding:30px; width:240px; transition:.3s; position:relative;}
+.p-card:hover { border-color:var(--neon); background:rgba(0,255,255,0.05); transform:scale(1.05);}
+.p-card h3 { font-size:12px; letter-spacing:3px; color:#888; margin-bottom:15px; }
+.p-card .price { font-size:36px; font-weight:900; margin-bottom:5px; color:#fff; }
+.p-card .old-price { text-decoration: line-through; color: var(--discount); font-size: 16px; font-weight: bold; margin-bottom:15px; display:block;}
+.p-card .btn-buy { background:var(--neon); color:#000; padding:12px; border-radius:8px; font-weight:900; font-size:14px; margin-top:15px;}
+
+.pricing-footer { margin-top:40px; padding-top:30px; border-top:1px solid #222; }
+.software-grid-mini { display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin:20px 0; font-size:12px; color:#666;}
+.close-btn { margin-top:30px; background:none; border:1px solid #444; color:#888; padding:10px 30px; cursor:pointer; border-radius:50px; transition:.3s; }
+.close-btn:hover { border-color:#fff; color:#fff; }
 </style>
 </head>
 <body id="mainBody">
@@ -42,11 +54,11 @@ body::before { content:""; position:fixed; inset:0; background: radial-gradient(
 <nav class="top-bar">
     <div class="logo-section">
         <span class="logo">HIDDEN PRO</span>
-        <span class="status-text" id="statusMsg">ENCRYPTED TERMINAL // OFFLINE</span>
+        <span class="status-text" id="statusMsg">SYSTEM STATUS: OFFLINE</span>
     </div>
     <button id="topAuthBtn">
         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="16">
-        <span>GMAIL LOGIN</span>
+        <span id="authBtnText">GMAIL LOGIN</span>
     </button>
 </nav>
 
@@ -54,12 +66,12 @@ body::before { content:""; position:fixed; inset:0; background: radial-gradient(
 
 <div id="overlay">
     <div class="overlay-content" id="overlayContent"></div>
-    <button class="close-btn" onclick="closeOverlay()">CLOSE</button>
+    <button class="close-btn" onclick="closeOverlay()">EXIT TERMINAL</button>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
@@ -67,8 +79,7 @@ const firebaseConfig = {
   projectId: "my-software-portal",
   storageBucket: "my-software-portal.firebasestorage.app",
   messagingSenderId: "1072405993700",
-  appId: "1:1072405993700:web:b66ca016c8de667d46f4f1",
-  measurementId: "G-KCJEWVQM61"
+  appId: "1:1072405993700:web:b66ca016c8de667d46f4f1"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -79,62 +90,111 @@ const overlay = document.getElementById('overlay');
 const overlayContent = document.getElementById('overlayContent');
 const statusMsg = document.getElementById('statusMsg');
 const topAuthBtn = document.getElementById('topAuthBtn');
+const authBtnText = document.getElementById('authBtnText');
 const softwareContainer = document.getElementById('softwareList');
 
 const softwareList = [
-    {name:"Viper Roulette"}, {name:"AI Baccarat Trend"}, {name:"Baccarat Analysis"}, {name:"Baccarat Predictor"}, 
-    {name:"Baccarat PRO"}, {name:"Roulette PRO"}, {name:"Card Counting"}, {name:"Gemini Ultra"}, 
-    {name:"Google AI"}, {name:"VisionWave Baccarat"}
+    {name:"Viper Roulette", desc:"Advanced table tracking with high-velocity pattern recognition."},
+    {name:"AI Baccarat Trend", desc:"Neural network trained on millions of shoes to detect trend shifts."},
+    {name:"Baccarat Analysis", desc:"Deep statistical breakdown of Banker/Player/Tie probabilities."},
+    {name:"Baccarat Predictor", desc:"Real-time calculation engine for next-hand high-confidence bets."},
+    {name:"Baccarat PRO", desc:"The elite version featuring secret sequence 'Neutral Engine' logic."},
+    {name:"Roulette PRO", desc:"Precision sector tracking and neighbor betting optimization."},
+    {name:"Card Counting", desc:"A digital counter for blackjack variants to keep the edge on your side."},
+    {name:"Gemini Ultra", desc:"AI-integrated terminal for complex casino data interpretation."},
+    {name:"Google AI", desc:"Utilizing massive datasets for pattern loophole identification."},
+    {name:"VisionWave Baccarat", desc:"Visual pattern analysis software for rapid shoe sequences."}
 ];
 
-// Populate main page software cards
+// Populate Main Page
 softwareList.forEach(s => {
     const card = document.createElement('div');
     card.classList.add('sw-card');
-    card.innerHTML = `<div><h2>${s.name}</h2></div>
-                      <button onclick="handleEngineClick('${s.name}')">Start Engine</button>`;
+    card.innerHTML = `
+        <div>
+            <h2>${s.name}</h2>
+            <p>${s.desc}</p>
+        </div>
+        <button onclick="handleEngineClick('${s.name}')">Start Engine</button>`;
     softwareContainer.appendChild(card);
 });
 
-async function executeLogin() {
-    try {
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-        statusMsg.textContent = "CONNECTED: " + user.email.toUpperCase();
-    } catch(err) { console.error("Login Error:", err); }
+// Authentication Logic
+async function toggleAuth() {
+    if (auth.currentUser) {
+        await signOut(auth);
+    } else {
+        try {
+            await signInWithPopup(auth, provider);
+        } catch(err) { console.error("Auth Error:", err); }
+    }
 }
 
-// Overlay shows monthly plans
+onAuthStateChanged(auth, user => {
+    if(user) {
+        statusMsg.textContent = "ENCRYPTED: " + user.email.toUpperCase();
+        authBtnText.textContent = "LOGOUT";
+        topAuthBtn.classList.add('logged-in');
+    } else {
+        statusMsg.textContent = "SYSTEM STATUS: OFFLINE";
+        authBtnText.textContent = "GMAIL LOGIN";
+        topAuthBtn.classList.remove('logged-in');
+    }
+});
+
+// Pricing Overlay
 window.handleEngineClick = async (engineName) => {
-    const user = auth.currentUser;
-    if(!user) { await executeLogin(); return; }
+    if(!auth.currentUser) { await toggleAuth(); return; }
 
     overlay.style.display = "flex";
     overlayContent.innerHTML = `
-        <h1 style="letter-spacing:10px;margin-bottom:10px;">MONTHLY PLANS</h1>
-        <p style="color: var(--neon); margin-bottom:30px;">Select a license plan to access engines.</p>
-        <div class="card-wrap">
-            <div class="p-card" onclick="buy(250)"><h3>30 DAYS</h3><div class="price">$250</div><div class="btn-buy">PURCHASE PASS</div></div>
-            <div class="p-card" onclick="buy(450)"><h3>90 DAYS</h3><div class="price">$450</div><div class="btn-buy">DISCOUNT $300</div></div>
-            <div class="p-card" onclick="buy(15001)"><h3>1 YEAR</h3><div class="price">$15001</div><div class="btn-buy">DISCOUNT $1500</div></div>
-            <div class="p-card" onclick="buy(5000)"><h3>NO EXPIRATION</h3><div class="price">$5000</div><div class="btn-buy">ALL TOOLS INCLUDED</div></div>
+        <h1 style="letter-spacing:10px; margin-bottom:10px; font-size:40px;">ELITE ACCESS</h1>
+        <p style="color: var(--neon); margin-bottom:40px;">Choose your subscription to activate all terminal tools.</p>
+        
+        <div class="software-grid-mini">
+            ${softwareList.map(s => `<span>▣ ${s.name}</span>`).join('')}
         </div>
-        <h2 style="margin-top:30px;">All Available Engines</h2>
-        <ul>${softwareList.map(s => `<li>${s.name}</li>`).join('')}</ul>
+
+        <div class="card-wrap">
+            <div class="p-card" onclick="buy(300)">
+                <h3>1 MONTH</h3>
+                <div class="price">$300</div>
+                <div class="btn-buy">PURCHASE</div>
+            </div>
+            
+            <div class="p-card" onclick="buy(400)">
+                <h3>3 MONTHS</h3>
+                <span class="old-price">$500</span>
+                <div class="price">$400</div>
+                <div class="btn-buy">PURCHASE</div>
+            </div>
+            
+            <div class="p-card" onclick="buy(1600)">
+                <h3>1 YEAR</h3>
+                <span class="old-price">$2000</span>
+                <div class="price">$1600</div>
+                <div class="btn-buy">PURCHASE</div>
+            </div>
+            
+            <div class="p-card" onclick="buy(5000)">
+                <h3>LIFETIME</h3>
+                <div class="price" style="font-size:28px;">$5000</div>
+                <p style="font-size:10px; margin-top:10px; color:var(--neon)">ALL TOOLS + FUTURE UPDATES</p>
+                <div class="btn-buy">PURCHASE</div>
+            </div>
+        </div>
     `;
 };
 
 window.buy = (amt) => {
     const user = auth.currentUser;
-    if(!user) { executeLogin(); return; }
-    const email = user.email;
-    const paypalURL = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=edzelkeith0@gmail.com&amount=${amt}&currency_code=USD&item_name=HiddenPro_Access&custom=${email}&return=https://hiddenpro.qzz.io`;
+    const email = user ? user.email : "Guest";
+    const paypalURL = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=edzelkeith0@gmail.com&amount=${amt}&currency_code=USD&item_name=HiddenPro_Elite_Access&custom=${email}&return=https://hiddenpro.qzz.io`;
     window.location.href = paypalURL;
 };
 
 window.closeOverlay = () => { overlay.style.display = "none"; };
-topAuthBtn.addEventListener('click', () => { if(!auth.currentUser) executeLogin(); });
-onAuthStateChanged(auth, user => { if(user) statusMsg.textContent = "CONNECTED: " + user.email.toUpperCase(); });
+topAuthBtn.addEventListener('click', toggleAuth);
 </script>
 </body>
 </html>
