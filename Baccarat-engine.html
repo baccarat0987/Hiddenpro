@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Baccarat Neural Engine</title>
     <link rel="icon" href="icon.ico" type="image/x-icon">
-    
+
     <script>
         if (window.location.pathname.endsWith('.html')) {
             const cleanUrl = window.location.pathname.replace('.html', '');
@@ -36,34 +36,26 @@
                 window.location.href = "index.html";
                 return;
             }
-            document.body.style.display = "flex"; // Show app after auth
+            document.body.style.display = "flex"; // Show original layout after auth
         });
     </script>
 
     <style>
+        /* 3. ORIGINAL STYLES (DO NOT TOUCH) */
         *{margin:0;padding:0;box-sizing:border-box;}
         body{  
             font-family:'Segoe UI',sans-serif;  
             height:100vh;  
-            display:none; /* Hidden by default for Security Guard */
+            display:none; /* Hidden for Security Guard */
             justify-content:center;  
             align-items:center;  
             background:radial-gradient(circle at center,#050b14,#00101f);  
             color:#d6e6ff;  
             overflow:hidden;
         }
-        body::before{  
-            content:"";  
-            position:absolute;  
-            inset:0;  
-            background-image:    
-                linear-gradient(rgba(0,150,255,0.05) 1px, transparent 1px),    
-                linear-gradient(90deg, rgba(0,150,255,0.05) 1px, transparent 1px);  
-            background-size:40px 40px;  
-            z-index:0;
-        }
+        body::before{  content:"";  position:absolute;  inset:0;  background-image:    linear-gradient(rgba(0,150,255,0.05) 1px, transparent 1px),    linear-gradient(90deg, rgba(0,150,255,0.05) 1px, transparent 1px);  background-size:40px 40px;  z-index:0;}
         
-        /* THE EXIT TERMINAL BUTTON */
+        /* EXIT BUTTON STYLE */
         .exit-nav { position: fixed; top: 15px; right: 15px; z-index: 1000; }
         .exit-btn { 
             background: rgba(0, 200, 255, 0.1); color: #00e5ff; padding: 8px 15px; 
@@ -73,21 +65,7 @@
         }
         .exit-btn:hover { background: #00e5ff; color: #000; }
 
-        .container{  
-            display:flex;  
-            flex-direction:column;  
-            align-items:center;  
-            width:420px;  
-            max-width:95%;  
-            backdrop-filter:blur(12px);  
-            background:rgba(0,20,35,0.6);  
-            border:2px solid rgba(0,200,255,0.4);  
-            border-radius:20px;  
-            box-shadow:0 0 30px rgba(0,200,255,0.3);  
-            padding:20px;  
-            z-index:1;  
-            animation:glowPulse 3s infinite alternate;
-        }
+        .container{  display:flex;  flex-direction:column;  align-items:center;  width:420px;  max-width:95%;  backdrop-filter:blur(12px);  background:rgba(0,20,35,0.6);  border:2px solid rgba(0,200,255,0.4);  border-radius:20px;  box-shadow:0 0 30px rgba(0,200,255,0.3);  padding:20px;  z-index:1;  animation:glowPulse 3s infinite alternate;}
         @keyframes glowPulse{  0%{box-shadow:0 0 20px rgba(0,200,255,0.3);}  100%{box-shadow:0 0 40px rgba(0,200,255,0.6);}}
         .header{  font-size:24px;  font-weight:700;  letter-spacing:2px;  color:#00e5ff;  text-shadow:0 0 10px #00e5ff;  margin-bottom:15px;  text-align:center;}
         .totals{  display:flex;  justify-content:space-between;  width:100%;  margin-bottom:20px;  padding:10px;  backdrop-filter:blur(10px);  background:rgba(0,0,20,0.4);  border:1px solid rgba(0,200,255,0.3);  border-radius:12px;}
@@ -120,42 +98,35 @@
 </div>
 
 <div class="container">  
-    <div class="scan-line"></div>  
-    <div class="header">Baccarat Neural Engine</div>
-    <div class="totals">    
-        <div>PLAYER: <span id="playerTotal">0</span></div>    
-        <div>BANKER: <span id="bankerTotal">0</span></div>    
-        <div>TOTAL ROUNDS: <span id="totalRounds">0</span></div>  
-    </div>
-    <div class="prediction" id="predictionBox">STANDBY</div>  
-    <div class="confidence-container">    
-        <div class="confidence-bar" id="confidenceBar"></div>  
-    </div>
-    <div class="history-panel" id="historyPanel">    
-        <div class="sequence-row" id="historySequence"></div>    
-        <div class="result-row" id="historyResult"></div>  
-    </div>
-    <div class="live-feed" id="liveFeed"></div>
-    <div class="controls">    
-        <button onclick="recordResult('P')">PLAYER</button>    
-        <button onclick="recordResult('B')">BANKER</button>    
-        <button onclick="undo()">UNDO</button>    
-        <button onclick="resetAll()">RESET</button>  
-    </div>
+  <div class="scan-line"></div>  
+  <div class="header">Baccarat Neural Engine</div>
+  <div class="totals">    
+    <div>PLAYER: <span id="playerTotal">0</span></div>    
+    <div>BANKER: <span id="bankerTotal">0</span></div>    
+    <div>TOTAL ROUNDS: <span id="totalRounds">0</span></div>  
+  </div>
+  <div class="prediction" id="predictionBox">STANDBY</div>  
+  <div class="confidence-container">    
+    <div class="confidence-bar" id="confidenceBar"></div>  
+  </div>
+  <div class="history-panel" id="historyPanel">    
+    <div class="sequence-row" id="historySequence"></div>    
+    <div class="result-row" id="historyResult"></div>  
+  </div>
+  <div class="live-feed" id="liveFeed"></div>
+  <div class="controls">    
+    <button onclick="recordResult('P')">PLAYER</button>    
+    <button onclick="recordResult('B')">BANKER</button>    
+    <button onclick="undo()">UNDO</button>    
+    <button onclick="resetAll()">RESET</button>  
+  </div>
 </div>
 
 <script>
-/* 100% ORIGINAL LOGIC */
-const MIN_HANDS = 10;
-let sequence = JSON.parse(localStorage.getItem('baccarat_sequence')) || [];
-let results = JSON.parse(localStorage.getItem('baccarat_results')) || [];
-let lastPrediction = null;
-
+/* 5. ORIGINAL LOGIC (DO NOT TOUCH) */
+const MIN_HANDS = 10;let sequence = JSON.parse(localStorage.getItem('baccarat_sequence')) || [];let results = JSON.parse(localStorage.getItem('baccarat_results')) || [];let lastPrediction = null;
 const oldPatterns=[{seq:'PBPBP',pred:'P'},{seq:'BPBPB',pred:'B'},{seq:'PBPPB',pred:'P'},{seq:'BPPBP',pred:'P'},{seq:'PBBPB',pred:'P'},{seq:'BPBPP',pred:'P'},{seq:'BPBBP',pred:'P'},{seq:'PBPBB',pred:'P'},{seq:'PPBPP',pred:'B'},{seq:'BBPPP',pred:'B'},{seq:'PPBPB',pred:'P'},{seq:'PPPBP',pred:'B'},{seq:'PBBPP',pred:'B'},{seq:'BBPBB',pred:'P'},{seq:'BBBPB',pred:'P'},{seq:'BPPBB',pred:'P'},{seq:'PBPBB',pred:'B'},{seq:'BPBBP',pred:'B'},{seq:'PPBBB',pred:'P'},{seq:'BBPBP',pred:'B'},{seq:'PBBPB',pred:'B'}];
-
-let patternMemory = JSON.parse(localStorage.getItem('patternMemory'))||{};
-let shadowPatterns = JSON.parse(localStorage.getItem('shadowPatterns'))||{};
-
+let patternMemory = JSON.parse(localStorage.getItem('patternMemory'))||{};let shadowPatterns = JSON.parse(localStorage.getItem('shadowPatterns'))||{};
 function applyPatternMemory(pred,seq){if(seq.length<5)return pred;const key=seq.slice(-5).join('');if(patternMemory[key]==="R") return pred==='P'?'B':'P';return pred;}
 function storePatternMemory(seq,pred,actual){if(seq.length<5)return;const key=seq.slice(-5).join('');if(pred!==actual) patternMemory[key]="R";localStorage.setItem("patternMemory",JSON.stringify(patternMemory));}
 function shadowCheck(seq,pred){if(seq.length<6)return pred;const key=seq.slice(-6).join('');if(shadowPatterns[key]>=2) return pred==='P'?'B':'P';return pred;}
@@ -163,7 +134,6 @@ function shadowStore(seq,pred,actual){if(seq.length<6)return;const key=seq.slice
 function quantumDrift(seq,pred){if(seq.length<6)return pred;const s=seq.slice(-6);const mirror=s[0]!==s[1]&&s[1]!==s[2]&&s[2]!==s[3];const streak=s.every(v=>v===s[0]);if(mirror||streak) return pred==='P'?'B':'P';return pred;}
 function neuralShoe(seq,pred){if(seq.length<12)return pred;const s=seq.slice(-12);const p=s.filter(x=>x==='P').length;const b=s.filter(x=>x==='B').length;if(Math.abs(p-b)>=4) return p>b?'P':'B';return pred;}
 function chaosDetector(seq,pred){if(seq.length<10)return pred;const s=seq.slice(-10);let alt=true;for(let i=1;i<s.length;i++) if(s[i]===s[i-1]) alt=false;const p=s.filter(x=>x==='P').length;const b=s.filter(x=>x==='B').length;if(alt||Math.abs(p-b)<=1) return "WAIT";return pred;}
-
 function oldPatternPrediction(seq){if(seq.length<5)return null;const last5=seq.slice(-5).join('');const match=oldPatterns.find(p=>p.seq===last5);return match?match.pred:null;}
 function buildPatterns(seq,length=5){const table={};for(let i=0;i<=seq.length-length;i++){const sub=seq.slice(i,i+length).join('');const next=seq[i+length];if(!next)continue;if(!table[sub])table[sub]={P:0,B:0};table[sub][next]++;}return table;}
 function adaptivePrediction(seq){if(seq.length<5)return null;const table=buildPatterns(seq,5);const last5=seq.slice(-5).join('');if(table[last5]) return table[last5].P>=table[last5].B?'P':'B';return null;}
@@ -171,44 +141,43 @@ function trendPrediction(seq){const last6=seq.slice(-6);if(last6.length===0)retu
 function finalPrediction(seq){const oldPred=oldPatternPrediction(seq);if(oldPred) return{pred:oldPred,confidence:90};const adaptivePred=adaptivePrediction(seq);const trendPred=trendPrediction(seq);const pred=adaptivePred||trendPred;return pred?{pred,confidence:85}:null;}
 
 function updatePredictionBox(){
-    const box=document.getElementById("predictionBox");const bar=document.getElementById("confidenceBar");
-    if(sequence.length<MIN_HANDS){box.innerHTML="STANDBY";bar.style.width="0%";lastPrediction=null;return;}
-    const result=finalPrediction(sequence);if(!result){box.innerHTML="NO OUTPUT";return;}
-    let pred=result.pred;
-    pred=applyPatternMemory(pred,sequence);pred=shadowCheck(sequence,pred);pred=quantumDrift(sequence,pred);pred=neuralShoe(sequence,pred);pred=chaosDetector(sequence,pred);
-    if(pred==="WAIT"){box.innerHTML="WAIT";bar.style.width="0%";lastPrediction=null;return;}
-    lastPrediction=pred;
-    const text=pred==='P'?'PLAYER':'BANKER';const cls=pred==='P'?'player':'banker';
-    box.innerHTML=`<span class="${cls}">${text}</span>`;bar.style.width=result.confidence+"%";
+const box=document.getElementById("predictionBox");const bar=document.getElementById("confidenceBar");
+if(sequence.length<MIN_HANDS){box.innerHTML="STANDBY";bar.style.width="0%";lastPrediction=null;return;}
+const result=finalPrediction(sequence);if(!result){box.innerHTML="NO OUTPUT";return;}
+let pred=result.pred;
+pred=applyPatternMemory(pred,sequence);pred=shadowCheck(sequence,pred);pred=quantumDrift(sequence,pred);pred=neuralShoe(sequence,pred);pred=chaosDetector(sequence,pred);
+if(pred==="WAIT"){box.innerHTML="WAIT";bar.style.width="0%";lastPrediction=null;return;}
+lastPrediction=pred;
+const text=pred==='P'?'PLAYER':'BANKER';const cls=pred==='P'?'player':'banker';
+box.innerHTML=`<span class="${cls}">${text}</span>`;bar.style.width=result.confidence+"%";
 }
 
 function updateHistory(){
-    const seqRow=document.getElementById('historySequence');const resRow=document.getElementById('historyResult');
-    const visibleSeq=sequence.slice(-10);
-    seqRow.innerHTML='';visibleSeq.forEach(val=>{const s=document.createElement('span');s.className=val;s.textContent=val;seqRow.appendChild(s);});
-    document.getElementById('playerTotal').textContent=sequence.filter(x=>'P'===x).length;
-    document.getElementById('bankerTotal').textContent=sequence.filter(x=>'B'===x).length;
-    document.getElementById('totalRounds').textContent=sequence.length;
+const seqRow=document.getElementById('historySequence');const resRow=document.getElementById('historyResult');
+const visibleSeq=sequence.slice(-10);
+seqRow.innerHTML='';visibleSeq.forEach(val=>{const s=document.createElement('span');s.className=val;s.textContent=val;seqRow.appendChild(s);});
+document.getElementById('playerTotal').textContent=sequence.filter(x=>'P'===x).length;
+document.getElementById('bankerTotal').textContent=sequence.filter(x=>'B'===x).length;
+document.getElementById('totalRounds').textContent=sequence.length;
 }
 
 function recordResult(r){
-    sequence.push(r);
-    if(lastPrediction){
-        const wl=(lastPrediction===r)?'W':'L';results.push(wl);
-        storePatternMemory(sequence.slice(0,-1),lastPrediction,r);shadowStore(sequence.slice(0,-1),lastPrediction,r);
-    }else{results.push('');}
-    localStorage.setItem('baccarat_sequence',JSON.stringify(sequence));localStorage.setItem('baccarat_results',JSON.stringify(results));
-    updateHistory();updatePredictionBox();triggerLiveFeed();
+sequence.push(r);
+if(lastPrediction){
+const wl=(lastPrediction===r)?'W':'L';results.push(wl);
+storePatternMemory(sequence.slice(0,-1),lastPrediction,r);shadowStore(sequence.slice(0,-1),lastPrediction,r);
+}else{results.push('');}
+localStorage.setItem('baccarat_sequence',JSON.stringify(sequence));localStorage.setItem('baccarat_results',JSON.stringify(results));
+updateHistory();updatePredictionBox();triggerLiveFeed();
 }
-
 function undo(){if(sequence.length===0)return;sequence.pop();results.pop();updateHistory();updatePredictionBox();}
-function resetAll(){if(confirm("Reset software?")){sequence=[];results=[];lastPrediction=null;localStorage.clear();updateHistory();updatePredictionBox();document.getElementById("liveFeed").innerHTML = "";}}
+function resetAll(){sequence=[];results=[];lastPrediction=null;localStorage.clear();updateHistory();updatePredictionBox();document.getElementById("liveFeed").innerHTML = "";}
 
 function triggerLiveFeed(){
-    if(sequence.length<MIN_HANDS) return;
-    const liveFeed=document.getElementById('liveFeed');
-    const msgs=["SCANNING TABLE...","AI PATTERN ANALYSIS RUNNING...","NEURAL NETWORK ADJUSTMENT...","TACTICAL ENGINE UPDATED..."];
-    msgs.forEach((m,i)=>{setTimeout(()=>{const div=document.createElement("div");div.textContent="> "+m;liveFeed.appendChild(div);liveFeed.scrollTop=liveFeed.scrollHeight;},i*600);});
+if(sequence.length<MIN_HANDS) return;
+const liveFeed=document.getElementById('liveFeed');
+const msgs=["SCANNING TABLE...","AI PATTERN ANALYSIS RUNNING...","NEURAL NETWORK ADJUSTMENT...","TACTICAL ENGINE UPDATED..."];
+msgs.forEach((m,i)=>{setTimeout(()=>{const div=document.createElement("div");div.textContent="> "+m;liveFeed.appendChild(div);liveFeed.scrollTop=liveFeed.scrollHeight;},i*600);});
 }
 
 updateHistory();updatePredictionBox();
