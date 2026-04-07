@@ -5,13 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Card Counting | PREMIUM</title>
     
-    <script>
-        if (window.location.pathname.endsWith('.html')) {
-            const cleanUrl = window.location.pathname.replace('.html', '');
-            window.history.replaceState(null, '', cleanUrl);
-        }
-    </script>
-    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
@@ -55,96 +48,104 @@
         .exit-btn { background: rgba(255,215,0,0.1); color: #ffd700; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-weight: bold; border: 1px solid #ffd700; font-size: 12px; transition: 0.3s; }
         .exit-btn:hover { background: #ffd700; color: #000; }
 
-        .container { max-width: 700px; margin: 0 auto; padding: 40px 20px; }
+        .container { max-width: 650px; margin: 0 auto; padding: 30px 15px; box-sizing: border-box; }
         
-        h1 { text-align: center; margin-bottom: 5px; font-size: 2.2em; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.3); }
-        .tagline { text-align: center; font-size: 0.9em; font-style: italic; margin-bottom: 30px; color: #888; }
+        h1 { text-align: center; margin-bottom: 5px; font-size: 1.8em; color: #ffd700; }
+        .tagline { text-align: center; font-size: 0.8em; margin-bottom: 20px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
 
         .prediction {
-            background: linear-gradient(145deg, #1b1b1b, #2c2c2c);
-            padding: 20px;
-            border-radius: 12px;
+            background: #111;
+            padding: 15px;
+            border-radius: 10px;
             text-align: center;
-            margin-bottom: 25px;
-            height: 100px; /* Fixed Height */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            position: relative;
-            font-size: 1.4em;
+            margin-bottom: 20px;
+            height: 80px;
             border: 1px solid #333;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: 0.3s ease;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        .prediction.flash { box-shadow: 0 0 25px 5px #ffd700; border-color: #ffd700; }
 
         .calculating-overlay {
             position: absolute; inset: 0; background: rgba(0, 0, 0, 0.9);
             display: none; align-items: center; justify-content: center;
-            font-size: 1.1em; font-weight: bold; color: #ffd700; border-radius: 12px; z-index: 10;
+            font-size: 1em; color: #ffd700; border-radius: 10px; z-index: 10;
         }
 
-        .pred-side { display: inline-block; padding: 5px 15px; margin-left: 10px; border-radius: 4px; background: #000; border: 1px solid #ffd700; color: #ffd700; font-size: 0.8em; }
-        .player-text { color: #3498db; text-shadow: 0 0 10px #3498db; font-weight: 800; }
-        .banker-text { color: #e74c3c; text-shadow: 0 0 10px #e74c3c; font-weight: 800; }
+        .pred-side { display: inline-block; padding: 4px 12px; margin-left: 8px; border-radius: 4px; background: #000; border: 1px solid #ffd700; color: #ffd700; font-size: 0.75em; }
+        .player-text { color: #3498db; font-weight: 800; font-size: 1.2em; }
+        .banker-text { color: #e74c3c; font-weight: 800; font-size: 1.2em; }
 
-        .control-buttons { display: flex; gap: 10px; margin-bottom: 25px; }
-        .action-btn { flex: 1; background: #333; color: #fff; border: 1px solid #444; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: 0.2s; }
-        .action-btn:hover { background: #444; border-color: #ffd700; }
+        .control-buttons { display: flex; gap: 8px; margin-bottom: 15px; }
+        .action-btn { flex: 1; background: #222; color: #fff; border: 1px solid #444; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: 0.2s; }
+        .action-btn:hover { border-color: #ffd700; background: #2a2a2a; }
 
-        /* SAME SIZE GRID */
+        /* REVISED GRID: AUTO-ADJUSTING FOR FULL VISIBILITY */
         .score-grid {
             display: grid;
             grid-template-columns: 1fr 1fr; 
-            gap: 15px;
+            gap: 12px;
             margin-bottom: 15px;
         }
 
         .score-column {
-            background: #1a1a1a; padding: 20px; border-radius: 12px;
+            background: #181818; 
+            padding: 15px; 
+            border-radius: 10px;
             border: 1px solid #333;
-            height: 240px; /* Fixed Height for alignment */
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            text-align: center;
         }
 
-        .score-column h3 { margin: 0 0 10px 0; font-size: 1em; color: #aaa; text-transform: uppercase; }
-        .score-column h3 span { color: #fff; font-size: 1.2em; float: right; }
+        .score-column h3 { margin: 0 0 12px 0; font-size: 0.9em; color: #888; display: flex; justify-content: space-between; align-items: center; }
+        .score-column h3 span { color: #fff; font-size: 1.3em; font-weight: bold; }
 
-        /* UNIFORM BUTTONS */
-        .button-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .button-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 8px; 
+        }
+
         .score-btn { 
-            background: #222; color: #ccc; border: 1px solid #333; 
-            aspect-ratio: 1 / 1; /* Makes them perfectly square */
-            border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px;
-            display: flex; align-items: center; justify-content: center;
+            background: #252525; 
+            color: #ddd; 
+            border: 1px solid #3d3d3d; 
+            padding: 12px 0; /* Vertical padding ensures text visibility */
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 18px;
+            transition: 0.2s;
+            width: 100%;
+            display: block;
         }
-        .score-btn:hover { background: #2a2a2a; color: #fff; }
-        .score-btn.selected { background: #ffd700; color: #000; border-color: #fff; }
+
+        .score-btn:hover { background: #333; color: #fff; border-color: #666; }
+        .score-btn.selected { background: #ffd700; color: #000; border-color: #fff; box-shadow: 0 0 10px rgba(255,215,0,0.4); }
 
         .submit-btn {
             width: 100%; background: #ffd700; color: #000; border: none;
-            padding: 18px; border-radius: 10px; font-size: 18px; font-weight: 800;
-            cursor: pointer; transition: 0.2s;
+            padding: 16px; border-radius: 8px; font-size: 18px; font-weight: 800;
+            cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
-        .stats-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; }
-        .stats-box { background: #151515; padding: 15px; border-radius: 10px; border: 1px solid #222; text-align: center; height: 120px; overflow-y: auto; }
-        .stats-box h2 { font-size: 0.8em; color: #666; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; }
+        .stats-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .stats-box { background: #111; padding: 12px; border-radius: 8px; border: 1px solid #222; text-align: center; height: 100px; overflow-y: auto; }
+        .stats-box h2 { font-size: 0.75em; color: #555; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #222; padding-bottom: 5px; }
 
-        .win-icon { background: #2ecc71; color: #fff; padding: 3px 6px; border-radius: 4px; margin: 2px; font-size: 11px; font-weight: bold; display: inline-block; }
-        .lose-icon { background: #e74c3c; color: #fff; padding: 3px 6px; border-radius: 4px; margin: 2px; font-size: 11px; font-weight: bold; display: inline-block; }
+        .win-icon { background: #2ecc71; color: #fff; padding: 2px 6px; border-radius: 3px; margin: 1px; font-size: 10px; font-weight: bold; display: inline-block; }
+        .lose-icon { background: #e74c3c; color: #fff; padding: 2px 6px; border-radius: 3px; margin: 1px; font-size: 10px; font-weight: bold; display: inline-block; }
         
-        .round-history span { display: inline-block; width: 24px; height: 24px; line-height: 24px; margin: 2px; border-radius: 50%; font-weight: bold; font-size: 11px; }
+        .round-history span { display: inline-block; width: 22px; height: 22px; line-height: 22px; margin: 1px; border-radius: 50%; font-weight: bold; font-size: 10px; color: #fff; }
         .round-outcome.B { background: #e74c3c; }
         .round-outcome.P { background: #3498db; }
         .round-outcome.T { background: #27ae60; }
-        
-        @media (max-width: 500px) {
-            .score-grid { gap: 10px; }
-            .score-column { padding: 12px; height: 210px; }
-            .score-btn { font-size: 14px; }
+
+        /* Responsive stack for very narrow phones */
+        @media (max-width: 480px) {
+            .score-grid { grid-template-columns: 1fr; }
+            .score-column { height: auto; }
         }
     </style>
 </head>
@@ -156,22 +157,22 @@
 
     <div class="container">
         <h1>AI Card Counting</h1>
-        <div class="tagline">Neural Pattern Recognition v4.2</div>
+        <div class="tagline">Neural Logic Engine v4.2</div>
 
         <div class="prediction" id="predictionMain">
-            <div class="calculating-overlay" id="overlay">PROCESSING DATA...</div>
-            <p id="predText">READY FOR INPUT</p>
+            <div class="calculating-overlay" id="overlay">SYNCING PATTERNS...</div>
+            <p id="predText" style="color: #666; font-size: 0.8em;">WAITING FOR INPUT</p>
         </div>
 
         <div class="control-buttons">
-            <button type="button" id="deleteBtn" class="action-btn">UNDO</button>
-            <button type="button" id="resetBtn" class="action-btn">RESET</button>
+            <button type="button" id="deleteBtn" class="action-btn">UNDO LAST</button>
+            <button type="button" id="resetBtn" class="action-btn">RESET ENGINE</button>
         </div>
 
         <form id="scoreForm">
             <div class="score-grid">
                 <div class="score-column">
-                    <h3>Player <span id="playerScoreDisplay">0</span></h3>
+                    <h3>PLAYER <span id="playerScoreDisplay">0</span></h3>
                     <div class="button-grid">
                         <button type="button" class="score-btn" data-side="player" data-value="1">1</button>
                         <button type="button" class="score-btn" data-side="player" data-value="2">2</button>
@@ -186,7 +187,7 @@
                 </div>
 
                 <div class="score-column">
-                    <h3>Banker <span id="bankerScoreDisplay">0</span></h3>
+                    <h3>BANKER <span id="bankerScoreDisplay">0</span></h3>
                     <div class="button-grid">
                         <button type="button" class="score-btn" data-side="banker" data-value="1">1</button>
                         <button type="button" class="score-btn" data-side="banker" data-value="2">2</button>
@@ -210,7 +211,7 @@
                 <div id="history"></div>
             </div>
             <div class="stats-box">
-                <h2>History</h2>
+                <h2>Pattern</h2>
                 <div id="roundHistory"></div>
             </div>
         </div>
@@ -222,19 +223,17 @@
         const playerScoreDisplay = document.getElementById("playerScoreDisplay");
         const bankerScoreDisplay = document.getElementById("bankerScoreDisplay");
         const predText = document.getElementById("predText");
-        const predictionBox = document.getElementById("predictionMain");
         const overlay = document.getElementById("overlay");
         let pastRounds = [];
 
         buttons.forEach(btn => {
             btn.addEventListener("click", function() {
                 const side = this.dataset.side;
-                const value = this.dataset.value;
                 if(side === "player") {
-                    playerScoreDisplay.textContent = value;
+                    playerScoreDisplay.textContent = this.dataset.value;
                     document.querySelectorAll("button[data-side='player']").forEach(b=>b.classList.remove("selected"));
                 } else {
-                    bankerScoreDisplay.textContent = value;
+                    bankerScoreDisplay.textContent = this.dataset.value;
                     document.querySelectorAll("button[data-side='banker']").forEach(b=>b.classList.remove("selected"));
                 }
                 this.classList.add("selected");
@@ -245,56 +244,46 @@
             const sides = ['player','banker'];
             const chosenSide = sides[Math.floor(Math.random()*2)];
             const points = Math.floor(Math.random()*3)+7;
-            const html = chosenSide==='player' ? 
+            predText.innerHTML = chosenSide==='player' ? 
                 `<span class="player-text">PLAYER</span> <span class="pred-side">${points} PTS</span>` : 
                 `<span class="banker-text">BANKER</span> <span class="pred-side">${points} PTS</span>`;
-            predText.innerHTML = html;
-            predictionBox.classList.add("flash");
-            setTimeout(() => predictionBox.classList.remove("flash"), 600);
             return {side: chosenSide, points};
         }
 
         document.getElementById("submitRoundBtn").addEventListener("click", () => {
-            const pScore = parseInt(playerScoreDisplay.textContent)||0;
-            const bScore = parseInt(bankerScoreDisplay.textContent)||0;
-            if(pScore===0 && bScore===0) return;
+            const p = parseInt(playerScoreDisplay.textContent)||0;
+            const b = parseInt(bankerScoreDisplay.textContent)||0;
+            if(p===0 && b===0) return;
 
             overlay.style.display = "flex";
             setTimeout(() => {
                 overlay.style.display = "none";
                 const prediction = generatePrediction();
-                pastRounds.push({player:pScore, banker:bScore, prediction});
-                const rh = document.getElementById("roundHistory");
-                const outcome = pScore > bScore ? 'P' : bScore > pScore ? 'B' : 'T';
+                pastRounds.push({p, b, prediction});
+                
+                const outcome = p > b ? 'P' : b > p ? 'B' : 'T';
                 const span = document.createElement('span');
                 span.className = 'round-outcome ' + outcome;
                 span.textContent = outcome;
-                rh.appendChild(span);
+                document.getElementById("roundHistory").appendChild(span);
 
                 if(pastRounds.length > 1 && outcome !== 'T'){
-                    const hi = document.getElementById("history");
                     const prev = pastRounds[pastRounds.length-2];
-                    const pred = prev.prediction.side === 'player' ? 'P' : 'B';
+                    const predSide = prev.prediction.side === 'player' ? 'P' : 'B';
                     const wl = document.createElement('span');
-                    wl.textContent = (pred === outcome) ? 'W' : 'L';
+                    wl.textContent = (predSide === outcome) ? 'W' : 'L';
                     wl.className = (wl.textContent === 'W') ? 'win-icon' : 'lose-icon';
-                    hi.appendChild(wl);
+                    document.getElementById("history").appendChild(wl);
                 }
 
                 playerScoreDisplay.textContent = 0;
                 bankerScoreDisplay.textContent = 0;
                 document.querySelectorAll('.score-btn').forEach(b=>b.classList.remove('selected'));
-            }, 800);
+            }, 600);
         });
 
         document.getElementById("resetBtn").addEventListener("click", () => {
-            pastRounds = [];
-            predText.textContent = "READY FOR INPUT";
-            playerScoreDisplay.textContent = 0;
-            bankerScoreDisplay.textContent = 0;
-            document.querySelectorAll('.score-btn').forEach(b=>b.classList.remove('selected'));
-            document.getElementById("history").innerHTML = '';
-            document.getElementById("roundHistory").innerHTML = '';
+            location.reload();
         });
 
         document.getElementById("deleteBtn").addEventListener("click", () => {
@@ -304,15 +293,6 @@
             if(rh.lastChild) rh.removeChild(rh.lastChild);
             const hi = document.getElementById("history");
             if(hi.lastChild) hi.removeChild(hi.lastChild);
-
-            if(pastRounds.length > 0){
-                const prev = pastRounds[pastRounds.length - 1].prediction;
-                predText.innerHTML = prev.side === 'player' ? 
-                    `<span class="player-text">PLAYER</span> <span class="pred-side">${prev.points} PTS</span>` : 
-                    `<span class="banker-text">BANKER</span> <span class="pred-side">${prev.points} PTS</span>`;
-            } else {
-                predText.textContent = "READY FOR INPUT";
-            }
         });
     });
 </script>
