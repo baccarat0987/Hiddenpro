@@ -61,7 +61,6 @@ td { padding: 18px 15px; border-bottom: 1px solid #111; font-size: 14px; positio
 .dropdown-content { display: none; position: absolute; right: 0; top: 30px; background: #151515; border: 1px solid #333; z-index: 100; border-radius: 8px; width: 140px; box-shadow: 0 5px 20px rgba(0,0,0,0.8); overflow: hidden; }
 .dropdown-content button { width: 100%; padding: 12px 15px; background: none; border: none; color: #fff; text-align: left; cursor: pointer; font-size: 12px; font-weight: 600; }
 .dropdown-content button:hover { background: var(--neon); color: #000; }
-.dropdown-content button.ban-option { color: var(--danger); }
 </style>
 </head>
 <body>
@@ -80,12 +79,12 @@ td { padding: 18px 15px; border-bottom: 1px solid #111; font-size: 14px; positio
     <div class="pricing-grid">
         <div class="price-card"><label>1 MONTH (30D)</label><input type="number" id="p1" placeholder="300"></div>
         <div class="price-card">
-            <label>3 MONTHS (SLASH/NEW)</label>
-            <div style="display:flex; gap:5px;"><input type="number" id="p3_old" placeholder="500"><input type="number" id="p3_new" placeholder="400"></div>
+            <label>3 MONTHS</label>
+            <input type="number" id="p3_new" placeholder="400">
         </div>
         <div class="price-card">
-            <label>1 YEAR (SLASH/NEW)</label>
-            <div style="display:flex; gap:5px;"><input type="number" id="p12_old" placeholder="2000"><input type="number" id="p12_new" placeholder="1600"></div>
+            <label>1 YEAR</label>
+            <input type="number" id="p12_new" placeholder="1600">
         </div>
         <div class="price-card"><label>LIFETIME ACCESS</label><input type="number" id="p_life" placeholder="5000"></div>
     </div>
@@ -130,7 +129,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Helper: Show Toast
 function showSuccess(msg) {
     const toast = document.getElementById('successToast');
     toast.textContent = "SUCCESS: " + msg;
@@ -138,15 +136,13 @@ function showSuccess(msg) {
     setTimeout(() => { toast.style.display = 'none'; }, 3000);
 }
 
-// Load Pricing
+// Load current data
 (async () => {
     const pDoc = await getDoc(doc(db, "settings", "pricing"));
     if(pDoc.exists()){
         const d = pDoc.data();
         document.getElementById('p1').value = d.p1 || "";
-        document.getElementById('p3_old').value = d.p3_old || "";
         document.getElementById('p3_new').value = d.p3_new || "";
-        document.getElementById('p12_old').value = d.p12_old || "";
         document.getElementById('p12_new').value = d.p12_new || "";
         document.getElementById('p_life').value = d.p_life || "";
     }
@@ -161,16 +157,13 @@ window.updatePricing = async () => {
     try {
         await setDoc(doc(db, "settings", "pricing"), {
             p1: document.getElementById('p1').value,
-            p3_old: document.getElementById('p3_old').value,
             p3_new: document.getElementById('p3_new').value,
-            p12_old: document.getElementById('p12_old').value,
             p12_new: document.getElementById('p12_new').value,
             p_life: document.getElementById('p_life').value
         });
         showSuccess("PRICING DEPLOYED");
     } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
+        btn.disabled = false; btn.innerHTML = originalText;
     }
 };
 
@@ -178,11 +171,10 @@ window.grantAccess = async () => {
     const email = document.getElementById('addEmail').value.toLowerCase().trim();
     const days = parseInt(document.getElementById('addDuration').value);
     const btn = document.getElementById('grantBtn');
-    
     if(!email) return;
 
-    const originalText = btn.innerHTML;
     btn.disabled = true;
+    const originalText = btn.innerHTML;
     btn.innerHTML = `<span class="spinner"></span> ACTIVATING...`;
 
     try {
@@ -196,8 +188,33 @@ window.grantAccess = async () => {
         document.getElementById('addEmail').value = "";
         showSuccess("ACCESS GRANTED");
     } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
+        btn.disabled = false; btn.innerHTML = originalText;
+    }
+};
+
+// Real-time List Listener
+onSnapshot(collection(db, "users"), (snapshot) => {
+    const list = document.getElementById('userList');
+    list.innerHTML = "";
+    snapshot.forEach(docSnap => {
+        const u = docSnap.data();
+        const isLife = u.expiry === 'LIFETIME';
+        list.innerHTML += `
+            <tr>
+                <td><strong>${u.email}</strong></td>
+                <td><span class="timer-text ${isLife ? 'lifetime-text' : ''}" data-expiry="${u.expiry}" data-email="${u.email}">${isLife ? '∞ INFINITE' : 'SYNCING...'}</span></td>
+                <td style="color:#777;">${isLife ? 'NEVER' : new Date(u.expiry).toLocaleDateString()}</td>
+                <td style="text-align:right">
+                    <button onclick="banUser('${u.email}')" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">REMOVE</button>
+                </td>
+            </tr>`;
+    });
+});
+
+window.banUser = async (email) => {
+    if(confirm(`Remove ${email}?`)) {
+        await deleteDoc(doc(db, "users", email));
+        showSuccess("USER REMOVED");
     }
 };
 
@@ -219,46 +236,6 @@ setInterval(() => {
         el.innerHTML = `${d}D ${h}H ${m}M ${s}S`;
     });
 }, 1000);
-
-onSnapshot(collection(db, "users"), (snapshot) => {
-    const list = document.getElementById('userList');
-    list.innerHTML = "";
-    snapshot.forEach(docSnap => {
-        const u = docSnap.data();
-        const isLife = u.expiry === 'LIFETIME';
-        list.innerHTML += `
-            <tr>
-                <td><strong>${u.email}</strong></td>
-                <td><span class="timer-text ${isLife ? 'lifetime-text' : ''}" data-expiry="${u.expiry}" data-email="${u.email}">${isLife ? '∞ INFINITE' : 'SYNCING...'}</span></td>
-                <td style="color:#777;">${isLife ? 'NEVER' : new Date(u.expiry).toLocaleDateString()}</td>
-                <td style="text-align:right">
-                    <div class="menu-container">
-                        <span class="dots" onclick="toggleMenu('${u.email}')">⋮</span>
-                        <div class="dropdown-content" id="drop-${u.email.replace(/[@.]/g, '')}">
-                            <button class="ban-option" onclick="banUser('${u.email}')">BAN / REMOVE</button>
-                            <button onclick="this.parentElement.style.display='none'">CANCEL</button>
-                        </div>
-                    </div>
-                </td>
-            </tr>`;
-    });
-});
-
-window.toggleMenu = (email) => {
-    const id = "drop-" + email.replace(/[@.]/g, '');
-    const menu = document.getElementById(id);
-    document.querySelectorAll('.dropdown-content').forEach(d => { if(d.id !== id) d.style.display='none'; });
-    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-};
-
-window.banUser = async (email) => {
-    if(confirm(`Remove ${email}?`)) {
-        await deleteDoc(doc(db, "users", email));
-        showSuccess("USER REMOVED");
-    }
-};
-
-window.onclick = (e) => { if (!e.target.matches('.dots')) document.querySelectorAll('.dropdown-content').forEach(d => d.style.display='none'); };
 </script>
 </body>
 </html>
