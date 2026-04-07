@@ -5,79 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HIDDEN PRO | ELITE TERMINAL</title>
 <style>
-:root { 
-    --neon: #00ffff; 
-    --panel-bg: rgba(6, 11, 25, 0.9);
-}
-* { box-sizing: border-box; }
-body {
-    margin: 0; min-height: 100vh;
-    background: #000; font-family: 'Segoe UI', sans-serif; color: #fff;
-    display: flex; flex-direction: column; overflow-x: hidden;
-}
-body::before {
-    content: ""; position: fixed; inset: 0;
-    background: radial-gradient(circle at 20% 30%, #001f3f 0%, #000 70%);
-    z-index: -1;
-}
-.top-bar {
-    width: 100%; padding: 15px 30px;
-    background: rgba(0,0,0,0.8); backdrop-filter: blur(25px);
-    border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-    display: flex; justify-content: space-between; align-items: center;
-    position: sticky; top: 0; z-index: 100;
-}
-.logo-section { display: flex; flex-direction: column; }
-.logo { font-size: 26px; letter-spacing: 10px; font-weight: 900; color: #fff; }
-.status-text { font-size: 11px; color: var(--neon); letter-spacing: 3px; font-weight: 600; }
-#topAuthBtn {
-    background: #fff; color: #000; border: none; padding: 10px 16px;
-    border-radius: 8px; font-weight: 800; cursor: pointer;
-    display: flex; align-items: center; gap: 8px; font-size: 13px;
-    transition: 0.3s;
-}
-#topAuthBtn:hover { background: var(--neon); transform: translateY(-2px); }
+:root { --neon:#00ffff; --panel-bg: rgba(6,11,25,0.9);}
+* { box-sizing: border-box; margin:0; padding:0; }
+body { font-family:'Segoe UI',sans-serif; color:#fff; min-height:100vh; background:#000; display:flex; flex-direction:column; overflow-x:hidden; }
+body::before { content:""; position:fixed; inset:0; background: radial-gradient(circle at 20% 30%, #001f3f 0%, #000 70%); z-index:-1; }
 
-.main-content {
-    padding: 40px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-    max-width: 1200px; margin: 0 auto;
-}
+.top-bar { width:100%; padding:15px 30px; background:rgba(0,0,0,0.8); backdrop-filter:blur(25px); border-bottom:1px solid rgba(0,255,255,0.2); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100;}
+.logo-section { display:flex; flex-direction:column; }
+.logo { font-size:26px; letter-spacing:10px; font-weight:900; color:#fff; }
+.status-text { font-size:11px; color:var(--neon); letter-spacing:3px; font-weight:600; }
+#topAuthBtn { background:#fff; color:#000; border:none; padding:10px 16px; border-radius:8px; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:8px; font-size:13px; transition:.3s;}
+#topAuthBtn:hover { background:var(--neon); transform:translateY(-2px); }
 
-.sw-card {
-    background: var(--panel-bg);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 20px; padding: 25px;
-    display: flex; flex-direction: column; justify-content: space-between;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-    transition: 0.3s;
-}
-.sw-card:hover { border-color: var(--neon); transform: translateY(-5px); }
-.sw-card h2 { font-size: 16px; margin: 0 0 5px 0; color: #fff; }
-.sw-card p { font-size: 12px; color: #777; line-height: 1.4; margin-bottom: 15px; }
-.sw-card button {
-    background: var(--neon); border: none; color: #000; padding: 8px;
-    border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;
-}
-.sw-card button:hover { background: #0ff; }
+.main-content { padding:40px; display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:20px; max-width:1200px; margin:0 auto;}
 
-#overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.98);
-    display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200;
-    backdrop-filter: blur(20px); overflow-y: auto; padding: 20px;
-}
-.overlay-content { text-align: center; max-width: 900px; width: 100%; }
-.card-wrap { display: flex; gap: 20px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
-.p-card {
-    background: var(--panel-bg); border: 1px solid #222; border-radius: 20px;
-    padding: 20px; width: 240px; cursor: pointer; transition: 0.3s;
-}
-.p-card:hover { border-color: var(--neon); transform: scale(1.05); }
-.p-card h3 { font-size: 13px; letter-spacing: 3px; color: #aaa; margin-bottom: 10px; }
-.p-card .price { font-size: 30px; font-weight: 900; margin-bottom: 10px; }
-.p-card .btn-buy { background: var(--neon); color: #000; padding: 8px; border-radius: 6px; font-weight: bold; }
+.sw-card { background:var(--panel-bg); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:25px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 5px 20px rgba(0,0,0,0.5); transition:.3s;}
+.sw-card:hover { border-color:var(--neon); transform:translateY(-5px);}
+.sw-card h2 { font-size:16px; margin:0 0 5px 0; color:#fff; }
+.sw-card p { font-size:12px; color:#777; line-height:1.4; margin-bottom:15px;}
+.sw-card button { background:var(--neon); border:none; color:#000; padding:8px; border-radius:6px; font-weight:bold; cursor:pointer; transition:.2s;}
+.sw-card button:hover { background:#0ff;}
+
+#overlay { position:fixed; inset:0; background:rgba(0,0,0,0.98); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:200; backdrop-filter:blur(20px); overflow-y:auto; padding:20px;}
+.overlay-content { text-align:center; max-width:900px; width:100%; }
+.card-wrap { display:flex; gap:20px; margin-top:20px; flex-wrap:wrap; justify-content:center;}
+.p-card { background:var(--panel-bg); border:1px solid #222; border-radius:20px; padding:20px; width:240px; cursor:pointer; transition:.3s; }
+.p-card:hover { border-color:var(--neon); transform:scale(1.05);}
+.p-card h3 { font-size:13px; letter-spacing:3px; color:#aaa; margin-bottom:10px; }
+.p-card .price { font-size:30px; font-weight:900; margin-bottom:10px; }
+.p-card .btn-buy { background:var(--neon); color:#000; padding:8px; border-radius:6px; font-weight:bold; }
+.close-btn { margin-top:30px; background:none; border:none; color:#444; cursor:pointer; letter-spacing:5px; font-weight:bold; }
 </style>
 </head>
 <body id="mainBody">
@@ -93,19 +50,16 @@ body::before {
     </button>
 </nav>
 
-<main class="main-content" id="softwareList">
-    <!-- Software cards will appear here -->
-</main>
+<main class="main-content" id="softwareList"></main>
 
 <div id="overlay">
     <div class="overlay-content" id="overlayContent"></div>
-    <button onclick="closeOverlay()" style="margin-top: 30px; background: none; border: none; color: #444; cursor: pointer; letter-spacing: 5px; font-weight: bold;">CLOSE</button>
+    <button class="close-btn" onclick="closeOverlay()">CLOSE</button>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
@@ -120,7 +74,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
-const db = getFirestore(app);
 
 const overlay = document.getElementById('overlay');
 const overlayContent = document.getElementById('overlayContent');
@@ -129,23 +82,17 @@ const topAuthBtn = document.getElementById('topAuthBtn');
 const softwareContainer = document.getElementById('softwareList');
 
 const softwareList = [
-    {name:"Viper Roulette", description:"Advanced cycle prediction and neighbor sector logic."},
-    {name:"AI Baccarat Trend", description:"Real-time pattern recognition for shoe transitions."},
-    {name:"Baccarat Analysis", description:"Mathematical edge and probability tracker."},
-    {name:"Baccarat Predictor", description:"Real-time banker/player advantage signal."},
-    {name:"Baccarat PRO", description:"Professional grade analytical toolset."},
-    {name:"Roulette PRO", description:"Sector-based tracking and visual prediction."},
-    {name:"Card Counting", description:"Digital deck penetration and count metrics."},
-    {name:"Gemini Ultra", description:"Neural network assisted game state logic."},
-    {name:"Google AI", description:"Integrated search-probability correlation."},
-    {name:"VisionWave Baccarat", description:"Visual trend-line and wave analysis."}
+    {name:"Viper Roulette"}, {name:"AI Baccarat Trend"}, {name:"Baccarat Analysis"}, {name:"Baccarat Predictor"}, 
+    {name:"Baccarat PRO"}, {name:"Roulette PRO"}, {name:"Card Counting"}, {name:"Gemini Ultra"}, 
+    {name:"Google AI"}, {name:"VisionWave Baccarat"}
 ];
 
 // Populate main page software cards
 softwareList.forEach(s => {
     const card = document.createElement('div');
     card.classList.add('sw-card');
-    card.innerHTML = `<div><h2>${s.name}</h2><p>${s.description}</p></div><button onclick="handleEngineClick('${s.name}')">Start Engine</button>`;
+    card.innerHTML = `<div><h2>${s.name}</h2></div>
+                      <button onclick="handleEngineClick('${s.name}')">Start Engine</button>`;
     softwareContainer.appendChild(card);
 });
 
@@ -154,34 +101,29 @@ async function executeLogin() {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
         statusMsg.textContent = "CONNECTED: " + user.email.toUpperCase();
-    } catch (err) {
-        console.error("Login Error:", err);
-    }
+    } catch(err) { console.error("Login Error:", err); }
 }
 
-// Overlay shows monthly
-window.handleEngineClick = async (engineCode) => {
+// Overlay shows monthly plans
+window.handleEngineClick = async (engineName) => {
     const user = auth.currentUser;
-    if(!user) { executeLogin(); return; }
+    if(!user) { await executeLogin(); return; }
+
     overlay.style.display = "flex";
     overlayContent.innerHTML = `
         <h1 style="letter-spacing:10px;margin-bottom:10px;">MONTHLY PLANS</h1>
-        <p style="color: var(--neon);margin-bottom:30px;">Select a license plan to access engines.</p>
+        <p style="color: var(--neon); margin-bottom:30px;">Select a license plan to access engines.</p>
         <div class="card-wrap">
-            <div class="p-card" onclick="buy(250)">
-                <h3>30 DAYS</h3><div class="price">$250</div><div class="btn-buy">PURCHASE PASS</div>
-            </div>
-            <div class="p-card" onclick="buy(400)" style="border-color:var(--neon)">
-                <h3 style="color:var(--neon)">90 DAYS</h3><div class="price">$400</div><div class="btn-buy">MOST POPULAR</div>
-            </div>
-            <div class="p-card" onclick="buy(800)">
-                <h3>365 DAYS</h3><div class="price">$800</div><div class="btn-buy">FULL LICENSE</div>
-            </div>
+            <div class="p-card" onclick="buy(250)"><h3>30 DAYS</h3><div class="price">$250</div><div class="btn-buy">PURCHASE PASS</div></div>
+            <div class="p-card" onclick="buy(450)"><h3>90 DAYS</h3><div class="price">$450</div><div class="btn-buy">DISCOUNT $300</div></div>
+            <div class="p-card" onclick="buy(15001)"><h3>1 YEAR</h3><div class="price">$15001</div><div class="btn-buy">DISCOUNT $1500</div></div>
+            <div class="p-card" onclick="buy(5000)"><h3>NO EXPIRATION</h3><div class="price">$5000</div><div class="btn-buy">ALL TOOLS INCLUDED</div></div>
         </div>
+        <h2 style="margin-top:30px;">All Available Engines</h2>
+        <ul>${softwareList.map(s => `<li>${s.name}</li>`).join('')}</ul>
     `;
 };
 
-// Paypal
 window.buy = (amt) => {
     const user = auth.currentUser;
     if(!user) { executeLogin(); return; }
@@ -192,8 +134,7 @@ window.buy = (amt) => {
 
 window.closeOverlay = () => { overlay.style.display = "none"; };
 topAuthBtn.addEventListener('click', () => { if(!auth.currentUser) executeLogin(); });
-onAuthStateChanged(auth, (user) => { if(user) statusMsg.textContent = "CONNECTED: " + user.email.toUpperCase(); });
+onAuthStateChanged(auth, user => { if(user) statusMsg.textContent = "CONNECTED: " + user.email.toUpperCase(); });
 </script>
-
 </body>
 </html>
