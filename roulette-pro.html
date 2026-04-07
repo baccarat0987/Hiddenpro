@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roulette PRO | PREMIUM</title>
+    
+    <script>
+        if (window.location.pathname.endsWith('.html')) {
+            const cleanUrl = window.location.pathname.replace('.html', '');
+            window.history.replaceState(null, '', cleanUrl);
+        }
+    </script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
+            authDomain: "my-software-portal.firebaseapp.com",
+            projectId: "my-software-portal",
+            appId: "1:1072405993700:web:b66ca016c8de667d46f4f1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = "index.html"; return; }
+            const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
+            const now = new Date().getTime();
+            if (!userDoc.exists() || (userDoc.data().expiry !== 'LIFETIME' && userDoc.data().expiry < now)) {
+                window.location.href = "index.html";
+                return;
+            }
+            document.body.style.display = "block";
+        });
+    </script>
+
+    <style>
+        body {
+            background: radial-gradient(circle at top, #0f1c3d, #05070f 70%);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            display: none; /* Guard hidden */
+            min-height: 100vh;
+        }
+
+        /* EXIT BUTTON */
+        .exit-nav { position: fixed; top: 20px; right: 20px; z-index: 1000; }
+        .exit-btn { background: rgba(0, 242, 255, 0.1); color: #00f2ff; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; border: 1px solid #00f2ff; font-size: 12px; transition: 0.3s; }
+        .exit-btn:hover { background: #00f2ff; color: #000; box-shadow: 0 0 15px #00f2ff; }
+
+        .wrapper { max-width: 450px; margin: auto; padding-top: 40px; }
+        
+        h1 {
+            font-size: 28px; margin-bottom: 20px;
+            background: linear-gradient(90deg, #00f2ff, #ffffff, #00f2ff);
+            background-size: 200% auto;
+            color: transparent; -webkit-background-clip: text;
+            animation: shine 5s linear infinite;
+        }
+        @keyframes shine { to { background-position: 200% center; }}
+
+        .panel {
+            padding: 20px;
+            background: rgba(15, 25, 55, 0.6);
+            border-radius: 18px;
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(0, 200, 255, 0.3);
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .spin-box {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 36px;
+            font-weight: bold;
+            min-height: 60px;
+            color: #ff1493;
+            text-shadow: 0 0 10px #ff1493;
+            border: 1px solid rgba(255, 20, 147, 0.3);
+        }
+
+        #lastSpin { color: #00f2ff; font-size: 18px; margin-top: 0; }
+
+        /* ================= WHEEL ================= */
+        .wheel-container {
+            position: relative;
+            width: 380px;
+            height: 380px;
+            margin: auto;
+            border-radius: 50%;
+            border: 4px solid rgba(0, 242, 255, 0.2);
+            background: rgba(0,0,0,0.3);
+        }
+
+        .wheel-number {
+            position: absolute;
+            width: 42px;
+            height: 42px;
+            line-height: 42px;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .red { background: #a30000; }
+        .black { background: #111; }
+        .green { background: #006b4e; }
+
+        /* PREDICTION HIGHLIGHTS */
+        .highlight-main {
+            background: #ff1493 !important;
+            box-shadow: 0 0 15px #ff1493, 0 0 30px #ff1493;
+            border: 2px solid #ffffff !important;
+            z-index: 10;
+        }
+
+        .highlight-neighbor {
+            box-shadow: 0 0 10px #00f2ff, 0 0 20px #00f2ff;
+            border: 2px solid #00f2ff !important;
+            z-index: 5;
+        }
+
+        .center-control {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 50%;
+            width: 110px;
+            height: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border: 2px solid rgba(0, 242, 255, 0.4);
+            box-shadow: inset 0 0 15px rgba(0, 242, 255, 0.2);
+        }
+
+        .center-control button {
+            background: transparent;
+            border: 1px solid #00f2ff;
+            color: #00f2ff;
+            font-size: 11px;
+            padding: 5px 10px;
+            margin: 3px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .center-control button:hover { background: #00f2ff; color: white; }
+
+        .loading { animation: blink 0.8s infinite; color: #aaa; font-size: 20px; }
+        @keyframes blink { 0% {opacity:0.3;} 50% {opacity:1;} 100% {opacity:0.3;}}
+    </style>
+</head>
+<body>
+
+    <div class="exit-nav">
+        <a href="index.html" class="exit-btn">EXIT TERMINAL</a>
+    </div>
+
+    <div class="wrapper">
+        <h1>Roulette Analyzer PRO</h1>
+        
+        <div class="panel">
+            <h2 id="lastSpin">Last Spin: -</h2>
+            <div class="spin-box" id="predictionBox">READY</div>
+        </div>
+
+        <div class="wheel-container" id="wheel">
+            <div class="center-control">
+                <button onclick="rotateZero('left')">ROTATE L</button>
+                <button onclick="rotateZero('right')">ROTATE R</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    /* EUROPEAN ORDER */
+    const wheelOrder = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+    const redNumbers = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+    const wheel = document.getElementById("wheel");
+    const radius = 170;
+    const center = 190;
+    let rotationOffset = 0;
+
+    function drawWheel(){
+        document.querySelectorAll(".wheel-number").forEach(n=>n.remove());
+        wheelOrder.forEach((num, index) => {
+            const angle = ((index / wheelOrder.length) * 2 * Math.PI) + rotationOffset;
+            const x = center + radius * Math.cos(angle) - 21;
+            const y = center + radius * Math.sin(angle) - 21;
+
+            const div = document.createElement("div");
+            div.classList.add("wheel-number");
+            if(num === 0) div.classList.add("green");
+            else if(redNumbers.includes(num)) div.classList.add("red");
+            else div.classList.add("black");
+
+            div.style.left = x + "px";
+            div.style.top = y + "px";
+            div.textContent = num;
+            div.dataset.number = num;
+
+            div.addEventListener("click", function(){
+                let number = parseInt(this.dataset.number);
+                document.getElementById("lastSpin").innerText = "Last Spin: " + number;
+                showLoading(number);
+            });
+            wheel.appendChild(div);
+        });
+    }
+
+    function rotateZero(side){
+        const zeroIndex = wheelOrder.indexOf(0);
+        const anglePerSlot = (2 * Math.PI) / wheelOrder.length;
+        if(side === "left") rotationOffset = Math.PI - (zeroIndex * anglePerSlot);
+        else rotationOffset = 0 - (zeroIndex * anglePerSlot);
+        drawWheel();
+    }
+
+    drawWheel();
+
+    const suggestionMap = {0:[17,30,25,36],1:[8,24,27,23],2:[13,26,4,3],3:[29,1,35,30],4:[15,19,0,11],5:[2,31,30,22],6:[0,6,5,3],7:[5,10,11,8],8:[9,1,33,6],9:[5,15,31,30],10:[3,4,8,35],11:[34,25,10,4],12:[26,8,20,25],13:[29,14,6,9],14:[20,3,12,6],15:[16,24,11,7],16:[32,3,33,16],17:[33,36,28,21],18:[34,16,2,0],19:[2,3,15,28],20:[12,21,13,20],21:[12,4,7,15],22:[35,15,25,13],23:[11,27,22,25],24:[27,14,22,15],25:[5,28,11,31],26:[16,12,14,32],27:[16,29,23,30],28:[2,34,25,26],29:[1,6,3,0],30:[33,28,35,14],31:[6,28,0,8],32:[13,15,14,1],33:[26,6,28,24],34:[8,27,32,1],35:[0,33,5,34],36:[4,3,16,10]};
+
+    function clearHighlights(){
+        document.querySelectorAll(".wheel-number").forEach(n=>{
+            n.classList.remove("highlight-main","highlight-neighbor");
+        });
+    }
+
+    function highlightWithNeighbors(numbers){
+        numbers.forEach(num => {
+            let index = wheelOrder.indexOf(num);
+            if(index === -1) return;
+            for(let i=-2;i<=2;i++){
+                let neighborIndex = (index + i + wheelOrder.length) % wheelOrder.length;
+                let neighborNum = wheelOrder[neighborIndex];
+                let element = document.querySelector(`[data-number='${neighborNum}']`);
+                if(numbers.includes(neighborNum)) element.classList.add("highlight-main");
+                else element.classList.add("highlight-neighbor");
+            }
+        });
+    }
+
+    function showLoading(lastNumber){
+        clearHighlights();
+        document.getElementById("predictionBox").innerHTML = "<span class='loading'>ANALYZING...</span>";
+        setTimeout(() => {
+            let predictions = suggestionMap[lastNumber] || [];
+            while(predictions.length < 4){
+                let randomNum = Math.floor(Math.random() * 37);
+                if(!predictions.includes(randomNum)) predictions.push(randomNum);
+            }
+            document.getElementById("predictionBox").innerHTML = predictions.join(", ");
+            highlightWithNeighbors(predictions);
+        }, 1200);
+    }
+</script>
+</body>
+</html>
