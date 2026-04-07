@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baccarat PRO | PREMIUM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <script>
+        if (window.location.pathname.endsWith('.html')) {
+            const cleanUrl = window.location.pathname.replace('.html', '');
+            window.history.replaceState(null, '', cleanUrl);
+        }
+    </script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
+            authDomain: "my-software-portal.firebaseapp.com",
+            projectId: "my-software-portal",
+            appId: "1:1072405993700:web:b66ca016c8de667d46f4f1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = "index.html"; return; }
+            const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
+            const now = new Date().getTime();
+            if (!userDoc.exists() || (userDoc.data().expiry !== 'LIFETIME' && userDoc.data().expiry < now)) {
+                window.location.href = "index.html";
+                return;
+            }
+            document.body.style.display = "block";
+        });
+    </script>
+
+    <style>
+        :root{  --player:#4169E1;  --banker:#800080;  --tie:#FFD700;  --sub:#FFFFFF;  --glass:rgba(20,20,20,0.9);  --ink:#FFFFFF;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{  
+            background:radial-gradient(circle at 50% 50%,#111111 0%,#000000 100%);  
+            font-family:'Inter', sans-serif;  
+            color:var(--ink);  
+            display: none; /* Guard hidden */
+            min-height: 100vh;
+            padding: 40px 12px;
+        }
+
+        /* EXIT BUTTON */
+        .exit-nav { position: fixed; top: 20px; right: 20px; z-index: 2000; }
+        .exit-btn { background: rgba(255,255,255,0.1); color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 600; border: 1px solid #444; font-size: 12px; transition: 0.3s; }
+        .exit-btn:hover { background: var(--player); border-color: #fff; }
+
+        .card{  
+            max-width:500px;  margin:0 auto;  background: var(--glass);  
+            border:1px solid rgba(255,255,255,0.1);  border-radius:24px;  
+            padding:40px; backdrop-filter:blur(15px);  
+            box-shadow:0 25px 50px rgba(0,0,0,0.5);
+        }
+        h1{  text-align:center;  font-size:1.8rem;  font-weight:600;  margin-bottom:20px;  letter-spacing:1px;  background:linear-gradient(90deg,var(--player),var(--banker),var(--tie),var(--sub));  -webkit-background-clip:text;  color:transparent;}
+        
+        .stats{  display:flex;  justify-content:space-between;  font-size:1rem;  margin-bottom:15px; border-bottom: 1px solid #333; padding-bottom: 15px;}
+        .label { color: #888; margin-right: 5px; }
+
+        .predict{text-align:center;margin-bottom:24px;}
+        .pred-label{  font-size:2.2rem;  font-weight:700;  padding:10px 30px;  border-radius:14px;  display: inline-block; transition: 0.5s;}
+        .pred-label.player{color:var(--player); text-shadow: 0 0 15px var(--player);}
+        .pred-label.banker{color:var(--banker); text-shadow: 0 0 15px var(--banker);}
+        
+        .conf-wrap{margin-top:20px; width:100%; max-width:280px; margin-inline:auto;}
+        .conf-bar{height:6px; border-radius:10px; background:rgba(255,255,255,0.05); overflow:hidden;}
+        .conf-fill{height:100%; width:0; background:linear-gradient(90deg,var(--player),var(--banker)); transition: width 0.5s;}
+        .conf-val{text-align:center; font-size:.85rem; margin-top:8px; color:#aaa; font-weight: 600;}
+
+        .btn-row{display:flex; gap:12px; margin-bottom:30px; flex-wrap:wrap;}
+        button{  flex:1; min-width:100px; padding:15px 0;  border-radius:12px; border:1px solid rgba(255,255,255,0.1);  font-weight:700; font-size:.9rem;  background:rgba(255,255,255,0.05); color:#fff; cursor:pointer; transition:0.2s;}
+        button:hover:enabled{background:rgba(255,255,255,0.15); transform: translateY(-2px);}
+        button:disabled{opacity:0.2; cursor:not-allowed;}
+        
+        .btn-player{ border-color: var(--player) !important; }
+        .btn-banker{ border-color: var(--banker) !important; }
+        .btn-tie{ border-color: var(--tie) !important; }
+        .btn-reset{ border-color: #ff4b4b !important; color: #ff4b4b; }
+
+        .first-six{ font-size:1.4rem; text-align:center; margin-top:15px; letter-spacing:.5rem; background: #000; padding: 10px; border-radius: 10px; min-height: 50px;}
+        .msg{text-align:center; margin-bottom:15px; font-weight: 600;}
+        #bankroll-msg { color: var(--tie); font-size: 1.1rem; }
+        .w{color:var(--player);} .l{color:var(--banker);} .t{color:var(--tie);} .dash{color:#444;}
+        .hidden{display:none;}
+
+        #setup-overlay{  position:fixed; inset:0;  background:rgba(0,0,0,0.9);  display:flex; justify-content:center; align-items:center;  z-index:3000;}
+        #setup-overlay div{  background:#1a1a1a; padding:40px; border-radius:20px; border: 1px solid #333; text-align:center; width: 350px;}
+        #setup-overlay h2 { margin-bottom: 20px; font-size: 1.2rem; color: var(--player); }
+        #setup-overlay input{ width:100%; padding:12px; border-radius:8px; border:1px solid #444; background: #000; color: #fff; font-size:1.1rem; text-align:center; margin-bottom: 15px;}
+        #setup-overlay button{ width: 100%; background: var(--player); color: #fff; border: none; padding: 15px; font-size: 1rem; }
+    </style>
+</head>
+<body>
+
+    <div class="exit-nav">
+        <a href="index.html" class="exit-btn">EXIT TERMINAL</a>
+    </div>
+
+    <div id="setup-overlay">
+        <div>
+            <h2>SETUP SESSION</h2>
+            <p style="color:#666; font-size: 0.8rem; margin-bottom: 10px;">BANKROLL</p>
+            <input type="number" id="input-bankroll" value="1000">
+            <p style="color:#666; font-size: 0.8rem; margin-bottom: 10px;">BASE BET</p>
+            <input type="number" id="input-bet" value="100">
+            <button id="start-btn">INITIALIZE ENGINE</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h1>Baccarat PRO</h1>
+
+        <div class="stats">
+            <span id="bankroll"><span class="label">Bank:</span> $1000</span>
+            <span id="next-bet"><span class="label">Bet:</span> $100</span>
+        </div>
+
+        <div class="predict hidden" id="prediction-box">
+            <span id="prediction" class="pred-label player">Player</span>
+            <div class="conf-wrap">
+                <div class="conf-bar"><div id="bar" class="conf-fill"></div></div>
+                <div id="val" class="conf-val">0%</div>
+            </div>
+        </div>
+
+        <div id="waitmsg" class="msg" style="color: #666;">Waiting for 6 results...</div>
+        <div id="bankroll-msg" class="msg"></div>
+
+        <div class="btn-row">
+            <button type="button" class="btn-player">P</button>
+            <button type="button" class="btn-tie">T</button>
+            <button type="button" class="btn-banker">B</button>
+            <button type="button" class="btn-reset">RESET</button>
+        </div>
+
+        <div id="history" class="first-six"></div>
+    </div>
+
+<script>
+    let bankroll=1000, baseBet=100, currentBet=100;
+    let cumulativeLoss=0, winCount=0, lossStreak=0;
+    let maxLoss=6, targetProfitMultiplier=1.8;
+    let targetProfit=0, history=[], aiPrediction=null;
+
+    const bankrollEl=document.getElementById("bankroll");
+    const nextBetEl=document.getElementById("next-bet");
+    const historyEl=document.getElementById("history");
+    const predictionBox=document.getElementById("prediction-box");
+    const predictionLabel=document.getElementById("prediction");
+    const bar=document.getElementById("bar");
+    const val=document.getElementById("val");
+    const waitmsg=document.getElementById("waitmsg");
+    const bankrollMsg=document.getElementById("bankroll-msg");
+
+    const btnPlayer=document.querySelector(".btn-player");
+    const btnBanker=document.querySelector(".btn-banker");
+    const btnTie=document.querySelector(".btn-tie");
+    const betButtons=[btnPlayer,btnBanker,btnTie];
+
+    const overlay=document.getElementById("setup-overlay");
+    const inputBankroll=document.getElementById("input-bankroll");
+    const inputBet=document.getElementById("input-bet");
+    const startBtn=document.getElementById("start-btn");
+
+    startBtn.onclick=()=>{
+        bankroll=parseInt(inputBankroll.value)||1000;
+        baseBet=currentBet=parseInt(inputBet.value)||100;
+        targetProfit=bankroll*targetProfitMultiplier;
+        resetState();
+        overlay.style.display="none";
+    };
+
+    function resetState(){
+        cumulativeLoss=0;winCount=0;lossStreak=0;
+        history=[];aiPrediction=null;
+        historyEl.innerHTML="";
+        predictionBox.classList.add("hidden");
+        waitmsg.classList.remove("hidden");
+        bankrollMsg.textContent="";
+        betButtons.forEach(b=>b.disabled=false);
+        updateBankroll();updateNextBet();
+    }
+
+    function updateBankroll(){
+        bankrollEl.innerHTML=`<span class="label">Bank:</span> $${bankroll}`;
+    }
+    function updateNextBet(){
+        nextBetEl.innerHTML=`<span class="label">Bet:</span> $${currentBet}`;
+    }
+
+    function addHistory(result,outcome="neutral"){
+        history.push({result,outcome});
+        if(history.length>10) history.shift();
+        historyEl.innerHTML=history.map(h=>{
+            if(h.result==="Tie")return `<span class="t">T</span>`;
+            if(h.outcome==="win")return `<span class="w">${h.result[0]}</span>`;
+            if(h.outcome==="loss")return `<span class="l">${h.result[0]}</span>`;
+            return `<span class="dash">${h.result[0]}</span>`;
+        }).join("");
+    }
+
+    function animateConfidence(num){
+        let c=0,inc=num/20;
+        (function run(){
+            c+=inc;if(c>num)c=num;
+            bar.style.width=c+"%";
+            val.textContent=c.toFixed(1)+"%";
+            if(c<num)requestAnimationFrame(run);
+        })();
+    }
+
+    function makePrediction(){
+        let p=0,b=0,decay=.95;
+        history.forEach((h,i)=>{
+            let f=Math.pow(decay,history.length-i-1);
+            if(h.result==="Player")p+=f;
+            if(h.result==="Banker")b+=f;
+        });
+        if(!p&&!b)return;
+        aiPrediction=Math.random()<p/(p+b)?"Player":"Banker";
+        predictionLabel.textContent=aiPrediction.toUpperCase();
+        predictionLabel.className="pred-label "+aiPrediction.toLowerCase();
+        predictionBox.classList.remove("hidden");
+        waitmsg.classList.add("hidden");
+        animateConfidence((aiPrediction==="Player"?p:b)/(p+b)*100);
+    }
+
+    function calculateNextBet(){
+        if(lossStreak>0){
+            let aggressive=(cumulativeLoss+baseBet)*1.5;
+            return Math.min(Math.ceil(aggressive), bankroll);
+        }
+        return baseBet;
+    }
+
+    function resetGame(){
+        overlay.style.display="flex";
+    }
+
+    function handleClick(result){
+        if(history.length<6){
+            addHistory(result);
+            if(history.length===6)makePrediction();
+            return;
+        }
+        if(result==="Tie"){addHistory(result);return;}
+
+        if(result===aiPrediction){
+            bankroll+=currentBet;
+            cumulativeLoss=0;lossStreak=0;winCount++;
+            addHistory(result,"win");
+            if(bankroll>=targetProfit){
+                bankrollMsg.textContent="SESSION COMPLETE: PROFIT REACHED";
+                betButtons.forEach(b=>b.disabled=true);
+                return;
+            }
+        }else{
+            bankroll-=currentBet;
+            cumulativeLoss+=currentBet;lossStreak++;
+            addHistory(result,"loss");
+            if(lossStreak>=maxLoss||bankroll<=0){
+                bankrollMsg.textContent="SESSION FAILED: LIMIT EXCEEDED";
+                betButtons.forEach(b=>b.disabled=true);
+                currentBet=0;updateNextBet();
+                return;
+            }
+        }
+        currentBet=calculateNextBet();
+        updateBankroll();updateNextBet();
+        makePrediction();
+    }
+
+    btnPlayer.onclick=()=>handleClick("Player");
+    btnBanker.onclick=()=>handleClick("Banker");
+    btnTie.onclick=()=>handleClick("Tie");
+    document.querySelector(".btn-reset").onclick=resetGame;
+</script>
+</body>
+</html>
