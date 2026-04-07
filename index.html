@@ -19,6 +19,13 @@
         #topAuthBtn { background:#fff; color:#000; border:none; padding:10px 16px; border-radius:8px; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:8px; font-size:13px; transition:.3s;}
         #topAuthBtn.logged-in { background: var(--discount); color: #fff; }
         #topAuthBtn:hover { transform:translateY(-2px); box-shadow: 0 0 15px var(--neon); }
+        
+        /* Premium Badge Style */
+        #premiumBadge { 
+            display:none; margin-left:8px; background:var(--neon); color:#000; 
+            padding:2px 8px; border-radius:4px; font-size:10px; font-weight:900;
+            box-shadow: 0 0 10px var(--neon);
+        }
 
         /* Main Grid */
         .main-content { padding:40px; display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:25px; max-width:1400px; margin:0 auto;}
@@ -57,6 +64,7 @@
     <button id="topAuthBtn">
         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="16">
         <span id="authBtnText">GMAIL LOGIN</span>
+        <span id="premiumBadge">PREMIUM</span>
     </button>
 </nav>
 
@@ -91,9 +99,16 @@ const overlayContent = document.getElementById('overlayContent');
 const statusMsg = document.getElementById('statusMsg');
 const topAuthBtn = document.getElementById('topAuthBtn');
 const authBtnText = document.getElementById('authBtnText');
+const premiumBadge = document.getElementById('premiumBadge');
 const softwareContainer = document.getElementById('softwareList');
 
-// LIST OF SOFTWARE AND THEIR CORRESPONDING FILES
+// Detection for PayPal Redirect
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('tx') || window.location.href.includes('paypal.com')) {
+    alert("PAYMENT SUCCESSFUL! Please allow a few moments for the system to sync your Premium status.");
+    window.history.replaceState(null, '', window.location.pathname); // Clean URL
+}
+
 const softwareList = [
     {name:"Viper Roulette", file:"viper-roulette.html", desc:"Advanced table tracking with high-velocity pattern recognition."},
     {name:"AI Baccarat Trend", file:"baccarat-trend.html", desc:"Neural network trained on millions of shoes to detect trend shifts."},
@@ -108,7 +123,6 @@ const softwareList = [
     {name:"Baccarat Neutral Engine", file:"Baccarat-engine.html", desc:"Visual pattern analysis software for rapid shoe sequences."}
 ];
 
-// Build the UI
 softwareList.forEach(s => {
     const card = document.createElement('div');
     card.classList.add('sw-card');
@@ -121,37 +135,46 @@ softwareList.forEach(s => {
     softwareContainer.appendChild(card);
 });
 
-// Auth Logic
 async function toggleAuth() {
     if (auth.currentUser) { await signOut(auth); } 
     else { try { await signInWithPopup(auth, provider); } catch(err) { console.error(err); } }
 }
 
-onAuthStateChanged(auth, user => {
+onAuthStateChanged(auth, async (user) => {
     if(user) {
         statusMsg.textContent = "ENCRYPTED: " + user.email.toUpperCase();
         authBtnText.textContent = "LOGOUT";
         topAuthBtn.classList.add('logged-in');
+
+        // Check for Premium Status
+        const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const now = new Date().getTime();
+            if (userData.expiry === 'LIFETIME' || userData.expiry > now) {
+                premiumBadge.style.display = "inline-block";
+                statusMsg.textContent = "SYSTEM STATUS: PREMIUM ACTIVE";
+            } else {
+                premiumBadge.style.display = "none";
+            }
+        }
     } else {
         statusMsg.textContent = "SYSTEM STATUS: OFFLINE";
         authBtnText.textContent = "GMAIL LOGIN";
         topAuthBtn.classList.remove('logged-in');
+        premiumBadge.style.display = "none";
     }
 });
 
-// ✅ ACCESS AND REDIRECT LOGIC
 window.handleEngineClick = async (engineName) => {
     if(!auth.currentUser) { await toggleAuth(); return; }
-
     const userEmail = auth.currentUser.email.toLowerCase();
     statusMsg.textContent = "VERIFYING ACCESS...";
-    
     const userDoc = await getDoc(doc(db, "users", userEmail));
     
     if (userDoc.exists()) {
         const userData = userDoc.data();
         const now = new Date().getTime();
-
         if (userData.expiry === 'LIFETIME' || userData.expiry > now) {
             const appData = softwareList.find(s => s.name === engineName);
             if (appData) {
@@ -161,8 +184,6 @@ window.handleEngineClick = async (engineName) => {
             }
         }
     }
-
-    // If no access, fetch prices and show payment screen
     statusMsg.textContent = "ACCESS DENIED: PAYMENT REQUIRED";
     openPricing();
 };
@@ -170,7 +191,6 @@ window.handleEngineClick = async (engineName) => {
 async function openPricing() {
     const priceDoc = await getDoc(doc(db, "settings", "pricing"));
     const p = priceDoc.exists() ? priceDoc.data() : { p1:300, p3_new:400, p12_new:1600, p_life:5000 };
-
     overlay.style.display = "flex";
     overlayContent.innerHTML = `
         <h1 style="letter-spacing:10px; margin-bottom:10px; font-size:40px;">ELITE ACCESS</h1>
@@ -188,7 +208,12 @@ async function openPricing() {
 }
 
 window.buy = (amt) => {
-    const email = auth.currentUser ? auth.currentUser.email : "Guest";
+    if (!auth.currentUser) {
+        alert("Please login first to link your purchase to your account.");
+        toggleAuth();
+        return;
+    }
+    const email = auth.currentUser.email.toLowerCase();
     const paypalURL = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=edzelkeith0@gmail.com&amount=${amt}&currency_code=USD&item_name=Elite_Terminal_Access&custom=${email}&return=https://hiddenpro.qzz.io`;
     window.location.href = paypalURL;
 };
