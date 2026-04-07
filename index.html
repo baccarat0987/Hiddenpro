@@ -23,26 +23,26 @@ body::before {
 }
 .top-bar {
     width: 100%; padding: 20px 40px;
-    background: rgba(0,0,0,0.8); backdrop-filter: blur(20px);
+    background: rgba(0,0,0,0.8); backdrop-filter: blur(25px);
     border-bottom: 1px solid rgba(0, 255, 255, 0.2);
     display: flex; justify-content: space-between; align-items: center;
     position: sticky; top: 0; z-index: 100;
 }
 .logo-section { display: flex; flex-direction: column; }
-.logo { font-size: 24px; letter-spacing: 8px; font-weight: 900; color: #fff; }
+.logo { font-size: 26px; letter-spacing: 10px; font-weight: 900; color: #fff; }
 .status-text { font-size: 11px; color: var(--neon); letter-spacing: 3px; font-weight: 600; }
 #topAuthBtn {
-    background: #fff; color: #000; border: none; padding: 10px 18px;
+    background: #fff; color: #000; border: none; padding: 12px 20px;
     border-radius: 8px; font-weight: 800; cursor: pointer;
-    display: flex; align-items: center; gap: 8px; font-size: 13px;
+    display: flex; align-items: center; gap: 10px; font-size: 13px;
     transition: 0.3s;
 }
 #topAuthBtn:hover { background: var(--neon); transform: translateY(-2px); }
 .main-content {
     padding: 40px; flex-grow: 1;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px; max-width: 1200px; margin: 0 auto; width: 100%;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px; max-width: 1400px; margin: 0 auto; width: 100%;
 }
 .sw-card {
     background: var(--panel-bg);
@@ -50,38 +50,32 @@ body::before {
     border-radius: 25px; padding: 30px;
     transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex; flex-direction: column; justify-content: space-between;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 .sw-card:hover { border-color: var(--neon); transform: translateY(-5px); }
 .sw-card h2 { font-size: 20px; margin: 0 0 10px 0; letter-spacing: 1px; color: #fff; }
-.sw-card p { font-size: 13px; color: #777; line-height: 1.6; margin-bottom: 20px; }
+.sw-card p { font-size: 13px; color: #777; line-height: 1.6; margin-bottom: 25px; }
 .engine-btn {
     background: transparent; border: 2px solid #333; color: #fff;
-    padding: 12px; border-radius: 10px; font-weight: 800; font-size: 12px;
-    text-align: center; text-transform: uppercase; letter-spacing: 2px;
+    padding: 14px; border-radius: 10px; font-weight: 800; font-size: 12px;
+    text-align: center; text-transform: uppercase; letter-spacing: 3px;
     cursor: pointer; transition: 0.3s;
 }
-.engine-btn:hover { border-color: var(--neon); background: rgba(0,255,255,0.05); color: var(--neon); }
+.engine-btn:hover { border-color: var(--neon); background: rgba(0, 255, 255, 0.05); color: var(--neon); }
 body.premium-active .engine-btn { 
     border-color: var(--neon); color: #000; background: var(--neon);
-    box-shadow: 0 0 15px rgba(0,255,255,0.3);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
 }
 #overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+    position: fixed; inset: 0; background: rgba(0,0,0,0.98);
     display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200;
     backdrop-filter: blur(20px);
 }
 .overlay-content { text-align: center; max-width: 900px; }
-.active-members {
-    position: fixed; top: 10px; right: 20px; color: #0f0;
-    font-weight: bold; font-size: 14px; letter-spacing: 1px;
-    background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 10px;
-}
+.fake-online { position: fixed; top: 20px; right: 40px; font-size: 14px; color: var(--neon); }
 </style>
 </head>
 <body id="mainBody">
-
-<div class="active-members">Active Members: <span id="activeCount">345</span></div>
 
 <nav class="top-bar">
     <div class="logo-section">
@@ -94,18 +88,19 @@ body.premium-active .engine-btn {
     </button>
 </nav>
 
-<main class="main-content" id="softwareList">
-    <!-- 10 software engines -->
-    <div class="sw-card"><div><h2>Viper Roulette</h2><p>Advanced cycle prediction and neighbor sector logic.</p></div><div class="engine-btn" onclick="handleEngineClick('ViperRoulette')">Start Engine</div></div>
-    <div class="sw-card"><div><h2>AI Baccarat Trend</h2><p>Real-time pattern recognition for shoe transitions.</p></div><div class="engine-btn" onclick="handleEngineClick('AIBaccaratTrend')">Start Engine</div></div>
-    <div class="sw-card"><div><h2>Baccarat Analysis</h2><p>Mathematical edge and probability tracker.</p></div><div class="engine-btn" onclick="handleEngineClick('BaccaratAnalysis')">Start Engine</div></div>
-    <div class="sw-card"><div><h2>Baccarat Predictor</h2><p>Real-time banker/player advantage signal.</p></div><div class="engine-btn" onclick="handleEngineClick('BaccaratPredictor')">Start Engine</div></div>
-    <div class="sw-card"><div><h2>Baccarat PRO</h2><p>Professional grade analytical toolset.</p></div><div class="engine-btn" onclick="handleEngineClick('BaccaratPRO')">Start Engine</div></div>
-    <div class="sw-card"><div><h2>Roulette PRO</h2><p>Sector-based tracking and visual prediction.</p></div><div class="engine-btn" onclick="handleEngineClick('RoulettePRO')">Start Engine</div></div>
-    <div class="sw-card"><div><h2>Card Counting</h2><p>Digital deck penetration and count metrics.</p></div><div class="engine-btn" onclick="handleEngineClick('CardCounting')">Start Engine</div></div>
-    <div class="sw-card"><div><h2>Gemini Ultra</h2><p>Neural network assisted game state logic.</p></div><div class="engine-btn" onclick="handleEngineClick('GeminiUltra')">Start Engine</div></div>
-    <div class="sw-card"><div><h2>Google AI</h2><p>Integrated search-probability correlation.</p></div><div class="engine-btn" onclick="handleEngineClick('GoogleAI')">Start Engine</div></div>
-    <div class="sw-card"><div><h2>VisionWave Baccarat</h2><p>Visual trend-line and wave analysis.</p></div><div class="engine-btn" onclick="handleEngineClick('VisionWaveBaccarat')">Start Engine</div></div>
+<div class="fake-online" id="fakeOnline">Active Online: 128</div>
+
+<main class="main-content">
+    <div class="sw-card"><div><h2>Viper Roulette</h2><p>Advanced cycle prediction and neighbor sector logic.</p></div><div class="engine-btn" onclick="handleEngineClick('viper-roulette')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>AI Baccarat Trend</h2><p>Real-time pattern recognition for shoe transitions.</p></div><div class="engine-btn" onclick="handleEngineClick('ai-baccarat-trend')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>Baccarat Analysis</h2><p>Mathematical edge and probability tracker.</p></div><div class="engine-btn" onclick="handleEngineClick('baccarat-analysis')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>Baccarat Predictor</h2><p>Real-time banker/player advantage signal.</p></div><div class="engine-btn" onclick="handleEngineClick('baccarat-predictor')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>Baccarat PRO</h2><p>Professional grade analytical toolset.</p></div><div class="engine-btn" onclick="handleEngineClick('baccarat-pro')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>Roulette PRO</h2><p>Sector-based tracking and visual prediction.</p></div><div class="engine-btn" onclick="handleEngineClick('roulette-pro')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>Card Counting</h2><p>Digital deck penetration and count metrics.</p></div><div class="engine-btn" onclick="handleEngineClick('card-counting')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>Gemini Ultra</h2><p>Neural network assisted game state logic.</p></div><div class="engine-btn" onclick="handleEngineClick('gemini-ultra')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>Google AI</h2><p>Integrated search-probability correlation.</p></div><div class="engine-btn" onclick="handleEngineClick('google-ai')">Start Engine</div></div>
+    <div class="sw-card"><div><h2>VisionWave Baccarat</h2><p>Visual trend-line and wave analysis.</p></div><div class="engine-btn" onclick="handleEngineClick('visionwave-baccarat')">Start Engine</div></div>
 </main>
 
 <div id="overlay">
@@ -113,25 +108,25 @@ body.premium-active .engine-btn {
     <button onclick="closeOverlay()" style="margin-top: 40px; background: none; border: none; color: #444; cursor: pointer; letter-spacing: 5px; font-weight: bold;">CLOSE TERMINAL</button>
 </div>
 
-<!-- Firebase CDN (compat) -->
-<script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-<script>
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
   authDomain: "my-software-portal.firebaseapp.com",
   projectId: "my-software-portal",
   storageBucket: "my-software-portal.firebasestorage.app",
   messagingSenderId: "1072405993700",
-  appId: "1:1072405993700:web:b66ca016c8de667d46f4f1",
+  appId: "1:107240599370c:b66ca016c8de667d46f4f1",
   measurementId: "G-KCJEWVQM61"
 };
-firebase.initializeApp(firebaseConfig);
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 const overlay = document.getElementById('overlay');
 const overlayContent = document.getElementById('overlayContent');
@@ -139,24 +134,34 @@ const mainBody = document.getElementById('mainBody');
 const statusMsg = document.getElementById('statusMsg');
 const topAuthBtn = document.getElementById('topAuthBtn');
 
+let isLoggingIn = false;
+
+// LOGIN
 async function executeLogin() {
+    if (isLoggingIn) return;
+    isLoggingIn = true;
     try {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        const result = await auth.signInWithPopup(provider);
-        await checkAccess(result.user);
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        await checkAccess(user);
     } catch (err) {
-        console.error("Login Error:", err);
+        console.error(err);
+    } finally {
+        isLoggingIn = false;
     }
 }
 
+// CHECK ACCESS
 async function checkAccess(user) {
     if (!user) return;
     topAuthBtn.innerHTML = `<span>${user.email.split('@')[0].toUpperCase()}</span>`;
     statusMsg.textContent = "CONNECTED: " + user.email.toUpperCase();
-    const userRef = db.collection("users").doc(user.email);
-    const userSnap = await userRef.get();
 
-    if (userSnap.exists && userSnap.data().expiresAt && userSnap.data().expiresAt.toDate() > new Date()) {
+    const userRef = doc(db, "users", user.email);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists() && userSnap.data().expiresAt?.toDate() > new Date()) {
         mainBody.classList.add('premium-active');
         statusMsg.style.color = "var(--neon)";
         overlay.style.display = "none";
@@ -166,6 +171,7 @@ async function checkAccess(user) {
     }
 }
 
+// ENGINE CLICK
 window.handleEngineClick = async (appCode) => {
     const user = auth.currentUser;
     if (!user) { executeLogin(); return; }
@@ -176,37 +182,36 @@ window.handleEngineClick = async (appCode) => {
     }
 };
 
+// SHOW PRICING
 function showPricingView() {
     overlay.style.display = "flex";
     overlayContent.innerHTML = `
         <h1 style="letter-spacing: 10px; margin-bottom: 10px;">ACCESS EXPIRED</h1>
         <p style="color: var(--neon); margin-bottom: 40px;">Select a license plan to reactivate all engines.</p>
         <div style="display:flex; gap:20px; justify-content:center;">
-            <div style="background:#050a15;padding:20px;border-radius:20px;cursor:pointer;" onclick="buy(250)">
-                <h3>30 DAYS</h3><div>$250</div>
-            </div>
-            <div style="background:#050a15;padding:20px;border-radius:20px;cursor:pointer;" onclick="buy(400)">
-                <h3>90 DAYS</h3><div>$400</div>
-            </div>
-            <div style="background:#050a15;padding:20px;border-radius:20px;cursor:pointer;" onclick="buy(800)">
-                <h3>365 DAYS</h3><div>$800</div>
-            </div>
+            <div style="background:#050a15;padding:20px;border-radius:20px;cursor:pointer;" onclick="buy(250)">30 DAYS $250</div>
+            <div style="background:#050a15;padding:20px;border-radius:20px;cursor:pointer;" onclick="buy(400)">90 DAYS $400</div>
+            <div style="background:#050a15;padding:20px;border-radius:20px;cursor:pointer;" onclick="buy(800)">365 DAYS $800</div>
         </div>
     `;
 }
 
+// PAYPAL BUY
 window.buy = (amt) => {
-    const email = auth.currentUser ? auth.currentUser.email : "unknown";
+    const email = auth.currentUser.email;
     const paypalURL = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=edzelkeith0@gmail.com&amount=${amt}&currency_code=USD&item_name=HiddenPro_Access&custom=${email}&return=https://hiddenpro.qzz.io`;
     window.location.href = paypalURL;
 };
 
+// CLOSE OVERLAY
 window.closeOverlay = () => { overlay.style.display = "none"; };
 
+// TOP BUTTON
 topAuthBtn.addEventListener('click', () => { if (!auth.currentUser) executeLogin(); });
 
-auth.onAuthStateChanged((user) => { if (user) checkAccess(user); });
-</script>
+// AUTH STATE
+onAuthStateChanged(auth, (user) => { if (user && !isLoggingIn) checkAccess(user); });
 
+</script>
 </body>
 </html>
