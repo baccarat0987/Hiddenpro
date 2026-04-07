@@ -7,13 +7,11 @@
     <style>
         :root { --neon:#00ffff; --panel-bg: rgba(6,11,25,0.9); --danger: #ff4444; --success: #00ff88; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body { font-family:'Segoe UI',sans-serif; background:#000; color:#fff; padding:20px; min-height:100vh; overflow-x: hidden; }
+        body { font-family:'Segoe UI',sans-serif; background:#000; color:#fff; padding:20px; min-height:100vh; }
         body::before { content:""; position:fixed; inset:0; background: radial-gradient(circle at 50% 50%, #001f3f 0%, #000 100%); z-index:-1; }
-
         .container { max-width: 1200px; margin: 0 auto; }
 
-        /* Success Toast Notification */
+        /* Notifications */
         #successToast {
             position: fixed; top: 20px; right: 20px; background: var(--neon); color: #000;
             padding: 15px 30px; border-radius: 8px; font-weight: 900; letter-spacing: 2px;
@@ -22,36 +20,20 @@
         }
         @keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
 
-        /* Loading Spinner */
-        .spinner {
-            width: 14px; height: 14px; border: 2px solid rgba(0,0,0,0.2); border-top: 2px solid #000;
-            border-radius: 50%; display: inline-block; animation: spin 0.8s linear infinite;
-            vertical-align: middle; margin-right: 10px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Sections */
+        /* UI Elements */
         .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .price-card { background: var(--panel-bg); border: 1px solid #333; padding: 20px; border-radius: 12px; backdrop-filter: blur(10px); }
+        .price-card { background: var(--panel-bg); border: 1px solid #333; padding: 20px; border-radius: 12px; }
         label { display: block; font-size: 10px; color: var(--neon); margin-bottom: 8px; letter-spacing: 2px; font-weight: bold; }
-        input, select { background: #0a0a0a; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 6px; margin-bottom: 10px; font-size: 14px; outline: none; }
-        input:focus { border-color: var(--neon); }
-
-        button { transition: 0.3s; cursor: pointer; }
-        button:disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(1); }
-
-        .save-btn { background: var(--neon); color: #000; border: none; padding: 15px; width: 100%; font-weight: 900; border-radius: 6px; text-transform: uppercase; letter-spacing: 2px; }
-        .save-btn:hover:not(:disabled) { box-shadow: 0 0 20px var(--neon); transform: translateY(-2px); }
-
-        .user-card { background: var(--panel-bg); border: 1px solid #222; border-radius: 15px; padding: 25px; margin-top: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .add-user-bar { display: flex; gap: 15px; margin-bottom: 30px; align-items: flex-end; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        input, select { background: #0a0a0a; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 6px; margin-bottom: 10px; }
+        
+        .save-btn { background: var(--neon); color: #000; border: none; padding: 15px; width: 100%; font-weight: 900; border-radius: 6px; cursor: pointer; text-transform: uppercase; }
+        .user-card { background: var(--panel-bg); border: 1px solid #222; border-radius: 15px; padding: 25px; margin-top: 40px; }
+        .add-user-bar { display: flex; gap: 15px; margin-bottom: 30px; align-items: flex-end; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; }
 
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; color: #555; font-size: 11px; padding: 15px; border-bottom: 1px solid #222; letter-spacing: 1px; text-transform: uppercase; }
+        th { text-align: left; color: #555; font-size: 11px; padding: 15px; border-bottom: 1px solid #222; }
         td { padding: 18px 15px; border-bottom: 1px solid #111; font-size: 14px; }
-
-        .timer-text { font-family: 'Consolas', monospace; color: var(--neon); font-weight: bold; font-size: 15px; }
-        .lifetime-text { color: #f1c40f; font-weight: bold; text-transform: uppercase; }
+        .timer-text { font-family: monospace; color: var(--neon); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -62,38 +44,38 @@
     <header style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center;">
         <div>
             <h1 style="letter-spacing:10px; margin:0;">ADMIN TERMINAL</h1>
-            <p style="color:var(--neon); font-size:11px; margin-top:5px; font-weight:bold;">SECURE ACCESS CONTROL // v2.5</p>
+            <p id="adminStatus" style="color:var(--danger); font-size:11px; margin-top:5px; font-weight:bold;">RECOGNIZING ADMIN...</p>
         </div>
-        <div id="adminStatus" style="font-size:12px; color:#555;">DATABASE CONNECTED</div>
+        <button onclick="adminLogin()" style="background:#fff; color:#000; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">FORCE LOGIN</button>
     </header>
 
     <div class="pricing-grid">
-        <div class="price-card"><label>1 MONTH</label><input type="number" id="p1" placeholder="300"></div>
-        <div class="price-card"><label>3 MONTHS</label><input type="number" id="p3_new" placeholder="400"></div>
-        <div class="price-card"><label>1 YEAR</label><input type="number" id="p12_new" placeholder="1600"></div>
-        <div class="price-card"><label>LIFETIME</label><input type="number" id="p_life" placeholder="5000"></div>
+        <div class="price-card"><label>1 MONTH</label><input type="number" id="p1"></div>
+        <div class="price-card"><label>3 MONTHS</label><input type="number" id="p3_new"></div>
+        <div class="price-card"><label>1 YEAR</label><input type="number" id="p12_new"></div>
+        <div class="price-card"><label>LIFETIME</label><input type="number" id="p_life"></div>
     </div>
-    <button id="savePricingBtn" class="save-btn" onclick="updatePricing()">Apply New Pricing</button>
+    <button class="save-btn" onclick="updatePricing()">Update Prices</button>
 
     <div class="user-card">
-        <h2 style="margin-bottom:20px; font-size:18px; letter-spacing:2px;">SUBSCRIBER DATABASE</h2>
+        <h2 style="margin-bottom:20px; font-size:18px;">GRANT ACCESS TO ANY EMAIL</h2>
         <div class="add-user-bar">
-            <div style="flex:2"><label>USER GMAIL</label><input type="text" id="addEmail" placeholder="user@gmail.com" style="margin:0;"></div>
+            <div style="flex:2"><label>TARGET GMAIL</label><input type="text" id="addEmail" placeholder="customer@gmail.com" style="margin:0;"></div>
             <div style="flex:1">
                 <label>DURATION</label>
                 <select id="addDuration" style="margin:0;">
                     <option value="30">30 Days</option>
                     <option value="90">90 Days</option>
                     <option value="365">365 Days</option>
-                    <option value="99999">LIFETIME ACCESS</option>
+                    <option value="99999">LIFETIME</option>
                 </select>
             </div>
-            <button id="grantBtn" onclick="grantAccess()" style="padding:12px 25px; background:var(--neon); border:none; font-weight:900; height:45px; border-radius:6px; margin-bottom:10px;">ACTIVATE</button>
+            <button id="grantBtn" onclick="grantAccess()" style="padding:12px 25px; background:var(--neon); border:none; font-weight:900; height:45px; border-radius:6px; cursor:pointer;">ACTIVATE EMAIL</button>
         </div>
 
         <table>
             <thead>
-                <tr><th>USER EMAIL</th><th>TIME REMAINING</th><th>STATUS</th><th style="text-align:right;">ACTION</th></tr>
+                <tr><th>USER EMAIL</th><th>TIME REMAINING</th><th>EXPIRY</th><th style="text-align:right;">ACTION</th></tr>
             </thead>
             <tbody id="userList"></tbody>
         </table>
@@ -103,6 +85,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
@@ -113,6 +96,23 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+// ADMIN AUTH CHECK
+window.adminLogin = () => signInWithPopup(auth, provider);
+
+onAuthStateChanged(auth, (user) => {
+    const status = document.getElementById('adminStatus');
+    if (user && user.email === 'edzelkeith0@gmail.com') {
+        status.innerHTML = "ADMIN VERIFIED: " + user.email;
+        status.style.color = "#00ff88";
+    } else {
+        status.innerHTML = "UNAUTHORIZED: PLEASE LOGIN AS ADMIN";
+        status.style.color = "#ff4444";
+        adminLogin();
+    }
+});
 
 function showSuccess(msg) {
     const toast = document.getElementById('successToast');
@@ -121,72 +121,50 @@ function showSuccess(msg) {
     setTimeout(() => { toast.style.display = 'none'; }, 3000);
 }
 
-// Initial Data Load
+// PRICING LOGIC
 (async () => {
     const pDoc = await getDoc(doc(db, "settings", "pricing"));
     if(pDoc.exists()){
         const d = pDoc.data();
-        document.getElementById('p1').value = d.p1 || "";
-        document.getElementById('p3_new').value = d.p3_new || "";
-        document.getElementById('p12_new').value = d.p12_new || "";
-        document.getElementById('p_life').value = d.p_life || "";
+        document.getElementById('p1').value = d.p1;
+        document.getElementById('p3_new').value = d.p3_new;
+        document.getElementById('p12_new').value = d.p12_new;
+        document.getElementById('p_life').value = d.p_life;
     }
 })();
 
-// Update Global Pricing
 window.updatePricing = async () => {
-    const btn = document.getElementById('savePricingBtn');
-    const originalText = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = `<span class="spinner"></span> UPDATING...`;
-
-    try {
-        await setDoc(doc(db, "settings", "pricing"), {
-            p1: document.getElementById('p1').value,
-            p3_new: document.getElementById('p3_new').value,
-            p12_new: document.getElementById('p12_new').value,
-            p_life: document.getElementById('p_life').value
-        });
-        showSuccess("PRICING UPDATED");
-    } finally {
-        btn.disabled = false; btn.innerHTML = originalText;
-    }
+    await setDoc(doc(db, "settings", "pricing"), {
+        p1: document.getElementById('p1').value,
+        p3_new: document.getElementById('p3_new').value,
+        p12_new: document.getElementById('p12_new').value,
+        p_life: document.getElementById('p_life').value
+    });
+    showSuccess("PRICING UPDATED");
 };
 
-// Grant Access Logic
+// USER ACCESS LOGIC
 window.grantAccess = async () => {
     const email = document.getElementById('addEmail').value.toLowerCase().trim();
     const days = parseInt(document.getElementById('addDuration').value);
-    const btn = document.getElementById('grantBtn');
     if(!email) return;
-
-    const originalText = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = `<span class="spinner"></span> ACTIVATING...`;
 
     try {
         const now = new Date().getTime();
-        // Expiry calculation with safe milliseconds
         const expiryTime = days > 30000 ? 'LIFETIME' : now + (days * 24 * 60 * 60 * 1000);
 
         await setDoc(doc(db, "users", email), {
             email: email,
             expiry: expiryTime,
-            isPaid: true,
-            addedOn: now
+            isPaid: true
         });
-        
         document.getElementById('addEmail').value = "";
-        showSuccess("USER ACTIVATED");
-    } catch (err) {
-        console.error(err);
-        alert("Access Denied. Check Firebase Rules.");
-    } finally {
-        btn.disabled = false; btn.innerHTML = originalText;
+        showSuccess("ACCESS GRANTED TO " + email);
+    } catch (e) {
+        alert("ACCESS DENIED: You must login as edzelkeith0@gmail.com");
     }
 };
 
-// Real-time List Listener
 onSnapshot(collection(db, "users"), (snapshot) => {
     const list = document.getElementById('userList');
     list.innerHTML = "";
@@ -196,48 +174,34 @@ onSnapshot(collection(db, "users"), (snapshot) => {
         list.innerHTML += `
             <tr>
                 <td><strong>${u.email}</strong></td>
-                <td><span class="timer-text ${isLife ? 'lifetime-text' : ''}" data-expiry="${u.expiry}" data-email="${u.email}">${isLife ? '∞ INFINITE' : 'Calculating...'}</span></td>
-                <td style="color:#777; font-size: 11px;">${isLife ? 'PERMANENT' : 'RECURRING'}</td>
-                <td style="text-align:right">
-                    <button onclick="removeUser('${u.email}')" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">REMOVE</button>
-                </td>
+                <td><span class="timer-text" data-expiry="${u.expiry}" data-email="${u.email}">${isLife ? '∞ LIFETIME' : '...'}</span></td>
+                <td>${isLife ? 'PERMANENT' : new Date(u.expiry).toLocaleDateString()}</td>
+                <td style="text-align:right"><button onclick="removeUser('${u.email}')" style="color:red; background:none; border:none; cursor:pointer;">REMOVE</button></td>
             </tr>`;
     });
 });
 
 window.removeUser = async (email) => {
-    if(confirm(`Remove access for ${email}?`)) {
+    if(confirm("Remove " + email + "?")) {
         await deleteDoc(doc(db, "users", email));
-        showSuccess("USER REMOVED");
+        showSuccess("USER DELETED");
     }
 };
 
-// Live Timer and Auto-Purge Loop
+// TIMER LOOP
 setInterval(() => {
     const now = new Date().getTime();
     document.querySelectorAll('.timer-text').forEach(async el => {
-        const expiry = el.dataset.expiry;
-        if(expiry === 'LIFETIME' || !expiry || expiry === "undefined") return;
-        
-        const distance = parseInt(expiry) - now;
-
-        // Auto-delete with 10-second safety buffer to prevent "instant disappear" bug
-        if (distance < -10000) { 
-            await deleteDoc(doc(db, "users", el.dataset.email));
-            return;
-        }
-
-        if (distance < 0) {
-            el.innerHTML = "EXPIRED";
-            el.style.color = "red";
-            return;
-        }
-
-        const d = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((distance % (1000 * 60)) / 1000);
-        el.innerHTML = `${d}D ${h}H ${m}M ${s}S`;
+        const exp = el.dataset.expiry;
+        if(exp === 'LIFETIME') return;
+        const dist = parseInt(exp) - now;
+        if (dist < -5000) { await deleteDoc(doc(db, "users", el.dataset.email)); return; }
+        if (dist < 0) { el.innerHTML = "EXPIRED"; return; }
+        const d = Math.floor(dist / (1000 * 60 * 60 * 24));
+        const h = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((dist % (1000 * 60)) / 1000);
+        el.innerHTML = `${d}d ${h}h ${m}m ${s}s`;
     });
 }, 1000);
 </script>
