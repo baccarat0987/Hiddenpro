@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Engine | TERMINAL</title>
+    
+    <script>
+        if (window.location.pathname.endsWith('.html')) {
+            const cleanUrl = window.location.pathname.replace('.html', '');
+            window.history.replaceState(null, '', cleanUrl);
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
+            authDomain: "my-software-portal.firebaseapp.com",
+            projectId: "my-software-portal",
+            appId: "1:1072405993700:web:b66ca016c8de667d46f4f1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = "index.html"; return; }
+            const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
+            const now = new Date().getTime();
+            if (!userDoc.exists() || (userDoc.data().expiry !== 'LIFETIME' && userDoc.data().expiry < now)) {
+                window.location.href = "index.html";
+                return;
+            }
+            document.body.style.display = "flex";
+        });
+    </script>
+
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{
+            font-family:'Segoe UI',sans-serif;
+            height:100vh;
+            display:none; /* Controlled by Guard */
+            justify-content:center;
+            align-items:center;
+            background:radial-gradient(circle at center,#050b14,#00101f);
+            color:#d6e6ff;
+            overflow:hidden;
+        }
+
+        /* 3. THE EXIT TERMINAL BUTTON */
+        .exit-nav { position: fixed; top: 15px; right: 15px; z-index: 1000; }
+        .exit-btn { 
+            background: rgba(0, 200, 255, 0.1); color: #00e5ff; padding: 8px 15px; 
+            border-radius: 4px; text-decoration: none; font-weight: bold; 
+            border: 1px solid rgba(0, 200, 255, 0.4); font-size: 11px; transition: 0.3s; 
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .exit-btn:hover { background: #00e5ff; color: #000; }
+
+        .container{
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            width:420px;
+            max-width:95%;
+            backdrop-filter:blur(12px);
+            background:rgba(0,20,35,0.7);
+            border:2px solid rgba(0,200,255,0.4);
+            border-radius:20px;
+            padding:25px;
+            z-index:1;
+            position: relative;
+        }
+
+        .header{
+            font-size:22px;
+            font-weight:700;
+            letter-spacing:3px;
+            color:#00e5ff;
+            text-shadow:0 0 10px #00e5ff;
+            margin-bottom:20px;
+            text-align:center;
+            text-transform: uppercase;
+        }
+
+        .totals{
+            display:flex;
+            justify-content:space-between;
+            width:100%;
+            margin-bottom:20px;
+            padding:12px;
+            background:rgba(0,0,0,0.4);
+            border:1px solid rgba(0,200,255,0.2);
+            border-radius:10px;
+        }
+        .totals div{ font-size:11px; font-weight:bold; color: #66b2ff; }
+
+        .prediction{ font-size:52px; font-weight:900; text-align:center; margin-bottom:15px; min-height: 70px; }
+        .player{color:#4fc3ff; text-shadow:0 0 25px #1e90ff;}
+        .banker{color:#ff5252; text-shadow:0 0 25px #ff3b3b;}
+
+        .confidence-container{ width:100%; margin-bottom:25px; height:8px; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden;}
+        .confidence-bar{ width:0%; height:100%; background:#00e5ff; box-shadow:0 0 15px #00e5ff; transition:width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        .history-panel{
+            width:100%;
+            background:rgba(0,0,0,0.3);
+            border:1px solid rgba(0,200,255,0.2);
+            border-radius:10px;
+            padding:12px;
+            margin-bottom:15px;
+        }
+        .sequence-row{ display:flex; gap:6px; justify-content: center; min-height: 30px; }
+        .sequence-row span{ width:28px; height:28px; display:flex; justify-content:center; align-items:center; border-radius:5px; font-weight:900; font-size:12px; }
+        .P{background:#1e90ff; color:#fff;}
+        .B{background:#ff3b3b; color:#fff;}
+
+        .live-feed{
+            width:100%;
+            height:100px;
+            overflow-y:auto;
+            font-family:'Courier New', monospace;
+            font-size:10px;
+            color:#00ffea;
+            background:rgba(0,0,0,0.5);
+            border-radius:8px;
+            padding:10px;
+            margin-bottom:20px;
+            border: 1px solid rgba(0,200,255,0.1);
+        }
+
+        .controls{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; width: 100%; }
+        .controls button{
+            padding:18px;
+            font-weight:900;
+            font-size:14px;
+            color:#fff;
+            background:rgba(255,255,255,0.05);
+            border:1px solid rgba(0,200,255,0.3);
+            border-radius:12px;
+            cursor:pointer;
+            transition:0.2s;
+            text-transform: uppercase;
+        }
+        .controls button:active { transform: scale(0.95); }
+        .btn-p:hover { background: #1e90ff; border-color: #1e90ff; }
+        .btn-b:hover { background: #ff3b3b; border-color: #ff3b3b; }
+        
+        .util-btns { grid-column: span 2; display: flex; gap: 10px; margin-top: 5px; }
+        .util-btns button { flex: 1; padding: 10px; font-size: 11px; background: transparent; color: #444; border-color: #222; }
+
+        .scan-line{
+            position:absolute;
+            top:0; left:0; width:100%; height:2px;
+            background:linear-gradient(90deg,transparent,#00e5ff,transparent);
+            animation:scan 3s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes scan{ 0%{top:0%;} 100%{top:100%;} }
+    </style>
+</head>
+<body>
+
+<div class="exit-nav">
+    <a href="index.html" class="exit-btn">EXIT TERMINAL</a>
+</div>
+
+<div class="container">
+    <div class="scan-line"></div>
+    <div class="header">Neural Engine v2</div>
+
+    <div class="totals">
+        <div>P: <span id="playerTotal">0</span></div>
+        <div>B: <span id="bankerTotal">0</span></div>
+        <div>ROUNDS: <span id="totalRounds">0</span></div>
+    </div>
+
+    <div class="prediction" id="predictionBox">STANDBY</div>
+    <div class="confidence-container">
+        <div class="confidence-bar" id="confidenceBar"></div>
+    </div>
+
+    <div class="history-panel">
+        <div class="sequence-row" id="historySequence"></div>
+    </div>
+
+    <div class="live-feed" id="liveFeed"></div>
+
+    <div class="controls">
+        <button class="btn-p" onclick="recordResult('P')">Player</button>
+        <button class="btn-b" onclick="recordResult('B')">Banker</button>
+        <div class="util-btns">
+            <button onclick="undo()">UNDO</button>
+            <button onclick="resetAll()">RESET</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const MIN_HANDS = 10;
+    let sequence = JSON.parse(localStorage.getItem('baccarat_sequence')) || [];
+    let results = JSON.parse(localStorage.getItem('baccarat_results')) || [];
+    let lastPrediction = null;
+
+    function recordResult(r){
+        sequence.push(r);
+        results.push(lastPrediction ? (lastPrediction === r ? 'W' : 'L') : '');
+        saveData();
+        updateUI();
+        triggerFeed(r);
+    }
+
+    function undo(){
+        sequence.pop(); results.pop();
+        saveData(); updateUI();
+    }
+
+    function resetAll(){
+        if(confirm("Wipe Neural Memory?")) {
+            localStorage.clear(); sequence=[]; results=[];
+            document.getElementById("liveFeed").innerHTML = "";
+            updateUI();
+        }
+    }
+
+    function saveData(){
+        localStorage.setItem('baccarat_sequence', JSON.stringify(sequence));
+        localStorage.setItem('baccarat_results', JSON.stringify(results));
+    }
+
+    function triggerFeed(r){
+        const feed = document.getElementById("liveFeed");
+        const lines = [`INPUT CAPTURED: ${r}`, `RE-CALCULATING WEIGHTS...`, `NEURAL SYNC COMPLETE.`];
+        lines.forEach((l, i) => {
+            setTimeout(() => {
+                const div = document.createElement("div");
+                div.textContent = "> " + l;
+                feed.appendChild(div);
+                feed.scrollTop = feed.scrollHeight;
+            }, i * 400);
+        });
+    }
+
+    function updateUI(){
+        document.getElementById('playerTotal').textContent = sequence.filter(x=>x==='P').length;
+        document.getElementById('bankerTotal').textContent = sequence.filter(x=>x==='B').length;
+        document.getElementById('totalRounds').textContent = sequence.length;
+
+        const seqRow = document.getElementById('historySequence');
+        seqRow.innerHTML = '';
+        sequence.slice(-10).forEach(val => {
+            const s = document.createElement('span');
+            s.className = val; s.textContent = val;
+            seqRow.appendChild(s);
+        });
+
+        const box = document.getElementById("predictionBox");
+        const bar = document.getElementById("confidenceBar");
+
+        if(sequence.length < MIN_HANDS){
+            box.innerHTML = `<span style="font-size:14px; color:#444">NEED ${MIN_HANDS-sequence.length} MORE</span>`;
+            bar.style.width = "0%";
+            lastPrediction = null;
+        } else {
+            // Basic logic for this template
+            const pCount = sequence.slice(-6).filter(x=>x==='P').length;
+            const bCount = sequence.slice(-6).filter(x=>x==='B').length;
+            const pred = pCount >= bCount ? 'P' : 'B';
+            lastPrediction = pred;
+            box.innerHTML = `<span class="${pred==='P'?'player':'banker'}">${pred==='P'?'PLAYER':'BANKER'}</span>`;
+            bar.style.width = "88%";
+        }
+    }
+
+    updateUI();
+</script>
+</body>
+</html>
