@@ -228,5 +228,45 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+
+<script>
+(function() {
+    // Blocks Right-Click
+    document.addEventListener('contextmenu', e => e.preventDefault());
+
+    // Blocks Inspect, View Source, and Save shortcuts
+    document.onkeydown = function(e) {
+        if (
+            e.keyCode === 123 || 
+            (e.ctrlKey && e.keyCode === 85) || 
+            (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) ||
+            (e.ctrlKey && e.keyCode === 83)
+        ) {
+            return false;
+        }
+    };
+
+    // Freezes UI if DevTools opens
+    setInterval(function() {
+        (function() { return false; }['constructor']('debugger')['call']());
+    }, 50);
+
+    // Wipes content if DevTools is detected via window size
+    function detectDevTools() {
+        const threshold = 160;
+        if ((window.outerWidth - window.innerWidth > threshold) || (window.outerHeight - window.innerHeight > threshold)) {
+            document.body.innerHTML = ""; 
+            window.location.replace("about:blank");
+        }
+    }
+    setInterval(detectDevTools, 500);
+
+    // Mutes console
+    if (typeof console !== "undefined") {
+        console.log = console.debug = console.info = console.warn = console.error = function() {};
+    }
+})();
+</script>
+
 </body>
 </html>
