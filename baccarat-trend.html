@@ -266,5 +266,45 @@
         });
     }
 </script>
+
+<script>
+(function() {
+    // 1. Block Right-Click
+    document.addEventListener('contextmenu', e => e.preventDefault());
+
+    // 2. Block Keyboard Shortcuts (F12, Ctrl+U, Inspect, Console, etc.)
+    document.onkeydown = function(e) {
+        if (
+            e.keyCode === 123 || 
+            (e.ctrlKey && e.keyCode === 85) || 
+            (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) ||
+            (e.ctrlKey && e.keyCode === 83)
+        ) {
+            return false;
+        }
+    };
+
+    // 3. Debugger Loop (Interrupts Inspector focus)
+    setInterval(function() {
+        (function() { return false; }['constructor']('debugger')['call']());
+    }, 50);
+
+    // 4. Blank Page Trigger if Inspector is detected via window dimensions
+    function detectDevTools() {
+        const threshold = 160;
+        if ((window.outerWidth - window.innerWidth > threshold) || (window.outerHeight - window.innerHeight > threshold)) {
+            document.body.innerHTML = ""; 
+            window.location.replace("about:blank");
+        }
+    }
+    setInterval(detectDevTools, 500);
+
+    // 5. Mute Console output
+    if (typeof console !== "undefined") {
+        console.log = console.debug = console.info = console.warn = console.error = function() {};
+    }
+})();
+</script>
+
 </body>
 </html>
