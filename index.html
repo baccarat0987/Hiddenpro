@@ -104,15 +104,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/fireba
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-// Encoded Firebase Parts for Extra Security
-const _config = {
-    _k: "QUl6YVN5REhraGQ3TzJySjJnb05UQ3VkZVJVeFFqclRGZTJLb0hj",
-    _d: "bXktc29mdHdhcmUtcG9ydGFsLmZpcmViYXNlYXBwLmNvbQ=="
-};
-
 const firebaseConfig = {
-    apiKey: atob(_config._k),
-    authDomain: atob(_config._d),
+    apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
+    authDomain: "my-software-portal.firebaseapp.com",
     projectId: "my-software-portal",
     storageBucket: "my-software-portal.firebasestorage.app",
     messagingSenderId: "1072405993700",
@@ -242,10 +236,11 @@ window.buy = (amt) => {
     }
     const email = auth.currentUser.email.toLowerCase();
     
+    // 
+    const _secB = "ZWR6ZWxrZWl0aDBAZ21haWwuY29t"; 
+    const businessEmail = atob(_secB);
     
-    const _biz = atob("ZWR6ZWxrZWl0aDBAZ21haWwuY29t");
-    
-    const paypalURL = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${_biz}&amount=${amt}&currency_code=USD&item_name=Elite_Terminal_Access&custom=${email}&return=https://hiddenpro.qzz.io`;
+    const paypalURL = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${businessEmail}&amount=${amt}&currency_code=USD&item_name=Elite_Terminal_Access&custom=${email}&return=https://hiddenpro.qzz.io`;
     window.location.href = paypalURL;
 };
 
@@ -254,6 +249,7 @@ topAuthBtn.addEventListener('click', toggleAuth);
 </script>
 
 <script>
+    // Security Layer
     document.addEventListener('contextmenu', event => event.preventDefault());
 
     document.onkeydown = function(e) {
@@ -271,8 +267,6 @@ topAuthBtn.addEventListener('click', toggleAuth);
             setTimeout(() => { window.location.reload(); }, 2000);
         }
     }, 1000);
-
-    document.ondragstart = function() { return false; };
 </script>
 
 </body>
