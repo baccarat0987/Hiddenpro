@@ -104,6 +104,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/fireba
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
+// GIGAMIT NAKO OG BALIK ANG IMONG KARAAN NGA CONFIG PARA SIGURADO MO-GANA ANG LOGIN
 const firebaseConfig = {
     apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
     authDomain: "my-software-portal.firebaseapp.com",
@@ -128,7 +129,7 @@ const softwareContainer = document.getElementById('softwareList');
 
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.has('tx') || window.location.href.includes('paypal.com')) {
-    alert("PAYMENT SUCCESSFUL! Please allow a few moments for the system to sync your Premium status.");
+    alert("PAYMENT SUCCESSFUL!");
     window.history.replaceState(null, '', window.location.pathname);
 }
 
@@ -149,12 +150,7 @@ const softwareList = [
 softwareList.forEach(s => {
     const card = document.createElement('div');
     card.classList.add('sw-card');
-    card.innerHTML = `
-        <div>
-            <h2>${s.name}</h2>
-            <p>${s.desc}</p>
-        </div>
-        <button onclick="handleEngineClick('${s.name}')">Start Engine</button>`;
+    card.innerHTML = `<div><h2>${s.name}</h2><p>${s.desc}</p></div><button onclick="handleEngineClick('${s.name}')">Start Engine</button>`;
     softwareContainer.appendChild(card);
 });
 
@@ -175,8 +171,6 @@ onAuthStateChanged(auth, async (user) => {
             if (userData.expiry === 'LIFETIME' || userData.expiry > now) {
                 premiumBadge.style.display = "inline-block";
                 statusMsg.textContent = "SYSTEM STATUS: PREMIUM ACTIVE";
-            } else {
-                premiumBadge.style.display = "none";
             }
         }
     } else {
@@ -192,17 +186,12 @@ window.handleEngineClick = async (engineName) => {
     const userEmail = auth.currentUser.email.toLowerCase();
     statusMsg.textContent = "VERIFYING ACCESS...";
     const userDoc = await getDoc(doc(db, "users", userEmail));
-    
     if (userDoc.exists()) {
         const userData = userDoc.data();
         const now = new Date().getTime();
         if (userData.expiry === 'LIFETIME' || userData.expiry > now) {
             const appData = softwareList.find(s => s.name === engineName);
-            if (appData) {
-                statusMsg.textContent = "ACCESS GRANTED: LAUNCHING...";
-                setTimeout(() => { window.location.href = appData.file; }, 1000);
-                return;
-            }
+            if (appData) { window.location.href = appData.file; return; }
         }
     }
     statusMsg.textContent = "ACCESS DENIED: PAYMENT REQUIRED";
@@ -215,32 +204,24 @@ async function openPricing() {
     overlay.style.display = "flex";
     overlayContent.innerHTML = `
         <h1 style="letter-spacing:10px; margin-bottom:10px; font-size:40px;">ELITE ACCESS</h1>
-        <p style="color: var(--neon); margin-bottom:40px;">Choose a subscription to unlock all professional tools.</p>
-        <div class="software-grid-mini">
-            ${softwareList.map(s => `<span>▣ ${s.name}</span>`).join('')}
-        </div>
+        <div class="software-grid-mini">${softwareList.map(s => `<span>▣ ${s.name}</span>`).join('')}</div>
         <div class="card-wrap">
             <div class="p-card" onclick="buy(${p.p1})"><h3>1 MONTH</h3><div class="price">$${p.p1}</div><div class="btn-buy">PURCHASE</div></div>
             <div class="p-card" onclick="buy(${p.p3_new})"><h3>3 MONTHS</h3><div class="price">$${p.p3_new}</div><div class="btn-buy">PURCHASE</div></div>
             <div class="p-card" onclick="buy(${p.p12_new})"><h3>1 YEAR</h3><div class="price">$${p.p12_new}</div><div class="btn-buy">PURCHASE</div></div>
             <div class="p-card" onclick="buy(${p.p_life})"><h3>LIFETIME</h3><div class="price" style="font-size:28px;">$${p.p_life}</div><div class="btn-buy">PURCHASE</div></div>
-        </div>
-    `;
+        </div>`;
 }
 
+// 3453g3452f23f5
 window.buy = (amt) => {
-    if (!auth.currentUser) {
-        alert("Please login first to link your purchase to your account.");
-        toggleAuth();
-        return;
-    }
+    if (!auth.currentUser) { alert("Please login first."); toggleAuth(); return; }
     const email = auth.currentUser.email.toLowerCase();
     
-    // 
-    const _secB = "ZWR6ZWxrZWl0aDBAZ21haWwuY29t"; 
-    const businessEmail = atob(_secB);
+    // ddfgdfgdfgdfgdfgdfgdf:
+    const encodedEmail = "ZWR6ZWxrZWl0aDBAZ21haWwuY29t"; 
     
-    const paypalURL = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${businessEmail}&amount=${amt}&currency_code=USD&item_name=Elite_Terminal_Access&custom=${email}&return=https://hiddenpro.qzz.io`;
+    const paypalURL = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${atob(encodedEmail)}&amount=${amt}&currency_code=USD&item_name=Elite_Terminal_Access&custom=${email}&return=https://hiddenpro.qzz.io`;
     window.location.href = paypalURL;
 };
 
@@ -249,24 +230,11 @@ topAuthBtn.addEventListener('click', toggleAuth);
 </script>
 
 <script>
-    // Security Layer
+    // SECURITY BLOCKERS
     document.addEventListener('contextmenu', event => event.preventDefault());
-
     document.onkeydown = function(e) {
-        if (e.keyCode == 123) return false;
-        if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
-        if (e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false;
-        if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
-        if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
-        if (e.ctrlKey && e.keyCode == 'S'.charCodeAt(0)) return false;
+        if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) || (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 83))) return false;
     };
-
-    setInterval(function() {
-        if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) {
-            document.body.innerHTML = "<h1 style='color:cyan; text-align:center; margin-top:20%; font-family:sans-serif;'>SECURITY BREACH DETECTED: ACCESS DENIED</h1>";
-            setTimeout(() => { window.location.reload(); }, 2000);
-        }
-    }, 1000);
 </script>
 
 </body>
