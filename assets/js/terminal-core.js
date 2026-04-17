@@ -16,13 +16,13 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-const overlay = document.getElementById('overlay');
-const overlayContent = document.getElementById('overlayContent');
 const statusMsg = document.getElementById('statusMsg');
 const topAuthBtn = document.getElementById('topAuthBtn');
 const authBtnText = document.getElementById('authBtnText');
 const premiumBadge = document.getElementById('premiumBadge');
 const softwareContainer = document.getElementById('softwareList');
+const overlay = document.getElementById('overlay');
+const overlayContent = document.getElementById('overlayContent');
 
 const softwareList = [
     {name:"Viper Roulette", file:"viper-roulette.html", desc:"Advanced table tracking with high-velocity pattern recognition."},
@@ -38,7 +38,7 @@ const softwareList = [
     {name:"Baccarat Neutral Engine", file:"Baccarat-engine.html", desc:"Pattern Analysis that combine trend and match pattern."}
 ];
 
-// Load software cards
+// Load Cards
 softwareList.forEach(s => {
     const card = document.createElement('div');
     card.classList.add('sw-card');
@@ -85,13 +85,14 @@ window.handleEngineClick = async (engineName) => {
         if (userData.expiry === 'LIFETIME' || userData.expiry > now) {
             const appData = softwareList.find(s => s.name === engineName);
             if (appData) {
-                // SUCCESS: This points to the main folder where your HTML files are
-                window.location.href = "/" + appData.file; 
+                statusMsg.textContent = "ACCESS GRANTED...";
+                setTimeout(() => { window.location.href = "./" + appData.file; }, 500);
                 return;
             }
         }
     }
-    openPricing();
+    statusMsg.textContent = "ACCESS DENIED: UPGRADE REQUIRED";
+    window.openPricing();
 };
 
 window.openPricing = async () => {
