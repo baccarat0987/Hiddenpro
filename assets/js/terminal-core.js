@@ -85,8 +85,8 @@ window.handleEngineClick = async (engineName) => {
         if (userData.expiry === 'LIFETIME' || userData.expiry > now) {
             const appData = softwareList.find(s => s.name === engineName);
             if (appData) {
-                // FIXED REDIRECT: Go back to the main folder
-                window.location.href = "../../" + appData.file; 
+                // SUCCESS: This points to the main folder where your HTML files are
+                window.location.href = "/" + appData.file; 
                 return;
             }
         }
