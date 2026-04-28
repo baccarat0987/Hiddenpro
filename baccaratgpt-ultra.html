@@ -50,8 +50,156 @@
             document.body.style.display = "flex";
         });
     </script>
+    
     <!-- ============================================= -->
-    <!-- END INTEGRATION                               -->
+    <!-- SECURITY BLOCKERS - Anti Theft Protection     -->
+    <!-- ============================================= -->
+    <script>
+        // 1. Disable Right-Click
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // 2. Disable All Keyboard Shortcuts (F12, Ctrl+Shift+I, Ctrl+U, Ctrl+S, etc.)
+        document.onkeydown = function(e) {
+            // F12 key
+            if (e.keyCode === 123) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+Shift+I (Inspect Element)
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+Shift+J (Console)
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+Shift+C (Inspect Element)
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+U (View Source)
+            if (e.ctrlKey && e.keyCode === 85) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+S (Save Page)
+            if (e.ctrlKey && e.keyCode === 83) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+P (Print)
+            if (e.ctrlKey && e.keyCode === 80) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+H (History)
+            if (e.ctrlKey && e.keyCode === 72) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+Shift+U (View Source alternative)
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 85) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+F (Find)
+            if (e.ctrlKey && e.keyCode === 70) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+R (Reload)
+            if (e.ctrlKey && e.keyCode === 82) {
+                e.preventDefault();
+                return false;
+            }
+            // F5 (Reload)
+            if (e.keyCode === 116) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+E (Search)
+            if (e.ctrlKey && e.keyCode === 69) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+G (Find Next)
+            if (e.ctrlKey && e.keyCode === 71) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+Shift+G (Find Previous)
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 71) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+K (Search)
+            if (e.ctrlKey && e.keyCode === 75) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+L (Address Bar)
+            if (e.ctrlKey && e.keyCode === 76) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+J (Downloads)
+            if (e.ctrlKey && e.keyCode === 74) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+D (Bookmark)
+            if (e.ctrlKey && e.keyCode === 68) {
+                e.preventDefault();
+                return false;
+            }
+            // Escape key (sometimes used for dev tools)
+            if (e.keyCode === 27) {
+                e.preventDefault();
+                return false;
+            }
+            return true;
+        };
+
+        // 3. Disable Drag and Drop (to prevent saving images/elements)
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // 4. Disable Text Selection (extra protection)
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // 5. DevTools Detection - Clear content if DevTools is opened
+        setInterval(function() {
+            const threshold = 160;
+            if ((window.outerWidth - window.innerWidth > threshold) || 
+                (window.outerHeight - window.innerHeight > threshold)) {
+                document.body.innerHTML = "";
+                window.location.replace("about:blank");
+            }
+        }, 1000);
+
+        // 6. Disable Console logging (silence console)
+        if (typeof console !== "undefined") {
+            console.log = console.debug = console.info = console.warn = console.error = function() {};
+        }
+
+        // 7. Prevent opening view-source: protocol
+        if (window.location.protocol === 'view-source:') {
+            window.location.href = 'about:blank';
+        }
+    </script>
+    <!-- ============================================= -->
+    <!-- END SECURITY BLOCKERS                         -->
     <!-- ============================================= -->
 
     <style>
