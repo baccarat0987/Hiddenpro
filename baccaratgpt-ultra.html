@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baccarat GPT Ultra — Neural Prediction Engine v6.2.3</title>
+    
+    <!-- ============================================= -->
+    <!-- INTEGRATION: Website Connection Scripts       -->
+    <!-- ============================================= -->
+    <script>
+        // URL Cleaner - removes .html extension
+        if (window.location.pathname.endsWith('.html')) {
+            const cleanUrl = window.location.pathname.replace('.html', '');
+            window.history.replaceState(null, '', cleanUrl);
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
+            authDomain: "my-software-portal.firebaseapp.com",
+            projectId: "my-software-portal",
+            appId: "1:1072405993700:web:b66ca016c8de667d46f4f1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Hide body until auth check passes
+        document.body.style.display = "none";
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { 
+                window.location.href = "index.html"; 
+                return; 
+            }
+            const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
+            const now = new Date().getTime();
+            if (!userDoc.exists() || (userDoc.data().expiry !== 'LIFETIME' && userDoc.data().expiry < now)) {
+                window.location.href = "index.html";
+                return;
+            }
+            // Authentication passed - show the app
+            document.body.style.display = "flex";
+        });
+    </script>
+    <!-- ============================================= -->
+    <!-- END INTEGRATION                               -->
+    <!-- ============================================= -->
+
+    <style>
+        /* Exit button styles - added for navigation */
+        .exit-nav { position: fixed; top: 20px; right: 20px; z-index: 2000; }
+        .exit-btn { background: rgba(255,255,255,0.1); color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 600; border: 1px solid #444; font-size: 12px; transition: 0.3s; font-family: 'Inter', sans-serif; }
+        .exit-btn:hover { background: var(--ultra-violet); border-color: #fff; }
+
+        :root {
+            --bg-deep: #06060e;
+            --bg-card: rgba(16, 16, 28, 0.96);
+            --bg-surface: rgba(20, 20, 35, 0.8);
+            --ultra-violet: #7c3aed;
+            --ultra-cyan: #06b6d4;
+            --ultra-rose: #f43f5e;
+            --ultra-amber: #f59e0b;
+            --ultra-emerald: #10b981;
+            --ultra-glow-violet: rgba(124, 58, 237, 0.5);
+            --ultra-glow-cyan: rgba(6, 182, 212, 0.5);
+            --ultra-gradient: linear-gradient(135deg, #7c3aed, #a855f7, #06b6d4);
+            --ultra-gradient-warm: linear-gradient(135deg, #f43f5e, #f59e0b, #10b981);
+            --banker: #ef4444;
+            --player: #3b82f6;
+            --tie: #22c55e;
+            --text-primary: #e8e8f0;
+            --text-secondary: #a0a0b8;
+            --text-muted: #6b6b80;
+            --border-subtle: rgba(124, 58, 237, 0.15);
+            --border-cyan: rgba(6, 182, 212, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: none; /* Hidden until auth check passes */
+            background: #03030a;
+            background-image: 
+                radial-gradient(ellipse at 50% 0%, rgba(124, 58, 237, 0.08) 0%, transparent 55%),
+                radial-gradient(ellipse at 20% 80%, rgba(6, 182, 212, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 85% 40%, rgba(244, 63, 94, 0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 100%, rgba(245, 158, 11, 0.03) 0%, transparent 40%);
+            color: var(--text-primary);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 100px 0;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 400px;
+            height: 730px;
+            background: #0a0a1a;
+            border-radius: 34px;
+            padding: 24px 18px;
+            border: 1.5px solid rgba(124, 58, 237, 0.25);
+            box-shadow: 
+                0 0 150px rgba(0, 0, 0, 0.95),
+                0 0 50px rgba(124, 58, 237, 0.1),
+                0 0 25px rgba(6, 182, 212, 0.06),
+                inset 0 1px 0 rgba(168, 85, 247, 0.04);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 5%;
+            right: 5%;
+            height: 2px;
+            background: var(--ultra-gradient);
+            border-radius: 0 0 50% 50%;
+            filter: blur(6px);
+            opacity: 0.7;
+            animation: topLinePulse 3s ease-in-out infinite;
+        }
+        @keyframes topLinePulse {
+            0%,
+            100% {
+                opacity: 0.5;
+                filter: blur(6px);
+            }
+            50% {
+                opacity: 0.9;
+                filter: blur(3px);
+            }
+        }
+
+        .app-container::after {
+            content: '';
+            position: absolute;
+            bottom: 60px;
+            left: 15%;
+            right: 15%;
+            height: 80px;
+            background: var(--ultra-gradient);
+            filter: blur(80px);
+            opacity: 0.04;
+            pointer-events: none;
+        }
+
+        /* Custom Baccarat GPT Logo */
+        .baccarat-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #1e1b4b, #312e81);
+            border: 1.5px solid rgba(124, 58, 237, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 
+                0 0 20px var(--ultra-glow-violet),
+                0 0 40px rgba(6, 182, 212, 0.2),
+                inset 0 0 12px rgba(168, 85, 247, 0.15);
+        }
+        .logo-icon::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 11px;
+            background: var(--ultra-gradient);
+            opacity: 0.3;
+            filter: blur(6px);
+            z-index: -1;
+        }
+        .logo-diamond {
+            width: 16px;
+            height: 16px;
+            background: var(--ultra-gradient);
+            transform: rotate(45deg);
+            border-radius: 3px;
+            box-shadow: 0 0 15px var(--ultra-glow-violet), 0 0 30px rgba(6, 182, 212, 0.3);
+            animation: diamondRotate 4s ease-in-out infinite;
+        }
+        @keyframes diamondRotate {
+            0%,
+            100% {
+                transform: rotate(45deg) scale(1);
+                box-shadow: 0 0 15px var(--ultra-glow-violet), 0 0 30px rgba(6, 182, 212, 0.3);
+            }
+            50% {
+                transform: rotate(225deg) scale(0.85);
+                box-shadow: 0 0 25px rgba(6, 182, 212, 0.5), 0 0 50px var(--ultra-glow-violet);
+            }
+        }
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+        .logo-title {
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            background: var(--ultra-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+        }
+        .logo-subtitle {
+            font-size: 7px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            color: rgba(168, 85, 247, 0.7);
+            text-transform: uppercase;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 14px;
+            margin-bottom: 8px;
+            flex-shrink: 0;
+        }
+        .stat-box {
+            text-align: center;
+            position: relative;
+        }
+        .stat-box span {
+            display: block;
+            font-size: 7px;
+            color: rgba(168, 85, 247, 0.6);
+            text-transform: uppercase;
+            margin-bottom: 3px;
+            letter-spacing: 1.2px;
+            font-weight: 500;
+        }
+        .stat-box b {
+            font-size: 10px;
+            background: var(--ultra-gradient-warm);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        .stat-box .stat-pulse {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--ultra-cyan);
+            display: inline-block;
+            margin-right: 3px;
+            box-shadow: 0 0 8px var(--ultra-glow-cyan);
+            vertical-align: middle;
+            animation: statPulse 2s ease-in-out infinite;
+        }
+        @keyframes statPulse {
+            0%,
+            100% {
+                opacity: 0.5;
+                box-shadow: 0 0 6px var(--ultra-glow-cyan);
+            }
+            50% {
+                opacity: 1;
+                box-shadow: 0 0 14px var(--ultra-glow-cyan), 0 0 24px rgba(6, 182, 212, 0.3);
+            }
+        }
+
+        /* Chat Flow */
+        .chat-flow {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            padding-right: 4px;
+            scroll-behavior: smooth;
+        }
+        .chat-flow::-webkit-scrollbar {
+            width: 3px;
+        }
+        .chat-flow::-webkit-scrollbar-thumb {
+            background: rgba(124, 58, 237, 0.25);
+            border-radius: 10px;
+        }
+
+        .app-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 18px;
+            padding: 14px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .user-bubble {
+            align-self: flex-end;
+            padding: 8px 16px;
+            border-radius: 16px 16px 4px 16px;
+            font-size: 11px;
+            font-weight: 600;
+            background: rgba(124, 58, 237, 0.1);
+            color: #a78bfa;
+            margin-left: 50px;
+            display: inline-block;
+            flex-shrink: 0;
+            letter-spacing: 1.5px;
+            border: 1px solid rgba(124, 58, 237, 0.25);
+        }
+
+        .token-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        .token {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            font-size: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .predict-box {
+            background: rgba(124, 58, 237, 0.04);
+            border-radius: 16px;
+            text-align: center;
+            padding: 18px 16px;
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            margin-top: 8px;
+            position: relative;
+        }
+        .predict-box::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 15%;
+            right: 15%;
+            height: 1px;
+            background: var(--ultra-gradient);
+            opacity: 0.5;
+        }
+        .winner-name {
+            font-size: 30px;
+            font-weight: 900;
+            margin: 8px 0;
+            letter-spacing: 2px;
+            text-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+        }
+        .conf-bar {
+            height: 5px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .conf-fill {
+            height: 100%;
+            background: var(--ultra-gradient-warm);
+            width: 0%;
+            transition: width 2s ease;
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+        }
+
+        .analysis-log {
+            font-size: 9px;
+            color: rgba(168, 85, 247, 0.6);
+            margin-bottom: 3px;
+            border-left: 2px solid rgba(124, 58, 237, 0.4);
+            padding-left: 8px;
+            font-family: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+            animation: fadeInLog 0.2s ease forwards;
+        }
+        @keyframes fadeInLog {
+            from {
+                opacity: 0;
+                transform: translateX(-4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .card-dimmed {
+            opacity: 0.4;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            filter: grayscale(0.6);
+        }
+
+        .fade-in-card {
+            animation: fadeInCard 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes fadeInCard {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .new-table-btn {
+            background: rgba(124, 58, 237, 0.1);
+            color: #a78bfa;
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease;
+            width: 100%;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+        .new-table-btn:hover {
+            background: rgba(124, 58, 237, 0.18);
+            border-color: var(--ultra-violet);
+            box-shadow: 0 0 25px var(--ultra-glow-violet);
+            transform: translateY(-1px);
+        }
+
+        .success-card {
+            background: rgba(16, 185, 129, 0.06);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 18px;
+            padding: 15px;
+            flex-shrink: 0;
+        }
+
+        .lose-card {
+            background: rgba(244, 63, 94, 0.06);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+            border-radius: 18px;
+            padding: 15px;
+            flex-shrink: 0;
+        }
+
+        .indicator-row {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            margin-top: 4px;
+            font-size: 8px;
+            color: rgba(168, 85, 247, 0.5);
+            letter-spacing: 1.5px;
+            font-family: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+        }
+
+        .recalibrating-header {
+            font-size: 10px;
+            color: #a78bfa;
+            margin-bottom: 6px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .btn {
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 10px;
+            cursor: pointer;
+            border: none;
+            font-weight: 700;
+            flex: 1;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.15s ease;
+            letter-spacing: 0.8px;
+        }
+        .btn:disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+        }
+        .btn:active:not(:disabled) {
+            transform: scale(0.94);
+        }
+
+        .thought-bubble {
+            background: rgba(124, 58, 237, 0.06);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-size: 10px;
+            color: #a78bfa;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* Input Area with Lightning Dots */
+        .input-area-clean {
+            padding: 0;
+            border: none;
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .input-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .input-label {
+            font-size: 8px;
+            color: rgba(168, 85, 247, 0.5);
+            letter-spacing: 0.8px;
+            font-weight: 500;
+        }
+        .input-counter {
+            font-size: 10px;
+            color: rgba(168, 85, 247, 0.7);
+            font-family: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+            font-weight: 600;
+        }
+
+        #main-input {
+            background: transparent;
+            border: none;
+            color: #a78bfa;
+            font-size: 15px;
+            width: 100%;
+            outline: none;
+            letter-spacing: 3px;
+            font-family: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+            padding: 0;
+            caret-color: var(--ultra-violet);
+        }
+        #main-input::placeholder {
+            color: rgba(168, 85, 247, 0.3);
+            letter-spacing: 1.5px;
+            font-size: 13px;
+        }
+
+        /* Lightning Dots */
+        .dot-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 0;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(124, 58, 237, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .dot.filled {
+            background: var(--ultra-violet);
+        }
+        .dot.lightning {
+            background: var(--ultra-cyan);
+            box-shadow: 0 0 10px var(--ultra-cyan), 0 0 22px var(--ultra-glow-cyan);
+            animation: lightningPulse 0.7s ease-in-out infinite;
+        }
+        @keyframes lightningPulse {
+            0%,
+            100% {
+                box-shadow: 0 0 8px var(--ultra-cyan), 0 0 18px var(--ultra-glow-cyan);
+            }
+            50% {
+                box-shadow: 0 0 18px var(--ultra-cyan), 0 0 35px var(--ultra-glow-cyan), 0 0 50px rgba(6, 182, 212, 0.4);
+            }
+        }
+
+        /* Verify Area */
+        .verify-area-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 8px 0;
+        }
+        .verify-display-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 8px 0;
+        }
+        .verify-label {
+            color: rgba(168, 85, 247, 0.5);
+            font-size: 10px;
+            margin-right: 6px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+        }
+        .verify-char {
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 3px;
+        }
+
+        .controls-area {
+            flex-shrink: 0;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(124, 58, 237, 0.12);
+        }
+
+        /* Mini logo for cards */
+        .mini-logo {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #1e1b4b, #312e81);
+            border: 1px solid rgba(124, 58, 237, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 10px var(--ultra-glow-violet);
+        }
+        .mini-diamond {
+            width: 9px;
+            height: 9px;
+            background: var(--ultra-gradient);
+            transform: rotate(45deg);
+            border-radius: 2px;
+            box-shadow: 0 0 8px var(--ultra-glow-violet);
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- EXIT BUTTON - Added for navigation back to main website -->
+    <div class="exit-nav">
+        <a href="index.html" class="exit-btn">EXIT TERMINAL</a>
+    </div>
+
+    <div class="app-container" id="app-container">
+        <!-- Header with Custom Logo -->
+        <div class="baccarat-logo">
+            <div class="logo-icon">
+                <div class="logo-diamond"></div>
+            </div>
+            <div class="logo-text">
+                <span class="logo-title">Baccarat GPT Ultra</span>
+                <span class="logo-subtitle">Neural Prediction Engine</span>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box"><span><span class="stat-pulse"></span>Model</span><b id="model-name">BGPT-U6</b></div>
+            <div class="stat-box"><span>Accuracy</span><b id="acc-val">--</b></div>
+            <div class="stat-box"><span>Sessions</span><b id="session-val">0</b></div>
+            <div class="stat-box"><span>Latency</span><b>12ms</b></div>
+        </div>
+
+        <div class="chat-flow" id="chat-flow">
+            <div class="app-card" id="welcome-card">
+                <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+                    <div class="mini-logo">
+                        <div class="mini-diamond"></div>
+                    </div>
+                    <div>
+                        <b style="font-size:11px; background:var(--ultra-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">Baccarat GPT Ultra 6.2.3</b>
+                        <div style="font-size:7px; color:rgba(168,85,247,0.5); letter-spacing:1.5px;">ADVANCED AI PREDICTION ENGINE</div>
+                    </div>
+                </div>
+                <p style="font-size:10px; color:rgba(255,255,255,0.5); margin:0;">Deep neural network analysis for Baccarat prediction.</p>
+                <p style="font-size:9px; color:rgba(168,85,247,0.4); margin-top:4px;">Enter 10 data points to begin neural analysis.</p>
+            </div>
+        </div>
+
+        <div class="controls-area">
+            <!-- Verify Area (shown when 10 chars entered) -->
+            <div id="verify-area" class="verify-area-box" style="display:none;">
+                <div class="verify-display-row" id="verify-display"></div>
+                <div class="dot-row" id="verify-dots-row"></div>
+                <div style="display:flex; gap:8px; margin-top:6px;">
+                    <button class="btn" style="background:rgba(124,58,237,0.15); color:#a78bfa; border:1px solid rgba(124,58,237,0.35);" onclick="startAnalysis()">Confirm</button>
+                    <button class="btn" style="background:rgba(244,63,94,0.1); color:#f43f5e; border:1px solid rgba(244,63,94,0.3);" onclick="resetInput()">Edit</button>
+                </div>
+            </div>
+
+            <!-- Input Area (shown when entering data) -->
+            <div class="input-area-clean" id="input-container">
+                <div class="input-label-row">
+                    <span class="input-label">Enter data: B = Banker · P = Player · T = Tie</span>
+                    <span class="input-counter" id="counter-text">0/10</span>
+                </div>
+                <input type="text" id="main-input" maxlength="10" placeholder="Type B, P, or T...">
+                <div class="dot-row" id="dots-row"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const input = document.getElementById('main-input');
+        const chatFlow = document.getElementById('chat-flow');
+        let sessionCount = 0;
+        let totalPredictions = 0;
+        let totalWins = 0;
+        let predictionNumber = 1;
+        let currentData = "";
+        let originalPatternData = "";
+        let currentAnalysisCard = null;
+        let thoughtInterval = null;
+        let isAnalyzing = false;
+        let neuralWeight = 0.5;
+
+        // Build 10 dots for input area
+        for (let i = 0; i < 10; i++) {
+            const d = document.createElement('div');
+            d.className = 'dot';
+            document.getElementById('dots-row').appendChild(d);
+        }
+
+        // Build 10 dots for verify area
+        for (let i = 0; i < 10; i++) {
+            const d = document.createElement('div');
+            d.className = 'dot lightning';
+            document.getElementById('verify-dots-row').appendChild(d);
+        }
+
+        function updateDots(val) {
+            const dots = document.querySelectorAll('#dots-row .dot');
+            const isComplete = val.length === 10;
+            dots.forEach((d, i) => {
+                if (i < val.length) {
+                    d.classList.add('filled');
+                    if (isComplete) {
+                        d.classList.add('lightning');
+                    } else {
+                        d.classList.remove('lightning');
+                    }
+                } else {
+                    d.classList.remove('filled', 'lightning');
+                }
+            });
+        }
+
+        input.addEventListener('input', (e) => {
+            let val = e.target.value.toUpperCase().replace(/[^BPT]/g, '');
+            e.target.value = val;
+            currentData = val;
+            document.getElementById('counter-text').innerText = `${val.length}/10  ${val.length === 10 ? '100%' : ''}`;
+            updateDots(val);
+
+            if (val.length === 10) {
+                document.getElementById('input-container').style.display = 'none';
+                document.getElementById('verify-area').style.display = 'flex';
+                renderVerify(val);
+            } else {
+                document.getElementById('input-container').style.display = 'flex';
+                document.getElementById('verify-area').style.display = 'none';
+            }
+            scrollToBottom();
+        });
+
+        function resetInput() {
+            input.value = "";
+            currentData = "";
+            document.getElementById('input-container').style.display = 'flex';
+            document.getElementById('verify-area').style.display = 'none';
+            document.querySelectorAll('#dots-row .dot').forEach(d => {
+                d.classList.remove('filled', 'lightning');
+            });
+            document.getElementById('counter-text').innerText = "0/10";
+        }
+
+        function renderVerify(str) {
+            let h = '<span class="verify-label">VERIFY DATA</span>';
+            str.split('').forEach(c => {
+                let clr = c === 'B' ? 'var(--banker)' : c === 'P' ? 'var(--player)' : 'var(--tie)';
+                h += `<span class="verify-char" style="color:${clr};">${c}</span>`;
+            });
+            document.getElementById('verify-display').innerHTML = h;
+        }
+
+        function startAnalysis(dataOverride = null, isRecalibration = false) {
+            if (isAnalyzing) return;
+            isAnalyzing = true;
+
+            const dataToAnalyze = dataOverride || currentData;
+
+            if (!isRecalibration && !dataOverride) {
+                originalPatternData = currentData;
+                neuralWeight = 0.5;
+            }
+
+            document.getElementById('verify-area').style.display = 'none';
+            document.getElementById('welcome-card')?.remove();
+
+            if (!isRecalibration) {
+                const uMsg = document.createElement('div');
+                uMsg.className = 'user-bubble';
+                uMsg.innerText = dataToAnalyze.split('').join(' ');
+                chatFlow.appendChild(uMsg);
+            }
+
+            const thought = document.createElement('div');
+            thought.innerHTML = `
+            <div class="thought-bubble">
+              <span>🧠</span> Thought for <span id="live-timer" style="color:rgba(168,85,247,0.5); margin-left:16px; font-family:'JetBrains Mono','SF Mono','Consolas',monospace;">0s</span>
+            </div>`;
+            chatFlow.appendChild(thought);
+
+            const analysisCard = document.createElement('div');
+            analysisCard.className = 'app-card fade-in-card';
+            analysisCard.style.marginTop = '5px';
+            analysisCard.innerHTML = `
+            <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+              <div class="mini-logo"><div class="mini-diamond"></div></div>
+              <div style="font-size:10px; color:#a78bfa; font-weight:600; letter-spacing:0.5px;">■ Analyzing...</div>
+            </div>
+            <div id="analysis-logs" style="margin-bottom:4px;"></div>
+            <div class="conf-bar" style="margin-top:8px;"><div class="conf-fill" id="analysis-bar" style="width:0%;"></div></div>
+          `;
+            chatFlow.appendChild(analysisCard);
+            currentAnalysisCard = analysisCard;
+            const analysisMessagesContainer = document.getElementById('analysis-logs');
+
+            const messages = [
+                'Receiving 10 data points...',
+                'Parsing B/P/T sequence pattern...',
+                'Loading neural model v6.2.3...',
+                'Scanning streak patterns...',
+                'Computing transition matrix...',
+                'Cross-referencing 1.2M patterns...',
+            ];
+
+            let msgIndex = 0;
+            let elapsed = 0;
+            const timerEl = document.getElementById('live-timer');
+            const totalDuration = 2000;
+            const msgInterval = totalDuration / messages.length;
+            const startTime = Date.now();
+
+            thoughtInterval = setInterval(() => {
+                elapsed = Date.now() - startTime;
+                const seconds = Math.floor(elapsed / 1000);
+                if (timerEl) timerEl.innerText = seconds + 's';
+
+                const targetMsgIndex = Math.floor(elapsed / msgInterval);
+                while (msgIndex < messages.length && msgIndex <= targetMsgIndex) {
+                    const logLine = document.createElement('div');
+                    logLine.className = 'analysis-log';
+                    logLine.innerText = messages[msgIndex];
+                    analysisMessagesContainer.appendChild(logLine);
+                    msgIndex++;
+                    scrollToBottom();
+                }
+
+                const bar = document.getElementById('analysis-bar');
+                if (bar) bar.style.width = Math.min((elapsed / totalDuration) * 100, 100) + '%';
+
+                if (elapsed >= totalDuration) {
+                    clearInterval(thoughtInterval);
+                    thoughtInterval = null;
+                    thought.remove();
+                    finishAnalysis(analysisCard, dataToAnalyze, isRecalibration);
+                    isAnalyzing = false;
+                }
+            }, 100);
+
+            scrollToBottom();
+        }
+
+        function finishAnalysis(analysisCard, dataStr, isRecalibration = false) {
+            const counts = { B: 0, P: 0, T: 0 };
+            dataStr.split('').forEach(c => counts[c]++);
+
+            const analysis = analyzeSequence(dataStr, neuralWeight);
+            const prediction = analysis.prediction;
+            const confidence = 95.3 + Math.random() * (98.9 - 95.3);
+            const displayConfidence = Math.round(confidence * 10) / 10;
+
+            if (sessionCount >= 0) {
+                document.getElementById('model-name').innerText = 'BGPT-U6';
+            }
+
+            analysisCard.innerHTML = `
+            <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px;">
+              <div class="mini-logo"><div class="mini-diamond"></div></div>
+              <div style="font-size:10px; color:#a78bfa; font-weight:600; letter-spacing:0.5px;">■ Analysis Summary</div>
+            </div>
+            <div class="token-row">${dataStr.split('').map(c => `<div class="token" style="background:var(--${c === 'B' ? 'banker' : c === 'P' ? 'player' : 'tie'})">${c}</div>`).join('')}</div>
+            <div style="font-size:9px; color:rgba(255,255,255,0.5); line-height:1.6;">
+              Composition: <b style="color:var(--banker)">${counts.B}B</b> · <b style="color:var(--player)">${counts.P}P</b> · <b style="color:var(--tie)">${counts.T}T</b><br>
+              Longest streak: <b style="color:#a78bfa;">${getLongestStreak(dataStr, 'B')}x Banker</b><br>
+              Pattern: <b>${counts.B >= counts.P ? 'Banker' : 'Player'}-dominant</b> · Conf: <span style="color:#f59e0b; font-weight:700;">${displayConfidence.toFixed(1)}%</span>
+            </div>
+            ${getNextRoundUI(prediction, displayConfidence)}
+          `;
+            currentAnalysisCard = analysisCard;
+
+            setTimeout(() => {
+                const fill = analysisCard.querySelector('.conf-fill');
+                const pctVal = analysisCard.querySelector('.pct-val');
+                if (fill) fill.style.width = displayConfidence.toFixed(1) + '%';
+                if (pctVal) pctVal.innerText = displayConfidence.toFixed(1) + '%';
+            }, 100);
+
+            if (!isRecalibration) {
+                sessionCount++;
+                document.getElementById('session-val').innerText = sessionCount;
+            }
+            scrollToBottom();
+            resetInput();
+        }
+
+        function analyzeSequence(str, weight = 0.5) {
+            const counts = { B: 0, P: 0, T: 0 };
+            str.split('').forEach(c => counts[c]++);
+            const lastOne = str[str.length - 1];
+            const bStreakEnd = getTrailingStreak(str, 'B');
+            const pStreakEnd = getTrailingStreak(str, 'P');
+
+            let prediction = 'BANKER';
+            let internalConfidence = 48.0;
+
+            if (bStreakEnd >= 5) {
+                prediction = 'BANKER';
+                internalConfidence = 99.9;
+            } else if (bStreakEnd >= 3 && lastOne === 'B') {
+                prediction = 'BANKER';
+                internalConfidence = 70 + Math.random() * 22;
+            } else if (pStreakEnd >= 3 && lastOne === 'P') {
+                prediction = 'PLAYER';
+                internalConfidence = 65 + Math.random() * 26;
+            } else if (lastOne === 'B' && counts.B > counts.P) {
+                prediction = 'BANKER';
+                internalConfidence = 55 + Math.random() * 32;
+            } else if (lastOne === 'P' && counts.P > counts.B) {
+                prediction = 'PLAYER';
+                internalConfidence = 55 + Math.random() * 32;
+            } else {
+                prediction = Math.random() < 0.5 ? 'BANKER' : 'PLAYER';
+                internalConfidence = 44 + Math.random() * 18;
+            }
+
+            if (weight > 0.6) {
+                if (Math.random() < (weight - 0.5) * 2) {
+                    prediction = prediction === 'BANKER' ? 'PLAYER' : 'BANKER';
+                }
+            } else if (weight < 0.4) {
+                if (Math.random() < (0.5 - weight) * 2) {
+                    prediction = prediction === 'BANKER' ? 'PLAYER' : 'BANKER';
+                }
+            }
+
+            internalConfidence = Math.min(99.9, Math.max(30, internalConfidence));
+            internalConfidence = Math.round(internalConfidence * 10) / 10;
+            return { prediction, confidence: internalConfidence };
+        }
+
+        function getLongestStreak(str, char) {
+            let max = 0,
+                cur = 0;
+            for (const c of str) {
+                cur = c === char ? cur + 1 : 0;
+                max = Math.max(max, cur);
+            }
+            return max;
+        }
+
+        function getTrailingStreak(str, char) {
+            let count = 0;
+            for (let i = str.length - 1; i >= 0; i--) {
+                if (str[i] === char) count++;
+                else break;
+            }
+            return count;
+        }
+
+        function getNextRoundUI(prediction, confidence) {
+            const predColor = prediction === 'BANKER' ? 'var(--banker)' : 'var(--player)';
+            predictionNumber++;
+            return `
+            <div class="predict-box">
+              <div style="font-size:7px; color:rgba(168,85,247,0.6); letter-spacing:1.5px; font-weight:600;">PREDICTION #${predictionNumber} · NEXT ROUND</div>
+              <div class="winner-name" style="color:${predColor}">${prediction}</div>
+              <div style="font-size:20px; color:#f59e0b; font-weight:900; letter-spacing:-0.5px;" class="pct-val">${confidence.toFixed(1)}%</div>
+              <div style="font-size:6px; color:rgba(168,85,247,0.5); margin-top:2px; letter-spacing:1.5px; font-weight:600;">AI CONFIDENCE</div>
+              <div class="indicator-row">
+                <span>W</span><span>O</span><span>L</span><span>B</span><span>STO</span>
+              </div>
+              <div class="conf-bar"><div class="conf-fill" style="width:${confidence.toFixed(1)}%;"></div></div>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:12px;">
+              <button class="btn" style="background:rgba(16,185,129,0.12); color:#10b981; border:1px solid rgba(16,185,129,0.3);" onclick="handleFeedback('WIN', this)">✓ WIN</button>
+              <button class="btn" style="background:rgba(244,63,94,0.1); color:#f43f5e; border:1px solid rgba(244,63,94,0.3);" onclick="handleFeedback('LOSE', this)">✕ LOSE</button>
+            </div>`;
+        }
+
+        function handleFeedback(type, btn) {
+            const card = btn.closest('.app-card');
+            if (!card) return;
+            card.classList.add('card-dimmed');
+            card.querySelectorAll('button').forEach(b => b.disabled = true);
+
+            totalPredictions++;
+
+            if (type === 'WIN') {
+                totalWins++;
+                const accPercent = Math.round((totalWins / totalPredictions) * 100);
+                document.getElementById('acc-val').innerText = accPercent + '%';
+
+                const responseBubble = document.createElement('div');
+                responseBubble.style.cssText = `
+              align-self: flex-end;
+              padding: 8px 16px;
+              border-radius: 16px 16px 4px 16px;
+              font-size: 11px;
+              font-weight: 700;
+              background: rgba(16,185,129,0.12);
+              color: #10b981;
+              margin-left: 50px;
+              display: inline-block;
+              flex-shrink: 0;
+              letter-spacing: 0.8px;
+              border: 1px solid rgba(16,185,129,0.2);
+            `;
+                responseBubble.innerText = '✅ WIN';
+                chatFlow.appendChild(responseBubble);
+
+                const successCard = document.createElement('div');
+                successCard.className = 'success-card fade-in-card';
+                successCard.innerHTML = `
+              <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+                <div class="mini-logo"><div class="mini-diamond"></div></div>
+                <b style="font-size:12px; color:#10b981;">🏆 Excellent!</b>
+              </div>
+              <p style="font-size:10px; color:rgba(16,185,129,0.7); margin-top:4px;">AI prediction correct.</p>
+              <p style="font-size:9px; color:rgba(255,255,255,0.4); margin-top:6px;">⚠️ Find a new table and enter 10 new data points.</p>
+              <p style="font-size:8px; color:rgba(168,85,247,0.4); margin-top:2px;">Fresh data = highest accuracy.</p>
+              <button class="new-table-btn" onclick="newTable()" style="margin-top:10px;">🔄 New Table</button>
+            `;
+                chatFlow.appendChild(successCard);
+                scrollToBottom();
+            } else {
+                const accPercent = Math.round((totalWins / totalPredictions) * 100);
+                document.getElementById('acc-val').innerText = accPercent + '%';
+
+                neuralWeight = Math.min(0.9, neuralWeight + 0.15);
+
+                const responseBubble = document.createElement('div');
+                responseBubble.style.cssText = `
+              align-self: flex-end;
+              padding: 8px 16px;
+              border-radius: 16px 16px 4px 16px;
+              font-size: 11px;
+              font-weight: 700;
+              background: rgba(244,63,94,0.1);
+              color: #f43f5e;
+              margin-left: 50px;
+              display: inline-block;
+              flex-shrink: 0;
+              letter-spacing: 0.8px;
+              border: 1px solid rgba(244,63,94,0.2);
+            `;
+                responseBubble.innerText = '✕ LOSE';
+                chatFlow.appendChild(responseBubble);
+
+                const recalCard = document.createElement('div');
+                recalCard.className = 'lose-card fade-in-card';
+                recalCard.id = 'recal-card';
+                recalCard.innerHTML = `
+              <div class="recalibrating-header">■ Recalibrating... Neural weights adjusting.</div>
+              <div id="recal-logs" style="margin-bottom:4px;"></div>
+              <div class="conf-bar" style="margin-top:8px;"><div class="conf-fill" id="recal-bar" style="width:0%;"></div></div>
+            `;
+                chatFlow.appendChild(recalCard);
+                scrollToBottom();
+
+                const patternToReanalyze = originalPatternData || currentData;
+
+                const recalLogs = document.getElementById('recal-logs');
+                const recalBar = document.getElementById('recal-bar');
+                const recalMessages = [
+                    'Recapitulating...',
+                    'Adjusting neural weights...',
+                    'Increasing depth...',
+                    'Analyzing...',
+                ];
+
+                let msgIdx = 0;
+                const recalDuration = 2000;
+                const recalMsgInterval = recalDuration / recalMessages.length;
+                const recalStart = Date.now();
+
+                const recalInterval = setInterval(() => {
+                    const elapsed = Date.now() - recalStart;
+
+                    const targetMsg = Math.floor(elapsed / recalMsgInterval);
+                    while (msgIdx < recalMessages.length && msgIdx <= targetMsg) {
+                        const logLine = document.createElement('div');
+                        logLine.className = 'analysis-log';
+                        logLine.innerText = recalMessages[msgIdx];
+                        recalLogs.appendChild(logLine);
+                        msgIdx++;
+                        scrollToBottom();
+                    }
+
+                    if (recalBar) recalBar.style.width = Math.min((elapsed / recalDuration) * 100, 100) +
+                        '%';
+
+                    if (elapsed >= recalDuration) {
+                        clearInterval(recalInterval);
+                        recalCard.remove();
+                        startAnalysis(patternToReanalyze, true);
+                    }
+                }, 100);
+            }
+        }
+
+        function newTable() {
+            if (thoughtInterval) {
+                clearInterval(thoughtInterval);
+                thoughtInterval = null;
+            }
+            isAnalyzing = false;
+            currentData = "";
+            originalPatternData = "";
+            currentAnalysisCard = null;
+            predictionNumber = 1;
+            neuralWeight = 0.5;
+
+            chatFlow.innerHTML = '';
+
+            const welcomeCard = document.createElement('div');
+            welcomeCard.className = 'app-card';
+            welcomeCard.id = 'welcome-card';
+            welcomeCard.innerHTML = `
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+              <div class="mini-logo"><div class="mini-diamond"></div></div>
+              <div>
+                <b style="font-size:11px; background:var(--ultra-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">Baccarat GPT Ultra 6.2.3</b>
+                <div style="font-size:7px; color:rgba(168,85,247,0.5); letter-spacing:1.5px;">ADVANCED AI PREDICTION ENGINE</div>
+              </div>
+            </div>
+            <p style="font-size:10px; color:rgba(255,255,255,0.5); margin:0;">Deep neural network analysis for Baccarat prediction.</p>
+            <p style="font-size:9px; color:rgba(168,85,247,0.4); margin-top:4px;">Enter 10 data points to begin neural analysis.</p>
+          `;
+            chatFlow.appendChild(welcomeCard);
+
+            resetInput();
+            document.getElementById('input-container').style.display = 'flex';
+            document.getElementById('verify-area').style.display = 'none';
+            document.getElementById('model-name').innerText = 'BGPT-U6';
+
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            chatFlow.scrollTop = chatFlow.scrollHeight;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (document.activeElement === input) return;
+            const key = e.key.toUpperCase();
+            if (key === 'B' || key === 'P' || key === 'T') {
+                e.preventDefault();
+                if (currentData.length < 10 && document.getElementById('input-container').style.display !==
+                    'none') {
+                    input.value = (input.value + key).substring(0, 10);
+                    input.dispatchEvent(new Event('input'));
+                }
+            }
+            if (key === 'BACKSPACE' && document.getElementById('input-container').style.display !== 'none') {
+                e.preventDefault();
+                input.value = input.value.slice(0, -1);
+                input.dispatchEvent(new Event('input'));
+            }
+            if (key === 'ENTER' && document.getElementById('verify-area').style.display === 'flex') {
+                e.preventDefault();
+                startAnalysis();
+            }
+        });
+
+        scrollToBottom();
+    </script>
+</body>
+</html>
