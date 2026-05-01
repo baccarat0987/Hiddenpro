@@ -178,6 +178,18 @@
         .select-all-btn:hover {
             background: #3a6a8a;
         }
+        .admin-controls-disabled {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        .login-error {
+            background: #ff4444;
+            color: #000;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -189,53 +201,51 @@
         <div>
             <h1 style="letter-spacing:5px; margin:0;">⚡ ADMIN TERMINAL</h1>
             <p id="adminStatus" style="color: rgb(255, 68, 68); font-size: 11px; margin-top: 5px; font-weight: bold;">🔐 NOT LOGGED IN</p>
+            <div id="loginError" class="login-error"></div>
         </div>
         <button id="adminLoginBtn" style="background:#fff; color:#000; border:none; padding:10px 20px; border-radius:8px; font-weight:bold; cursor:pointer;">🔑 ADMIN LOGIN</button>
     </header>
 
-    <!-- Pricing Section -->
-    <div class="pricing-grid">
-        <div class="price-card"><label>💰 1 MONTH (USD)</label><input type="number" id="p1" placeholder="Price"></div>
-        <div class="price-card"><label>💰 3 MONTHS</label><input type="number" id="p3_new"></div>
-        <div class="price-card"><label>💰 1 YEAR</label><input type="number" id="p12_new"></div>
-        <div class="price-card"><label>🌟 LIFETIME</label><input type="number" id="p_life"></div>
-    </div>
-    <button class="save-btn" onclick="updatePricing()">💾 UPDATE PRICES</button>
-
-    <!-- User Management Section -->
-    <div class="user-card">
-        <h2 style="margin-bottom:20px; font-size:20px;">👥 USER ACCESS MANAGEMENT</h2>
-        <div class="add-user-bar">
-            <div class="field-group">
-                <label>📧 EMAIL ADDRESS</label>
-                <input type="email" id="addEmail" placeholder="customer@gmail.com">
-            </div>
-            <div class="field-group">
-                <label>⏱️ DURATION</label>
-                <div class="duration-group">
-                    <input type="number" id="durationValue" value="30" min="1" step="1">
-                    <select id="durationUnit">
-                        <option value="minutes">Minutes</option>
-                        <option value="days" selected>Days</option>
-                    </select>
-                </div>
-                <div class="info-note">💡 Use 999999 for LIFETIME access</div>
-            </div>
-            <button id="grantBtn" style="padding:12px 25px; background:var(--neon); border:none; font-weight:900; border-radius:8px; cursor:pointer;">➕ ACTIVATE & SELECT SOFTWARE</button>
+    <div id="adminContent" style="opacity: 0.5; pointer-events: none;">
+        <!-- Pricing Section -->
+        <div class="pricing-grid">
+            <div class="price-card"><label>💰 1 MONTH (USD)</label><input type="number" id="p1" placeholder="Price"></div>
+            <div class="price-card"><label>💰 3 MONTHS</label><input type="number" id="p3_new"></div>
+            <div class="price-card"><label>💰 1 YEAR</label><input type="number" id="p12_new"></div>
+            <div class="price-card"><label>🌟 LIFETIME</label><input type="number" id="p_life"></div>
         </div>
+        <button class="save-btn" onclick="updatePricing()">💾 UPDATE PRICES</button>
 
-        <div style="overflow-x: auto;">
-            <table style="width: 100%;">
-                <thead>
-                    <tr>
-                        <th>USER EMAIL</th>
-                        <th>TIME REMAINING</th>
-                        <th>ALLOWED SOFTWARE (12 engines)</th>
-                        <th style="text-align:right;">ACTIONS</th>
-                    </tr>
-                </thead>
-                <tbody id="userList"></tbody>
-            </table>
+        <!-- User Management Section -->
+        <div class="user-card">
+            <h2 style="margin-bottom:20px; font-size:20px;">👥 USER ACCESS MANAGEMENT</h2>
+            <div class="add-user-bar">
+                <div class="field-group">
+                    <label>📧 EMAIL ADDRESS</label>
+                    <input type="email" id="addEmail" placeholder="customer@gmail.com">
+                </div>
+                <div class="field-group">
+                    <label>⏱️ DURATION</label>
+                    <div class="duration-group">
+                        <input type="number" id="durationValue" value="30" min="1" step="1">
+                        <select id="durationUnit">
+                            <option value="minutes">Minutes</option>
+                            <option value="days" selected>Days</option>
+                        </select>
+                    </div>
+                    <div class="info-note">💡 Use 999999 for LIFETIME access</div>
+                </div>
+                <button id="grantBtn" style="padding:12px 25px; background:var(--neon); border:none; font-weight:900; border-radius:8px; cursor:pointer;">➕ ACTIVATE & SELECT SOFTWARE</button>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table style="width: 100%;">
+                    <thead>
+                        <tr><th>USER EMAIL</th><th>TIME REMAINING</th><th>ALLOWED SOFTWARE (12 engines)</th><th style="text-align:right;">ACTIONS</th></tr>
+                    </thead>
+                    <tbody id="userList"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -258,7 +268,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
@@ -272,7 +282,10 @@
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
-    // ========== 12 SOFTWARE ENGINES (matches public website exactly) ==========
+    // Enable persistence so login stays
+    setPersistence(auth, browserLocalPersistence).catch(console.error);
+
+    // ========== 12 SOFTWARE ENGINES ==========
     const SOFTWARE_LIST = [
         { id: "engine_1", name: "🔷 Baccarat GPT Ultra" },
         { id: "engine_2", name: "🔶 Viper Roulette" },
@@ -288,23 +301,36 @@
         { id: "engine_12", name: "🔶 Baccarat Neutral Engine" }
     ];
 
-    // UI Elements
     const toast = document.getElementById('successToast');
+    const adminContent = document.getElementById('adminContent');
+    const loginErrorDiv = document.getElementById('loginError');
+    
     function showSuccess(msg) {
         toast.textContent = "✅ " + msg;
         toast.style.display = 'block';
         setTimeout(() => { toast.style.display = 'none'; }, 3000);
     }
 
-    // ========== ADMIN AUTH (only edzelkeith0@gmail.com) ==========
-    let isCheckingAuth = false;
-    
+    function enableAdminFeatures(enable) {
+        if (enable) {
+            adminContent.style.opacity = '1';
+            adminContent.style.pointerEvents = 'auto';
+        } else {
+            adminContent.style.opacity = '0.5';
+            adminContent.style.pointerEvents = 'none';
+        }
+    }
+
+    // ========== ADMIN AUTH ==========
     window.adminLogin = async () => {
         try {
-            await signInWithPopup(auth, provider);
+            loginErrorDiv.style.display = 'none';
+            const result = await signInWithPopup(auth, provider);
+            console.log("Logged in:", result.user.email);
         } catch (err) {
             console.error("Login error:", err);
-            alert("Login failed: " + err.message);
+            loginErrorDiv.innerText = "Login failed: " + err.message;
+            loginErrorDiv.style.display = 'block';
         }
     };
     
@@ -312,6 +338,7 @@
         try {
             await signOut(auth);
             showSuccess("Logged out");
+            enableAdminFeatures(false);
         } catch (err) {
             console.error("Logout error:", err);
         }
@@ -326,33 +353,29 @@
             statusSpan.style.color = "#00ff88";
             loginBtn.innerHTML = "🚪 LOGOUT";
             loginBtn.onclick = () => window.adminLogout();
+            enableAdminFeatures(true);
             console.log("✅ Admin logged in:", user.email);
-            // Enable admin features
-            document.querySelectorAll('.save-btn, #grantBtn, .edit-soft-btn, .remove-btn').forEach(btn => {
-                if (btn) btn.disabled = false;
-            });
         } else if (user && user.email) {
             statusSpan.innerHTML = "⛔ UNAUTHORIZED: " + user.email + " is not admin";
             statusSpan.style.color = "#ff4444";
             loginBtn.innerHTML = "🔑 ADMIN LOGIN";
             loginBtn.onclick = () => window.adminLogin();
-            alert("You are not authorized as admin. Only edzelkeith0@gmail.com can access.");
-            // Auto sign out non-admin users
+            enableAdminFeatures(false);
+            loginErrorDiv.innerText = "You are not authorized. Only edzelkeith0@gmail.com can access.";
+            loginErrorDiv.style.display = 'block';
+            // Sign out non-admin users
             signOut(auth);
         } else {
             statusSpan.innerHTML = "🔐 NOT LOGGED IN - Please login as admin (edzelkeith0@gmail.com)";
             statusSpan.style.color = "#ff8888";
             loginBtn.innerHTML = "🔑 ADMIN LOGIN";
             loginBtn.onclick = () => window.adminLogin();
+            enableAdminFeatures(false);
             console.log("No user logged in");
-            // Disable admin features
-            document.querySelectorAll('.save-btn, #grantBtn, .edit-soft-btn, .remove-btn').forEach(btn => {
-                if (btn) btn.disabled = true;
-            });
         }
     });
 
-    // ========== PRICING (from Firestore) ==========
+    // ========== PRICING ==========
     (async () => {
         try {
             const pDoc = await getDoc(doc(db, "settings", "pricing"));
@@ -385,7 +408,7 @@
         }
     };
 
-    // ========== DURATION HELPER (Minutes or Days) ==========
+    // ========== DURATION HELPER ==========
     function getExpiryFromDuration(value, unit) {
         const num = parseInt(value);
         if (isNaN(num) || num <= 0) return Date.now() + 60000;
@@ -461,7 +484,6 @@
         renderSoftwareCheckboxes();
         modalError.style.display = 'none';
         modal.style.display = 'flex';
-        console.log("Modal opened for new user:", email);
     };
 
     async function openEditSoftwareModal(email, currentSoftwareArray) {
@@ -473,7 +495,6 @@
         renderSoftwareCheckboxes();
         modalError.style.display = 'none';
         modal.style.display = 'flex';
-        console.log("Modal opened for edit user:", email);
     }
 
     function closeModal() {
@@ -502,7 +523,6 @@
                     allowedSoftware: selectedSoftwareIds
                 });
                 showSuccess(`Updated software access for ${pendingEmail}`);
-                console.log("Updated software for", pendingEmail);
             } else {
                 const expiry = getExpiryFromDuration(pendingDurationValue, pendingDurationUnit);
                 await setDoc(doc(db, "users", pendingEmail), {
@@ -515,7 +535,6 @@
                 document.getElementById('durationValue').value = "30";
                 document.getElementById('durationUnit').value = "days";
                 showSuccess(`✅ User ${pendingEmail} activated with ${selectedSoftwareIds.length} software(s)`);
-                console.log("Created user", pendingEmail);
             }
             closeModal();
         } catch (err) {
