@@ -741,6 +741,7 @@
     let isPremiumActive = false;
     let currentExpiryTimestamp = null;
     let expiryCheckInterval = null;
+    let isCheckingLicense = false; // Prevent multiple checks
 
     function showLuxuryLoadingAndRedirect(redirectUrl) {
         return new Promise((resolve) => {
@@ -767,7 +768,7 @@
     function showContactAdminAlert(softwareName) {
         alert(`⛔ Contact admin: you don't have permission for ${softwareName}.`);
         statusMsg.textContent = "ACCESS DENIED · CONTACT ADMIN";
-        setTimeout(() => { if (currentUserEmail && isPremiumActive) statusMsg.textContent = `PREMIUM: ${currentUserEmail}`; else statusMsg.textContent = "CORE: OFFLINE"; }, 2000);
+        setTimeout(() => { if (currentUserEmail && isPremiumActive) statusMsg.textContent = `PREMIUM: ${currentUserEmail}`; else statusMsg.textContent = "LOGGED IN · FREE TIER"; }, 2000);
     }
 
     async function engineClickHandler(e) {
@@ -784,7 +785,7 @@
             return;
         }
         
-        // STEP 2: Logged in but not premium? Show pricing overlay
+        // STEP 2: Logged in but not premium? Show pricing overlay (NO AUTO LOGOUT)
         if (!isPremiumActive) {
             openPricing();
             return;
@@ -802,18 +803,14 @@
 
     // BUTTONS ARE ALWAYS CLICKABLE - no disabled state
     function updateButtonsByPermission() {
-        // This function now only updates visual badges/indicators if needed
-        // But buttons remain clickable at all times
         document.querySelectorAll('.engine-trigger').forEach(btn => {
             const engineId = btn.getAttribute('data-engine-id');
             const isAllowed = currentUserAllowedSet.has(engineId);
-            // Only change opacity for visual feedback, but NEVER disable
             if (!isAllowed && auth.currentUser && isPremiumActive) {
                 btn.style.opacity = '0.7';
             } else {
                 btn.style.opacity = '1';
             }
-            // NEVER disable the button - always clickable
             btn.disabled = false;
             btn.style.cursor = 'pointer';
         });
@@ -826,7 +823,7 @@
         if (now >= currentExpiryTimestamp) {
             console.log("Expiry reached, logging out...");
             await signOut(auth);
-            alert("Your subscription has expired. You have been logged out.");
+            alert("Your premium subscription has expired. You have been logged out.");
             currentUserAllowedSet.clear();
             isPremiumActive = false;
             currentUserEmail = null;
@@ -842,61 +839,72 @@
     }
 
     async function fetchAndSetUserData(userEmail) {
-        const userDocRef = doc(db, "users", userEmail);
-        const userSnap = await getDoc(userDocRef);
-        if (userSnap.exists()) {
-            const userData = userSnap.data();
-            const expiry = userData.expiry;
-            const allowed = userData.allowedSoftware || [];
-            currentUserAllowedSet = new Set(allowed);
-            if (expiry === 'LIFETIME') {
-                isPremiumActive = true;
-                currentExpiryTimestamp = 'LIFETIME';
-                premiumBadge.style.display = "inline-block";
-                statusMsg.textContent = `PREMIUM (LIFETIME) · ${userEmail}`;
-            } else if (typeof expiry === 'number') {
-                currentExpiryTimestamp = expiry;
-                if (Date.now() < expiry) {
+        if (isCheckingLicense) return;
+        isCheckingLicense = true;
+        
+        try {
+            const userDocRef = doc(db, "users", userEmail);
+            const userSnap = await getDoc(userDocRef);
+            
+            if (userSnap.exists()) {
+                const userData = userSnap.data();
+                const expiry = userData.expiry;
+                const allowed = userData.allowedSoftware || [];
+                currentUserAllowedSet = new Set(allowed);
+                
+                if (expiry === 'LIFETIME') {
                     isPremiumActive = true;
+                    currentExpiryTimestamp = 'LIFETIME';
                     premiumBadge.style.display = "inline-block";
-                    statusMsg.textContent = `PREMIUM ACTIVE · ${userEmail}`;
+                    statusMsg.textContent = `PREMIUM (LIFETIME) · ${userEmail}`;
+                } else if (typeof expiry === 'number') {
+                    currentExpiryTimestamp = expiry;
+                    if (Date.now() < expiry) {
+                        isPremiumActive = true;
+                        premiumBadge.style.display = "inline-block";
+                        statusMsg.textContent = `PREMIUM ACTIVE · ${userEmail}`;
+                    } else {
+                        // Expired premium - stay logged in but mark as non-premium
+                        isPremiumActive = false;
+                        currentExpiryTimestamp = null;
+                        premiumBadge.style.display = "none";
+                        statusMsg.textContent = `FREE TIER · ${userEmail} (premium expired)`;
+                        // DO NOT LOGOUT - just show as free tier
+                    }
                 } else {
                     isPremiumActive = false;
+                    currentExpiryTimestamp = null;
                     premiumBadge.style.display = "none";
-                    statusMsg.textContent = "EXPIRED · PLEASE RENEW";
-                    await signOut(auth);
-                    alert("Your subscription has expired. You have been logged out.");
-                    return;
+                    statusMsg.textContent = `FREE TIER · ${userEmail}`;
                 }
             } else {
+                // No license found - stay logged in as free tier user
                 isPremiumActive = false;
+                currentUserAllowedSet.clear();
                 currentExpiryTimestamp = null;
                 premiumBadge.style.display = "none";
-                statusMsg.textContent = "INVALID LICENSE";
-                await signOut(auth);
-                return;
+                statusMsg.textContent = `FREE TIER · ${userEmail} (no license)`;
+                // DO NOT LOGOUT - just show as free tier
             }
-        } else {
-            isPremiumActive = false;
-            currentUserAllowedSet.clear();
-            currentExpiryTimestamp = null;
-            premiumBadge.style.display = "none";
-            statusMsg.textContent = "NO LICENSE · CONTACT ADMIN";
-            await signOut(auth);
-            alert("No active license found. Please contact admin.");
-            return;
-        }
-        updateButtonsByPermission();
-        if (expiryCheckInterval) clearInterval(expiryCheckInterval);
-        if (isPremiumActive && currentExpiryTimestamp !== 'LIFETIME') {
-            expiryCheckInterval = setInterval(checkExpiryAndLogout, 30000);
+            
+            updateButtonsByPermission();
+            
+            if (expiryCheckInterval) clearInterval(expiryCheckInterval);
+            if (isPremiumActive && currentExpiryTimestamp !== 'LIFETIME' && currentExpiryTimestamp) {
+                expiryCheckInterval = setInterval(checkExpiryAndLogout, 30000);
+            }
+        } catch (err) {
+            console.error("Error fetching user data:", err);
+            statusMsg.textContent = `⚠️ ERROR: ${err.message}`;
+        } finally {
+            isCheckingLicense = false;
         }
     }
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUserEmail = user.email.toLowerCase();
-            statusMsg.textContent = `AUTHENTICATING: ${currentUserEmail}`;
+            statusMsg.textContent = `WELCOME: ${currentUserEmail}`;
             authBtnText.textContent = "LOGOUT";
             topAuthBtn.classList.add('logged-in');
             await fetchAndSetUserData(currentUserEmail);
