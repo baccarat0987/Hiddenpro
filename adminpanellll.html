@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HIDDEN PRO | COMMAND CENTER</title>
+    <title>ADMIN PANEL | Software Access Controller</title>
     <style>
         :root { --neon:#00ffff; --panel-bg: rgba(6,11,25,0.9); --danger: #ff4444; --success: #00ff88; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family:'Segoe UI',sans-serif; background:#000; color:#fff; padding:20px; min-height:100vh; }
         body::before { content:""; position:fixed; inset:0; background: radial-gradient(circle at 50% 50%, #001f3f 0%, #000 100%); z-index:-1; }
-        .container { max-width: 1200px; margin: 0 auto; }
+        .container { max-width: 1400px; margin: 0 auto; }
 
-        /* Notifications */
         #successToast {
             position: fixed; top: 20px; right: 20px; background: var(--neon); color: #000;
             padding: 15px 30px; border-radius: 8px; font-weight: 900; letter-spacing: 2px;
@@ -20,7 +19,6 @@
         }
         @keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
 
-        /* UI Elements */
         .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .price-card { background: var(--panel-bg); border: 1px solid #333; padding: 20px; border-radius: 12px; }
         label { display: block; font-size: 10px; color: var(--neon); margin-bottom: 8px; letter-spacing: 2px; font-weight: bold; }
@@ -28,182 +26,547 @@
         
         .save-btn { background: var(--neon); color: #000; border: none; padding: 15px; width: 100%; font-weight: 900; border-radius: 6px; cursor: pointer; text-transform: uppercase; }
         .user-card { background: var(--panel-bg); border: 1px solid #222; border-radius: 15px; padding: 25px; margin-top: 40px; }
-        .add-user-bar { display: flex; gap: 15px; margin-bottom: 30px; align-items: flex-end; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; }
+        .add-user-bar { display: flex; gap: 15px; margin-bottom: 30px; align-items: flex-end; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; flex-wrap: wrap; }
+        .field-group { flex: 1; min-width: 180px; }
+        .duration-group { display: flex; gap: 10px; align-items: center; }
+        .duration-group input { flex: 2; margin-bottom: 0; }
+        .duration-group select { flex: 1; margin-bottom: 0; }
 
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; color: #555; font-size: 11px; padding: 15px; border-bottom: 1px solid #222; }
-        td { padding: 18px 15px; border-bottom: 1px solid #111; font-size: 14px; }
+        td { padding: 18px 15px; border-bottom: 1px solid #111; font-size: 14px; vertical-align: middle; }
         .timer-text { font-family: monospace; color: var(--neon); font-weight: bold; }
+        .software-badge {
+            background: #0a2a3a;
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 11px;
+            display: inline-block;
+            margin: 3px 5px 3px 0;
+            color: #aaffdd;
+        }
+        .edit-soft-btn {
+            background: #2a4a6a;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            margin-right: 8px;
+            font-size: 11px;
+        }
+        .remove-btn {
+            background: none;
+            border: 1px solid #ff6666;
+            color: #ff8888;
+            padding: 6px 12px;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(12px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #0b1120;
+            border-radius: 24px;
+            max-width: 750px;
+            width: 90%;
+            padding: 30px;
+            border: 1px solid #00ffff;
+            box-shadow: 0 0 40px rgba(0,255,255,0.2);
+        }
+        .software-check-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+            max-height: 450px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .software-check-item {
+            background: #1a2335;
+            padding: 10px 14px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .software-check-item:hover {
+            background: #2a3a55;
+        }
+        .software-check-item input {
+            width: 20px;
+            height: 20px;
+            margin: 0;
+            accent-color: #0ff;
+            cursor: pointer;
+        }
+        .software-check-item label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 13px;
+            color: #eef5ff;
+            margin: 0;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .modal-actions button {
+            padding: 10px 25px;
+            border-radius: 30px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .confirm-btn {
+            background: #0ff;
+            color: #000;
+        }
+        .confirm-btn:hover {
+            background: #fff;
+            transform: scale(1.02);
+        }
+        .cancel-btn {
+            background: #333;
+            color: #fff;
+        }
+        .cancel-btn:hover {
+            background: #555;
+        }
+        h3 {
+            color: #0ff;
+            margin-bottom: 10px;
+            font-size: 22px;
+        }
+        .info-note {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 8px;
+        }
+        .modal-desc {
+            font-size: 12px;
+            color: #88aaff;
+            margin-bottom: 15px;
+        }
+        .select-all-btn {
+            background: #2a4a6a;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            font-size: 11px;
+            margin-bottom: 10px;
+        }
+        .select-all-btn:hover {
+            background: #3a6a8a;
+        }
     </style>
 </head>
 <body>
 
-<div id="successToast">SUCCESS: ACTION COMPLETED</div>
+<div id="successToast">✅ SUCCESS</div>
 
 <div class="container">
-    <header style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center;">
+    <header style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
         <div>
-            <h1 style="letter-spacing:10px; margin:0;">ADMIN TERMINAL</h1>
-            <p id="adminStatus" style="color:var(--danger); font-size:11px; margin-top:5px; font-weight:bold;">RECOGNIZING ADMIN...</p>
+            <h1 style="letter-spacing:5px; margin:0;">⚡ ADMIN TERMINAL</h1>
+            <p id="adminStatus" style="color: rgb(255, 68, 68); font-size: 11px; margin-top: 5px; font-weight: bold;">🔐 UNAUTHORIZED: PLEASE LOGIN AS ADMIN</p>
         </div>
-        <button onclick="adminLogin()" style="background:#fff; color:#000; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">FORCE LOGIN</button>
+        <button onclick="adminLogin()" style="background:#fff; color:#000; border:none; padding:10px 20px; border-radius:8px; font-weight:bold; cursor:pointer;">🔑 ADMIN LOGIN</button>
     </header>
 
+    <!-- Pricing Section -->
     <div class="pricing-grid">
-        <div class="price-card"><label>1 MONTH</label><input type="number" id="p1"></div>
-        <div class="price-card"><label>3 MONTHS</label><input type="number" id="p3_new"></div>
-        <div class="price-card"><label>1 YEAR</label><input type="number" id="p12_new"></div>
-        <div class="price-card"><label>LIFETIME</label><input type="number" id="p_life"></div>
+        <div class="price-card"><label>💰 1 MONTH (USD)</label><input type="number" id="p1" placeholder="Price"></div>
+        <div class="price-card"><label>💰 3 MONTHS</label><input type="number" id="p3_new"></div>
+        <div class="price-card"><label>💰 1 YEAR</label><input type="number" id="p12_new"></div>
+        <div class="price-card"><label>🌟 LIFETIME</label><input type="number" id="p_life"></div>
     </div>
-    <button class="save-btn" onclick="updatePricing()">Update Prices</button>
+    <button class="save-btn" onclick="updatePricing()">💾 UPDATE PRICES</button>
 
+    <!-- User Management Section -->
     <div class="user-card">
-        <h2 style="margin-bottom:20px; font-size:18px;">GRANT ACCESS TO ANY EMAIL</h2>
+        <h2 style="margin-bottom:20px; font-size:20px;">👥 USER ACCESS MANAGEMENT</h2>
         <div class="add-user-bar">
-            <div style="flex:2"><label>TARGET GMAIL</label><input type="text" id="addEmail" placeholder="customer@gmail.com" style="margin:0;"></div>
-            <div style="flex:1">
-                <label>DURATION</label>
-                <select id="addDuration" style="margin:0;">
-                    <option value="30">30 Days</option>
-                    <option value="90">90 Days</option>
-                    <option value="365">365 Days</option>
-                    <option value="99999">LIFETIME</option>
-                </select>
+            <div class="field-group">
+                <label>📧 EMAIL ADDRESS</label>
+                <input type="email" id="addEmail" placeholder="customer@gmail.com">
             </div>
-            <button id="grantBtn" onclick="grantAccess()" style="padding:12px 25px; background:var(--neon); border:none; font-weight:900; height:45px; border-radius:6px; cursor:pointer;">ACTIVATE EMAIL</button>
+            <div class="field-group">
+                <label>⏱️ DURATION</label>
+                <div class="duration-group">
+                    <input type="number" id="durationValue" value="30" min="1" step="1">
+                    <select id="durationUnit">
+                        <option value="minutes">Minutes</option>
+                        <option value="days" selected>Days</option>
+                    </select>
+                </div>
+                <div class="info-note">💡 Use 999999 for LIFETIME access</div>
+            </div>
+            <button id="grantBtn" style="padding:12px 25px; background:var(--neon); border:none; font-weight:900; border-radius:8px; cursor:pointer;">➕ ACTIVATE & SELECT SOFTWARE</button>
         </div>
 
-        <table>
-            <thead>
-                <tr><th>USER EMAIL</th><th>TIME REMAINING</th><th>EXPIRY</th><th style="text-align:right;">ACTION</th></tr>
-            </thead>
-            <tbody id="userList"></tbody>
-        </table>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>USER EMAIL</th>
+                        <th>TIME REMAINING</th>
+                        <th>ALLOWED SOFTWARE (12 engines)</th>
+                        <th style="text-align:right;">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="userList"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL for software selection -->
+<div id="softwareModal" class="modal">
+    <div class="modal-content">
+        <h3>🎛️ SELECT ALLOWED SOFTWARE</h3>
+        <div class="modal-desc">✅ Only checked engines will be accessible to this user on the public website.</div>
+        <button id="selectAllBtn" class="select-all-btn">☑️ Select All</button>
+        <div id="softwareChecklist" class="software-check-grid"></div>
+        <div class="modal-actions">
+            <button class="cancel-btn" id="modalCancelBtn">CANCEL</button>
+            <button class="confirm-btn" id="modalConfirmBtn">✅ CONFIRM & SAVE</button>
+        </div>
+        <div id="modalError" style="color: #ff6666; font-size: 12px; margin-top: 10px; display: none;"></div>
     </div>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
-    authDomain: "my-software-portal.firebaseapp.com",
-    projectId: "my-software-portal",
-    appId: "1:1072405993700:web:b66ca016c8de667d46f4f1"
-};
+    const firebaseConfig = {
+        apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
+        authDomain: "my-software-portal.firebaseapp.com",
+        projectId: "my-software-portal",
+        appId: "1:1072405993700:web:b66ca016c8de667d46f4f1"
+    };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
-// ADMIN AUTH CHECK
-window.adminLogin = () => signInWithPopup(auth, provider);
+    // ========== 12 SOFTWARE ENGINES (matches public website exactly) ==========
+    const SOFTWARE_LIST = [
+        { id: "engine_1", name: "🔷 Baccarat GPT Ultra" },
+        { id: "engine_2", name: "🔶 Viper Roulette" },
+        { id: "engine_3", name: "🔷 AI Baccarat Trend" },
+        { id: "engine_4", name: "🔶 Baccarat Analysis" },
+        { id: "engine_5", name: "🔷 Baccarat Pro Series" },
+        { id: "engine_6", name: "🔶 Baccarat PRO" },
+        { id: "engine_7", name: "🔷 Roulette PRO" },
+        { id: "engine_8", name: "🔶 AI Card Counting" },
+        { id: "engine_9", name: "🔷 Gemini Ultra" },
+        { id: "engine_10", name: "🔶 Google AI" },
+        { id: "engine_11", name: "🔷 VisionWave Baccarat" },
+        { id: "engine_12", name: "🔶 Baccarat Neutral Engine" }
+    ];
 
-onAuthStateChanged(auth, (user) => {
-    const status = document.getElementById('adminStatus');
-    if (user && user.email === 'edzelkeith0@gmail.com') {
-        status.innerHTML = "ADMIN VERIFIED: " + user.email;
-        status.style.color = "#00ff88";
-    } else {
-        status.innerHTML = "UNAUTHORIZED: PLEASE LOGIN AS ADMIN";
-        status.style.color = "#ff4444";
-        adminLogin();
-    }
-});
-
-function showSuccess(msg) {
+    // UI Elements
     const toast = document.getElementById('successToast');
-    toast.textContent = "SUCCESS: " + msg;
-    toast.style.display = 'block';
-    setTimeout(() => { toast.style.display = 'none'; }, 3000);
-}
-
-// PRICING LOGIC
-(async () => {
-    const pDoc = await getDoc(doc(db, "settings", "pricing"));
-    if(pDoc.exists()){
-        const d = pDoc.data();
-        document.getElementById('p1').value = d.p1;
-        document.getElementById('p3_new').value = d.p3_new;
-        document.getElementById('p12_new').value = d.p12_new;
-        document.getElementById('p_life').value = d.p_life;
+    function showSuccess(msg) {
+        toast.textContent = "✅ " + msg;
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 3000);
     }
-})();
 
-window.updatePricing = async () => {
-    await setDoc(doc(db, "settings", "pricing"), {
-        p1: document.getElementById('p1').value,
-        p3_new: document.getElementById('p3_new').value,
-        p12_new: document.getElementById('p12_new').value,
-        p_life: document.getElementById('p_life').value
+    // ========== ADMIN AUTH (only edzelkeith0@gmail.com) ==========
+    window.adminLogin = () => signInWithPopup(auth, provider);
+    
+    onAuthStateChanged(auth, (user) => {
+        const statusSpan = document.getElementById('adminStatus');
+        if (user && user.email === 'edzelkeith0@gmail.com') {
+            statusSpan.innerHTML = "🟢 ADMIN VERIFIED: " + user.email;
+            statusSpan.style.color = "#00ff88";
+            console.log("✅ Admin logged in");
+        } else {
+            statusSpan.innerHTML = "⛔ UNAUTHORIZED: LOGIN AS ADMIN (edzelkeith0@gmail.com)";
+            statusSpan.style.color = "#ff4444";
+            if (!user) {
+                adminLogin();
+            } else if (user.email !== 'edzelkeith0@gmail.com') {
+                alert("You are not authorized as admin. Only edzelkeith0@gmail.com can access.");
+            }
+        }
     });
-    showSuccess("PRICING UPDATED");
-};
 
-// USER ACCESS LOGIC
-window.grantAccess = async () => {
-    const email = document.getElementById('addEmail').value.toLowerCase().trim();
-    const days = parseInt(document.getElementById('addDuration').value);
-    if(!email) return;
+    // ========== PRICING (from Firestore) ==========
+    (async () => {
+        const pDoc = await getDoc(doc(db, "settings", "pricing"));
+        if(pDoc.exists()){
+            const d = pDoc.data();
+            document.getElementById('p1').value = d.p1 || 0;
+            document.getElementById('p3_new').value = d.p3_new || 0;
+            document.getElementById('p12_new').value = d.p12_new || 0;
+            document.getElementById('p_life').value = d.p_life || 0;
+        }
+    })();
 
-    try {
-        const now = new Date().getTime();
-        const expiryTime = days > 30000 ? 'LIFETIME' : now + (days * 24 * 60 * 60 * 1000);
-
-        await setDoc(doc(db, "users", email), {
-            email: email,
-            expiry: expiryTime,
-            isPaid: true
+    window.updatePricing = async () => {
+        const admin = auth.currentUser;
+        if (!admin || admin.email !== 'edzelkeith0@gmail.com') { alert("❌ Admin only"); return; }
+        await setDoc(doc(db, "settings", "pricing"), {
+            p1: document.getElementById('p1').value,
+            p3_new: document.getElementById('p3_new').value,
+            p12_new: document.getElementById('p12_new').value,
+            p_life: document.getElementById('p_life').value
         });
-        document.getElementById('addEmail').value = "";
-        showSuccess("ACCESS GRANTED TO " + email);
-    } catch (e) {
-        alert("ACCESS DENIED: You must login as edzelkeith0@gmail.com");
+        showSuccess("Pricing updated");
+    };
+
+    // ========== DURATION HELPER (Minutes or Days) ==========
+    function getExpiryFromDuration(value, unit) {
+        const num = parseInt(value);
+        if (isNaN(num) || num <= 0) return Date.now() + 60000;
+        // Large number = LIFETIME
+        if (num > 100000) return 'LIFETIME';
+        const now = Date.now();
+        if (unit === 'minutes') {
+            return now + (num * 60 * 1000);
+        } else {
+            return now + (num * 24 * 60 * 60 * 1000);
+        }
     }
-};
 
-onSnapshot(collection(db, "users"), (snapshot) => {
-    const list = document.getElementById('userList');
-    list.innerHTML = "";
-    snapshot.forEach(docSnap => {
-        const u = docSnap.data();
-        const isLife = u.expiry === 'LIFETIME';
-        list.innerHTML += `
-            <tr>
-                <td><strong>${u.email}</strong></td>
-                <td><span class="timer-text" data-expiry="${u.expiry}" data-email="${u.email}">${isLife ? '∞ LIFETIME' : '...'}</span></td>
-                <td>${isLife ? 'PERMANENT' : new Date(u.expiry).toLocaleDateString()}</td>
-                <td style="text-align:right"><button onclick="removeUser('${u.email}')" style="color:red; background:none; border:none; cursor:pointer;">REMOVE</button></td>
-            </tr>`;
-    });
-});
+    // ========== MODAL LOGIC ==========
+    let pendingEmail = null;
+    let pendingDurationValue = null;
+    let pendingDurationUnit = null;
+    let pendingEditMode = false;
+    let selectedSoftwareIds = [];
 
-window.removeUser = async (email) => {
-    if(confirm("Remove " + email + "?")) {
-        await deleteDoc(doc(db, "users", email));
-        showSuccess("USER DELETED");
+    const modal = document.getElementById('softwareModal');
+    const modalError = document.getElementById('modalError');
+    const checklistContainer = document.getElementById('softwareChecklist');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+
+    function renderSoftwareCheckboxes() {
+        checklistContainer.innerHTML = '';
+        SOFTWARE_LIST.forEach(sw => {
+            const isChecked = selectedSoftwareIds.includes(sw.id);
+            const div = document.createElement('div');
+            div.className = 'software-check-item';
+            div.innerHTML = `
+                <input type="checkbox" value="${sw.id}" id="chk_${sw.id}" ${isChecked ? 'checked' : ''}>
+                <label for="chk_${sw.id}">${sw.name}</label>
+            `;
+            const chk = div.querySelector('input');
+            chk.addEventListener('change', () => {
+                if (chk.checked) {
+                    if (!selectedSoftwareIds.includes(sw.id)) selectedSoftwareIds.push(sw.id);
+                } else {
+                    selectedSoftwareIds = selectedSoftwareIds.filter(id => id !== sw.id);
+                }
+            });
+            checklistContainer.appendChild(div);
+        });
     }
-};
 
-// TIMER LOOP
-setInterval(() => {
-    const now = new Date().getTime();
-    document.querySelectorAll('.timer-text').forEach(async el => {
-        const exp = el.dataset.expiry;
-        if(exp === 'LIFETIME') return;
-        const dist = parseInt(exp) - now;
-        if (dist < -5000) { await deleteDoc(doc(db, "users", el.dataset.email)); return; }
-        if (dist < 0) { el.innerHTML = "EXPIRED"; return; }
-        const d = Math.floor(dist / (1000 * 60 * 60 * 24));
-        const h = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((dist % (1000 * 60)) / 1000);
-        el.innerHTML = `${d}d ${h}h ${m}m ${s}s`;
+    // Select All functionality
+    selectAllBtn.onclick = () => {
+        const allIds = SOFTWARE_LIST.map(sw => sw.id);
+        if (selectedSoftwareIds.length === allIds.length) {
+            selectedSoftwareIds = [];
+        } else {
+            selectedSoftwareIds = [...allIds];
+        }
+        renderSoftwareCheckboxes();
+    };
+
+    // Open modal for NEW user
+    window.openSoftwareModalForNew = () => {
+        const email = document.getElementById('addEmail').value.trim().toLowerCase();
+        const durationVal = document.getElementById('durationValue').value;
+        const durationUnit = document.getElementById('durationUnit').value;
+        
+        if (!email) { alert("❌ Enter email address"); return; }
+        if (!durationVal || durationVal <= 0) { alert("❌ Enter a positive duration"); return; }
+        
+        pendingEmail = email;
+        pendingDurationValue = durationVal;
+        pendingDurationUnit = durationUnit;
+        pendingEditMode = false;
+        selectedSoftwareIds = [];
+        renderSoftwareCheckboxes();
+        modalError.style.display = 'none';
+        modal.style.display = 'flex';
+        console.log("Modal opened for new user:", email);
+    };
+
+    // Open modal for EDIT existing user
+    async function openEditSoftwareModal(email, currentSoftwareArray) {
+        const admin = auth.currentUser;
+        if (!admin || admin.email !== 'edzelkeith0@gmail.com') { alert("❌ Admin only"); return; }
+        pendingEmail = email;
+        pendingEditMode = true;
+        selectedSoftwareIds = [...currentSoftwareArray];
+        renderSoftwareCheckboxes();
+        modalError.style.display = 'none';
+        modal.style.display = 'flex';
+        console.log("Modal opened for edit user:", email);
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+        pendingEmail = null;
+        pendingEditMode = false;
+    }
+
+    // Save user with selected software
+    async function saveUserWithSoftware() {
+        modalError.style.display = 'none';
+        if (!pendingEmail) {
+            modalError.innerText = "No email selected";
+            modalError.style.display = 'block';
+            return;
+        }
+        const admin = auth.currentUser;
+        if (!admin || admin.email !== 'edzelkeith0@gmail.com') {
+            modalError.innerText = "❌ Admin permission required";
+            modalError.style.display = 'block';
+            return;
+        }
+        
+        try {
+            if (pendingEditMode) {
+                // Update only allowedSoftware (keep existing expiry)
+                await updateDoc(doc(db, "users", pendingEmail), {
+                    allowedSoftware: selectedSoftwareIds
+                });
+                showSuccess(`Updated software access for ${pendingEmail}`);
+                console.log("Updated software for", pendingEmail);
+            } else {
+                // New user: create full document
+                const expiry = getExpiryFromDuration(pendingDurationValue, pendingDurationUnit);
+                await setDoc(doc(db, "users", pendingEmail), {
+                    email: pendingEmail,
+                    expiry: expiry,
+                    isPaid: true,
+                    allowedSoftware: selectedSoftwareIds
+                });
+                // Clear input fields
+                document.getElementById('addEmail').value = "";
+                document.getElementById('durationValue').value = "30";
+                document.getElementById('durationUnit').value = "days";
+                showSuccess(`✅ User ${pendingEmail} activated with ${selectedSoftwareIds.length} software(s)`);
+                console.log("Created user", pendingEmail, "expiry:", expiry, "software:", selectedSoftwareIds);
+            }
+            closeModal();
+        } catch (err) {
+            console.error("Save error:", err);
+            modalError.innerText = "❌ Error: " + err.message;
+            modalError.style.display = 'block';
+        }
+    }
+
+    // Modal button events
+    document.getElementById('modalConfirmBtn').onclick = saveUserWithSoftware;
+    document.getElementById('modalCancelBtn').onclick = closeModal;
+    document.getElementById('grantBtn').onclick = () => window.openSoftwareModalForNew();
+
+    // ========== USER LIST RENDER (with live timer) ==========
+    onSnapshot(collection(db, "users"), (snapshot) => {
+        const tbody = document.getElementById('userList');
+        tbody.innerHTML = "";
+        snapshot.forEach(docSnap => {
+            const u = docSnap.data();
+            const email = u.email;
+            const expiryRaw = u.expiry;
+            const isLife = expiryRaw === 'LIFETIME';
+            
+            let timeDisplay = isLife ? '♾️ LIFETIME' : (typeof expiryRaw === 'number' ? new Date(expiryRaw).toLocaleString() : 'Invalid');
+            let timerHtml = '';
+            if (isLife) {
+                timerHtml = '<span class="timer-text">∞ PERMANENT</span>';
+            } else if (typeof expiryRaw === 'number') {
+                timerHtml = `<span class="timer-text" data-expiry="${expiryRaw}" data-email="${email}">loading...</span>`;
+            } else {
+                timerHtml = '<span style="color:red;">⚠️ ERROR</span>';
+            }
+            
+            const allowed = u.allowedSoftware || [];
+            const badgesHtml = allowed.length ? allowed.map(swId => {
+                const swName = SOFTWARE_LIST.find(s => s.id === swId)?.name || swId;
+                return `<span class="software-badge">${swName}</span>`;
+            }).join('') : '<span style="color:#ff9966;">⚠️ No software assigned</span>';
+            
+            const row = tbody.insertRow();
+            row.innerHTML = `
+                <td><strong>${email}</strong></td>
+                <td>${timerHtml}<br><small style="font-size:10px; color:#888;">${timeDisplay}</small></td>
+                <td><div style="display:flex; flex-wrap:wrap; gap:5px;">${badgesHtml}</div></td>
+                <td style="text-align:right;">
+                    <button class="edit-soft-btn" data-email="${email}">✏️ Edit Software</button>
+                    <button class="remove-btn" data-email="${email}">🗑️ Remove</button>
+                </td>
+            `;
+            const editBtn = row.querySelector('.edit-soft-btn');
+            const removeBtn = row.querySelector('.remove-btn');
+            editBtn.addEventListener('click', () => openEditSoftwareModal(email, allowed));
+            removeBtn.addEventListener('click', async () => {
+                if(confirm(`⚠️ Revoke ALL access for ${email}?`)) {
+                    await deleteDoc(doc(db, "users", email));
+                    showSuccess(`User ${email} removed`);
+                }
+            });
+        });
+        startTimers();
     });
-}, 1000);
+
+    // Live timer countdown
+    function startTimers() {
+        const now = Date.now();
+        document.querySelectorAll('.timer-text[data-expiry]').forEach(el => {
+            const exp = parseInt(el.dataset.expiry);
+            if (isNaN(exp)) return;
+            const dist = exp - now;
+            if (dist < -5000) {
+                const email = el.dataset.email;
+                if (email) deleteDoc(doc(db, "users", email)).catch(()=>{});
+                el.innerHTML = "⏰ EXPIRED";
+                return;
+            }
+            if (dist <= 0) { el.innerHTML = "🔴 EXPIRED"; return; }
+            const days = Math.floor(dist / (1000*60*60*24));
+            const hours = Math.floor((dist % (86400000)) / 3600000);
+            const mins = Math.floor((dist % 3600000) / 60000);
+            const secs = Math.floor((dist % 60000) / 1000);
+            if (days > 0) {
+                el.innerHTML = `${days}d ${hours}h ${mins}m`;
+            } else if (hours > 0) {
+                el.innerHTML = `${hours}h ${mins}m ${secs}s`;
+            } else {
+                el.innerHTML = `${mins}m ${secs}s`;
+            }
+        });
+    }
+    setInterval(startTimers, 1000);
 </script>
 </body>
 </html>
