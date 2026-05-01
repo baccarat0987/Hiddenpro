@@ -188,9 +188,9 @@
     <header style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
         <div>
             <h1 style="letter-spacing:5px; margin:0;">⚡ ADMIN TERMINAL</h1>
-            <p id="adminStatus" style="color: rgb(255, 68, 68); font-size: 11px; margin-top: 5px; font-weight: bold;">🔐 UNAUTHORIZED: PLEASE LOGIN AS ADMIN</p>
+            <p id="adminStatus" style="color: rgb(255, 68, 68); font-size: 11px; margin-top: 5px; font-weight: bold;">🔐 NOT LOGGED IN</p>
         </div>
-        <button onclick="adminLogin()" style="background:#fff; color:#000; border:none; padding:10px 20px; border-radius:8px; font-weight:bold; cursor:pointer;">🔑 ADMIN LOGIN</button>
+        <button id="adminLoginBtn" style="background:#fff; color:#000; border:none; padding:10px 20px; border-radius:8px; font-weight:bold; cursor:pointer;">🔑 ADMIN LOGIN</button>
     </header>
 
     <!-- Pricing Section -->
@@ -258,7 +258,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
@@ -297,54 +297,98 @@
     }
 
     // ========== ADMIN AUTH (only edzelkeith0@gmail.com) ==========
-    window.adminLogin = () => signInWithPopup(auth, provider);
+    let isCheckingAuth = false;
     
+    window.adminLogin = async () => {
+        try {
+            await signInWithPopup(auth, provider);
+        } catch (err) {
+            console.error("Login error:", err);
+            alert("Login failed: " + err.message);
+        }
+    };
+    
+    window.adminLogout = async () => {
+        try {
+            await signOut(auth);
+            showSuccess("Logged out");
+        } catch (err) {
+            console.error("Logout error:", err);
+        }
+    };
+
     onAuthStateChanged(auth, (user) => {
         const statusSpan = document.getElementById('adminStatus');
-        if (user && user.email === 'edzelkeith0@gmail.com') {
+        const loginBtn = document.getElementById('adminLoginBtn');
+        
+        if (user && user.email && user.email.toLowerCase() === 'edzelkeith0@gmail.com') {
             statusSpan.innerHTML = "🟢 ADMIN VERIFIED: " + user.email;
             statusSpan.style.color = "#00ff88";
-            console.log("✅ Admin logged in");
-        } else {
-            statusSpan.innerHTML = "⛔ UNAUTHORIZED: LOGIN AS ADMIN (edzelkeith0@gmail.com)";
+            loginBtn.innerHTML = "🚪 LOGOUT";
+            loginBtn.onclick = () => window.adminLogout();
+            console.log("✅ Admin logged in:", user.email);
+            // Enable admin features
+            document.querySelectorAll('.save-btn, #grantBtn, .edit-soft-btn, .remove-btn').forEach(btn => {
+                if (btn) btn.disabled = false;
+            });
+        } else if (user && user.email) {
+            statusSpan.innerHTML = "⛔ UNAUTHORIZED: " + user.email + " is not admin";
             statusSpan.style.color = "#ff4444";
-            if (!user) {
-                adminLogin();
-            } else if (user.email !== 'edzelkeith0@gmail.com') {
-                alert("You are not authorized as admin. Only edzelkeith0@gmail.com can access.");
-            }
+            loginBtn.innerHTML = "🔑 ADMIN LOGIN";
+            loginBtn.onclick = () => window.adminLogin();
+            alert("You are not authorized as admin. Only edzelkeith0@gmail.com can access.");
+            // Auto sign out non-admin users
+            signOut(auth);
+        } else {
+            statusSpan.innerHTML = "🔐 NOT LOGGED IN - Please login as admin (edzelkeith0@gmail.com)";
+            statusSpan.style.color = "#ff8888";
+            loginBtn.innerHTML = "🔑 ADMIN LOGIN";
+            loginBtn.onclick = () => window.adminLogin();
+            console.log("No user logged in");
+            // Disable admin features
+            document.querySelectorAll('.save-btn, #grantBtn, .edit-soft-btn, .remove-btn').forEach(btn => {
+                if (btn) btn.disabled = true;
+            });
         }
     });
 
     // ========== PRICING (from Firestore) ==========
     (async () => {
-        const pDoc = await getDoc(doc(db, "settings", "pricing"));
-        if(pDoc.exists()){
-            const d = pDoc.data();
-            document.getElementById('p1').value = d.p1 || 0;
-            document.getElementById('p3_new').value = d.p3_new || 0;
-            document.getElementById('p12_new').value = d.p12_new || 0;
-            document.getElementById('p_life').value = d.p_life || 0;
+        try {
+            const pDoc = await getDoc(doc(db, "settings", "pricing"));
+            if(pDoc.exists()){
+                const d = pDoc.data();
+                document.getElementById('p1').value = d.p1 || 0;
+                document.getElementById('p3_new').value = d.p3_new || 0;
+                document.getElementById('p12_new').value = d.p12_new || 0;
+                document.getElementById('p_life').value = d.p_life || 0;
+            }
+        } catch (err) {
+            console.error("Error loading pricing:", err);
         }
     })();
 
     window.updatePricing = async () => {
         const admin = auth.currentUser;
-        if (!admin || admin.email !== 'edzelkeith0@gmail.com') { alert("❌ Admin only"); return; }
-        await setDoc(doc(db, "settings", "pricing"), {
-            p1: document.getElementById('p1').value,
-            p3_new: document.getElementById('p3_new').value,
-            p12_new: document.getElementById('p12_new').value,
-            p_life: document.getElementById('p_life').value
-        });
-        showSuccess("Pricing updated");
+        if (!admin || admin.email.toLowerCase() !== 'edzelkeith0@gmail.com') { alert("❌ Admin only"); return; }
+        try {
+            await setDoc(doc(db, "settings", "pricing"), {
+                p1: document.getElementById('p1').value,
+                p3_new: document.getElementById('p3_new').value,
+                p12_new: document.getElementById('p12_new').value,
+                p_life: document.getElementById('p_life').value
+            });
+            showSuccess("Pricing updated");
+        } catch (err) {
+            console.error("Update error:", err);
+            alert("Error: " + err.message);
+        }
     };
 
     // ========== DURATION HELPER (Minutes or Days) ==========
     function getExpiryFromDuration(value, unit) {
         const num = parseInt(value);
         if (isNaN(num) || num <= 0) return Date.now() + 60000;
-        // Large number = LIFETIME
         if (num > 100000) return 'LIFETIME';
         const now = Date.now();
         if (unit === 'minutes') {
@@ -388,7 +432,6 @@
         });
     }
 
-    // Select All functionality
     selectAllBtn.onclick = () => {
         const allIds = SOFTWARE_LIST.map(sw => sw.id);
         if (selectedSoftwareIds.length === allIds.length) {
@@ -399,8 +442,10 @@
         renderSoftwareCheckboxes();
     };
 
-    // Open modal for NEW user
     window.openSoftwareModalForNew = () => {
+        const admin = auth.currentUser;
+        if (!admin || admin.email.toLowerCase() !== 'edzelkeith0@gmail.com') { alert("❌ Admin only"); return; }
+        
         const email = document.getElementById('addEmail').value.trim().toLowerCase();
         const durationVal = document.getElementById('durationValue').value;
         const durationUnit = document.getElementById('durationUnit').value;
@@ -419,10 +464,9 @@
         console.log("Modal opened for new user:", email);
     };
 
-    // Open modal for EDIT existing user
     async function openEditSoftwareModal(email, currentSoftwareArray) {
         const admin = auth.currentUser;
-        if (!admin || admin.email !== 'edzelkeith0@gmail.com') { alert("❌ Admin only"); return; }
+        if (!admin || admin.email.toLowerCase() !== 'edzelkeith0@gmail.com') { alert("❌ Admin only"); return; }
         pendingEmail = email;
         pendingEditMode = true;
         selectedSoftwareIds = [...currentSoftwareArray];
@@ -438,7 +482,6 @@
         pendingEditMode = false;
     }
 
-    // Save user with selected software
     async function saveUserWithSoftware() {
         modalError.style.display = 'none';
         if (!pendingEmail) {
@@ -447,7 +490,7 @@
             return;
         }
         const admin = auth.currentUser;
-        if (!admin || admin.email !== 'edzelkeith0@gmail.com') {
+        if (!admin || admin.email.toLowerCase() !== 'edzelkeith0@gmail.com') {
             modalError.innerText = "❌ Admin permission required";
             modalError.style.display = 'block';
             return;
@@ -455,14 +498,12 @@
         
         try {
             if (pendingEditMode) {
-                // Update only allowedSoftware (keep existing expiry)
                 await updateDoc(doc(db, "users", pendingEmail), {
                     allowedSoftware: selectedSoftwareIds
                 });
                 showSuccess(`Updated software access for ${pendingEmail}`);
                 console.log("Updated software for", pendingEmail);
             } else {
-                // New user: create full document
                 const expiry = getExpiryFromDuration(pendingDurationValue, pendingDurationUnit);
                 await setDoc(doc(db, "users", pendingEmail), {
                     email: pendingEmail,
@@ -470,12 +511,11 @@
                     isPaid: true,
                     allowedSoftware: selectedSoftwareIds
                 });
-                // Clear input fields
                 document.getElementById('addEmail').value = "";
                 document.getElementById('durationValue').value = "30";
                 document.getElementById('durationUnit').value = "days";
                 showSuccess(`✅ User ${pendingEmail} activated with ${selectedSoftwareIds.length} software(s)`);
-                console.log("Created user", pendingEmail, "expiry:", expiry, "software:", selectedSoftwareIds);
+                console.log("Created user", pendingEmail);
             }
             closeModal();
         } catch (err) {
@@ -485,12 +525,11 @@
         }
     }
 
-    // Modal button events
     document.getElementById('modalConfirmBtn').onclick = saveUserWithSoftware;
     document.getElementById('modalCancelBtn').onclick = closeModal;
     document.getElementById('grantBtn').onclick = () => window.openSoftwareModalForNew();
 
-    // ========== USER LIST RENDER (with live timer) ==========
+    // ========== USER LIST RENDER ==========
     onSnapshot(collection(db, "users"), (snapshot) => {
         const tbody = document.getElementById('userList');
         tbody.innerHTML = "";
@@ -530,6 +569,8 @@
             const removeBtn = row.querySelector('.remove-btn');
             editBtn.addEventListener('click', () => openEditSoftwareModal(email, allowed));
             removeBtn.addEventListener('click', async () => {
+                const admin = auth.currentUser;
+                if (!admin || admin.email.toLowerCase() !== 'edzelkeith0@gmail.com') { alert("❌ Admin only"); return; }
                 if(confirm(`⚠️ Revoke ALL access for ${email}?`)) {
                     await deleteDoc(doc(db, "users", email));
                     showSuccess(`User ${email} removed`);
