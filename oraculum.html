@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORACULUM | Weighted Oracle</title>
+    
+    <!-- Clean URL script -->
+    <script>
+        if (window.location.pathname.endsWith('.html')) {
+            const cleanUrl = window.location.pathname.replace('.html', '');
+            window.history.replaceState(null, '', cleanUrl);
+        }
+    </script>
+    
+    <!-- Firebase Authentication & Permission Check (EXACT same as Google AI app) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
+            authDomain: "my-software-portal.firebaseapp.com",
+            projectId: "my-software-portal",
+            storageBucket: "my-software-portal.firebasestorage.app",
+            messagingSenderId: "1072405993700",
+            appId: "1:1072405993700:web:b66ca016c8de667d46f4f1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // IMPORTANT: Add this engine to your portal's softwareCatalog with this ID
+        const REQUIRED_ENGINE_ID = "engine_14";  // ← Change this number as needed
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = "index.html";
+                return;
+            }
+            const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
+            const now = Date.now();
+            const userData = userDoc.data();
+            const isValid = userDoc.exists() && 
+                           (userData.expiry === 'LIFETIME' || userData.expiry > now) &&
+                           userData.allowedSoftware?.includes(REQUIRED_ENGINE_ID);
+            if (!isValid) {
+                alert("Access denied: you don't have permission for ORACULUM Engine.");
+                window.location.href = "index.html";
+                return;
+            }
+            // Show the app
+            document.body.style.display = "flex";
+        });
+    </script>
+    
+    <!-- Right-click and shortcut blocker (same as your other apps) -->
+    <script>
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.onkeydown = function(e) {
+            if (e.keyCode === 123 || 
+                (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
+                (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
+                return false;
+            }
+        };
+    </script>
+    
+    <style>
+        /* ==============================================
+           EXACT SAME LAYOUT AS REFERENCE EXAMPLE
+           Prediction container box: identical dimensions
+           Prediction text: same size (24px bold)
+           Trend bars: EXTREME RANDOM JUMPS every click after 7 entries
+           Weighted prediction system (NOT random)
+        ============================================== */
+        
+        body {
+            background-color: #0c0a1a;
+            background-image: radial-gradient(circle at 30% 20%, #1a1635 0%, #020108 100%);
+            color: #e8e6f0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: none;  /* Hidden until Firebase check passes */
+            flex-direction: column;
+            align-items: center;
+            padding: 150px 15px;
+            margin: 0;
+        }
+
+        /* HEADER WITH SPINNING LOGO */
+        .logo-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 35px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .spinning-logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #1a1630, #0a0820);
+            border: 2px solid #a855f7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+            animation: spinMoveLogo 2s ease-in-out infinite;
+        }
+        
+        @keyframes spinMoveLogo {
+            0% { transform: rotate(0deg) translateY(0px); }
+            25% { transform: rotate(90deg) translateY(-4px); }
+            50% { transform: rotate(180deg) translateY(0px); }
+            75% { transform: rotate(270deg) translateY(4px); }
+            100% { transform: rotate(360deg) translateY(0px); }
+        }
+        
+        .spinning-logo span {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #c084fc, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: counterSpinText 2s ease-in-out infinite;
+        }
+        
+        @keyframes counterSpinText {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-360deg); }
+        }
+        
+        .title-brand {
+            text-align: left;
+        }
+        
+        .main-title {
+            font-weight: 800;
+            font-size: 28px;
+            background: linear-gradient(135deg, #e9d5ff, #c084fc, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+        
+        .sub-badge {
+            font-size: 8px;
+            letter-spacing: 3px;
+            color: #a78bfa;
+            text-transform: uppercase;
+            margin-top: 3px;
+        }
+
+        /* CARD - EXACT SAME AS REFERENCE */
+        .card {
+            background-color: #0f0e1a;
+            border: 1px solid #2d2a4a;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        /* Prediction Window - EXACT SAME STYLE */
+        .pred-box {
+            border: 2px solid #a855f7;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 25px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .next-label { 
+            font-size: 24px; 
+            font-weight: bold;
+            background: linear-gradient(135deg, #c4b5fd, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .waiting { 
+            color: #6b6a8a; 
+        }
+        
+        .pct-green { 
+            color: #a5f3fc; 
+            font-size: 16px; 
+            margin-left: 8px; 
+            display: none;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 8px;
+            border-radius: 8px;
+        }
+        
+        .threshold-message {
+            font-size: 11px;
+            color: #a78bfa;
+            margin-top: 10px;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            text-align: center;
+        }
+
+        /* History - EXACT SAME */
+        .history-row {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 30px;
+            min-height: 45px;
+        }
+
+        .dot {
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .dot.player {
+            background: linear-gradient(145deg, #0891b2, #06b6d4);
+            border-bottom: 2px solid #67e8f9;
+            color: #0a0c12;
+        }
+        
+        .dot.banker {
+            background: linear-gradient(145deg, #be185d, #db2777);
+            border-bottom: 2px solid #f9a8d4;
+            color: #fff0f5;
+        }
+
+        /* Buttons - EXACT SAME SIZE */
+        .controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        button {
+            height: 55px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.12s ease;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+        button:active { transform: scale(0.92); }
+        
+        .btn-p {
+            background: linear-gradient(135deg, #0891b2, #06b6d4);
+            border-bottom: 2px solid #67e8f9;
+        }
+        .btn-b {
+            background: linear-gradient(135deg, #be185d, #db2777);
+            border-bottom: 2px solid #f9a8d4;
+        }
+        .btn-undo {
+            background: linear-gradient(135deg, #4c1d95, #6d28d9);
+            border-bottom: 2px solid #c084fc;
+        }
+        .btn-reset {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border-bottom: 2px solid #64748b;
+        }
+
+        /* CHART AREA */
+        .chart-svg {
+            width: 100%;
+            height: 220px;
+        }
+
+        .bar-rect {
+            transition: height 0.55s cubic-bezier(0.2, 1.4, 0.3, 1.1), y 0.55s cubic-bezier(0.2, 1.4, 0.3, 1.1), opacity 0.25s;
+            transform-origin: bottom;
+            rx: 4;
+            ry: 4;
+        }
+
+        .hidden-bar {
+            opacity: 0;
+            height: 0 !important;
+        }
+        
+        .chart-footer {
+            text-align: center;
+            font-size: 9px;
+            color: #a78bfa;
+            margin-top: 8px;
+            letter-spacing: 1px;
+        }
+        
+        /* Exit button (ADDED for easy return to dashboard) */
+        .exit-nav {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1000;
+        }
+        .exit-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: #a855f7;
+            padding: 6px 14px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 11px;
+            border: 1px solid rgba(168, 85, 247, 0.5);
+            backdrop-filter: blur(8px);
+            transition: 0.2s;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        .exit-btn:hover {
+            background: #a855f7;
+            color: #0a0820;
+            box-shadow: 0 0 12px #a855f7;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Exit button (added for convenience) -->
+    <div class="exit-nav">
+        <a href="index.html" class="exit-btn">← EXIT TERMINAL</a>
+    </div>
+
+    <!-- HEADER WITH SPINNING LOGO -->
+    <div class="logo-header">
+        <div class="spinning-logo">
+            <span>◈</span>
+        </div>
+        <div class="title-brand">
+            <div class="main-title">ORACULUM</div>
+            <div class="sub-badge">WEIGHTED ORACLE</div>
+        </div>
+    </div>
+
+    <!-- MAIN CARD - EXACT SAME STRUCTURE -->
+    <div class="card">
+        <div class="pred-box">
+            <span class="next-label">Next: <span id="label" class="waiting">Waiting..</span></span>
+            <span id="acc" class="pct-green">88.48%</span>
+            <div id="thresholdMsg" class="threshold-message"></div>
+        </div>
+
+        <div id="history" class="history-row"></div>
+
+        <div class="controls">
+            <button class="btn-p" onclick="add('P')">P</button>
+            <button class="btn-b" onclick="add('B')">B</button>
+            <button class="btn-undo" onclick="undo()">←</button>
+            <button class="btn-reset" onclick="reset()">Reset</button>
+        </div>
+    </div>
+
+    <!-- CHART CARD - EXACT SAME SVG -->
+    <div class="card">
+        <div class="chart-svg">
+            <svg width="100%" height="100%" viewBox="0 0 340 220">
+                <defs>
+                    <linearGradient id="grad1" x1="0%" y1="100%" x2="0%" y2="0%">
+                        <stop offset="0%" stop-color="#0891b2"/>
+                        <stop offset="100%" stop-color="#22d3ee"/>
+                    </linearGradient>
+                    <linearGradient id="grad2" x1="0%" y1="100%" x2="0%" y2="0%">
+                        <stop offset="0%" stop-color="#be185d"/>
+                        <stop offset="100%" stop-color="#f472b6"/>
+                    </linearGradient>
+                    <linearGradient id="grad3" x1="0%" y1="100%" x2="0%" y2="0%">
+                        <stop offset="0%" stop-color="#6d28d9"/>
+                        <stop offset="100%" stop-color="#c084fc"/>
+                    </linearGradient>
+                    <linearGradient id="grad4" x1="0%" y1="100%" x2="0%" y2="0%">
+                        <stop offset="0%" stop-color="#1e293b"/>
+                        <stop offset="100%" stop-color="#64748b"/>
+                    </linearGradient>
+                </defs>
+                <g fill="#7c7a9e" font-size="10" text-anchor="end">
+                    <text x="25" y="15">2.0</text><text x="25" y="105">1.0</text><text x="25" y="195">0</text>
+                </g>
+
+                <g stroke="#2d2a4a" stroke-width="1" opacity="0.5">
+                    <line x1="35" y1="12" x2="330" y2="12" /><line x1="35" y1="30" x2="330" y2="30" />
+                    <line x1="35" y1="48" x2="330" y2="48" /><line x1="35" y1="66" x2="330" y2="66" />
+                    <line x1="35" y1="84" x2="330" y2="84" /><line x1="35" y1="102" x2="330" y2="102" />
+                    <line x1="35" y1="120" x2="330" y2="120" /><line x1="35" y1="138" x2="330" y2="138" />
+                    <line x1="35" y1="156" x2="330" y2="156" /><line x1="35" y1="174" x2="330" y2="174" />
+                    <line x1="35" y1="192" x2="330" y2="192" />
+                </g>
+
+                <rect id="gpt" class="bar-rect hidden-bar" x="45" y="192" width="55" height="0" fill="url(#grad1)" />
+                <rect id="grok" class="bar-rect hidden-bar" x="115" y="192" width="55" height="0" fill="url(#grad2)" />
+                <rect id="gemini" class="bar-rect hidden-bar" x="185" y="192" width="55" height="0" fill="url(#grad3)" />
+                <rect id="deep" class="bar-rect hidden-bar" x="255" y="192" width="55" height="0" fill="url(#grad4)" />
+
+                <g font-size="10" fill="#8b89ab" text-anchor="middle">
+                    <text x="72" y="212">Chat Gpt</text><text x="142" y="212">Grok</text>
+                    <text x="212" y="212">Gemini</text><text x="282" y="212">DeepSeek</text>
+                </g>
+            </svg>
+        </div>
+        <div class="chart-footer">◉ COMBINING FOUR AI ◉</div>
+    </div>
+
+    <script>
+        // ============================================================
+        // WEIGHTED PREDICTION SYSTEM - NOT RANDOM
+        // Requires 7 entries before prediction
+        // AFTER 7 ENTRIES: ALL 4 BARS MAKE RANDOM EXTREME JUMPS every click
+        // Confidence: 87.3% - 97.5%
+        // Undo works perfectly
+        // ============================================================
+        
+        let fullResults = [];
+        let stateStack = [];
+        
+        const MIN_ENTRIES = 7;
+        
+        const hDiv = document.getElementById('history');
+        const labelSpan = document.getElementById('label');
+        const accSpan = document.getElementById('acc');
+        const thresholdMsgDiv = document.getElementById('thresholdMsg');
+        
+        const barData = [
+            { el: document.getElementById('gpt'), base: 192 },
+            { el: document.getElementById('grok'), base: 192 },
+            { el: document.getElementById('gemini'), base: 192 },
+            { el: document.getElementById('deep'), base: 192 }
+        ];
+
+        // WEIGHTED PREDICTION ALGORITHM (NOT RANDOM)
+        function generateWeightedPrediction(history) {
+            const len = history.length;
+            
+            if (len < MIN_ENTRIES) {
+                return { prediction: null, confidence: null };
+            }
+            
+            const lastSeven = history.slice(-7);
+            
+            let playerScore = 0;
+            let bankerScore = 0;
+            let totalWeight = 0;
+            
+            for (let i = 0; i < lastSeven.length; i++) {
+                const weight = i + 1;
+                totalWeight += weight;
+                if (lastSeven[i] === 'P') {
+                    playerScore += weight;
+                } else {
+                    bankerScore += weight;
+                }
+            }
+            
+            let playerProbability = playerScore / totalWeight;
+            
+            // STREAK FACTOR
+            let streak = 1;
+            let streakDir = null;
+            if (len >= 2) {
+                const last = history[len - 1];
+                streakDir = last;
+                for (let i = len - 2; i >= 0; i--) {
+                    if (history[i] === last) streak++;
+                    else break;
+                }
+            }
+            
+            if (streak >= 2 && streakDir !== null) {
+                let streakBonus = (streak - 1) * 0.045;
+                streakBonus = Math.min(0.22, streakBonus);
+                if (streakDir === 'P') {
+                    playerProbability += streakBonus;
+                } else {
+                    playerProbability -= streakBonus;
+                }
+            }
+            
+            // ALTERNATION PATTERN
+            if (len >= 4) {
+                const lastThree = history.slice(-3);
+                const isAlternating = (lastThree[0] !== lastThree[1] && lastThree[1] !== lastThree[2]);
+                if (isAlternating) {
+                    const lastResult = history[len - 1];
+                    if (lastResult === 'P') {
+                        playerProbability -= 0.18;
+                    } else {
+                        playerProbability += 0.18;
+                    }
+                }
+            }
+            
+            // OVERALL TREND
+            const totalPlayer = history.filter(r => r === 'P').length;
+            const totalGames = history.length;
+            const overallRatio = totalPlayer / totalGames;
+            
+            if (overallRatio > 0.62) {
+                playerProbability -= 0.12;
+            } else if (overallRatio < 0.38) {
+                playerProbability += 0.12;
+            }
+            
+            // SHORT TERM MOMENTUM
+            if (len >= 3) {
+                const lastThree = history.slice(-3);
+                const recentPlayer = lastThree.filter(r => r === 'P').length;
+                if (recentPlayer === 3) {
+                    playerProbability += 0.08;
+                } else if (recentPlayer === 0) {
+                    playerProbability -= 0.08;
+                }
+            }
+            
+            playerProbability = Math.min(0.82, Math.max(0.18, playerProbability));
+            
+            const isPlayer = playerProbability > 0.5;
+            const prediction = isPlayer ? 'Player' : 'Banker';
+            
+            let confidence = 87.3 + (Math.abs(playerProbability - 0.5) * 18);
+            confidence = Math.min(97.5, Math.max(87.3, confidence));
+            
+            return { prediction, confidence };
+        }
+        
+        // ============================================================
+        // RANDOM EXTREME BAR HEIGHTS
+        // Each bar gets a COMPLETELY RANDOM height between 10px and 185px
+        // Creates dramatic unpredictable jumps every click
+        // ============================================================
+        function getRandomExtremeBarHeights() {
+            // Each bar independently random between EXTREME LOW (10px) to EXTREME HIGH (185px)
+            const gptH = Math.floor(Math.random() * 176) + 10;   // 10-185
+            const grokH = Math.floor(Math.random() * 176) + 10;  // 10-185
+            const geminiH = Math.floor(Math.random() * 176) + 10; // 10-185
+            const deepH = Math.floor(Math.random() * 176) + 10;   // 10-185
+            
+            return [gptH, grokH, geminiH, deepH];
+        }
+        
+        function applyBars(heights) {
+            barData.forEach((b, idx) => {
+                const h = heights[idx];
+                if (h === 0) {
+                    b.el.classList.add('hidden-bar');
+                    b.el.setAttribute('height', '0');
+                    b.el.setAttribute('y', '192');
+                } else {
+                    b.el.classList.remove('hidden-bar');
+                    const newY = 192 - h;
+                    b.el.setAttribute('height', h);
+                    b.el.setAttribute('y', newY);
+                }
+            });
+        }
+        
+        function renderHistory(history) {
+            hDiv.innerHTML = '';
+            const lastSix = history.slice(-6);
+            lastSix.forEach(val => {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                dot.innerText = val;
+                if (val === 'P') {
+                    dot.classList.add('player');
+                } else {
+                    dot.classList.add('banker');
+                }
+                hDiv.appendChild(dot);
+            });
+        }
+        
+        function saveState() {
+            // Get current bar heights
+            const currentBars = barData.map(b => {
+                if (b.el.classList.contains('hidden-bar')) return 0;
+                return parseFloat(b.el.getAttribute('height')) || 0;
+            });
+            stateStack.push({
+                results: [...fullResults],
+                predictionText: labelSpan.innerText,
+                predictionColor: labelSpan.style.color,
+                confidenceText: accSpan.innerText,
+                confidenceDisplay: accSpan.style.display,
+                thresholdText: thresholdMsgDiv.innerText,
+                barHeights: [...currentBars]
+            });
+            if (stateStack.length > 50) stateStack.shift();
+        }
+        
+        function restoreState(state) {
+            fullResults = [...state.results];
+            renderHistory(fullResults);
+            
+            labelSpan.innerText = state.predictionText;
+            labelSpan.style.color = state.predictionColor;
+            accSpan.innerText = state.confidenceText;
+            accSpan.style.display = state.confidenceDisplay;
+            thresholdMsgDiv.innerText = state.thresholdText || '';
+            
+            if (state.barHeights && state.barHeights.length === 4) {
+                applyBars(state.barHeights);
+            } else {
+                // If no saved bars, use random
+                const randomBars = getRandomExtremeBarHeights();
+                applyBars(randomBars);
+            }
+        }
+        
+        function updateUI() {
+            renderHistory(fullResults);
+            
+            const len = fullResults.length;
+            
+            if (len === 0) {
+                labelSpan.innerText = "Waiting..";
+                labelSpan.className = "waiting";
+                labelSpan.style.color = "#6b6a8a";
+                accSpan.style.display = "none";
+                thresholdMsgDiv.innerText = `⚡ Needs ${MIN_ENTRIES} results (0/${MIN_ENTRIES})`;
+                applyBars([0, 0, 0, 0]);
+                return;
+            }
+            
+            if (len < MIN_ENTRIES) {
+                labelSpan.innerText = "Waiting..";
+                labelSpan.className = "waiting";
+                labelSpan.style.color = "#6b6a8a";
+                accSpan.style.display = "none";
+                thresholdMsgDiv.innerText = `⚡ Calibrating... ${len}/${MIN_ENTRIES} results needed`;
+                applyBars([0, 0, 0, 0]);
+                return;
+            }
+            
+            // HAS ENOUGH ENTRIES - show weighted prediction
+            thresholdMsgDiv.innerText = "";
+            
+            const { prediction, confidence } = generateWeightedPrediction(fullResults);
+            
+            if (prediction) {
+                labelSpan.innerText = prediction;
+                labelSpan.className = "";
+                labelSpan.style.color = prediction === 'Player' ? '#22d3ee' : '#f472b6';
+                accSpan.style.display = "inline";
+                accSpan.innerText = confidence.toFixed(2) + "%";
+            }
+            
+            // AFTER 7 ENTRIES: ALL 4 BARS GET RANDOM EXTREME HEIGHTS
+            // This creates dramatic unpredictable jumps every single click
+            const randomBarHeights = getRandomExtremeBarHeights();
+            applyBars(randomBarHeights);
+        }
+        
+        function add(val) {
+            saveState();
+            fullResults.push(val);
+            updateUI();
+        }
+        
+        function undo() {
+            if (stateStack.length === 0) return;
+            const prev = stateStack.pop();
+            restoreState(prev);
+        }
+        
+        function reset() {
+            stateStack = [];
+            fullResults = [];
+            updateUI();
+        }
+        
+        updateUI();
+    </script>
+</body>
+</html>
