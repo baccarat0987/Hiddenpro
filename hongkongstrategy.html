@@ -2,10 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Baccarat · Paroli Strategy | 4X Profit Target</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baccarat Hongkong Strategy</title>
     
-    <!-- Firebase Authentication & Permission Check (untouched structure) -->
+    <script>
+        if (window.location.pathname.endsWith('.html')) {
+            const cleanUrl = window.location.pathname.replace('.html', '');
+            window.history.replaceState(null, '', cleanUrl);
+        }
+    </script>
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
@@ -23,6 +29,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
         const REQUIRED_ENGINE_ID = "engine_13"; 
 
         onAuthStateChanged(auth, async (user) => {
@@ -45,7 +52,6 @@
         });
     </script>
     
-    <!-- Right-click + shortcut blocker (untouched) -->
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = function(e) {
@@ -68,10 +74,9 @@
             --border: #1f2538;
             --text-main: #f8fafc;
             --text-dim: #475569;
-            --glow-banker: rgba(255, 71, 87, 0.2);
-            --glow-player: rgba(46, 134, 222, 0.2);
-            --glow-accent: rgba(56, 189, 248, 0.2);
-            --profit-glow: #10b981;
+            --glow-banker: rgba(255, 71, 87, 0.15);
+            --glow-player: rgba(46, 134, 222, 0.15);
+            --glow-accent: rgba(56, 189, 248, 0.15);
         }
 
         body {
@@ -93,11 +98,12 @@
             max-width: 500px;
             background: var(--card);
             border: 1px solid rgba(255, 255, 255, 0.04);
-            border-radius: 28px;
+            border-radius: 24px;
             overflow: hidden;
             box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+            position: relative;
             backdrop-filter: blur(20px);
-            animation: fadeInContainer 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: fadeInContainer 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .header {
@@ -141,70 +147,71 @@
         }
 
         .config-label { font-size: 0.72rem; color: #94a3b8; letter-spacing: 1px; font-weight: 700; text-transform: uppercase; }
-        .basebet-input-wrapper { display: flex; align-items: center; background: #0f1322; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 4px 12px; }
+        .basebet-input-wrapper { display: flex; align-items: center; background: #0f1322; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 4px 12px; }
         .currency-symbol { color: var(--accent); font-weight: 800; font-size: 0.9rem; margin-right: 4px; }
-        .basebet-input { background: transparent; border: none; color: #ffffff; font-family: inherit; font-weight: 800; font-size: 0.95rem; width: 80px; outline: none; text-align: left; }
+        .basebet-input { background: transparent; border: none; color: #ffffff; font-family: inherit; font-weight: 800; font-size: 0.95rem; width: 70px; outline: none; text-align: left; }
 
         .prediction-box {
             padding: 30px 24px; text-align: center; background: linear-gradient(180deg, #090b11 0%, #030406 100%);
-            border-bottom: 1px solid var(--border); transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+            border-bottom: 1px solid var(--border); transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); position: relative;
             box-shadow: inset 0 -20px 30px rgba(0, 0, 0, 0.3);
         }
 
-        #instruction { font-size: 0.72rem; color: var(--text-dim); letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; margin-top: 14px; }
-        .bet-label { font-size: 0.7rem; color: #475569; letter-spacing: 4px; text-transform: uppercase; font-weight: 800; }
-        #bet-signal { font-size: 3.6rem; font-weight: 950; margin: 2px 0; letter-spacing: 4px; text-shadow: 0 0 40px rgba(255,255,255,0.02); transition: all 0.3s; line-height: 1.1; }
-        #bet-recommendation-amount { font-size: 1.35rem; font-weight: 800; color: #e2e8f0; letter-spacing: 1px; margin: 6px 0; text-transform: uppercase; }
+        #instruction { font-size: 0.72rem; color: var(--text-dim); letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; transition: color 0.3s ease; margin-top: 14px; }
+        .bet-label { font-size: 0.72rem; color: #475569; letter-spacing: 4px; text-transform: uppercase; font-weight: 800; }
+        #bet-signal { font-size: 3.5rem; font-weight: 950; margin: 2px 0; letter-spacing: 4px; text-shadow: 0 0 40px rgba(255,255,255,0.02); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); line-height: 1.1; }
+        #bet-recommendation-amount { font-size: 1.3rem; font-weight: 800; color: #e2e8f0; letter-spacing: 1px; margin: 6px 0; text-transform: uppercase; opacity: 0.95; transition: all 0.3s ease; }
 
         .excel-container { max-height: 190px; overflow-y: auto; padding: 16px; background: #040508; box-shadow: inset 0 10px 20px rgba(0,0,0,0.5); }
         table { width: 100%; border-collapse: separate; border-spacing: 3px; table-layout: fixed; }
         tr.new-row-anim { animation: slideInRow 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        td { border: 1px solid rgba(255, 255, 255, 0.02); background: rgba(255, 255, 255, 0.01); height: 44px; text-align: center; font-weight: 800; font-size: 0.95rem; border-radius: 10px; transition: all 0.2s; }
+        td { border: 1px solid rgba(255, 255, 255, 0.02); background: rgba(255, 255, 255, 0.01); height: 44px; text-align: center; font-weight: 800; font-size: 0.95rem; border-radius: 6px; transition: all 0.3s ease; }
 
-        .ref-cell { background: rgba(56, 189, 248, 0.03); color: var(--accent); border: 1px solid rgba(56, 189, 248, 0.2); text-shadow: 0 0 8px rgba(56, 189, 248, 0.4); }        
-        .b-text { color: var(--banker); text-shadow: 0 0 10px var(--glow-banker); }        
-        .p-text { color: var(--player); text-shadow: 0 0 10px var(--glow-player); }        
-        .win-icon { color: #10b981; font-size: 0.8rem; font-weight: 900; margin-left: 3px; text-shadow: 0 0 6px rgba(16,185,129,0.5); }        
-        .loss-icon { color: #ef4444; font-size: 0.8rem; font-weight: 900; margin-left: 3px; }
+        .ref-cell { background: rgba(56, 189, 248, 0.03); color: var(--accent); border: 1px solid rgba(56, 189, 248, 0.15); text-shadow: 0 0 10px rgba(56, 189, 248, 0.3); }        
+        .b-text { color: var(--banker); text-shadow: 0 0 12px var(--glow-banker); }        
+        .p-text { color: var(--player); text-shadow: 0 0 12px var(--glow-player); }        
+        .win-icon { color: #10b981; font-size: 0.8rem; font-weight: 900; margin-left: 3px; text-shadow: 0 0 8px rgba(16,185,129,0.4); }        
+        .loss-icon { color: #ef4444; font-size: 0.8rem; font-weight: 900; margin-left: 3px; text-shadow: 0 0 8px rgba(239,68,68,0.4); }
 
         .controls { padding: 24px 24px 12px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .btn { padding: 18px; border-radius: 16px; border: none; font-weight: 800; letter-spacing: 1.5px; cursor: pointer; transition: all 0.2s ease; font-size: 0.9rem; position: relative; overflow: hidden; }
-        .btn::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); transition: 0.4s; }
+        .btn { padding: 18px; border-radius: 12px; border: none; font-weight: 800; letter-spacing: 1.5px; cursor: pointer; transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1); font-size: 0.9rem; position: relative; overflow: hidden; }
+        .btn::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); transition: 0.5s; }
         .btn:hover::after { left: 100%; }
         .btn:active { transform: scale(0.97); }
 
-        .btn-b { background: linear-gradient(135deg, #ff4757 0%, #d62839 100%); color: white; box-shadow: 0 6px 20px rgba(255, 71, 87, 0.3); }
+        .btn-b { background: linear-gradient(135deg, #ff4757 0%, #d62839 100%); color: white; box-shadow: 0 6px 20px rgba(255, 71, 87, 0.25), 0 1px 0 rgba(255,255,255,0.2) inset; }
         .btn-b:hover { background: linear-gradient(135deg, #ff6b7b 0%, #ff4757 100%); transform: translateY(-1px); }
-        .btn-p { background: linear-gradient(135deg, #2e86de 0%, #1a62b0 100%); color: white; box-shadow: 0 6px 20px rgba(46, 134, 222, 0.3); }
+        .btn-p { background: linear-gradient(135deg, #2e86de 0%, #1a62b0 100%); color: white; box-shadow: 0 6px 20px rgba(46, 134, 222, 0.25), 0 1px 0 rgba(255,255,255,0.2) inset; }
         .btn-p:hover { background: linear-gradient(135deg, #4ba3ff 0%, #2e86de 100%); transform: translateY(-1px); }
 
-        .btn-secondary { background: linear-gradient(180deg, #161b26 0%, #0f121a 100%); color: #94a3b8; flex: 1; border: 1px solid rgba(255, 255, 255, 0.03); border-radius: 14px; font-size: 0.8rem; }
-        .btn-secondary:hover { background: linear-gradient(180deg, #1f2636 0%, #161b26 100%); color: #fff; }
+        .btn-secondary { background: linear-gradient(180deg, #161b26 0%, #0f121a 100%); color: #94a3b8; flex: 1; border: 1px solid rgba(255, 255, 255, 0.03); border-radius: 10px; font-size: 0.8rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .btn-secondary:hover { background: linear-gradient(180deg, #1f2636 0%, #161b26 100%); color: #fff; border-color: rgba(255,255,255,0.1); }
+        
+        #mode-badge { font-size: 0.65rem; background: rgba(30, 41, 59, 0.5); color: #94a3b8; padding: 6px 14px; border-radius: 20px; font-weight: 800; letter-spacing: 1.5px; border: 1px solid var(--border); text-transform: uppercase; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-        .footer-tools { display: flex; gap: 12px; padding: 0 24px 24px 24px; }
-        #mode-badge { font-size: 0.65rem; background: rgba(30, 41, 59, 0.6); color: #94a3b8; padding: 6px 14px; border-radius: 30px; font-weight: 800; letter-spacing: 1.5px; border: 1px solid var(--border); text-transform: uppercase; backdrop-filter: blur(4px); }
-
-        .system-lock-overlay { position: absolute; top: 77px; left: 0; width: 100%; height: calc(100% - 77px); background: rgba(3, 4, 7, 0.96); backdrop-filter: blur(20px); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; z-index: 100; text-align: center; border-radius: 0 0 28px 28px; animation: overlayFadeIn 0.35s ease; }
+        .system-lock-overlay { position: absolute; top: 77px; left: 0; width: 100%; height: calc(100% - 77px); background: rgba(3, 4, 7, 0.95); backdrop-filter: blur(16px); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; z-index: 100; text-align: center; animation: overlayFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .lock-status { font-size: 0.75rem; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 8px; }
         .lock-title { font-size: 2.4rem; font-weight: 950; letter-spacing: 1px; margin: 12px 0; line-height: 1.1; }
-        .lock-desc { font-size: 0.88rem; color: #94a3b8; max-width: 380px; line-height: 1.6; margin-bottom: 35px; }
+        .lock-desc { font-size: 0.88rem; color: #64748b; max-width: 380px; line-height: 1.6; margin-bottom: 35px; }
 
-        .profit-callout-block { display: block; margin-top: 14px; font-size: 1.5rem; font-weight: 900; color: #10b981; text-shadow: 0 0 12px #10b981; background: rgba(16,185,129,0.1); padding: 10px 0; border-radius: 40px; letter-spacing: 1px; }
+        .profit-callout-block { display: block; margin-top: 14px; font-size: 1.40rem; font-weight: 900; letter-spacing: 1px; color: var(--accent); text-transform: uppercase; text-shadow: 0 0 15px var(--glow-accent); }
 
-        .btn-lock-reset { background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #030407; padding: 18px 44px; font-size: 0.95rem; font-weight: 900; border-radius: 40px; border: none; letter-spacing: 1.5px; cursor: pointer; box-shadow: 0 10px 25px rgba(56, 189, 248, 0.4); transition: all 0.2s; }
-        .btn-lock-reset:hover { transform: scale(1.02); background: linear-gradient(135deg, #4ec9ff, #0891d2); }
+        .btn-lock-reset { background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #030407; padding: 18px 44px; font-size: 0.95rem; font-weight: 900; border-radius: 12px; border: none; letter-spacing: 1.5px; cursor: pointer; box-shadow: 0 10px 30px rgba(56, 189, 248, 0.35), 0 1px 0 rgba(255,255,255,0.3) inset; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .btn-lock-reset:hover { transform: scale(1.03) translateY(-2px); box-shadow: 0 15px 35px rgba(56, 189, 248, 0.5); }
+        .btn-lock-reset:active { transform: scale(0.98); }
 
         .exit-nav { position: fixed; top: 15px; right: 15px; z-index: 1000; }
-        .exit-btn { background: rgba(0, 0, 0, 0.7); color: #38bdf8; padding: 6px 14px; border-radius: 40px; text-decoration: none; font-weight: 700; font-size: 11px; border: 1px solid rgba(56, 189, 248, 0.5); backdrop-filter: blur(8px); font-family: inherit; }
-        .exit-btn:hover { background: #38bdf8; color: #030407; }
+        .exit-btn { background: rgba(0, 0, 0, 0.7); color: #38bdf8; padding: 6px 14px; border-radius: 40px; text-decoration: none; font-weight: 700; font-size: 11px; border: 1px solid rgba(56, 189, 248, 0.5); backdrop-filter: blur(8px); transition: 0.2s; font-family: 'Inter', -apple-system, sans-serif; }
+        .exit-btn:hover { background: #38bdf8; color: #030407; box-shadow: 0 0 12px #38bdf8; }
 
-        @keyframes fadeInContainer { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes overlayFadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-        @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 10px var(--accent); } 50% { box-shadow: 0 0 22px var(--accent); } }
-        @keyframes slideInRow { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInContainer { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes overlayFadeIn { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: scale(1); } }
+        @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 12px var(--accent); opacity: 0.8; } 50% { box-shadow: 0 0 20px var(--accent); opacity: 1; } }
+        @keyframes slideInRow { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
+
     <div class="exit-nav">
         <a href="index.html" class="exit-btn">← EXIT TERMINAL</a>
     </div>
@@ -215,25 +222,25 @@
                 <span class="brand-icon"></span>
                 <div>
                     <span class="brand-title">BACCARAT</span>
-                    <span class="brand-subtitle">PAROLI · 4X PROFIT</span>
+                    <span class="brand-subtitle">HONGKONG STRATEGY</span>
                 </div>
             </div>
-            <span id="mode-badge">PAROLI ACTIVE</span>
+            <span id="mode-badge">INITIALIZING</span>
         </div>
 
         <div class="config-panel">
-            <span class="config-label">Base Bet (any amount):</span>
+            <span class="config-label">Set Your Base Bet:</span>
             <div class="basebet-input-wrapper">
                 <span class="currency-symbol">$</span>
-                <input type="number" id="base-bet-field" class="basebet-input" value="25" min="1" step="1" onchange="resetFullState()">
+                <input type="number" id="base-bet-field" class="basebet-input" value="10" min="1" onchange="updateLogic()">
             </div>
         </div>
 
         <div class="system-lock-overlay" id="lock-screen">
-            <div class="lock-status" id="lock-status-label">PROFIT TARGET REACHED</div>
-            <div class="lock-title" id="lock-main-msg">CHANGE TABLE ✓</div>
-            <div class="lock-desc" id="lock-sub-desc">You've reached 4x base bet profit. Secure winnings.</div>
-            <button class="btn btn-lock-reset" onclick="resetFullState()">START NEW SESSION →</button>
+            <div class="lock-status" id="lock-status-label">SYSTEM ALERT</div>
+            <div class="lock-title" id="lock-main-msg">CHANGE TABLE</div>
+            <div class="lock-desc" id="lock-sub-desc">The strategy rules have triggered an exit state.</div>
+            <button class="btn btn-lock-reset" onclick="appSoftReset()">START NEW FRESH</button>
         </div>
 
         <div id="app-workspace">
@@ -243,7 +250,7 @@
                     <div id="bet-signal">WAIT</div>
                     <div id="bet-recommendation-amount">---</div>
                 </div>
-                <div id="instruction">Input first 5 hands for reference</div>
+                <div id="instruction">INPUT FIRST 5 HANDS FOR REFERENCE</div>
             </div>
 
             <div class="excel-container">
@@ -253,314 +260,167 @@
             </div>
 
             <div class="controls">
-                <button class="btn btn-p" onclick="addOutcome('P')">PLAYER</button>
-                <button class="btn btn-b" onclick="addOutcome('B')">BANKER</button>
+                <button class="btn btn-p" onclick="addEntry('P')">PLAYER</button>
+                <button class="btn btn-b" onclick="addEntry('B')">BANKER</button>
             </div>
 
-            <div class="footer-tools">
-                <button class="btn btn-secondary" onclick="undoLast()">UNDO</button>
-                <button class="btn btn-secondary" onclick="resetFullState()">RESET</button>
+            <div class="footer-tools" style="display:flex; gap:12px; padding:0 24px 24px 24px;">
+                <button class="btn btn-secondary" onclick="undo()">UNDO</button>
+                <button class="btn btn-secondary" onclick="appSoftReset()">RESET</button>
             </div>
         </div>
     </div>
 
     <script>
-        // ============================================================
-        // PAROLI (POSITIVE PROGRESSION) STRATEGY
-        // - Start with base bet amount
-        // - After a win: double the bet for next round (max 3 consecutive wins recommended, but flexible)
-        // - After a loss: reset to base bet
-        // - Lock screen triggers when total net profit >= 4x BASE_BET (any basebet amount works)
-        // ============================================================
-        
-        let history = [];           // 'B' / 'P'
+        let history = [];
         const ROW_SIZE = 5;
-        let currentDirectionIsDirect = true;   // true = match ref, false = opposite
+        let currentRowModeIsDirect = true; 
+        let paroliStep = 0; 
+        const paroliMultipliers = [1, 2, 4, 8];
         
-        // Paroli state
-        let currentBetMultiplier = 1;    // 1 = baseBet, 2 = double, 4 = quadruple etc.
-        let currentStreakWins = 0;
-        let totalNetProfit = 0;           // accumulated profit/loss in current session
-        
-        // Reference row values (first row)
-        let referenceRow = [];     // stores first 5 reference symbols
-        
-        function getBaseBet() {
-            let val = parseFloat(document.getElementById('base-bet-field').value);
-            return (isNaN(val) || val <= 0) ? 25 : val;
+        function getBaseBetValue() {
+            const value = parseFloat(document.getElementById('base-bet-field').value);
+            return isNaN(value) || value <= 0 ? 10 : value;
         }
         
-        function getCurrentBetAmount() {
-            return getBaseBet() * currentBetMultiplier;
+        function getCurrentBetValue() {
+            return getBaseBetValue() * paroliMultipliers[paroliStep];
         }
         
-        // Reset everything (soft + profit, paroli state)
-        function resetFullState() {
+        function appSoftReset() {
             history = [];
-            referenceRow = [];
-            currentDirectionIsDirect = true;
-            currentBetMultiplier = 1;
-            currentStreakWins = 0;
-            totalNetProfit = 0;
+            currentRowModeIsDirect = true;
+            paroliStep = 0;
             document.getElementById('lock-screen').style.display = "none";
             renderTable();
-            updateUI();
+            updateLogic();
         }
-        
-        // Called when a bet is resolved: outcome = 'W' or 'L', predicted bet side (just for commission)
-        function applyParoliAndProfit(outcomeWasWin, betOnSide, betAmount) {
-            if (outcomeWasWin) {
-                let netWin = betAmount;
-                // Banker commission 5%
-                if (betOnSide === 'B') {
-                    netWin = betAmount * 0.95;
-                }
-                totalNetProfit += netWin;
-                // Paroli progression: double after win (but we cap at reasonable step, max x4)
-                if (currentBetMultiplier < 8) {  // safe cap: baseBet*8 max
-                    currentBetMultiplier = currentBetMultiplier * 2;
-                }
-                currentStreakWins++;
-            } else {
-                // loss
-                totalNetProfit -= betAmount;
-                // reset paroli to base
-                currentBetMultiplier = 1;
-                currentStreakWins = 0;
-            }
-        }
-        
-        // Check if profit target met: net profit >= 4 * baseBet (works for any amount)
-        function isProfitTargetMet() {
-            const target = getBaseBet() * 4;
-            return totalNetProfit >= target;
-        }
-        
-        function addOutcome(selectedSymbol) {
-            if (document.getElementById('lock-screen').style.display === 'flex') return;
-            
-            history.push(selectedSymbol);
-            
-            // Build reference row from first 5 entries if we have them
-            if (history.length >= ROW_SIZE && referenceRow.length === 0) {
-                referenceRow = history.slice(0, ROW_SIZE);
-            }
-            
-            // Process betting logic: evaluate the last entry that was just added
-            // Important: we need to know what was the predicted bet for that last position (if any)
-            if (history.length > ROW_SIZE) {
-                const totalEntries = history.length;
-                const colIdx = (totalEntries - 1) % ROW_SIZE;
-                // we only evaluate predictions if the position is not a row starter (col != 0)
-                if (colIdx !== 0 && referenceRow.length === ROW_SIZE) {
-                    const masterValue = referenceRow[colIdx];
-                    let predictedSide = "";
-                    if (currentDirectionIsDirect) {
-                        predictedSide = masterValue;
-                    } else {
-                        predictedSide = (masterValue === 'B') ? 'P' : 'B';
-                    }
-                    
-                    const actualOutcome = selectedSymbol;
-                    const isWin = (predictedSide === actualOutcome);
-                    const betAmountUsed = getCurrentBetAmount();
-                    
-                    if (isWin) {
-                        // WIN: apply paroli & profit
-                        applyParoliAndProfit(true, predictedSide, betAmountUsed);
-                        // after win, direction remains same for next (direct/opposite stays as current logic)
-                        // but we keep currentDirectionIsDirect unchanged (system continues)
-                    } else {
-                        // LOSS: reset paroli and record loss
-                        applyParoliAndProfit(false, predictedSide, betAmountUsed);
-                        // Flip direction after a loss: important for the Hongkong pattern logic
-                        currentDirectionIsDirect = !currentDirectionIsDirect;
-                    }
-                }
-            }
-            
+
+        function addEntry(val) {
+            history.push(val);
             renderTable();
-            updateUI();
-            
-            // After rendering, check profit target
-            if (isProfitTargetMet()) {
-                const base = getBaseBet();
-                const profitVal = totalNetProfit.toFixed(2);
-                triggerLockScreen(profitVal, base);
-            }
+            updateLogic();
         }
-        
-        function triggerLockScreen(profitFormatted, baseBetAmount) {
-            const lockDiv = document.getElementById('lock-screen');
-            const statusSpan = document.getElementById('lock-status-label');
-            const mainMsg = document.getElementById('lock-main-msg');
-            const descSpan = document.getElementById('lock-sub-desc');
-            statusSpan.innerText = "✓ TARGET COMPLETE ✓";
-            mainMsg.innerText = "CHANGE TABLE";
-            descSpan.innerHTML = `You reached 4x your base bet ($${baseBetAmount} → +$${profitFormatted} profit).<br><span class="profit-callout-block">TOTAL PROFIT: +$${profitFormatted}</span><br>Secure gains and start fresh.`;
-            lockDiv.style.display = "flex";
+
+        function undo() {
+            history.pop();
+            paroliStep = 0;
+            renderTable();
+            updateLogic();
         }
-        
-        function undoLast() {
-            if (history.length === 0) return;
-            if (document.getElementById('lock-screen').style.display === 'flex') return;
-            // Undo is simplified: reset full session to avoid broken paroli state
-            // But to keep UX smooth: we alert and reset
-            if (confirm("Undo will reset the entire session to avoid betting errors. Continue?")) {
-                resetFullState();
-            }
-        }
-        
+
         function renderTable() {
             const body = document.getElementById('table-body');
             body.innerHTML = '';
-            if (!history.length && referenceRow.length === 0) {
-                // show empty placeholders
-                for (let i = 0; i < 2; i++) {
-                    const tr = document.createElement('tr');
-                    for (let j = 0; j < ROW_SIZE; j++) {
-                        const td = document.createElement('td');
-                        if (i === 0) td.className = 'ref-cell';
-                        td.innerHTML = '—';
-                        tr.appendChild(td);
-                    }
-                    body.appendChild(tr);
-                }
-                return;
-            }
+            const rowCount = Math.ceil((history.length + 1) / ROW_SIZE);
+            const totalRows = Math.max(1, rowCount);
             
-            const totalCells = Math.max(history.length, ROW_SIZE);
-            const rowCount = Math.ceil(totalCells / ROW_SIZE);
-            const maxVisible = 6;
-            const startRow = Math.max(0, rowCount - maxVisible);
+            let runningProfitBalance = 0;
+            let dynamicEngineIsDirect = true;
+            let tempParoliStep = 0;
             
-            // Recalculate visual with dynamic win/loss icons based on predictions
-            // We'll rebuild full fresh table
-            for (let i = startRow; i < rowCount; i++) {
-                const tr = document.createElement('tr');
-                if (i === rowCount-1 && history.length > ROW_SIZE) tr.className = 'new-row-anim';
+            const maxTrailingRows = 2; 
+            const startRowIndex = Math.max(1, totalRows - maxTrailingRows);
+
+            for (let i = 0; i < totalRows; i++) {
+                const isReferenceRow = (i === 0);
+                const isWithinVisibleWindow = (i >= startRowIndex && i < startRowIndex + maxTrailingRows);
+                let tr = (isReferenceRow || isWithinVisibleWindow) ? document.createElement('tr') : null;
+
                 for (let j = 0; j < ROW_SIZE; j++) {
-                    const idx = i * ROW_SIZE + j;
-                    const td = document.createElement('td');
-                    let cellContent = '';
-                    let hasWinLoss = false;
-                    let isWinFlag = false;
-                    
-                    if (idx < history.length) {
-                        const symbol = history[idx];
-                        cellContent = `<span class="${symbol === 'B' ? 'b-text' : 'p-text'}">${symbol}</span>`;
-                        // add win/loss icon if this cell was a predicted outcome (idx >= ROW_SIZE and not starter)
-                        if (idx >= ROW_SIZE && referenceRow.length === ROW_SIZE) {
-                            const colPos = idx % ROW_SIZE;
-                            if (colPos !== 0) {
-                                // Determine what was predicted at that historical moment
-                                // To avoid complex state, we reconstruct prediction based on direction at that time? 
-                                // For simplicity we can re-evaluate using saved direction but easier: we recalc using rule engine
-                                // We'll recompute prediction based on saved 'currentDirectionIsDirect' but direction changes over time. 
-                                // Better: show only outcome, but win/loss shown dynamically in recent updates? for UX we show only outcome marks not necessary but nice.
-                                // We simplify: win/loss shown only for last few bets to keep consistency; but for table we display just outcome and a simple indicator.
-                                // Since this is a strategy display, we show generic marks for wins/losses based on real results.
-                                // We'll compute by re-simulating lightweight for each cell? might be heavy, but okay. We'll generate small indicator.
-                                // However to avoid complexity and respect "small changes", we display just outcome; profit panel shows details.
+                    const index = i * ROW_SIZE + j;
+                    if (history[index]) {
+                        const value = history[index];
+                        const td = document.createElement('td');
+                        if (isReferenceRow) td.className = 'ref-cell';
+                        td.innerHTML = `<span class="${value === 'B' ? 'b-text' : 'p-text'}">${value}</span>`;
+                        
+                        if (i > 0) {
+                            if (j === 0) {
+                                dynamicEngineIsDirect = (value === history[0]);
+                            } else {
+                                const isMatch = (dynamicEngineIsDirect ? (value === history[j]) : (value !== history[j]));
+                                const betAmount = getBaseBetValue() * paroliMultipliers[tempParoliStep];
+                                
+                                if (isMatch) {
+                                    td.innerHTML += ' <span class="win-icon">✓</span>';
+                                    runningProfitBalance += (history[j] === 'B' ? betAmount * 0.95 : betAmount);
+                                    tempParoliStep = Math.min(tempParoliStep + 1, 3);
+                                    dynamicEngineIsDirect = true;
+                                } else {
+                                    td.innerHTML += ' <span class="loss-icon">X</span>';
+                                    runningProfitBalance -= betAmount;
+                                    tempParoliStep = 0;
+                                    dynamicEngineIsDirect = false;
+                                }
                             }
                         }
-                        // Add tiny win/loss markers for the last 2 rows' predictions to give feedback
-                        if (idx === history.length-1 && idx >= ROW_SIZE) {
-                            // last added cell: show marker if known
-                            const lastCol = idx % ROW_SIZE;
-                            if (lastCol !== 0 && referenceRow.length === ROW_SIZE) {
-                                const refVal = referenceRow[lastCol];
-                                let predictedAtThatTime = "";
-                                // we need direction used for that specific bet, we use currentDirectionIsDirect? not exact but approximate for marker
-                                // We'll just not overcomplicate: user can see net profit
-                            }
-                        }
-                    } else {
-                        if (i === 0 && referenceRow.length > j) {
-                            cellContent = `<span style="color:#38bdf8;">${referenceRow[j]}</span>`;
-                            td.className = 'ref-cell';
-                        } else {
-                            cellContent = '—';
-                        }
+                        if (tr) tr.appendChild(td);
                     }
-                    td.innerHTML = cellContent;
-                    tr.appendChild(td);
                 }
-                body.appendChild(tr);
+                if (tr) body.appendChild(tr);
             }
-        }
-        
-        function updateUI() {
-            const signalDiv = document.getElementById('bet-signal');
-            const instrDiv = document.getElementById('instruction');
-            const badgeSpan = document.getElementById('mode-badge');
-            const betAmountSpan = document.getElementById('bet-recommendation-amount');
-            const boxBg = document.getElementById('predict-box-bg');
             
+            paroliStep = tempParoliStep;
+            currentRowModeIsDirect = dynamicEngineIsDirect;
+            
+            const target = getBaseBetValue() * 4;
+            if (runningProfitBalance >= target && history.length > 5) {
+                triggerSystemLock("TARGET ACHIEVED", "PROFIT GOAL REACHED", `You have reached your 4x profit target. <span class="profit-callout-block">PROFIT: +$${runningProfitBalance.toFixed(2)}</span>`, "var(--accent)");
+            }
+            
+            const container = document.querySelector('.excel-container');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function triggerSystemLock(badgeText, mainText, descHTML, themeColor) {
+            const lockScreen = document.getElementById('lock-screen');
+            const statusLabel = document.getElementById('lock-status-label');
+            const mainMsg = document.getElementById('lock-main-msg');
+            const subDesc = document.getElementById('lock-sub-desc');
+
+            statusLabel.innerText = badgeText;
+            statusLabel.style.color = themeColor;
+            mainMsg.innerText = mainText;
+            subDesc.innerHTML = descHTML; 
+            lockScreen.style.display = "flex";
+        }
+
+        function updateLogic() {
+            const signal = document.getElementById('bet-signal');
+            const instr = document.getElementById('instruction');
+            const badge = document.getElementById('mode-badge');
+            const betAmountLabel = document.getElementById('bet-recommendation-amount');
+
             if (history.length < ROW_SIZE) {
-                signalDiv.innerText = "WAIT";
-                signalDiv.style.color = "#94a3b8";
-                betAmountSpan.innerText = "";
-                instrDiv.innerText = `NEED ${ROW_SIZE - history.length} MORE REFERENCE HANDS`;
-                badgeSpan.innerText = "ANALYZING";
+                signal.innerText = "WAIT";
+                betAmountLabel.innerText = "";
+                instr.innerText = `NEED ${ROW_SIZE - history.length} MORE HANDS FOR REFERENCE`;
+                badge.innerText = "GATHERING DATA";
                 return;
             }
-            
-            // ensure reference row captured
-            if (referenceRow.length === 0 && history.length >= ROW_SIZE) {
-                referenceRow = history.slice(0, ROW_SIZE);
-            }
-            
-            const currentPos = history.length;
-            const colIndex = currentPos % ROW_SIZE;
-            
+
+            const colIndex = history.length % ROW_SIZE;
+            const masterRefValue = history[colIndex];
+
             if (colIndex === 0) {
-                signalDiv.innerText = "OBSERVE";
-                signalDiv.style.color = "var(--accent)";
-                betAmountSpan.innerText = "NO BET";
-                instrDiv.innerText = "New row starter — waiting for pattern alignment";
-                badgeSpan.innerText = "SCAN TREND";
+                signal.innerText = "SKIP HAND";
+                betAmountLabel.innerText = "NO BET";
+                instr.innerText = "OBSERVE NEW ROW STARTER";
+                badge.innerText = "TREND SCANNING";
                 return;
             }
+
+            badge.innerText = currentRowModeIsDirect ? "STRATEGY: MATCH" : "STRATEGY: OPPOSITE";
+            let prediction = currentRowModeIsDirect ? masterRefValue : (masterRefValue === 'B' ? 'P' : 'B');
             
-            if (referenceRow.length === ROW_SIZE) {
-                const masterVal = referenceRow[colIndex];
-                let prediction = "";
-                if (currentDirectionIsDirect) {
-                    prediction = masterVal;
-                    badgeSpan.innerText = "PAROLI • MATCH MODE";
-                    instrDiv.innerText = "Positive progression active • double on win";
-                } else {
-                    prediction = (masterVal === 'B') ? 'P' : 'B';
-                    badgeSpan.innerText = "PAROLI • OPPOSITE";
-                    instrDiv.innerText = "Recovery pattern • reset to base after loss";
-                }
-                
-                const currentBetValue = getCurrentBetAmount();
-                betAmountSpan.innerText = `BET: $${currentBetValue.toFixed(2)}`;
-                
-                if (prediction === 'B') {
-                    signalDiv.innerText = "BANKER";
-                    signalDiv.style.color = "var(--banker)";
-                    boxBg.style.background = "linear-gradient(180deg, #1c0a0e 0%, #030406 100%)";
-                    boxBg.style.boxShadow = "inset 0 0 25px rgba(255,71,87,0.1)";
-                } else {
-                    signalDiv.innerText = "PLAYER";
-                    signalDiv.style.color = "var(--player)";
-                    boxBg.style.background = "linear-gradient(180deg, #0a1222 0%, #030406 100%)";
-                    boxBg.style.boxShadow = "inset 0 0 25px rgba(46,134,222,0.1)";
-                }
-                // display profit status
-                const targetRequired = getBaseBet() * 4;
-                instrDiv.innerHTML = `💰 Session P&L: $${totalNetProfit.toFixed(2)}  |  Target: $${targetRequired.toFixed(2)} (4x Base)`;
-            } else {
-                signalDiv.innerText = "ERROR";
-                betAmountSpan.innerText = "---";
-            }
+            betAmountLabel.innerText = `BET: $${getCurrentBetValue().toFixed(2)}`;
+            signal.innerText = prediction === 'B' ? 'BANKER' : 'PLAYER';
+            signal.style.color = prediction === 'B' ? 'var(--banker)' : 'var(--player)';
         }
         
-        // initial empty state
-        resetFullState();
+        renderTable();
+        updateLogic();
     </script>
 </body>
 </html>
