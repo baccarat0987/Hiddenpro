@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Baccarat Hongkong Strategy</title>
     
+    <!-- Clean URL script -->
     <script>
         if (window.location.pathname.endsWith('.html')) {
             const cleanUrl = window.location.pathname.replace('.html', '');
@@ -12,6 +13,7 @@
         }
     </script>
     
+    <!-- Firebase Authentication & Permission Check -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
@@ -52,6 +54,7 @@
         });
     </script>
     
+    <!-- Right-click and shortcut blocker -->
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = function(e) {
@@ -100,7 +103,8 @@
             border: 1px solid rgba(255, 255, 255, 0.04);
             border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 
+                        0 0 0 1px rgba(255, 255, 255, 0.03) inset;
             position: relative;
             backdrop-filter: blur(20px);
             animation: fadeInContainer 0.8s cubic-bezier(0.16, 1, 0.3, 1);
@@ -186,7 +190,8 @@
 
         .btn-secondary { background: linear-gradient(180deg, #161b26 0%, #0f121a 100%); color: #94a3b8; flex: 1; border: 1px solid rgba(255, 255, 255, 0.03); border-radius: 10px; font-size: 0.8rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .btn-secondary:hover { background: linear-gradient(180deg, #1f2636 0%, #161b26 100%); color: #fff; border-color: rgba(255,255,255,0.1); }
-        
+                    
+        .footer-tools { display: flex; gap: 12px; padding: 0 24px 24px 24px; }
         #mode-badge { font-size: 0.65rem; background: rgba(30, 41, 59, 0.5); color: #94a3b8; padding: 6px 14px; border-radius: 20px; font-weight: 800; letter-spacing: 1.5px; border: 1px solid var(--border); text-transform: uppercase; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
         .system-lock-overlay { position: absolute; top: 77px; left: 0; width: 100%; height: calc(100% - 77px); background: rgba(3, 4, 7, 0.95); backdrop-filter: blur(16px); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; z-index: 100; text-align: center; animation: overlayFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -200,9 +205,34 @@
         .btn-lock-reset:hover { transform: scale(1.03) translateY(-2px); box-shadow: 0 15px 35px rgba(56, 189, 248, 0.5); }
         .btn-lock-reset:active { transform: scale(0.98); }
 
-        .exit-nav { position: fixed; top: 15px; right: 15px; z-index: 1000; }
-        .exit-btn { background: rgba(0, 0, 0, 0.7); color: #38bdf8; padding: 6px 14px; border-radius: 40px; text-decoration: none; font-weight: 700; font-size: 11px; border: 1px solid rgba(56, 189, 248, 0.5); backdrop-filter: blur(8px); transition: 0.2s; font-family: 'Inter', -apple-system, sans-serif; }
-        .exit-btn:hover { background: #38bdf8; color: #030407; box-shadow: 0 0 12px #38bdf8; }
+        .excel-container::-webkit-scrollbar { width: 5px; }
+        .excel-container::-webkit-scrollbar-thumb { background: #161b26; border-radius: 10px; }
+        .excel-container::-webkit-scrollbar-thumb:hover { background: #22293a; }
+
+        .exit-nav {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1000;
+        }
+        .exit-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: #38bdf8;
+            padding: 6px 14px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 11px;
+            border: 1px solid rgba(56, 189, 248, 0.5);
+            backdrop-filter: blur(8px);
+            transition: 0.2s;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+        .exit-btn:hover {
+            background: #38bdf8;
+            color: #030407;
+            box-shadow: 0 0 12px #38bdf8;
+        }
 
         @keyframes fadeInContainer { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes overlayFadeIn { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: scale(1); } }
@@ -272,11 +302,25 @@
     </div>
 
     <script>
+        // ============================================================
+        // PROTECTED FIBONACCI BETTING STRATEGY
+        // ============================================================
+        // Sequence: 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610
+        // Win: Move back 2 steps
+        // Loss: Move forward 1 step
+        // Floor Protection: After 5+ consecutive losses, never go below Step 4 (3x base bet)
+        // ============================================================
+        
         let history = [];
         const ROW_SIZE = 5;
         let currentRowModeIsDirect = true; 
-        let paroliStep = 0; 
-        const paroliMultipliers = [1, 2, 4, 8];
+        let currentCalculatedBetValue = 0;
+        
+        // Fibonacci state variables
+        let fibSequenceMultipliers = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610];
+        let fibIndex = 0;
+        let consecutiveLosses = 0;
+        const FLOOR_STEP = 4;  // Step 4 = multiplier 3 (3x base bet)
         
         function getBaseBetValue() {
             const value = parseFloat(document.getElementById('base-bet-field').value);
@@ -284,13 +328,41 @@
         }
         
         function getCurrentBetValue() {
-            return getBaseBetValue() * paroliMultipliers[paroliStep];
+            return getBaseBetValue() * fibSequenceMultipliers[fibIndex];
+        }
+        
+        function regressFibonacciOnWin() {
+            let targetStep = fibIndex - 2;
+            
+            // FLOOR PROTECTION: If we had 5+ consecutive losses, never go below FLOOR_STEP
+            if (consecutiveLosses >= 5 && targetStep < FLOOR_STEP) {
+                targetStep = FLOOR_STEP;
+            }
+            
+            if (targetStep < 0) targetStep = 0;
+            fibIndex = targetStep;
+            
+            // Reduce consecutive losses counter on win
+            consecutiveLosses = Math.max(0, consecutiveLosses - 2);
+        }
+        
+        function advanceFibonacciOnLoss() {
+            if (fibIndex + 1 < fibSequenceMultipliers.length) {
+                fibIndex++;
+            }
+            consecutiveLosses++;
+        }
+        
+        function resetFibonacciToCurrentBase() {
+            fibIndex = 0;
+            consecutiveLosses = 0;
         }
         
         function appSoftReset() {
             history = [];
             currentRowModeIsDirect = true;
-            paroliStep = 0;
+            currentCalculatedBetValue = 0;
+            resetFibonacciToCurrentBase();
             document.getElementById('lock-screen').style.display = "none";
             renderTable();
             updateLogic();
@@ -303,21 +375,28 @@
         }
 
         function undo() {
+            // Simplified undo - just remove last entry and reset Fibonacci
             history.pop();
-            paroliStep = 0;
+            resetFibonacciToCurrentBase();
             renderTable();
             updateLogic();
         }
 
         function renderTable() {
             const body = document.getElementById('table-body');
-            body.innerHTML = '';
+            body.innerHTML = '';                
+            
             const rowCount = Math.ceil((history.length + 1) / ROW_SIZE);
             const totalRows = Math.max(1, rowCount);
-            
+
+            let totalCheckmarks = 0;
             let runningProfitBalance = 0;
             let dynamicEngineIsDirect = true;
-            let tempParoliStep = 0;
+            
+            const userConfigBaseBet = getBaseBetValue();
+            
+            // Reset Fibonacci state before processing
+            resetFibonacciToCurrentBase();
             
             const maxTrailingRows = 2; 
             const startRowIndex = Math.max(1, totalRows - maxTrailingRows);
@@ -325,52 +404,107 @@
             for (let i = 0; i < totalRows; i++) {
                 const isReferenceRow = (i === 0);
                 const isWithinVisibleWindow = (i >= startRowIndex && i < startRowIndex + maxTrailingRows);
-                let tr = (isReferenceRow || isWithinVisibleWindow) ? document.createElement('tr') : null;
+
+                let tr = null;
+                if (isReferenceRow || isWithinVisibleWindow) {
+                    tr = document.createElement('tr');
+                    if (!isReferenceRow && i === totalRows - 1) {
+                        tr.className = "new-row-anim";
+                    }
+                }
 
                 for (let j = 0; j < ROW_SIZE; j++) {
-                    const index = i * ROW_SIZE + j;
+                    let td = null;
+                    if (isReferenceRow || isWithinVisibleWindow) {
+                        td = document.createElement('td');
+                        if (isReferenceRow) td.className = 'ref-cell';
+                    }
+                    
+                    const index = i * ROW_SIZE + j;                                
+
                     if (history[index]) {
                         const value = history[index];
-                        const td = document.createElement('td');
-                        if (isReferenceRow) td.className = 'ref-cell';
-                        td.innerHTML = `<span class="${value === 'B' ? 'b-text' : 'p-text'}">${value}</span>`;
+                        
+                        if (td) {
+                            td.innerHTML = `<span class="${value === 'B' ? 'b-text' : 'p-text'}">${value}</span>`;
+                        }                                        
                         
                         if (i > 0) {
                             if (j === 0) {
-                                dynamicEngineIsDirect = (value === history[0]);
+                                const topRowReferenceStarter = history[0];
+                                dynamicEngineIsDirect = (value === topRowReferenceStarter);
                             } else {
-                                const isMatch = (dynamicEngineIsDirect ? (value === history[j]) : (value !== history[j]));
-                                const betAmount = getBaseBetValue() * paroliMultipliers[tempParoliStep];
-                                
-                                if (isMatch) {
-                                    td.innerHTML += ' <span class="win-icon">✓</span>';
-                                    runningProfitBalance += (history[j] === 'B' ? betAmount * 0.95 : betAmount);
-                                    tempParoliStep = Math.min(tempParoliStep + 1, 3);
+                                const masterReferenceValue = history[j];
+                                const isIdenticalMatch = (value === masterReferenceValue);
+
+                                let historicPrediction = "";
+                                if (dynamicEngineIsDirect) {
+                                    historicPrediction = masterReferenceValue;
+                                } else {
+                                    historicPrediction = (masterReferenceValue === 'B') ? 'P' : 'B';
+                                }
+
+                                const betAmount = getCurrentBetValue();
+
+                                if ((dynamicEngineIsDirect && isIdenticalMatch) || (!dynamicEngineIsDirect && !isIdenticalMatch)) {
+                                    // WIN
+                                    if (td) td.innerHTML += ' <span class="win-icon">✓</span>';
+                                    totalCheckmarks++;
+                                    
+                                    // Banker wins take 5% commission
+                                    if (historicPrediction === 'B') {
+                                        runningProfitBalance += (betAmount * 0.95);
+                                    } else {
+                                        runningProfitBalance += betAmount;
+                                    }
+                                    
+                                    // PROTECTED FIBONACCI: Move back 2 steps on win
+                                    regressFibonacciOnWin();
                                     dynamicEngineIsDirect = true;
                                 } else {
-                                    td.innerHTML += ' <span class="loss-icon">X</span>';
+                                    // LOSS
+                                    if (td) td.innerHTML += ' <span class="loss-icon">X</span>';
                                     runningProfitBalance -= betAmount;
-                                    tempParoliStep = 0;
+                                    
+                                    // PROTECTED FIBONACCI: Move forward 1 step on loss
+                                    advanceFibonacciOnLoss();
                                     dynamicEngineIsDirect = false;
                                 }
                             }
                         }
-                        if (tr) tr.appendChild(td);
+                    } else {
+                        if (index === history.length && history.length >= ROW_SIZE) {
+                            if (j !== 0) {
+                                currentCalculatedBetValue = getCurrentBetValue();
+                            }
+                        }
                     }
+                    if (tr && td) tr.appendChild(td);
                 }
                 if (tr) body.appendChild(tr);
             }
             
-            paroliStep = tempParoliStep;
             currentRowModeIsDirect = dynamicEngineIsDirect;
             
-            const target = getBaseBetValue() * 4;
-            if (runningProfitBalance >= target && history.length > 5) {
-                triggerSystemLock("TARGET ACHIEVED", "PROFIT GOAL REACHED", `You have reached your 4x profit target. <span class="profit-callout-block">PROFIT: +$${runningProfitBalance.toFixed(2)}</span>`, "var(--accent)");
-            }
-            
+            // SMART TRIGGER EVALUATION: Assures 4 wins AND net profit margin above zero
+            evaluateSystemThresholds(totalCheckmarks, runningProfitBalance);
+
             const container = document.querySelector('.excel-container');
             container.scrollTop = container.scrollHeight;
+        }
+
+        function evaluateSystemThresholds(totalCheckmarks, finalProfit) {
+            if (totalCheckmarks >= 4 && finalProfit > 0) {
+                const formattedProfit = Number(finalProfit.toFixed(2)).toLocaleString();
+                
+                triggerSystemLock(
+                    "TARGET ACHIEVED", 
+                    "CHANGE TABLE", 
+                    `You have reached 4 overall checkmark wins with a secured clean positive balance. Take your profits and clear down. <span class="profit-callout-block">TOTAL PROFIT: +$${formattedProfit}</span>`, 
+                    "var(--accent)"
+                );
+                return;
+            }
         }
 
         function triggerSystemLock(badgeText, mainText, descHTML, themeColor) {
@@ -382,7 +516,9 @@
             statusLabel.innerText = badgeText;
             statusLabel.style.color = themeColor;
             mainMsg.innerText = mainText;
+            mainMsg.style.color = "#ffffff";
             subDesc.innerHTML = descHTML; 
+
             lockScreen.style.display = "flex";
         }
 
@@ -393,31 +529,60 @@
             const boxBg = document.getElementById('predict-box-bg');
             const betAmountLabel = document.getElementById('bet-recommendation-amount');
 
+            boxBg.style.background = "linear-gradient(180deg, #090b11 0%, #030406 100%)";
+            boxBg.style.boxShadow = "inset 0 -20px 30px rgba(0, 0, 0, 0.3)";
+
             if (history.length < ROW_SIZE) {
                 signal.innerText = "WAIT";
+                signal.style.color = "white";
                 betAmountLabel.innerText = "";
                 instr.innerText = `NEED ${ROW_SIZE - history.length} MORE HANDS FOR REFERENCE`;
                 badge.innerText = "GATHERING DATA";
                 return;
             }
 
-            const colIndex = history.length % ROW_SIZE;
+            const currentPos = history.length;
+            const colIndex = currentPos % ROW_SIZE;
             const masterRefValue = history[colIndex];
 
             if (colIndex === 0) {
                 signal.innerText = "SKIP HAND";
+                signal.style.color = "var(--accent)";
                 betAmountLabel.innerText = "NO BET";
-                instr.innerText = "OBSERVE NEW ROW STARTER";
+                instr.innerText = "OBSERVE NEW ROW STARTER TO CALCULATE TREND";
                 badge.innerText = "TREND SCANNING";
                 return;
             }
 
-            badge.innerText = currentRowModeIsDirect ? "STRATEGY: MATCH" : "STRATEGY: OPPOSITE";
-            let prediction = currentRowModeIsDirect ? masterRefValue : (masterRefValue === 'B' ? 'P' : 'B');
-            
-            betAmountLabel.innerText = `BET: $${getCurrentBetValue().toFixed(2)}`;
-            signal.innerText = prediction === 'B' ? 'BANKER' : 'PLAYER';
-            signal.style.color = prediction === 'B' ? 'var(--banker)' : 'var(--player)';
+            if (currentRowModeIsDirect) {
+                badge.innerText = "STRATEGY: MATCH MODE";
+                instr.innerText = "PATTERN IS HITTING: ESCALATING COMFORT UNITS";
+            } else {
+                badge.innerText = "STRATEGY: OPPOSITE MODE";
+                instr.innerText = "LOSS DETECTED: FIBONACCI COVER MODE";
+            }
+
+            let prediction = "";
+            if (currentRowModeIsDirect) {
+                prediction = masterRefValue; 
+            } else {
+                prediction = (masterRefValue === 'B') ? 'P' : 'B'; 
+            }
+
+            const currentBet = getCurrentBetValue();
+            betAmountLabel.innerText = `BET: $${currentBet.toFixed(2)}`;
+
+            if (prediction === 'B') {
+                signal.innerText = 'BANKER';
+                signal.style.color = 'var(--banker)';
+                boxBg.style.background = "linear-gradient(180deg, #1f0b0f 0%, #070203 100%)"; 
+                boxBg.style.boxShadow = "inset 0 0 30px rgba(255, 71, 87, 0.08), inset 0 -20px 30px rgba(0, 0, 0, 0.4)";
+            } else {
+                signal.innerText = 'PLAYER';
+                signal.style.color = 'var(--player)';
+                boxBg.style.background = "linear-gradient(180deg, #091322 0%, #020407 100%)"; 
+                boxBg.style.boxShadow = "inset 0 0 30px rgba(46, 134, 222, 0.08), inset 0 -20px 30px rgba(0, 0, 0, 0.4)";
+            }
         }
         
         renderTable();
