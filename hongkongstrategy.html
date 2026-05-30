@@ -29,14 +29,20 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
         const REQUIRED_ENGINE_ID = "engine_13"; 
 
         onAuthStateChanged(auth, async (user) => {
-            if (!user) { window.location.href = "index.html"; return; }
+            if (!user) {
+                window.location.href = "index.html";
+                return;
+            }
             const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
             const now = Date.now();
             const userData = userDoc.data();
-            const isValid = userDoc.exists() && (userData.expiry === 'LIFETIME' || userData.expiry > now) && userData.allowedSoftware?.includes(REQUIRED_ENGINE_ID);
+            const isValid = userDoc.exists() && 
+                           (userData.expiry === 'LIFETIME' || userData.expiry > now) &&
+                           userData.allowedSoftware?.includes(REQUIRED_ENGINE_ID);
             if (!isValid) {
                 alert("Access denied: you don't have permission for Hongkong Strategy Engine.");
                 window.location.href = "index.html";
@@ -49,57 +55,157 @@
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = function(e) {
-            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) { return false; }
+            if (e.keyCode === 123 || 
+                (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
+                (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
+                return false;
+            }
         };
     </script>
     
     <style>
-        :root { --bg: #030407; --card: #0a0c14; --card-header: #111422; --accent: #38bdf8; --banker: #ff4757; --player: #2e86de; --border: #1f2538; --text-main: #f8fafc; --text-dim: #475569; --glow-banker: rgba(255, 71, 87, 0.15); --glow-player: rgba(46, 134, 222, 0.15); --glow-accent: rgba(56, 189, 248, 0.15); }
-        body { background-color: var(--bg); color: var(--text-main); font-family: 'Inter', -apple-system, sans-serif; display: none; flex-direction: column; align-items: center; margin: 0; padding: 100px 20px; background-image: radial-gradient(circle at 50% 0%, #111524 0%, #030407 70%); min-height: 100vh; box-sizing: border-box; }
-        .container { width: 100%; max-width: 500px; background: var(--card); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 24px; overflow: hidden; box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.03) inset; position: relative; backdrop-filter: blur(20px); animation: fadeInContainer 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-        .header { padding: 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(180deg, var(--card-header) 0%, rgba(17, 20, 34, 0.6) 100%); }
-        .brand-logo-area { display: flex; align-items: center; gap: 12px; }
-        .brand-icon { width: 14px; height: 14px; border: 2px solid var(--accent); transform: rotate(45deg); display: inline-block; box-shadow: 0 0 15px var(--accent); animation: pulseGlow 3s infinite ease-in-out; }
-        .brand-title { font-weight: 900; letter-spacing: 2px; font-size: 1.15rem; color: #ffffff; text-shadow: 0 2px 10px rgba(255,255,255,0.1); }
-        .brand-subtitle { color: var(--accent); font-size: 0.65rem; display: block; font-weight: 600; letter-spacing: 3px; opacity: 0.9; margin-top: 2px; }
-        .config-panel { background: #07090f; border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        :root {
+            --bg: #030407;
+            --card: #0a0c14;
+            --card-header: #111422;
+            --accent: #38bdf8; 
+            --banker: #ff4757; 
+            --player: #2e86de; 
+            --border: #1f2538;
+            --text-main: #f8fafc;
+            --text-dim: #475569;
+            --glow-banker: rgba(255, 71, 87, 0.15);
+            --glow-player: rgba(46, 134, 222, 0.15);
+            --glow-accent: rgba(56, 189, 248, 0.15);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, sans-serif;
+            display: none; 
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 100px 20px;
+            background-image: radial-gradient(circle at 50% 0%, #111524 0%, #030407 70%);
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+            position: relative;
+            backdrop-filter: blur(20px);
+            animation: fadeInContainer 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(180deg, var(--card-header) 0%, rgba(17, 20, 34, 0.6) 100%);
+        }
+
+        .brand-logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 14px; height: 14px;
+            border: 2px solid var(--accent);
+            transform: rotate(45deg);
+            display: inline-block;
+            box-shadow: 0 0 15px var(--accent);
+            animation: pulseGlow 3s infinite ease-in-out;
+        }
+
+        .brand-title {
+            font-weight: 900; letter-spacing: 2px; font-size: 1.15rem; color: #ffffff;
+            text-shadow: 0 2px 10px rgba(255,255,255,0.1);
+        }
+
+        .brand-subtitle {
+            color: var(--accent); font-size: 0.65rem; display: block;
+            font-weight: 600; letter-spacing: 3px; opacity: 0.9; margin-top: 2px;
+        }
+
+        .config-panel {
+            background: #07090f; border-bottom: 1px solid var(--border);
+            padding: 14px 24px; display: flex; align-items: center;
+            justify-content: space-between; gap: 10px;
+        }
+
         .config-label { font-size: 0.72rem; color: #94a3b8; letter-spacing: 1px; font-weight: 700; text-transform: uppercase; }
         .basebet-input-wrapper { display: flex; align-items: center; background: #0f1322; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 4px 12px; }
         .currency-symbol { color: var(--accent); font-weight: 800; font-size: 0.9rem; margin-right: 4px; }
         .basebet-input { background: transparent; border: none; color: #ffffff; font-family: inherit; font-weight: 800; font-size: 0.95rem; width: 70px; outline: none; text-align: left; }
-        .prediction-box { padding: 30px 24px; text-align: center; background: linear-gradient(180deg, #090b11 0%, #030406 100%); border-bottom: 1px solid var(--border); transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); position: relative; box-shadow: inset 0 -20px 30px rgba(0, 0, 0, 0.3); }
+
+        .prediction-box {
+            padding: 30px 24px; text-align: center; background: linear-gradient(180deg, #090b11 0%, #030406 100%);
+            border-bottom: 1px solid var(--border); transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); position: relative;
+            box-shadow: inset 0 -20px 30px rgba(0, 0, 0, 0.3);
+        }
+
         #instruction { font-size: 0.72rem; color: var(--text-dim); letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; transition: color 0.3s ease; margin-top: 14px; }
         .bet-label { font-size: 0.72rem; color: #475569; letter-spacing: 4px; text-transform: uppercase; font-weight: 800; }
         #bet-signal { font-size: 3.5rem; font-weight: 950; margin: 2px 0; letter-spacing: 4px; text-shadow: 0 0 40px rgba(255,255,255,0.02); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); line-height: 1.1; }
         #bet-recommendation-amount { font-size: 1.3rem; font-weight: 800; color: #e2e8f0; letter-spacing: 1px; margin: 6px 0; text-transform: uppercase; opacity: 0.95; transition: all 0.3s ease; }
+
         .excel-container { max-height: 190px; overflow-y: auto; padding: 16px; background: #040508; box-shadow: inset 0 10px 20px rgba(0,0,0,0.5); }
         table { width: 100%; border-collapse: separate; border-spacing: 3px; table-layout: fixed; }
         tr.new-row-anim { animation: slideInRow 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         td { border: 1px solid rgba(255, 255, 255, 0.02); background: rgba(255, 255, 255, 0.01); height: 44px; text-align: center; font-weight: 800; font-size: 0.95rem; border-radius: 6px; transition: all 0.3s ease; }
+
         .ref-cell { background: rgba(56, 189, 248, 0.03); color: var(--accent); border: 1px solid rgba(56, 189, 248, 0.15); text-shadow: 0 0 10px rgba(56, 189, 248, 0.3); }        
         .b-text { color: var(--banker); text-shadow: 0 0 12px var(--glow-banker); }        
         .p-text { color: var(--player); text-shadow: 0 0 12px var(--glow-player); }        
         .win-icon { color: #10b981; font-size: 0.8rem; font-weight: 900; margin-left: 3px; text-shadow: 0 0 8px rgba(16,185,129,0.4); }        
         .loss-icon { color: #ef4444; font-size: 0.8rem; font-weight: 900; margin-left: 3px; text-shadow: 0 0 8px rgba(239,68,68,0.4); }
+
         .controls { padding: 24px 24px 12px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .btn { padding: 18px; border-radius: 12px; border: none; font-weight: 800; letter-spacing: 1.5px; cursor: pointer; transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1); font-size: 0.9rem; position: relative; overflow: hidden; }
         .btn::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); transition: 0.5s; }
         .btn:hover::after { left: 100%; }
         .btn:active { transform: scale(0.97); }
+
         .btn-b { background: linear-gradient(135deg, #ff4757 0%, #d62839 100%); color: white; box-shadow: 0 6px 20px rgba(255, 71, 87, 0.25), 0 1px 0 rgba(255,255,255,0.2) inset; }
+        .btn-b:hover { background: linear-gradient(135deg, #ff6b7b 0%, #ff4757 100%); transform: translateY(-1px); }
         .btn-p { background: linear-gradient(135deg, #2e86de 0%, #1a62b0 100%); color: white; box-shadow: 0 6px 20px rgba(46, 134, 222, 0.25), 0 1px 0 rgba(255,255,255,0.2) inset; }
+        .btn-p:hover { background: linear-gradient(135deg, #4ba3ff 0%, #2e86de 100%); transform: translateY(-1px); }
+
         .btn-secondary { background: linear-gradient(180deg, #161b26 0%, #0f121a 100%); color: #94a3b8; flex: 1; border: 1px solid rgba(255, 255, 255, 0.03); border-radius: 10px; font-size: 0.8rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .footer-tools { display: flex; gap: 12px; padding: 0 24px 24px 24px; }
-        #mode-badge { font-size: 0.65rem; background: rgba(30, 41, 59, 0.5); color: #94a3b8; padding: 6px 14px; border-radius: 20px; font-weight: 800; letter-spacing: 1.5px; border: 1px solid var(--border); text-transform: uppercase; }
-        .system-lock-overlay { position: absolute; top: 77px; left: 0; width: 100%; height: calc(100% - 77px); background: rgba(3, 4, 7, 0.95); backdrop-filter: blur(16px); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; z-index: 100; text-align: center; }
+        .btn-secondary:hover { background: linear-gradient(180deg, #1f2636 0%, #161b26 100%); color: #fff; border-color: rgba(255,255,255,0.1); }
+        
+        #mode-badge { font-size: 0.65rem; background: rgba(30, 41, 59, 0.5); color: #94a3b8; padding: 6px 14px; border-radius: 20px; font-weight: 800; letter-spacing: 1.5px; border: 1px solid var(--border); text-transform: uppercase; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        .system-lock-overlay { position: absolute; top: 77px; left: 0; width: 100%; height: calc(100% - 77px); background: rgba(3, 4, 7, 0.95); backdrop-filter: blur(16px); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; z-index: 100; text-align: center; animation: overlayFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .lock-status { font-size: 0.75rem; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 8px; }
         .lock-title { font-size: 2.4rem; font-weight: 950; letter-spacing: 1px; margin: 12px 0; line-height: 1.1; }
         .lock-desc { font-size: 0.88rem; color: #64748b; max-width: 380px; line-height: 1.6; margin-bottom: 35px; }
+
         .profit-callout-block { display: block; margin-top: 14px; font-size: 1.40rem; font-weight: 900; letter-spacing: 1px; color: var(--accent); text-transform: uppercase; text-shadow: 0 0 15px var(--glow-accent); }
-        .btn-lock-reset { background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #030407; padding: 18px 44px; font-size: 0.95rem; font-weight: 900; border-radius: 12px; border: none; letter-spacing: 1.5px; cursor: pointer; box-shadow: 0 10px 30px rgba(56, 189, 248, 0.35); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        .btn-lock-reset { background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #030407; padding: 18px 44px; font-size: 0.95rem; font-weight: 900; border-radius: 12px; border: none; letter-spacing: 1.5px; cursor: pointer; box-shadow: 0 10px 30px rgba(56, 189, 248, 0.35), 0 1px 0 rgba(255,255,255,0.3) inset; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .btn-lock-reset:hover { transform: scale(1.03) translateY(-2px); box-shadow: 0 15px 35px rgba(56, 189, 248, 0.5); }
+        .btn-lock-reset:active { transform: scale(0.98); }
+
         .exit-nav { position: fixed; top: 15px; right: 15px; z-index: 1000; }
-        .exit-btn { background: rgba(0, 0, 0, 0.7); color: #38bdf8; padding: 6px 14px; border-radius: 40px; text-decoration: none; font-weight: 700; font-size: 11px; border: 1px solid rgba(56, 189, 248, 0.5); backdrop-filter: blur(8px); }
+        .exit-btn { background: rgba(0, 0, 0, 0.7); color: #38bdf8; padding: 6px 14px; border-radius: 40px; text-decoration: none; font-weight: 700; font-size: 11px; border: 1px solid rgba(56, 189, 248, 0.5); backdrop-filter: blur(8px); transition: 0.2s; font-family: 'Inter', -apple-system, sans-serif; }
+        .exit-btn:hover { background: #38bdf8; color: #030407; box-shadow: 0 0 12px #38bdf8; }
+
         @keyframes fadeInContainer { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes overlayFadeIn { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: scale(1); } }
         @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 12px var(--accent); opacity: 0.8; } 50% { box-shadow: 0 0 20px var(--accent); opacity: 1; } }
         @keyframes slideInRow { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -116,7 +222,7 @@
                 <span class="brand-icon"></span>
                 <div>
                     <span class="brand-title">BACCARAT</span>
-                    <span class="brand-subtitle">PAROLI STRATEGY</span>
+                    <span class="brand-subtitle">HONGKONG STRATEGY</span>
                 </div>
             </div>
             <span id="mode-badge">INITIALIZING</span>
@@ -132,8 +238,8 @@
 
         <div class="system-lock-overlay" id="lock-screen">
             <div class="lock-status" id="lock-status-label">SYSTEM ALERT</div>
-            <div class="lock-title" id="lock-main-msg">TARGET ACHIEVED</div>
-            <div class="lock-desc" id="lock-sub-desc">Profit target reached.</div>
+            <div class="lock-title" id="lock-main-msg">CHANGE TABLE</div>
+            <div class="lock-desc" id="lock-sub-desc">The strategy rules have triggered an exit state.</div>
             <button class="btn btn-lock-reset" onclick="appSoftReset()">START NEW FRESH</button>
         </div>
 
@@ -148,7 +254,9 @@
             </div>
 
             <div class="excel-container">
-                <table id="excel-table"><tbody id="table-body"></tbody></table>
+                <table id="excel-table">
+                    <tbody id="table-body"></tbody>
+                </table>
             </div>
 
             <div class="controls">
@@ -164,12 +272,11 @@
     </div>
 
     <script>
-        // PAROLI STATE
         let history = [];
         const ROW_SIZE = 5;
         let currentRowModeIsDirect = true; 
-        let paroliStep = 0; // 0 = 1x, 1 = 2x, 2 = 4x
-        const paroliMultipliers = [1, 2, 4];
+        let paroliStep = 0; 
+        const paroliMultipliers = [1, 2, 4, 8];
         
         function getBaseBetValue() {
             const value = parseFloat(document.getElementById('base-bet-field').value);
@@ -197,79 +304,124 @@
 
         function undo() {
             history.pop();
-            paroliStep = 0; // Reset on undo to be safe
+            paroliStep = 0;
             renderTable();
             updateLogic();
         }
 
         function renderTable() {
             const body = document.getElementById('table-body');
-            body.innerHTML = '';            
-            const totalRows = Math.max(1, Math.ceil((history.length + 1) / ROW_SIZE));
+            body.innerHTML = '';
+            const rowCount = Math.ceil((history.length + 1) / ROW_SIZE);
+            const totalRows = Math.max(1, rowCount);
+            
             let runningProfitBalance = 0;
             let dynamicEngineIsDirect = true;
-            paroliStep = 0; // Reset progression for table calculation
+            let tempParoliStep = 0;
             
+            const maxTrailingRows = 2; 
+            const startRowIndex = Math.max(1, totalRows - maxTrailingRows);
+
             for (let i = 0; i < totalRows; i++) {
-                let tr = document.createElement('tr');
+                const isReferenceRow = (i === 0);
+                const isWithinVisibleWindow = (i >= startRowIndex && i < startRowIndex + maxTrailingRows);
+                let tr = (isReferenceRow || isWithinVisibleWindow) ? document.createElement('tr') : null;
+
                 for (let j = 0; j < ROW_SIZE; j++) {
-                    let td = document.createElement('td');
-                    if (i === 0) td.className = 'ref-cell';
-                    
                     const index = i * ROW_SIZE + j;
                     if (history[index]) {
-                        const val = history[index];
-                        td.innerHTML = `<span class="${val === 'B' ? 'b-text' : 'p-text'}">${val}</span>`;
+                        const value = history[index];
+                        const td = document.createElement('td');
+                        if (isReferenceRow) td.className = 'ref-cell';
+                        td.innerHTML = `<span class="${value === 'B' ? 'b-text' : 'p-text'}">${value}</span>`;
                         
                         if (i > 0) {
                             if (j === 0) {
-                                dynamicEngineIsDirect = (val === history[0]);
+                                dynamicEngineIsDirect = (value === history[0]);
                             } else {
-                                const isMatch = (val === history[j]);
-                                const currentBet = getCurrentBetValue();
-                                if ((dynamicEngineIsDirect && isMatch) || (!dynamicEngineIsDirect && !isMatch)) {
+                                const isMatch = (dynamicEngineIsDirect ? (value === history[j]) : (value !== history[j]));
+                                const betAmount = getBaseBetValue() * paroliMultipliers[tempParoliStep];
+                                
+                                if (isMatch) {
                                     td.innerHTML += ' <span class="win-icon">✓</span>';
-                                    runningProfitBalance += (history[j] === 'B' ? (currentBet * 0.95) : currentBet);
-                                    paroliStep = (paroliStep + 1) % 3;
+                                    runningProfitBalance += (history[j] === 'B' ? betAmount * 0.95 : betAmount);
+                                    tempParoliStep = Math.min(tempParoliStep + 1, 3);
                                     dynamicEngineIsDirect = true;
                                 } else {
                                     td.innerHTML += ' <span class="loss-icon">X</span>';
-                                    runningProfitBalance -= currentBet;
-                                    paroliStep = 0;
+                                    runningProfitBalance -= betAmount;
+                                    tempParoliStep = 0;
                                     dynamicEngineIsDirect = false;
                                 }
                             }
                         }
+                        if (tr) tr.appendChild(td);
                     }
-                    tr.appendChild(td);
                 }
-                body.appendChild(tr);
+                if (tr) body.appendChild(tr);
             }
-            evaluateSystemThresholds(runningProfitBalance);
-            document.querySelector('.excel-container').scrollTop = document.querySelector('.excel-container').scrollHeight;
+            
+            paroliStep = tempParoliStep;
+            currentRowModeIsDirect = dynamicEngineIsDirect;
+            
+            const target = getBaseBetValue() * 4;
+            if (runningProfitBalance >= target && history.length > 5) {
+                triggerSystemLock("TARGET ACHIEVED", "PROFIT GOAL REACHED", `You have reached your 4x profit target. <span class="profit-callout-block">PROFIT: +$${runningProfitBalance.toFixed(2)}</span>`, "var(--accent)");
+            }
+            
+            const container = document.querySelector('.excel-container');
+            container.scrollTop = container.scrollHeight;
         }
 
-        function evaluateSystemThresholds(finalProfit) {
-            const target = getBaseBetValue() * 4;
-            if (finalProfit >= target) {
-                document.getElementById('lock-screen').style.display = "flex";
-                document.getElementById('lock-sub-desc').innerHTML = `4x Base Bet Profit Target Reached. <span class="profit-callout-block">TOTAL PROFIT: +$${finalProfit.toFixed(2)}</span>`;
-            }
+        function triggerSystemLock(badgeText, mainText, descHTML, themeColor) {
+            const lockScreen = document.getElementById('lock-screen');
+            const statusLabel = document.getElementById('lock-status-label');
+            const mainMsg = document.getElementById('lock-main-msg');
+            const subDesc = document.getElementById('lock-sub-desc');
+
+            statusLabel.innerText = badgeText;
+            statusLabel.style.color = themeColor;
+            mainMsg.innerText = mainText;
+            subDesc.innerHTML = descHTML; 
+            lockScreen.style.display = "flex";
         }
 
         function updateLogic() {
-            const signal = document.getElementById('bet-signal'), instr = document.getElementById('instruction'), badge = document.getElementById('mode-badge'), boxBg = document.getElementById('predict-box-bg'), betAmountLabel = document.getElementById('bet-recommendation-amount');
+            const signal = document.getElementById('bet-signal');
+            const instr = document.getElementById('instruction');
+            const badge = document.getElementById('mode-badge');
+            const boxBg = document.getElementById('predict-box-bg');
+            const betAmountLabel = document.getElementById('bet-recommendation-amount');
+
             if (history.length < ROW_SIZE) {
-                signal.innerText = "WAIT"; betAmountLabel.innerText = ""; instr.innerText = `NEED ${ROW_SIZE - history.length} MORE HANDS`; badge.innerText = "GATHERING DATA"; return;
+                signal.innerText = "WAIT";
+                betAmountLabel.innerText = "";
+                instr.innerText = `NEED ${ROW_SIZE - history.length} MORE HANDS FOR REFERENCE`;
+                badge.innerText = "GATHERING DATA";
+                return;
             }
-            const prediction = (currentRowModeIsDirect ? history[history.length % ROW_SIZE] : (history[history.length % ROW_SIZE] === 'B' ? 'P' : 'B'));
+
+            const colIndex = history.length % ROW_SIZE;
+            const masterRefValue = history[colIndex];
+
+            if (colIndex === 0) {
+                signal.innerText = "SKIP HAND";
+                betAmountLabel.innerText = "NO BET";
+                instr.innerText = "OBSERVE NEW ROW STARTER";
+                badge.innerText = "TREND SCANNING";
+                return;
+            }
+
+            badge.innerText = currentRowModeIsDirect ? "STRATEGY: MATCH" : "STRATEGY: OPPOSITE";
+            let prediction = currentRowModeIsDirect ? masterRefValue : (masterRefValue === 'B' ? 'P' : 'B');
+            
+            betAmountLabel.innerText = `BET: $${getCurrentBetValue().toFixed(2)}`;
             signal.innerText = prediction === 'B' ? 'BANKER' : 'PLAYER';
             signal.style.color = prediction === 'B' ? 'var(--banker)' : 'var(--player)';
-            betAmountLabel.innerText = `BET: $${getCurrentBetValue().toFixed(2)}`;
-            badge.innerText = "PAROLI MODE ACTIVE";
         }
         
-        renderTable(); updateLogic();
+        renderTable();
+        updateLogic();
     </script>
 </body>
 </html>
