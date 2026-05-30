@@ -482,11 +482,7 @@
             const targetProfit = getBaseBetValue() * 4;
             if (netProfit >= targetProfit) {
                 const formattedProfit = Number(netProfit.toFixed(2)).toLocaleString();
-                triggerSystemLock(
-                    "PROFIT TARGET REACHED", 
-                    "CHANGE TABLE", 
-                    `Your net profit has reached or exceeded 4 × base bet ($${targetProfit.toFixed(2)}).<br>Secure your earnings and move to a fresh table.<span class="profit-callout-block">TOTAL PROFIT: +$${formattedProfit}</span>`, 
-                    "var(--accent)"
+                triggerSystemLock("PROFIT TARGET REACHED", "CHANGE TABLE", `Secure your earnings and move to a fresh table.<span class="profit-callout-block">TOTAL PROFIT: +$${formattedProfit}</span>`, "var(--accent)"
                 );
             }
         }
