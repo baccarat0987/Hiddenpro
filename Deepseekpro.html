@@ -3,9 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Deepseek PRO</title>
+  <title>Deepseek PRO - Enhanced Prediction</title>
   
-  <!-- Firebase Connection Script (exactly like HongKong example) -->
+  <!-- ========== ADDED 1: CLEAN URL SCRIPT ========== -->
+  <script>
+    if (window.location.pathname.endsWith('.html')) {
+      const cleanUrl = window.location.pathname.replace('.html', '');
+      window.history.replaceState(null, '', cleanUrl);
+    }
+  </script>
+  
+  <!-- ========== ADDED 2: FIREBASE AUTHENTICATION MODULE ========== -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
@@ -23,100 +31,43 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    
-    // ENGINE ID FOR THIS APP - Change this to register your new app in private panel
-    // In your private registration panel, add "deepseek_pro_engine" to user's allowedSoftware
+
     const REQUIRED_ENGINE_ID = "engine_14";
-    
-    // Wait for DOM to be ready
-    window.addEventListener('DOMContentLoaded', () => {
-      // Initially hide main content until auth check passes
-      document.body.style.opacity = "0";
-      document.body.style.visibility = "hidden";
-      
-      onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-          // Not logged in - redirect to main portal
-          window.location.href = "index.html";
-          return;
-        }
-        
-        try {
-          const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
-          const now = Date.now();
-          
-          if (!userDoc.exists()) {
-            alert("Access denied: User not registered in private panel.");
-            window.location.href = "index.html";
-            return;
-          }
-          
-          const userData = userDoc.data();
-          const isValidExpiry = (userData.expiry === 'LIFETIME' || userData.expiry > now);
-          const hasPermission = userData.allowedSoftware?.includes(REQUIRED_ENGINE_ID);
-          
-          if (!isValidExpiry || !hasPermission) {
-            alert(`Access denied: You don't have permission for Deepseek PRO Engine.\n\nContact admin to add "${REQUIRED_ENGINE_ID}" to your account.`);
-            window.location.href = "index.html";
-            return;
-          }
-          
-          // Access granted - show the app
-          document.body.style.opacity = "1";
-          document.body.style.visibility = "visible";
-          
-          // Initialize the app after auth passes
-          if (window.initDeepseekApp) {
-            window.initDeepseekApp();
-          }
-          
-        } catch (error) {
-          console.error("Auth error:", error);
-          alert("Authentication error. Please try again.");
-          window.location.href = "index.html";
-        }
-      });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+      const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
+      const now = Date.now();
+      const userData = userDoc.data();
+      const isValid = userDoc.exists() && 
+                     (userData.expiry === 'LIFETIME' || userData.expiry > now) &&
+                     userData.allowedSoftware?.includes(REQUIRED_ENGINE_ID);
+      if (!isValid) {
+        alert("Access denied: you don't have permission for Deepseek PRO Engine (engine_14).");
+        window.location.href = "index.html";
+        return;
+      }
+      document.body.style.display = "flex";
     });
   </script>
   
-  <!-- Security: Right-click and shortcut blocker (same as HongKong) -->
+  <!-- ========== ADDED 3: RIGHT-CLICK & SHORTCUT BLOCKER ========== -->
   <script>
-    (function() {
-      document.addEventListener('contextmenu', e => e.preventDefault());
-      document.onkeydown = function(e) {
-        if (e.keyCode === 123 || 
-            (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
-            (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
-          e.preventDefault();
-          return false;
-        }
-      };
-    })();
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.onkeydown = function(e) {
+      if (e.keyCode === 123 || 
+          (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
+          (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
+        return false;
+      }
+    };
   </script>
   
+  <!-- ========== ADDED 4: EXIT BUTTON STYLES ========== -->
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      user-select: none;
-    }
-
-    body {
-      background: #000000;
-      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 1.5rem;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease;
-    }
-
-    /* Exit button (like HongKong example) */
     .exit-nav {
       position: fixed;
       top: 15px;
@@ -141,6 +92,26 @@
       color: #030407;
       box-shadow: 0 0 12px #38bdf8;
     }
+  </style>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      background: #000000;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 1.5rem;
+    }
 
     .app-container {
       max-width: 420px;
@@ -150,7 +121,6 @@
       padding: 1.8rem 1.5rem 2rem;
       border: 1px solid #2a2a2a;
       box-shadow: 0 25px 40px -15px rgba(0,0,0,0.9);
-      position: relative;
     }
 
     .brand {
@@ -194,14 +164,6 @@
       background-clip: text;
       -webkit-background-clip: text;
       color: transparent;
-    }
-    .license-badge {
-      text-align: center;
-      font-size: 0.6rem;
-      color: #38bdf8;
-      margin-top: 0.3rem;
-      letter-spacing: 1px;
-      font-weight: 600;
     }
     .status-text {
       text-align: center;
@@ -448,437 +410,496 @@
   </style>
 </head>
 <body>
-  <div class="exit-nav">
-    <a href="index.html" class="exit-btn">← EXIT TERMINAL</a>
+
+<!-- ========== ADDED 5: EXIT BUTTON HTML ========== -->
+<div class="exit-nav">
+  <a href="index.html" class="exit-btn">← EXIT TERMINAL</a>
+</div>
+
+<div class="app-container">
+  <div class="brand">
+    <div class="logo-container"><div class="animated-logo">⌬</div><div class="logo-text">Deepseek PRO</div></div>
+    <div class="status-text" id="statusMsg">3 Enhanced Logics Active · Minimal Loss Mode</div>
   </div>
 
-  <div class="app-container">
-    <div class="brand">
-      <div class="logo-container"><div class="animated-logo">⌬</div><div class="logo-text">Deepseek PRO</div></div>
-      <div class="license-badge" id="licenseBadge">🔐 VERIFYING LICENSE...</div>
-      <div class="status-text" id="statusMsg">3 Enhanced Logics Active · Minimal Loss Mode</div>
+  <div class="history-row" id="historyContainer"></div>
+
+  <div id="dynamicArea">
+    <div class="loading-area" id="loadingArea">
+      <div class="loading-text">COLLECTING STATISTICAL DATA...</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="loading-percent" id="loadingPercent">0%</div>
     </div>
-
-    <div class="history-row" id="historyContainer"></div>
-
-    <div id="dynamicArea">
-      <div class="loading-area" id="loadingArea">
-        <div class="loading-text">COLLECTING STATISTICAL DATA...</div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-        <div class="loading-percent" id="loadingPercent">0%</div>
-      </div>
-      <div id="predictionArea" style="display: none;">
-        <div class="prediction-card" id="predictionCard">
-          <div class="prediction-content" id="predictionContent">
-            <div class="ai-label">AI PREDICTION</div>
-            <div class="prediction-side" id="predictionSide">—</div>
-            <div class="confidence"><span id="confidenceValue">—</span><span>%</span></div>
-            <div id="patternBadge" class="pattern-badge empty-pattern"></div>
-          </div>
+    <div id="predictionArea" style="display: none;">
+      <div class="prediction-card" id="predictionCard">
+        <div class="prediction-content" id="predictionContent">
+          <div class="ai-label">AI PREDICTION</div>
+          <div class="prediction-side" id="predictionSide">—</div>
+          <div class="confidence"><span id="confidenceValue">—</span><span>%</span></div>
+          <div id="patternBadge" class="pattern-badge empty-pattern"></div>
         </div>
       </div>
     </div>
-
-    <div class="stats-row">
-      <div class="stat-block"><div class="stat-label">INPUTS</div><div class="stat-number"><span id="inputsCount">0</span><small> / 70</small></div></div>
-      <div class="stat-block"><div class="stat-label">W/L</div><div class="stat-number"><span id="wlValue">0/0</span></div></div>
-      <div class="stat-block"><div class="stat-label">P / B</div><div class="stat-number"><span id="pbCount">0 / 0</span></div></div>
-    </div>
-    
-    <div class="logic-badge" id="logicIndicator"></div>
-
-    <div class="btns"><button class="btn-player" id="playerBtn">PLAYER</button><button class="btn-banker" id="bankerBtn">BANKER</button></div>
-    <button class="btn-reset" id="resetBtn">RESET</button>
-    <div class="footer">Deepseek PRO</div>
   </div>
 
-  <script>
-    // App initialization after Firebase auth passes
-    window.initDeepseekApp = function() {
-      // Update license badge with user email
-      const licenseBadge = document.getElementById('licenseBadge');
-      if (licenseBadge) {
-        licenseBadge.innerHTML = '✓ PRIVATE LICENSE ACTIVE';
-        licenseBadge.style.color = '#00e64d';
-      }
-      
-      // ---------- APP STATE ----------
-      let allHands = [];            // 'P' or 'B'
-      let totalInputs = 0;
-      let wins = 0;
-      let losses = 0;
-      let playerCount = 0;
-      let bankerCount = 0;
-      const MAX_INPUTS = 70;
-      const MAX_HISTORY_DISPLAY = 6;
-      const ACTIVATION_THRESHOLD = 10;
+  <div class="stats-row">
+    <div class="stat-block"><div class="stat-label">INPUTS</div><div class="stat-number"><span id="inputsCount">0</span><small> / 70</small></div></div>
+    <div class="stat-block"><div class="stat-label">W/L</div><div class="stat-number"><span id="wlValue">0/0</span></div></div>
+    <div class="stat-block"><div class="stat-label">P / B</div><div class="stat-number"><span id="pbCount">0 / 0</span></div></div>
+  </div>
+  
+  <div class="logic-badge" id="logicIndicator"></div>
 
-      let detailedHistory = []; // { type: 'win' or 'loss', wasSkip: bool }
-      
-      // DOM elements
-      const historyContainer = document.getElementById('historyContainer');
-      const loadingArea = document.getElementById('loadingArea');
-      const predictionArea = document.getElementById('predictionArea');
-      const predictionCard = document.getElementById('predictionCard');
-      const progressFill = document.getElementById('progressFill');
-      const loadingPercentSpan = document.getElementById('loadingPercent');
-      const predictionSideSpan = document.getElementById('predictionSide');
-      const confidenceValueSpan = document.getElementById('confidenceValue');
-      const patternBadge = document.getElementById('patternBadge');
-      const inputsCountSpan = document.getElementById('inputsCount');
-      const wlValueSpan = document.getElementById('wlValue');
-      const pbCountSpan = document.getElementById('pbCount');
-      const statusMsgSpan = document.getElementById('statusMsg');
+  <div class="btns"><button class="btn-player" id="playerBtn">PLAYER</button><button class="btn-banker" id="bankerBtn">BANKER</button></div>
+  <button class="btn-reset" id="resetBtn">RESET</button>
+  <div class="footer">Baccarat PRO Channel</div>
+</div>
 
-      function oppositeSide(side) {
-        return side === 'P' ? 'B' : 'P';
-      }
+<script>
+  // ---------- STATE ----------
+  let allHands = [];            // 'P' or 'B'
+  let totalInputs = 0;
+  let wins = 0;
+  let losses = 0;
+  let playerCount = 0;
+  let bankerCount = 0;
+  const MAX_INPUTS = 70;
+  const MAX_HISTORY_DISPLAY = 6;
+  const ACTIVATION_THRESHOLD = 10;
 
-      function getCurrentStreak() {
-        if (allHands.length === 0) return { side: null, count: 0 };
-        let streak = 1;
-        const lastSide = allHands[allHands.length - 1];
-        for (let i = allHands.length - 2; i >= 0; i--) {
-          if (allHands[i] === lastSide) streak++;
-          else break;
-        }
-        return { side: lastSide, count: streak };
-      }
+  let detailedHistory = []; // { type: 'win' or 'loss', wasSkip: bool }
+  
+  // DOM elements
+  const historyContainer = document.getElementById('historyContainer');
+  const loadingArea = document.getElementById('loadingArea');
+  const predictionArea = document.getElementById('predictionArea');
+  const predictionCard = document.getElementById('predictionCard');
+  const predictionContent = document.getElementById('predictionContent');
+  const statusMsgSpan = document.getElementById('statusMsg');
+  const progressFill = document.getElementById('progressFill');
+  const loadingPercentSpan = document.getElementById('loadingPercent');
+  const predictionSideSpan = document.getElementById('predictionSide');
+  const confidenceValueSpan = document.getElementById('confidenceValue');
+  const patternBadge = document.getElementById('patternBadge');
+  const inputsCountSpan = document.getElementById('inputsCount');
+  const wlValueSpan = document.getElementById('wlValue');
+  const pbCountSpan = document.getElementById('pbCount');
 
-      function analyzeLast3Pattern() {
-        if (allHands.length < 3) return null;
-        
-        const last3 = allHands.slice(-3);
-        let occurrences = 0;
-        let playerFollows = 0;
-        let bankerFollows = 0;
-        
-        for (let i = 0; i <= allHands.length - 4; i++) {
-          const first = allHands[i];
-          const second = allHands[i+1];
-          const third = allHands[i+2];
-          const next = allHands[i+3];
-          
-          if (first === last3[0] && second === last3[1] && third === last3[2]) {
-            occurrences++;
-            if (next === 'P') playerFollows++;
-            else bankerFollows++;
-          }
-        }
-        
-        if (occurrences === 0 && allHands.length >= 2) {
-          const last2 = allHands.slice(-2);
-          for (let i = 0; i <= allHands.length - 3; i++) {
-            const first = allHands[i];
-            const second = allHands[i+1];
-            const next = allHands[i+2];
-            if (first === last2[0] && second === last2[1]) {
-              occurrences++;
-              if (next === 'P') playerFollows++;
-              else bankerFollows++;
-            }
-          }
-        }
-        
-        if (occurrences === 0) return null;
-        
-        const prediction = playerFollows > bankerFollows ? 'P' : 'B';
-        const matches = prediction === 'P' ? playerFollows : bankerFollows;
-        const rawConfidence = (matches / occurrences) * 100;
-        
-        return {
-          prediction: prediction,
-          confidence: rawConfidence,
-          occurrences: occurrences,
-          matches: matches
-        };
-      }
+  function oppositeSide(side) {
+    return side === 'P' ? 'B' : 'P';
+  }
 
-      function isZigzagPattern() {
-        if (allHands.length < 4) return false;
-        let alternating = true;
-        for (let i = allHands.length - 3; i < allHands.length - 1; i++) {
-          if (allHands[i] === allHands[i + 1]) {
-            alternating = false;
-            break;
-          }
-        }
-        return alternating;
-      }
+  // ========== LOGIC 1: STREAK DETECTION ==========
+  function getCurrentStreak() {
+    if (allHands.length === 0) return { side: null, count: 0 };
+    let streak = 1;
+    const lastSide = allHands[allHands.length - 1];
+    for (let i = allHands.length - 2; i >= 0; i--) {
+      if (allHands[i] === lastSide) streak++;
+      else break;
+    }
+    return { side: lastSide, count: streak };
+  }
 
-      function getEnhancedPredictionAndConfidence() {
-        if (allHands.length < 2) return { prediction: null, confidence: 0, occurrences: 0 };
-        
-        let scores = { P: 0, B: 0 };
-        let totalWeight = 0;
-        
-        const streak = getCurrentStreak();
-        if (streak.count >= 3) {
-          const streakBonus = Math.min(40, (streak.count - 2) * 15);
-          scores[streak.side] += streakBonus;
-          totalWeight += 30;
-        } else if (streak.count === 2) {
-          scores[streak.side] += 10;
-          totalWeight += 20;
-        }
-        
-        const patternAnalysis = analyzeLast3Pattern();
-        if (patternAnalysis && patternAnalysis.occurrences > 0) {
-          const patternWeight = 50;
-          const patternScore = (patternAnalysis.confidence / 100) * patternWeight;
-          scores[patternAnalysis.prediction] += patternScore;
-          totalWeight += patternWeight;
-        }
-        
-        if (isZigzagPattern() && allHands.length >= 4) {
-          const lastResult = allHands[allHands.length - 1];
-          const zigzagPrediction = oppositeSide(lastResult);
-          const zigzagWeight = 20;
-          scores[zigzagPrediction] += zigzagWeight;
-          totalWeight += zigzagWeight;
-        }
-        
-        if (totalWeight === 0 && allHands.length >= 2) {
-          const lastResult = allHands[allHands.length - 1];
-          const fallbackPrediction = oppositeSide(lastResult);
-          scores[fallbackPrediction] = 55;
-          totalWeight = 100;
-        }
-        
-        let prediction = scores.P > scores.B ? 'P' : 'B';
-        let maxScore = Math.max(scores.P, scores.B);
-        let confidence = totalWeight > 0 ? (maxScore / totalWeight) * 100 : 50;
-        
-        let confidenceBonus = 0;
-        if (allHands.length > 50) confidenceBonus = 10;
-        else if (allHands.length > 30) confidenceBonus = 7;
-        else if (allHands.length > 20) confidenceBonus = 5;
-        else if (allHands.length > 10) confidenceBonus = 2;
-        
-        let finalConfidence = Math.min(96, Math.max(40, confidence + confidenceBonus));
-        
-        let totalOccurrences = patternAnalysis ? patternAnalysis.occurrences : 1;
-        
-        return {
-          prediction: prediction,
-          confidence: Math.round(finalConfidence * 10) / 10,
-          occurrences: totalOccurrences
-        };
-      }
-
-      function getDynamicSkipThreshold() {
-        const recentResults = detailedHistory.slice(-5).filter(h => !h.wasSkip);
-        const recentLosses = recentResults.filter(r => r.type === 'loss').length;
-        const recentWins = recentResults.filter(r => r.type === 'win').length;
-        
-        if (recentLosses >= 3) return 52;
-        if (recentWins >= 3 && recentResults.length >= 3) return 68;
-        if (recentLosses >= 2) return 56;
-        if (recentWins >= 2) return 64;
-        
-        const totalDecisions = wins + losses;
-        if (totalDecisions > 10) {
-          const winRate = wins / totalDecisions;
-          if (winRate < 0.45) return 55;
-          if (winRate > 0.55) return 70;
-        }
-        return 60;
-      }
-
-      function shouldShowSkipBlur(confidence, occurrences) {
-        const dynamicThreshold = getDynamicSkipThreshold();
-        let adjustedThreshold = dynamicThreshold;
-        if (occurrences >= 5) {
-          adjustedThreshold = Math.max(50, dynamicThreshold - 8);
-        }
-        return confidence < adjustedThreshold || occurrences < 1;
-      }
+  // ========== LOGIC 2: LAST-3 PATTERN DETECTION (Enhanced from last-2) ==========
+  function analyzeLast3Pattern() {
+    if (allHands.length < 3) return null;
+    
+    const last3 = allHands.slice(-3);
+    let occurrences = 0;
+    let playerFollows = 0;
+    let bankerFollows = 0;
+    
+    // Look for last3 pattern in history
+    for (let i = 0; i <= allHands.length - 4; i++) {
+      const first = allHands[i];
+      const second = allHands[i+1];
+      const third = allHands[i+2];
+      const next = allHands[i+3];
       
-      function removeBlurOverlay() {
-        const existingOverlay = predictionCard.querySelector('.blur-overlay');
-        if (existingOverlay) existingOverlay.remove();
+      if (first === last3[0] && second === last3[1] && third === last3[2]) {
+        occurrences++;
+        if (next === 'P') playerFollows++;
+        else bankerFollows++;
       }
-      
-      function addSkipBlurOverlay() {
-        removeBlurOverlay();
-        const overlay = document.createElement('div');
-        overlay.className = 'blur-overlay';
-        overlay.innerText = 'SKIP';
-        predictionCard.appendChild(overlay);
-      }
-      
-      function updatePredictionAndBet() {
-        if (totalInputs < ACTIVATION_THRESHOLD || allHands.length < 2) {
-          removeBlurOverlay();
-          return;
-        }
-        
-        const { prediction, confidence, occurrences } = getEnhancedPredictionAndConfidence();
-        if (!prediction) {
-          removeBlurOverlay();
-          return;
-        }
-        
-        const sideText = prediction === 'P' ? 'PLAYER' : 'BANKER';
-        predictionSideSpan.innerText = sideText;
-        predictionCard.classList.remove('player-bg', 'banker-bg');
-        predictionCard.classList.add(prediction === 'P' ? 'player-bg' : 'banker-bg');
-        confidenceValueSpan.innerText = confidence;
-        
-        const isSkipRound = shouldShowSkipBlur(confidence, occurrences);
-        
-        if (isSkipRound) {
-          addSkipBlurOverlay();
-        } else {
-          removeBlurOverlay();
-        }
-        
-        // Update pattern badge
-        const nonSkipEntries = detailedHistory.filter(entry => !entry.wasSkip);
-        if (totalInputs >= ACTIVATION_THRESHOLD && nonSkipEntries.length > 0) {
-          const last4 = nonSkipEntries.slice(-4);
-          const pattern = last4.map(entry => entry.type === 'win' ? 'W' : 'L').join('');
-          if (pattern.length > 0) {
-            patternBadge.innerText = pattern;
-            patternBadge.classList.remove('empty-pattern');
-          } else {
-            patternBadge.classList.add('empty-pattern');
-          }
-        } else {
-          patternBadge.classList.add('empty-pattern');
+    }
+    
+    // Also check last2 pattern as fallback (original logic)
+    if (occurrences === 0 && allHands.length >= 2) {
+      const last2 = allHands.slice(-2);
+      for (let i = 0; i <= allHands.length - 3; i++) {
+        const first = allHands[i];
+        const second = allHands[i+1];
+        const next = allHands[i+2];
+        if (first === last2[0] && second === last2[1]) {
+          occurrences++;
+          if (next === 'P') playerFollows++;
+          else bankerFollows++;
         }
       }
-      
-      function renderHistory() {
-        historyContainer.innerHTML = '';
-        const startIdx = Math.max(0, allHands.length - MAX_HISTORY_DISPLAY);
-        const recent = allHands.slice(startIdx);
-        for (let i = 0; i < MAX_HISTORY_DISPLAY; i++) {
-          const hand = i < recent.length ? recent[i] : null;
-          const chip = document.createElement('div');
-          chip.classList.add('hist-chip');
-          if (hand === null) {
-            chip.classList.add('empty');
-            chip.textContent = '';
-          } else {
-            chip.textContent = hand === 'P' ? 'P' : 'B';
-            chip.classList.add(hand === 'P' ? 'player' : 'banker');
-          }
-          historyContainer.appendChild(chip);
-        }
-      }
-      
-      function updateStatsDisplay() {
-        inputsCountSpan.innerText = totalInputs;
-        wlValueSpan.innerText = `${wins}/${losses}`;
-        pbCountSpan.innerText = `${playerCount} / ${bankerCount}`;
-      }
-      
-      function updateActivationUI() {
-        const isActive = totalInputs >= ACTIVATION_THRESHOLD;
-        if (!isActive) {
-          loadingArea.style.display = 'block';
-          predictionArea.style.display = 'none';
-          const percent = Math.min(100, Math.floor((totalInputs / ACTIVATION_THRESHOLD) * 100));
-          loadingPercentSpan.innerText = `${percent}%`;
-          progressFill.style.width = `${percent}%`;
-          const needed = ACTIVATION_THRESHOLD - totalInputs;
-          statusMsgSpan.innerText = needed === 1 ? 'Enter 1 more result to activate.' : `Enter ${needed} results to activate.`;
-          removeBlurOverlay();
-        } else {
-          loadingArea.style.display = 'none';
-          predictionArea.style.display = 'block';
-          statusMsgSpan.innerText = "3 Enhanced Logics Active · Minimal Loss Mode";
-          updatePredictionAndBet();
-        }
-      }
-      
-      function refreshUI() {
-        renderHistory();
-        updateStatsDisplay();
-        updateActivationUI();
-        if (totalInputs >= ACTIVATION_THRESHOLD) {
-          updatePredictionAndBet();
-        } else {
-          removeBlurOverlay();
-        }
-      }
-      
-      function addResult(side) {
-        if (totalInputs >= MAX_INPUTS) {
-          alert(`Maximum inputs (${MAX_INPUTS}) reached. Press RESET to continue.`);
-          return;
-        }
-      
-        let isCurrentRoundSkip = false;
-        let currentPrediction = null;
-        let currentConfidence = 0;
-        let currentOccurrences = 0;
-        
-        if (totalInputs >= ACTIVATION_THRESHOLD && allHands.length >= 2) {
-          const predData = getEnhancedPredictionAndConfidence();
-          if (predData && predData.prediction) {
-            currentPrediction = predData.prediction;
-            currentConfidence = predData.confidence;
-            currentOccurrences = predData.occurrences;
-            isCurrentRoundSkip = shouldShowSkipBlur(currentConfidence, currentOccurrences);
-          }
-        }
-        
-        let wasWin = false;
-        if (!isCurrentRoundSkip && totalInputs >= ACTIVATION_THRESHOLD && allHands.length >= 2 && currentPrediction) {
-          wasWin = (side === currentPrediction);
-          if (wasWin) {
-            wins++;
-            detailedHistory.push({ type: 'win', wasSkip: false });
-          } else {
-            losses++;
-            detailedHistory.push({ type: 'loss', wasSkip: false });
-          }
-        } 
-        else if (isCurrentRoundSkip && totalInputs >= ACTIVATION_THRESHOLD && allHands.length >= 2) {
-          detailedHistory.push({ type: 'skip', wasSkip: true });
-        }
-        
-        allHands.push(side);
-        totalInputs++;
-        if (side === 'P') playerCount++;
-        else bankerCount++;
-        
-        if (detailedHistory.length > 50) detailedHistory.shift();
-        
-        refreshUI();
-        if (totalInputs >= ACTIVATION_THRESHOLD) {
-          updatePredictionAndBet();
-        }
-      }
-      
-      function resetAll() {
-        allHands = [];
-        totalInputs = 0;
-        wins = 0;
-        losses = 0;
-        playerCount = 0;
-        bankerCount = 0;
-        detailedHistory = [];
-        removeBlurOverlay();
-        refreshUI();
-        predictionSideSpan.innerText = '—';
-        confidenceValueSpan.innerText = '—';
-        patternBadge.classList.add('empty-pattern');
-        predictionCard.classList.remove('player-bg', 'banker-bg');
-        loadingPercentSpan.innerText = `0%`;
-        progressFill.style.width = `0%`;
-      }
-      
-      // Event listeners
-      document.getElementById('playerBtn').addEventListener('click', () => addResult('P'));
-      document.getElementById('bankerBtn').addEventListener('click', () => addResult('B'));
-      document.getElementById('resetBtn').addEventListener('click', resetAll);
-      
-      // Initial render
-      refreshUI();
+    }
+    
+    if (occurrences === 0) return null;
+    
+    const prediction = playerFollows > bankerFollows ? 'P' : 'B';
+    const matches = prediction === 'P' ? playerFollows : bankerFollows;
+    const rawConfidence = (matches / occurrences) * 100;
+    
+    return {
+      prediction: prediction,
+      confidence: rawConfidence,
+      occurrences: occurrences,
+      matches: matches
     };
-  </script>
+  }
+
+  // ========== LOGIC 3: ZIGZAG PATTERN DETECTION ==========
+  function isZigzagPattern() {
+    if (allHands.length < 4) return false;
+    // Check alternating pattern: P,B,P,B or B,P,B,P
+    let alternating = true;
+    for (let i = allHands.length - 3; i < allHands.length - 1; i++) {
+      if (allHands[i] === allHands[i + 1]) {
+        alternating = false;
+        break;
+      }
+    }
+    return alternating;
+  }
+
+  // ========== ENHANCED PREDICTION WITH ALL 3 LOGICS ==========
+  function getEnhancedPredictionAndConfidence() {
+    if (allHands.length < 2) return { prediction: null, confidence: 0, occurrences: 0 };
+    
+    let scores = { P: 0, B: 0 };
+    let totalWeight = 0;
+    let details = [];
+    
+    // LOGIC 1: Streak Detection (30% weight)
+    const streak = getCurrentStreak();
+    if (streak.count >= 3) {
+      const streakBonus = Math.min(40, (streak.count - 2) * 15);
+      scores[streak.side] += streakBonus;
+      totalWeight += 30;
+      details.push(`Streak: ${streak.side} (${streak.count}) +${streakBonus}`);
+    } else if (streak.count === 2) {
+      // Slight bias to continue 2-streak
+      const streakBonus = 10;
+      scores[streak.side] += streakBonus;
+      totalWeight += 20;
+      details.push(`2-Streak: ${streak.side} +${streakBonus}`);
+    }
+    
+    // LOGIC 2: Last-3 Pattern Analysis (50% weight - most important)
+    const patternAnalysis = analyzeLast3Pattern();
+    if (patternAnalysis && patternAnalysis.occurrences > 0) {
+      const patternWeight = 50;
+      const patternScore = (patternAnalysis.confidence / 100) * patternWeight;
+      scores[patternAnalysis.prediction] += patternScore;
+      totalWeight += patternWeight;
+      details.push(`Last-3 Pattern: ${patternAnalysis.prediction} (${patternAnalysis.matches}/${patternAnalysis.occurrences}) +${Math.round(patternScore)}`);
+    }
+    
+    // LOGIC 3: Zigzag Detection (20% weight)
+    if (isZigzagPattern() && allHands.length >= 4) {
+      const lastResult = allHands[allHands.length - 1];
+      const zigzagPrediction = oppositeSide(lastResult);
+      const zigzagWeight = 20;
+      scores[zigzagPrediction] += zigzagWeight;
+      totalWeight += zigzagWeight;
+      details.push(`Zigzag Pattern: ${zigzagPrediction} +${zigzagWeight}`);
+    }
+    
+    // Fallback: If no patterns detected, use opposite of last result (simple logic)
+    if (totalWeight === 0 && allHands.length >= 2) {
+      const lastResult = allHands[allHands.length - 1];
+      const fallbackPrediction = oppositeSide(lastResult);
+      scores[fallbackPrediction] = 55;
+      totalWeight = 100;
+      details.push(`Fallback: ${fallbackPrediction} (opposite last)`);
+    }
+    
+    // Determine prediction
+    let prediction = scores.P > scores.B ? 'P' : 'B';
+    let maxScore = Math.max(scores.P, scores.B);
+    let confidence = totalWeight > 0 ? (maxScore / totalWeight) * 100 : 50;
+    
+    // Apply confidence bonuses based on history length
+    let confidenceBonus = 0;
+    if (allHands.length > 50) confidenceBonus = 10;
+    else if (allHands.length > 30) confidenceBonus = 7;
+    else if (allHands.length > 20) confidenceBonus = 5;
+    else if (allHands.length > 10) confidenceBonus = 2;
+    
+    let finalConfidence = Math.min(96, Math.max(40, confidence + confidenceBonus));
+    
+    // Calculate total occurrences (for skip logic)
+    let totalOccurrences = 0;
+    if (patternAnalysis) totalOccurrences = patternAnalysis.occurrences;
+    if (streak.count >= 3) totalOccurrences += streak.count;
+    
+    return {
+      prediction: prediction,
+      confidence: Math.round(finalConfidence * 10) / 10,
+      occurrences: totalOccurrences || 1,
+      details: details
+    };
+  }
+
+  // ========== DYNAMIC SKIP THRESHOLD (Based on recent performance) ==========
+  function getDynamicSkipThreshold() {
+    let baseThreshold = 0;
+    
+    // Analyze recent results (last 5 non-skip rounds)
+    const recentResults = detailedHistory.slice(-5).filter(h => !h.wasSkip);
+    const recentLosses = recentResults.filter(r => r.type === 'loss').length;
+    const recentWins = recentResults.filter(r => r.type === 'win').length;
+    
+    // Dynamic adjustment based on streak
+    if (recentLosses >= 3) {
+      // On losing streak: lower threshold to be more aggressive
+      baseThreshold = 52;
+    } else if (recentWins >= 3 && recentResults.length >= 3) {
+      // On winning streak: raise threshold to protect gains
+      baseThreshold = 68;
+    } else if (recentLosses >= 2) {
+      baseThreshold = 56;
+    } else if (recentWins >= 2) {
+      baseThreshold = 64;
+    }
+    
+    // Adjust based on overall win rate
+    const totalDecisions = wins + losses;
+    if (totalDecisions > 10) {
+      const winRate = wins / totalDecisions;
+      if (winRate < 0.45) {
+        // Below 45% win rate: lower threshold
+        baseThreshold = Math.max(50, baseThreshold - 5);
+      } else if (winRate > 0.55) {
+        // Above 55% win rate: raise threshold
+        baseThreshold = Math.min(75, baseThreshold + 5);
+      }
+    }
+    
+    return baseThreshold;
+  }
+
+  // ========== ENHANCED SKIP CONDITION ==========
+  function shouldShowSkipBlur(confidence, occurrences) {
+    const dynamicThreshold = getDynamicSkipThreshold();
+    
+    // More lenient if we have strong pattern occurrences
+    let adjustedThreshold = dynamicThreshold;
+    if (occurrences >= 5) {
+      adjustedThreshold = Math.max(50, dynamicThreshold - 8);
+    }
+    
+    return confidence < adjustedThreshold || occurrences < 1;
+  }
+  
+  // ========== UI UPDATE FUNCTIONS ==========
+  function triggerFadeAnimation() {
+    predictionCard.style.animation = 'none';
+    void predictionCard.offsetHeight;
+    predictionCard.style.animation = 'predictionFade 0.4s ease-in-out';
+  }
+  
+  function updatePatternDisplay() {
+    const nonSkipEntries = detailedHistory.filter(entry => !entry.wasSkip);
+    if (totalInputs >= ACTIVATION_THRESHOLD && nonSkipEntries.length > 0) {
+      const last4 = nonSkipEntries.slice(-4);
+      const pattern = last4.map(entry => entry.type === 'win' ? 'W' : 'L').join('');
+      if (pattern.length > 0) {
+        patternBadge.innerText = pattern;
+        patternBadge.classList.remove('empty-pattern');
+      } else {
+        patternBadge.innerText = '';
+        patternBadge.classList.add('empty-pattern');
+      }
+    } else {
+      patternBadge.innerText = '';
+      patternBadge.classList.add('empty-pattern');
+    }
+  }
+  
+  function removeBlurOverlay() {
+    const existingOverlay = predictionCard.querySelector('.blur-overlay');
+    if (existingOverlay) existingOverlay.remove();
+  }
+  
+  function addSkipBlurOverlay() {
+    removeBlurOverlay();
+    const overlay = document.createElement('div');
+    overlay.className = 'blur-overlay';
+    overlay.innerText = 'SKIP';
+    predictionCard.style.position = 'relative';
+    predictionCard.appendChild(overlay);
+  }
+  
+  function updatePredictionAndBet() {
+    if (totalInputs < ACTIVATION_THRESHOLD || allHands.length < 2) {
+      removeBlurOverlay();
+      return;
+    }
+    
+    const { prediction, confidence, occurrences, details } = getEnhancedPredictionAndConfidence();
+    if (!prediction) {
+      removeBlurOverlay();
+      return;
+    }
+    
+    const sideText = prediction === 'P' ? 'PLAYER' : 'BANKER';
+    predictionSideSpan.innerText = sideText;
+    predictionCard.classList.remove('player-bg', 'banker-bg');
+    predictionCard.classList.add(prediction === 'P' ? 'player-bg' : 'banker-bg');
+    confidenceValueSpan.innerText = confidence;
+    
+    triggerFadeAnimation();
+    
+    const isSkipRound = shouldShowSkipBlur(confidence, occurrences);
+    
+    if (isSkipRound) {
+      addSkipBlurOverlay();
+    } else {
+      removeBlurOverlay();
+    }
+    
+    updatePatternDisplay();
+  }
+  
+  function renderHistory() {
+    historyContainer.innerHTML = '';
+    const startIdx = Math.max(0, allHands.length - MAX_HISTORY_DISPLAY);
+    const recent = allHands.slice(startIdx);
+    for (let i = 0; i < MAX_HISTORY_DISPLAY; i++) {
+      const hand = i < recent.length ? recent[i] : null;
+      const chip = document.createElement('div');
+      chip.classList.add('hist-chip');
+      if (hand === null) {
+        chip.classList.add('empty');
+        chip.textContent = '';
+      } else {
+        chip.textContent = hand === 'P' ? 'P' : 'B';
+        chip.classList.add(hand === 'P' ? 'player' : 'banker');
+      }
+      historyContainer.appendChild(chip);
+    }
+  }
+  
+  function updateStatsDisplay() {
+    inputsCountSpan.innerText = totalInputs;
+    wlValueSpan.innerText = `${wins}/${losses}`;
+    pbCountSpan.innerText = `${playerCount} / ${bankerCount}`;
+  }
+  
+  function updateActivationUI() {
+    const isActive = totalInputs >= ACTIVATION_THRESHOLD;
+    if (!isActive) {
+      loadingArea.style.display = 'block';
+      predictionArea.style.display = 'none';
+      const percent = Math.min(100, Math.floor((totalInputs / ACTIVATION_THRESHOLD) * 100));
+      loadingPercentSpan.innerText = `${percent}%`;
+      progressFill.style.width = `${percent}%`;
+      const needed = ACTIVATION_THRESHOLD - totalInputs;
+      statusMsgSpan.innerText = needed === 1 ? 'Enter 1 more result to activate.' : `Enter ${needed} results to activate.`;
+      removeBlurOverlay();
+    } else {
+      loadingArea.style.display = 'none';
+      predictionArea.style.display = 'block';
+      statusMsgSpan.innerText = "";
+      updatePredictionAndBet();
+    }
+  }
+  
+  function refreshUI() {
+    renderHistory();
+    updateStatsDisplay();
+    updateActivationUI();
+    if (totalInputs >= ACTIVATION_THRESHOLD) {
+      updatePredictionAndBet();
+    } else {
+      removeBlurOverlay();
+    }
+  }
+  
+  function addResult(side) {
+    if (totalInputs >= MAX_INPUTS) {
+      alert(`Maximum inputs (${MAX_INPUTS}) reached. Press RESET to continue.`);
+      return;
+    }
+  
+    let isCurrentRoundSkip = false;
+    let currentPrediction = null;
+    let currentConfidence = 0;
+    let currentOccurrences = 0;
+    
+    if (totalInputs >= ACTIVATION_THRESHOLD && allHands.length >= 2) {
+      const predData = getEnhancedPredictionAndConfidence();
+      if (predData && predData.prediction) {
+        currentPrediction = predData.prediction;
+        currentConfidence = predData.confidence;
+        currentOccurrences = predData.occurrences;
+        isCurrentRoundSkip = shouldShowSkipBlur(currentConfidence, currentOccurrences);
+      }
+    }
+    
+    let wasWin = false;
+    if (!isCurrentRoundSkip && totalInputs >= ACTIVATION_THRESHOLD && allHands.length >= 2 && currentPrediction) {
+      wasWin = (side === currentPrediction);
+      if (wasWin) {
+        wins++;
+        detailedHistory.push({ type: 'win', wasSkip: false });
+      } else {
+        losses++;
+        detailedHistory.push({ type: 'loss', wasSkip: false });
+      }
+    } 
+    else if (isCurrentRoundSkip && totalInputs >= ACTIVATION_THRESHOLD && allHands.length >= 2) {
+      detailedHistory.push({ type: 'skip', wasSkip: true });
+    }
+    
+    allHands.push(side);
+    totalInputs++;
+    if (side === 'P') playerCount++;
+    else bankerCount++;
+    
+    if (detailedHistory.length > 50) detailedHistory.shift();
+    
+    refreshUI();
+    if (totalInputs >= ACTIVATION_THRESHOLD) {
+      updatePredictionAndBet();
+    }
+  }
+  
+  function resetAll() {
+    allHands = [];
+    totalInputs = 0;
+    wins = 0;
+    losses = 0;
+    playerCount = 0;
+    bankerCount = 0;
+    detailedHistory = [];
+    removeBlurOverlay();
+    refreshUI();
+    predictionSideSpan.innerText = '—';
+    confidenceValueSpan.innerText = '—';
+    patternBadge.innerText = '';
+    patternBadge.classList.add('empty-pattern');
+    predictionCard.classList.remove('player-bg', 'banker-bg');
+    if (loadingArea.style.display !== 'none') {
+      loadingPercentSpan.innerText = `0%`;
+      progressFill.style.width = `0%`;
+    }
+    predictionCard.style.animation = '';
+  }
+  
+  // Event listeners
+  document.getElementById('playerBtn').addEventListener('click', () => addResult('P'));
+  document.getElementById('bankerBtn').addEventListener('click', () => addResult('B'));
+  document.getElementById('resetBtn').addEventListener('click', resetAll);
+  
+  // Initial render
+  refreshUI();
+</script>
 </body>
 </html>
