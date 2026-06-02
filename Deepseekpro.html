@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Deepseek PRO</title>
+  
+  <!-- Firebase Connection Script (exactly like HongKong example) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
+      authDomain: "my-software-portal.firebaseapp.com",
+      projectId: "my-software-portal",
+      storageBucket: "my-software-portal.firebasestorage.app",
+      messagingSenderId: "1072405993700",
+      appId: "1:1072405993700:web:b66ca016c8de667d46f4f1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    
+    // ENGINE ID FOR THIS APP - Change this to register your new app in private panel
+    // In your private registration panel, add "deepseek_pro_engine" to user's allowedSoftware
+    const REQUIRED_ENGINE_ID = "engine_14";
+    
+    // Wait for DOM to be ready
+    window.addEventListener('DOMContentLoaded', () => {
+      // Initially hide main content until auth check passes
+      document.body.style.opacity = "0";
+      document.body.style.visibility = "hidden";
+      
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          // Not logged in - redirect to main portal
+          window.location.href = "index.html";
+          return;
+        }
+        
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
+          const now = Date.now();
+          
+          if (!userDoc.exists()) {
+            alert("Access denied: User not registered in private panel.");
+            window.location.href = "index.html";
+            return;
+          }
+          
+          const userData = userDoc.data();
+          const isValidExpiry = (userData.expiry === 'LIFETIME' || userData.expiry > now);
+          const hasPermission = userData.allowedSoftware?.includes(REQUIRED_ENGINE_ID);
+          
+          if (!isValidExpiry || !hasPermission) {
+            alert(`Access denied: You don't have permission for Deepseek PRO Engine.\n\nContact admin to add "${REQUIRED_ENGINE_ID}" to your account.`);
+            window.location.href = "index.html";
+            return;
+          }
+          
+          // Access granted - show the app
+          document.body.style.opacity = "1";
+          document.body.style.visibility = "visible";
+          
+          // Initialize the app after auth passes
+          if (window.initDeepseekApp) {
+            window.initDeepseekApp();
+          }
+          
+        } catch (error) {
+          console.error("Auth error:", error);
+          alert("Authentication error. Please try again.");
+          window.location.href = "index.html";
+        }
+      });
+    });
+  </script>
+  
+  <!-- Security: Right-click and shortcut blocker (same as HongKong) -->
+  <script>
+    (function() {
+      document.addEventListener('contextmenu', e => e.preventDefault());
+      document.onkeydown = function(e) {
+        if (e.keyCode === 123 || 
+            (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
+            (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
+          e.preventDefault();
+          return false;
+        }
+      };
+    })();
+  </script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      background: #000000;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 1.5rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Exit button (like HongKong example) */
+    .exit-nav {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      z-index: 1000;
+    }
+    .exit-btn {
+      background: rgba(0, 0, 0, 0.7);
+      color: #38bdf8;
+      padding: 6px 14px;
+      border-radius: 40px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 11px;
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      backdrop-filter: blur(8px);
+      transition: 0.2s;
+      font-family: 'Inter', -apple-system, sans-serif;
+    }
+    .exit-btn:hover {
+      background: #38bdf8;
+      color: #030407;
+      box-shadow: 0 0 12px #38bdf8;
+    }
+
+    .app-container {
+      max-width: 420px;
+      width: 100%;
+      background: #000000;
+      border-radius: 2.5rem;
+      padding: 1.8rem 1.5rem 2rem;
+      border: 1px solid #2a2a2a;
+      box-shadow: 0 25px 40px -15px rgba(0,0,0,0.9);
+      position: relative;
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 1.2rem;
+    }
+    .logo-container {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: rgba(25, 30, 40, 0.7);
+      padding: 0.5rem 1.5rem;
+      border-radius: 3rem;
+      border: 0.5px solid rgba(100, 150, 220, 0.4);
+      backdrop-filter: blur(2px);
+    }
+    .animated-logo {
+      font-size: 1.7rem;
+      font-weight: 500;
+      display: inline-block;
+      animation: spinGlow 3s infinite ease-in-out, colorGlow 4s infinite alternate;
+      filter: drop-shadow(0 0 3px currentColor);
+    }
+    @keyframes spinGlow {
+      0% { transform: rotate(0deg); }
+      50% { transform: rotate(180deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes colorGlow {
+      0% { color: #00e64d; text-shadow: 0 0 6px #00e64d; }
+      33% { color: #ff4d4d; text-shadow: 0 0 10px #ff4d4d; }
+      66% { color: #ffcc33; text-shadow: 0 0 10px #ffcc33; }
+      100% { color: #00e64d; text-shadow: 0 0 6px #00e64d; }
+    }
+    .logo-text {
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #e2edf7, #b9d0f0);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+    .license-badge {
+      text-align: center;
+      font-size: 0.6rem;
+      color: #38bdf8;
+      margin-top: 0.3rem;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+    .status-text {
+      text-align: center;
+      color: #7e8a9c;
+      font-size: 0.7rem;
+      margin-top: 0.4rem;
+      letter-spacing: 0.3px;
+    }
+
+    .history-row {
+      display: flex;
+      justify-content: center;
+      gap: 0.6rem;
+      margin: 1.5rem 0 1.8rem;
+      flex-wrap: wrap;
+    }
+    .hist-chip {
+      width: 38px;
+      height: 38px;
+      background: #111316;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      font-family: monospace;
+      border: 1px solid #5a6575;
+    }
+    .hist-chip.empty {
+      background: transparent;
+      border: 1px solid transparent;
+      visibility: hidden;
+    }
+    .hist-chip.player {
+      color: #2ecc71;
+    }
+    .hist-chip.banker {
+      color: #e65c4a;
+    }
+
+    .prediction-card {
+      position: relative;
+      border-radius: 1.8rem;
+      padding: 1.2rem 1rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      transition: background 0.2s, box-shadow 0.2s;
+      border: none;
+      overflow: hidden;
+      animation: predictionFade 0.4s ease-in-out;
+    }
+    @keyframes predictionFade {
+      0% { opacity: 0.3; transform: scale(0.98); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .prediction-card.player-bg {
+      background: #00b33c;
+      box-shadow: 0 0 10px rgba(0, 179, 60, 0.5);
+    }
+    .prediction-card.banker-bg {
+      background: #e63946;
+      box-shadow: 0 0 10px rgba(230, 57, 70, 0.5);
+    }
+    .blur-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.55);
+      border-radius: 1.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      font-weight: 800;
+      font-size: 2.2rem;
+      letter-spacing: 4px;
+      color: #ffffff;
+      text-transform: uppercase;
+      text-shadow: 0 0 12px rgba(0,0,0,0.8);
+      font-family: 'Inter', monospace;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .prediction-content {
+      position: relative;
+      z-index: 1;
+    }
+    .ai-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .prediction-side {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0.3rem 0;
+      color: #ffffff;
+    }
+    .confidence {
+      font-size: 1.6rem;
+      font-weight: 600;
+      font-family: monospace;
+      color: #ffffff;
+      text-shadow: 0 0 2px rgba(0,0,0,0.3);
+    }
+    .confidence span {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .pattern-badge {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: monospace;
+      background: rgba(0,0,0,0.4);
+      display: inline-block;
+      padding: 0.2rem 1rem;
+      border-radius: 30px;
+      color: #fff0b5;
+    }
+    .pattern-badge.empty-pattern {
+      visibility: hidden;
+      display: none;
+    }
+
+    .loading-area {
+      background: #0c0c0c;
+      border-radius: 1.8rem;
+      padding: 1.8rem 1.2rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      border: 1px solid #2a2a2a;
+    }
+    .loading-text {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #cbdffc;
+      margin-bottom: 1rem;
+      letter-spacing: 0.5px;
+    }
+    .progress-bar {
+      height: 10px;
+      background: #1e1e24;
+      border-radius: 20px;
+      overflow: hidden;
+      width: 100%;
+      margin: 16px 0;
+    }
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #ff4d4d, #ffb347, #ffff66, #66ff66, #33ccff, #bf80ff, #ff66cc);
+      background-size: 200% 100%;
+      animation: rainbowMove 1.2s linear infinite;
+      border-radius: 20px;
+      transition: width 0.3s ease;
+    }
+    @keyframes rainbowMove {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+    .loading-percent {
+      font-size: 0.7rem;
+      font-weight: 800;
+      font-family: monospace;
+      color: #ffffff;
+      background: #1a1f2a;
+      display: inline-block;
+      padding: 0.3rem 1.2rem;
+      border-radius: 3rem;
+      margin-top: 0.5rem;
+      letter-spacing: 2px;
+      text-shadow: 0 0 5px #00e6b3;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 0.7rem;
+      margin-bottom: 1.8rem;
+    }
+    .stat-block {
+      flex: 1;
+      background: #0a0a0a;
+      border-radius: 1.2rem;
+      padding: 0.5rem 0.2rem;
+      text-align: center;
+      border: 1px solid #2a2a2a;
+    }
+    .stat-label {
+      font-size: 0.6rem;
+      font-weight: 500;
+      color: #7c8da8;
+    }
+    .stat-number {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #e3ecfc;
+    }
+
+    .btns {
+      display: flex;
+      gap: 0.9rem;
+      margin-bottom: 0.9rem;
+    }
+    button {
+      flex: 1;
+      font-family: inherit;
+      font-weight: 700;
+      padding: 0.8rem 0;
+      border-radius: 2rem;
+      border: none;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-player { background: #00b33c; color: white; box-shadow: 0 0 6px #00e64d; }
+    .btn-banker { background: #e63946; color: white; box-shadow: 0 0 6px #ff4d4d; }
+    .btn-reset { background: #e6a017; color: #1e1a00; width: 100%; margin-top: 0.4rem; }
+    button:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    .footer {
+      text-align: center;
+      margin-top: 1.2rem;
+      font-size: 0.55rem;
+      color: #5d708b;
+      border-top: 1px solid #232323;
+      padding-top: 0.8rem;
+    }
+    .logic-badge {
+      text-align: center;
+      margin-top: 0.5rem;
+      font-size: 0.6rem;
+      color: #4a9eff;
+    }
+  </style>
+</head>
+<body>
+  <div class="exit-nav">
+    <a href="index.html" class="exit-btn">← EXIT TERMINAL</a>
+  </div>
+
+  <div class="app-container">
+    <div class="brand">
+      <div class="logo-container"><div class="animated-logo">⌬</div><div class="logo-text">Deepseek PRO</div></div>
+      <div class="license-badge" id="licenseBadge">🔐 VERIFYING LICENSE...</div>
+      <div class="status-text" id="statusMsg">3 Enhanced Logics Active · Minimal Loss Mode</div>
+    </div>
+
+    <div class="history-row" id="historyContainer"></div>
+
+    <div id="dynamicArea">
+      <div class="loading-area" id="loadingArea">
+        <div class="loading-text">COLLECTING STATISTICAL DATA...</div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="loading-percent" id="loadingPercent">0%</div>
+      </div>
+      <div id="predictionArea" style="display: none;">
+        <div class="prediction-card" id="predictionCard">
+          <div class="prediction-content" id="predictionContent">
+            <div class="ai-label">AI PREDICTION</div>
+            <div class="prediction-side" id="predictionSide">—</div>
+            <div class="confidence"><span id="confidenceValue">—</span><span>%</span></div>
+            <div id="patternBadge" class="pattern-badge empty-pattern"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-block"><div class="stat-label">INPUTS</div><div class="stat-number"><span id="inputsCount">0</span><small> / 70</small></div></div>
+      <div class="stat-block"><div class="stat-label">W/L</div><div class="stat-number"><span id="wlValue">0/0</span></div></div>
+      <div class="stat-block"><div class="stat-label">P / B</div><div class="stat-number"><span id="pbCount">0 / 0</span></div></div>
+    </div>
+    
+    <div class="logic-badge" id="logicIndicator"></div>
+
+    <div class="btns"><button class="btn-player" id="playerBtn">PLAYER</button><button class="btn-banker" id="bankerBtn">BANKER</button></div>
+    <button class="btn-reset" id="resetBtn">RESET</button>
+    <div class="footer">Deepseek PRO</div>
+  </div>
+
+  <script>
+    // App initialization after Firebase auth passes
+    window.initDeepseekApp = function() {
+      // Update license badge with user email
+      const licenseBadge = document.getElementById('licenseBadge');
+      if (licenseBadge) {
+        licenseBadge.innerHTML = '✓ PRIVATE LICENSE ACTIVE';
+        licenseBadge.style.color = '#00e64d';
+      }
+      
+      // ---------- APP STATE ----------
+      let allHands = [];            // 'P' or 'B'
+      let totalInputs = 0;
+      let wins = 0;
+      let losses = 0;
+      let playerCount = 0;
+      let bankerCount = 0;
+      const MAX_INPUTS = 70;
+      const MAX_HISTORY_DISPLAY = 6;
+      const ACTIVATION_THRESHOLD = 10;
+
+      let detailedHistory = []; // { type: 'win' or 'loss', wasSkip: bool }
+      
+      // DOM elements
+      const historyContainer = document.getElementById('historyContainer');
+      const loadingArea = document.getElementById('loadingArea');
+      const predictionArea = document.getElementById('predictionArea');
+      const predictionCard = document.getElementById('predictionCard');
+      const progressFill = document.getElementById('progressFill');
+      const loadingPercentSpan = document.getElementById('loadingPercent');
+      const predictionSideSpan = document.getElementById('predictionSide');
+      const confidenceValueSpan = document.getElementById('confidenceValue');
+      const patternBadge = document.getElementById('patternBadge');
+      const inputsCountSpan = document.getElementById('inputsCount');
+      const wlValueSpan = document.getElementById('wlValue');
+      const pbCountSpan = document.getElementById('pbCount');
+      const statusMsgSpan = document.getElementById('statusMsg');
+
+      function oppositeSide(side) {
+        return side === 'P' ? 'B' : 'P';
+      }
+
+      function getCurrentStreak() {
+        if (allHands.length === 0) return { side: null, count: 0 };
+        let streak = 1;
+        const lastSide = allHands[allHands.length - 1];
+        for (let i = allHands.length - 2; i >= 0; i--) {
+          if (allHands[i] === lastSide) streak++;
+          else break;
+        }
+        return { side: lastSide, count: streak };
+      }
+
+      function analyzeLast3Pattern() {
+        if (allHands.length < 3) return null;
+        
+        const last3 = allHands.slice(-3);
+        let occurrences = 0;
+        let playerFollows = 0;
+        let bankerFollows = 0;
+        
+        for (let i = 0; i <= allHands.length - 4; i++) {
+          const first = allHands[i];
+          const second = allHands[i+1];
+          const third = allHands[i+2];
+          const next = allHands[i+3];
+          
+          if (first === last3[0] && second === last3[1] && third === last3[2]) {
+            occurrences++;
+            if (next === 'P') playerFollows++;
+            else bankerFollows++;
+          }
+        }
+        
+        if (occurrences === 0 && allHands.length >= 2) {
+          const last2 = allHands.slice(-2);
+          for (let i = 0; i <= allHands.length - 3; i++) {
+            const first = allHands[i];
+            const second = allHands[i+1];
+            const next = allHands[i+2];
+            if (first === last2[0] && second === last2[1]) {
+              occurrences++;
+              if (next === 'P') playerFollows++;
+              else bankerFollows++;
+            }
+          }
+        }
+        
+        if (occurrences === 0) return null;
+        
+        const prediction = playerFollows > bankerFollows ? 'P' : 'B';
+        const matches = prediction === 'P' ? playerFollows : bankerFollows;
+        const rawConfidence = (matches / occurrences) * 100;
+        
+        return {
+          prediction: prediction,
+          confidence: rawConfidence,
+          occurrences: occurrences,
+          matches: matches
+        };
+      }
+
+      function isZigzagPattern() {
+        if (allHands.length < 4) return false;
+        let alternating = true;
+        for (let i = allHands.length - 3; i < allHands.length - 1; i++) {
+          if (allHands[i] === allHands[i + 1]) {
+            alternating = false;
+            break;
+          }
+        }
+        return alternating;
+      }
+
+      function getEnhancedPredictionAndConfidence() {
+        if (allHands.length < 2) return { prediction: null, confidence: 0, occurrences: 0 };
+        
+        let scores = { P: 0, B: 0 };
+        let totalWeight = 0;
+        
+        const streak = getCurrentStreak();
+        if (streak.count >= 3) {
+          const streakBonus = Math.min(40, (streak.count - 2) * 15);
+          scores[streak.side] += streakBonus;
+          totalWeight += 30;
+        } else if (streak.count === 2) {
+          scores[streak.side] += 10;
+          totalWeight += 20;
+        }
+        
+        const patternAnalysis = analyzeLast3Pattern();
+        if (patternAnalysis && patternAnalysis.occurrences > 0) {
+          const patternWeight = 50;
+          const patternScore = (patternAnalysis.confidence / 100) * patternWeight;
+          scores[patternAnalysis.prediction] += patternScore;
+          totalWeight += patternWeight;
+        }
+        
+        if (isZigzagPattern() && allHands.length >= 4) {
+          const lastResult = allHands[allHands.length - 1];
+          const zigzagPrediction = oppositeSide(lastResult);
+          const zigzagWeight = 20;
+          scores[zigzagPrediction] += zigzagWeight;
+          totalWeight += zigzagWeight;
+        }
+        
+        if (totalWeight === 0 && allHands.length >= 2) {
+          const lastResult = allHands[allHands.length - 1];
+          const fallbackPrediction = oppositeSide(lastResult);
+          scores[fallbackPrediction] = 55;
+          totalWeight = 100;
+        }
+        
+        let prediction = scores.P > scores.B ? 'P' : 'B';
+        let maxScore = Math.max(scores.P, scores.B);
+        let confidence = totalWeight > 0 ? (maxScore / totalWeight) * 100 : 50;
+        
+        let confidenceBonus = 0;
+        if (allHands.length > 50) confidenceBonus = 10;
+        else if (allHands.length > 30) confidenceBonus = 7;
+        else if (allHands.length > 20) confidenceBonus = 5;
+        else if (allHands.length > 10) confidenceBonus = 2;
+        
+        let finalConfidence = Math.min(96, Math.max(40, confidence + confidenceBonus));
+        
+        let totalOccurrences = patternAnalysis ? patternAnalysis.occurrences : 1;
+        
+        return {
+          prediction: prediction,
+          confidence: Math.round(finalConfidence * 10) / 10,
+          occurrences: totalOccurrences
+        };
+      }
+
+      function getDynamicSkipThreshold() {
+        const recentResults = detailedHistory.slice(-5).filter(h => !h.wasSkip);
+        const recentLosses = recentResults.filter(r => r.type === 'loss').length;
+        const recentWins = recentResults.filter(r => r.type === 'win').length;
+        
+        if (recentLosses >= 3) return 52;
+        if (recentWins >= 3 && recentResults.length >= 3) return 68;
+        if (recentLosses >= 2) return 56;
+        if (recentWins >= 2) return 64;
+        
+        const totalDecisions = wins + losses;
+        if (totalDecisions > 10) {
+          const winRate = wins / totalDecisions;
+          if (winRate < 0.45) return 55;
+          if (winRate > 0.55) return 70;
+        }
+        return 60;
+      }
+
+      function shouldShowSkipBlur(confidence, occurrences) {
+        const dynamicThreshold = getDynamicSkipThreshold();
+        let adjustedThreshold = dynamicThreshold;
+        if (occurrences >= 5) {
+          adjustedThreshold = Math.max(50, dynamicThreshold - 8);
+        }
+        return confidence < adjustedThreshold || occurrences < 1;
+      }
+      
+      function removeBlurOverlay() {
+        const existingOverlay = predictionCard.querySelector('.blur-overlay');
+        if (existingOverlay) existingOverlay.remove();
+      }
+      
+      function addSkipBlurOverlay() {
+        removeBlurOverlay();
+        const overlay = document.createElement('div');
+        overlay.className = 'blur-overlay';
+        overlay.innerText = 'SKIP';
+        predictionCard.appendChild(overlay);
+      }
+      
+      function updatePredictionAndBet() {
+        if (totalInputs < ACTIVATION_THRESHOLD || allHands.length < 2) {
+          removeBlurOverlay();
+          return;
+        }
+        
+        const { prediction, confidence, occurrences } = getEnhancedPredictionAndConfidence();
+        if (!prediction) {
+          removeBlurOverlay();
+          return;
+        }
+        
+        const sideText = prediction === 'P' ? 'PLAYER' : 'BANKER';
+        predictionSideSpan.innerText = sideText;
+        predictionCard.classList.remove('player-bg', 'banker-bg');
+        predictionCard.classList.add(prediction === 'P' ? 'player-bg' : 'banker-bg');
+        confidenceValueSpan.innerText = confidence;
+        
+        const isSkipRound = shouldShowSkipBlur(confidence, occurrences);
+        
+        if (isSkipRound) {
+          addSkipBlurOverlay();
+        } else {
+          removeBlurOverlay();
+        }
+        
+        // Update pattern badge
+        const nonSkipEntries = detailedHistory.filter(entry => !entry.wasSkip);
+        if (totalInputs >= ACTIVATION_THRESHOLD && nonSkipEntries.length > 0) {
+          const last4 = nonSkipEntries.slice(-4);
+          const pattern = last4.map(entry => entry.type === 'win' ? 'W' : 'L').join('');
+          if (pattern.length > 0) {
+            patternBadge.innerText = pattern;
+            patternBadge.classList.remove('empty-pattern');
+          } else {
+            patternBadge.classList.add('empty-pattern');
+          }
+        } else {
+          patternBadge.classList.add('empty-pattern');
+        }
+      }
+      
+      function renderHistory() {
+        historyContainer.innerHTML = '';
+        const startIdx = Math.max(0, allHands.length - MAX_HISTORY_DISPLAY);
+        const recent = allHands.slice(startIdx);
+        for (let i = 0; i < MAX_HISTORY_DISPLAY; i++) {
+          const hand = i < recent.length ? recent[i] : null;
+          const chip = document.createElement('div');
+          chip.classList.add('hist-chip');
+          if (hand === null) {
+            chip.classList.add('empty');
+            chip.textContent = '';
+          } else {
+            chip.textContent = hand === 'P' ? 'P' : 'B';
+            chip.classList.add(hand === 'P' ? 'player' : 'banker');
+          }
+          historyContainer.appendChild(chip);
+        }
+      }
+      
+      function updateStatsDisplay() {
+        inputsCountSpan.innerText = totalInputs;
+        wlValueSpan.innerText = `${wins}/${losses}`;
+        pbCountSpan.innerText = `${playerCount} / ${bankerCount}`;
+      }
+      
+      function updateActivationUI() {
+        const isActive = totalInputs >= ACTIVATION_THRESHOLD;
+        if (!isActive) {
+          loadingArea.style.display = 'block';
+          predictionArea.style.display = 'none';
+          const percent = Math.min(100, Math.floor((totalInputs / ACTIVATION_THRESHOLD) * 100));
+          loadingPercentSpan.innerText = `${percent}%`;
+          progressFill.style.width = `${percent}%`;
+          const needed = ACTIVATION_THRESHOLD - totalInputs;
+          statusMsgSpan.innerText = needed === 1 ? 'Enter 1 more result to activate.' : `Enter ${needed} results to activate.`;
+          removeBlurOverlay();
+        } else {
+          loadingArea.style.display = 'none';
+          predictionArea.style.display = 'block';
+          statusMsgSpan.innerText = "3 Enhanced Logics Active · Minimal Loss Mode";
+          updatePredictionAndBet();
+        }
+      }
+      
+      function refreshUI() {
+        renderHistory();
+        updateStatsDisplay();
+        updateActivationUI();
+        if (totalInputs >= ACTIVATION_THRESHOLD) {
+          updatePredictionAndBet();
+        } else {
+          removeBlurOverlay();
+        }
+      }
+      
+      function addResult(side) {
+        if (totalInputs >= MAX_INPUTS) {
+          alert(`Maximum inputs (${MAX_INPUTS}) reached. Press RESET to continue.`);
+          return;
+        }
+      
+        let isCurrentRoundSkip = false;
+        let currentPrediction = null;
+        let currentConfidence = 0;
+        let currentOccurrences = 0;
+        
+        if (totalInputs >= ACTIVATION_THRESHOLD && allHands.length >= 2) {
+          const predData = getEnhancedPredictionAndConfidence();
+          if (predData && predData.prediction) {
+            currentPrediction = predData.prediction;
+            currentConfidence = predData.confidence;
+            currentOccurrences = predData.occurrences;
+            isCurrentRoundSkip = shouldShowSkipBlur(currentConfidence, currentOccurrences);
+          }
+        }
+        
+        let wasWin = false;
+        if (!isCurrentRoundSkip && totalInputs >= ACTIVATION_THRESHOLD && allHands.length >= 2 && currentPrediction) {
+          wasWin = (side === currentPrediction);
+          if (wasWin) {
+            wins++;
+            detailedHistory.push({ type: 'win', wasSkip: false });
+          } else {
+            losses++;
+            detailedHistory.push({ type: 'loss', wasSkip: false });
+          }
+        } 
+        else if (isCurrentRoundSkip && totalInputs >= ACTIVATION_THRESHOLD && allHands.length >= 2) {
+          detailedHistory.push({ type: 'skip', wasSkip: true });
+        }
+        
+        allHands.push(side);
+        totalInputs++;
+        if (side === 'P') playerCount++;
+        else bankerCount++;
+        
+        if (detailedHistory.length > 50) detailedHistory.shift();
+        
+        refreshUI();
+        if (totalInputs >= ACTIVATION_THRESHOLD) {
+          updatePredictionAndBet();
+        }
+      }
+      
+      function resetAll() {
+        allHands = [];
+        totalInputs = 0;
+        wins = 0;
+        losses = 0;
+        playerCount = 0;
+        bankerCount = 0;
+        detailedHistory = [];
+        removeBlurOverlay();
+        refreshUI();
+        predictionSideSpan.innerText = '—';
+        confidenceValueSpan.innerText = '—';
+        patternBadge.classList.add('empty-pattern');
+        predictionCard.classList.remove('player-bg', 'banker-bg');
+        loadingPercentSpan.innerText = `0%`;
+        progressFill.style.width = `0%`;
+      }
+      
+      // Event listeners
+      document.getElementById('playerBtn').addEventListener('click', () => addResult('P'));
+      document.getElementById('bankerBtn').addEventListener('click', () => addResult('B'));
+      document.getElementById('resetBtn').addEventListener('click', resetAll);
+      
+      // Initial render
+      refreshUI();
+    };
+  </script>
+</body>
+</html>
