@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP ROULETTE · Neural Prediction</title>
+    <title>VIP ROULETTE · Neighbor Bet</title>
 
     <script>
         if (window.location.pathname.endsWith('.html')) {
@@ -41,313 +41,191 @@
     </script>
 
     <style>
-        * {
-            user-select: none;
-        }
         body { 
-            background: radial-gradient(circle at 20% 30%, #0a0a0c, #030303);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Segoe UI', 'Arial', sans-serif;
-            margin: 0;
-            min-height: 100vh;
-            padding: 30px 20px;
-            color: #eee;
+            background: linear-gradient(135deg, #0b0b0b, #1c1c1c, #2c2c2c); 
+            display: none; /* Guard hidden */
+            flex-direction: column; 
+            align-items: center; 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 120px; 
+            color: white; 
         }
 
-        /* exit button */
-        .exit-nav {
-            position: fixed;
-            top: 18px;
-            right: 24px;
-            z-index: 200;
-        }
-        .exit-btn {
-            background: #1f1f2e;
-            color: #f0f0f0;
-            padding: 8px 18px;
-            border-radius: 40px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 12px;
-            border: 1px solid #4a4a5a;
-            backdrop-filter: blur(4px);
-            transition: 0.2s;
-        }
-        .exit-btn:hover { background: #b91c2c; border-color: white; }
+        /* EXIT BUTTON */
+        .exit-nav { position: fixed; top: 20px; right: 20px; }
+        .exit-btn { background: #444; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; border: 1px solid #666; font-size: 13px; }
+        .exit-btn:hover { background: #ff4d6d; border-color: #fff; }
 
-        /* main layout */
-        .roulette-arena {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            text-align: center;
-            background: linear-gradient(135deg, #f5b042, #ff3a6f);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 20px;
-            letter-spacing: 2px;
-        }
-
-        /* wheel container - relative for prediction overlay inside circle */
-        .wheel-wrapper {
+        h1 { font-size: 2rem; font-weight: bold; text-shadow: 0 0 5px #ff4d6d, 0 0 10px #ff1a75; margin-bottom: 30px; }
+        
+        /* WHEEL CONTAINER - relative for prediction overlay */
+        .wheel-container {
             position: relative;
             width: 600px;
             height: 400px;
-            margin: 0 auto 20px;
+            margin-bottom: 20px;
         }
-        .track-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
+        .track-container { 
+            position: relative; 
+            width: 100%; 
+            height: 100%; 
         }
-        .num {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            position: absolute;
-            border-radius: 50%;
-            font-size: 14px;
-            transition: all 0.2s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        .num { 
+            width: 40px; 
+            height: 40px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-weight: bold; 
+            position: absolute; 
+            border-radius: 50%; 
+            font-size: 13px;
+            transition: all 0.2s ease;
         }
-        .red { background: #c62828; }
-        .black { background: #111; }
+        .red { background: #c62828; } 
+        .black { background: #111; } 
         .green { background: #0fa23f; }
-        .num.neighbor { background: yellow !important; color: black; transform: scale(1.2); box-shadow: 0 0 12px gold; }
-        .num.center { background: #ff69b4 !important; color: black; transform: scale(1.3); box-shadow: 0 0 18px hotpink; }
-
-        /* PREDICTION OVERLAY — MIDDLE OF THE CIRCLE (inside wheel) */
-        .prediction-core {
+        .num.neighbor { background: yellow !important; color: black; transform: scale(1.2); box-shadow: 0 0 10px gold; }
+        .num.center { background: #ff69b4 !important; color: black; transform: scale(1.3); box-shadow: 0 0 15px hotpink; }
+        
+        /* PREDICTION INSIDE WHEEL - CLEAN, CENTERED */
+        .wheel-prediction {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 130px;
-            height: 130px;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(12px);
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 215, 0, 0.5);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 50;
-            border: 2px solid rgba(255, 215, 0, 0.6);
-            box-shadow: 0 0 25px rgba(0,0,0,0.8), inset 0 0 8px rgba(255,215,0,0.3);
+            z-index: 100;
             pointer-events: none;
-            font-family: monospace;
+            font-family: 'Arial', monospace;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            transition: all 0.2s;
         }
-        .prediction-core .ai-badge {
-            font-size: 9px;
+        .pred-loading {
+            text-align: center;
+        }
+        .pred-loading .loading-dots {
+            font-size: 10px;
             letter-spacing: 2px;
-            background: #ffaa2b;
-            color: black;
-            padding: 2px 8px;
-            border-radius: 40px;
+            color: #ffaa66;
             font-weight: bold;
-            margin-bottom: 6px;
+            margin-top: 8px;
         }
-        .prediction-core .pred-number {
-            font-size: 38px;
+        .pred-loading .progress-ring {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto;
+        }
+        .pred-number {
+            font-size: 42px;
             font-weight: 900;
             color: #ffdd99;
-            text-shadow: 0 0 8px #ff9933;
+            text-shadow: 0 0 12px #ff9933;
             line-height: 1;
         }
-        .prediction-core .pred-conf {
+        .pred-confidence {
             font-size: 11px;
             font-weight: bold;
+            background: rgba(0,0,0,0.6);
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-top: 6px;
             color: #ddd;
-            background: #1e1e2aaa;
-            padding: 2px 8px;
-            border-radius: 30px;
-            margin-top: 5px;
         }
-        .prediction-core .skip-badge {
-            font-size: 20px;
+        .pred-skip {
+            font-size: 24px;
             font-weight: 900;
             color: #ff4d4d;
             text-transform: uppercase;
             letter-spacing: 4px;
             background: rgba(0,0,0,0.8);
-            padding: 6px 12px;
+            padding: 8px 0;
             border-radius: 40px;
-        }
-        .loader-inside {
-            text-align: center;
-        }
-        .loader-inside .loader-text {
-            font-size: 10px;
-            color: #ffaa66;
-            background: #000000aa;
-            padding: 4px 10px;
-            border-radius: 30px;
-            font-weight: bold;
-        }
-        .mini-progress {
-            width: 70px;
-            height: 4px;
-            background: #2c2c34;
-            border-radius: 4px;
-            margin: 6px auto 0;
-            overflow: hidden;
-        }
-        .mini-fill {
-            width: 0%;
-            height: 100%;
-            background: #f5b042;
-            transition: width 0.2s;
-        }
-
-        /* controls */
-        .controls {
-            display: flex;
-            gap: 12px;
-            margin: 20px 0 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 14px;
-        }
-        #enterBtn { background: #0fa23f; color: white; box-shadow: 0 2px 8px #0fa23f80; }
-        #enterBtn:disabled { background: #444; box-shadow: none; cursor: not-allowed; opacity: 0.5; }
-        #undoBtn { background: #c62828; color: white; }
-        #resetBtn { background: #3a3a44; color: white; }
-        .result-input {
-            width: 85px;
-            height: 42px;
-            background: #1e1e2a;
-            border: 1px solid #ffaa55;
-            color: white;
-            font-size: 20px;
-            text-align: center;
-            border-radius: 40px;
-            font-weight: bold;
-        }
-
-        /* history containers - LIMIT 10 each */
-        .history-section {
             width: 100%;
-            margin-top: 10px;
-        }
-        h3 {
-            font-size: 0.9rem;
-            margin: 10px 0 5px;
-            color: #ccccdd;
-        }
-        .history-container {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-            background: rgba(0,0,0,0.4);
-            border-radius: 40px;
-            padding: 10px 12px;
-            min-height: 52px;
-        }
-        .history-num, .history-wl {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 15px;
-            transition: 0.1s;
-        }
-        .history-num.red { background: #c62828; }
-        .history-num.black { background: #111; }
-        .history-num.green { background: #0fa23f; }
-        .history-wl.W { background: #0fa23f; box-shadow: 0 0 4px #0fa23f; }
-        .history-wl.L { background: #b91c2c; }
-
-        .footer-note {
-            margin-top: 24px;
-            font-size: 10px;
-            color: #6a6f7a;
             text-align: center;
         }
+        .glow-prediction {
+            animation: pulseGlow 1.2s infinite;
+            border-color: #ffdd77;
+            box-shadow: 0 0 20px #ffaa33;
+        }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 5px #ffaa33; border-color: rgba(255, 215, 0, 0.5); }
+            100% { box-shadow: 0 0 25px #ffdd77; border-color: #ffcc44; }
+        }
+        .progress-ring-circle {
+            stroke-dasharray: 126;
+            stroke-dashoffset: 126;
+            transition: stroke-dashoffset 0.3s;
+        }
+        
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; }
+        button { padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        #enterBtn { background: #0fa23f; color: white; }
+        #enterBtn:disabled { background: #555; cursor: not-allowed; opacity: 0.6; }
+        #undoBtn { background: #c62828; color: white; }
+        #resetBtn { background: #555; color: white; }
+        .result-input { width: 60px; height: 40px; background: #444; border: 1px solid #222; color: white; font-size: 16px; text-align: center; }
+        
+        .history-container { width: 600px; display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
+        .history-num, .history-wl { width: 28px; height: 28px; border-radius: 4px; display: flex; justify-content: center; align-items: center; font-weight: bold; color: white; font-size: 12px; }
+        .history-num.red { background: #c62828; } .history-num.black { background: #111; } .history-num.green { background: #0fa23f; }
+        .history-wl.W { background: #0fa23f; } .history-wl.L { background: #c62828; }
+        
+        h3 { margin: 15px 0 5px; font-size: 14px; }
     </style>
 </head>
 <body>
+
 <div class="exit-nav">
     <a href="index.html" class="exit-btn">EXIT TERMINAL</a>
 </div>
 
-<div class="roulette-arena">
-    <h1>✦ VIPER ROULETTE ✦</h1>
+<h1>VIPER ROULETTE</h1>
 
-    <!-- WHEEL WITH PREDICTION OVERLAY (MIDDLE OF CIRCLE) -->
-    <div class="wheel-wrapper">
-        <div class="track-container" id="track"></div>
-        <div class="prediction-core" id="predictionCore">
-            <!-- dynamic content: loading / prediction / skip -->
-            <div id="coreDynamic" style="text-align: center;">
-                <div class="ai-badge">DEEPSEEK AI</div>
-                <div id="coreNumberDisplay" class="pred-number">—</div>
-                <div id="coreConfidence" class="pred-conf">analyzing</div>
-                <div id="coreSkipDisplay" style="display: none;" class="skip-badge">SKIP</div>
-                <div id="coreLoaderArea">
-                    <div class="loader-inside">
-                        <div class="loader-text">ANALYZING PATTERNS...</div>
-                        <div class="mini-progress"><div class="mini-fill" id="miniProgressFill"></div></div>
-                    </div>
-                </div>
-            </div>
+<div class="wheel-container">
+    <div class="track-container" id="track"></div>
+    <!-- PREDICTION OVERLAY - INSIDE WHEEL, CLEAN -->
+    <div class="wheel-prediction" id="wheelPrediction">
+        <div id="predictionInner">
+            <!-- dynamic content -->
         </div>
     </div>
-
-    <div class="controls">
-        <input type="number" id="resultInput" class="result-input" placeholder="0-36" min="0" max="36" oninput="this.value = this.value.slice(0,2)">
-        <button id="enterBtn" disabled>ENTER SPIN</button>
-        <button id="undoBtn">↩ UNDO</button>
-        <button id="resetBtn">⟳ RESET</button>
-    </div>
-
-    <div class="history-section">
-        <h3>📊 NUMBER HISTORY (last 10)</h3>
-        <div class="history-container" id="numberHistory"></div>
-        <h3>🎯 WIN/LOSE HISTORY (last 10)</h3>
-        <div class="history-container" id="wlHistory"></div>
-    </div>
-    <div class="footer-note">Neighbor bet mode active | Neural prediction inside wheel</div>
 </div>
 
+<div class="controls">
+    <input type="number" id="resultInput" class="result-input" placeholder="0-36" min="0" max="36" required oninput="this.value = this.value.slice(0, 2)">
+    <button id="enterBtn" disabled>Enter</button>
+    <button id="undoBtn">Undo</button>
+    <button id="resetBtn">Reset</button>
+</div>
+
+<h3>Number History (last 10):</h3>
+<div class="history-container" id="numberHistory"></div>
+<h3>Win/Lose History (last 10):</h3>
+<div class="history-container" id="wlHistory"></div>
+
 <script>
-// ======================= ORIGINAL WHEEL + NEIGHBOR (UNTOUCHED) =======================
-(function initRoulette() {
-    const track = document.getElementById('track');
+// ==================== ORIGINAL ROULETTE ENGINE (PRESERVED) ====================
+window.addEventListener('DOMContentLoaded', () => {
+    const trackContainer = document.getElementById('track');
     const resultInput = document.getElementById('resultInput');
     const enterBtn = document.getElementById('enterBtn');
 
     const wheelNumbers = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
-    const numbersDivs = [];
-    const centerX = 300, centerY = 200;
-    const radiusX = 250, radiusY = 150;
+    const numbers = [];
+    const centerX = 300; const centerY = 200;
+    const radiusX = 250; const radiusY = 150;
 
     wheelNumbers.forEach((num, i) => {
         const angle = (i / wheelNumbers.length) * 2 * Math.PI + Math.PI;
@@ -359,40 +237,43 @@
         if (num === 0) div.classList.add('green');
         else if ([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(num)) div.classList.add('red');
         else div.classList.add('black');
-        div.style.left = `${x}px`;
-        div.style.top = `${y}px`;
-        track.appendChild(div);
-        numbersDivs.push(div);
+        div.style.left = `${x}px`; div.style.top = `${y}px`;
+        trackContainer.appendChild(div);
+        numbers.push(div);
     });
 
-    let numberHistory = [];      // max 10
-    let wlHistory = [];          // max 10
+    const numberHistoryContainer = document.getElementById('numberHistory');
+    const wlHistoryContainer = document.getElementById('wlHistory');
+
+    let numberHistory = [];
+    let wlHistory = [];
     let currentHighlight = [];
     let firstEntry = true;
     let undoStack = [];
+
+    const MAX_HISTORY = 10;      // LIMIT 10
     const neighborCount = 9;
-    const MAX_HISTORY = 10;      // 👈 LIMIT 10
 
     function generateHighlight() {
-        numbersDivs.forEach(n => n.classList.remove('neighbor','center'));
+        numbers.forEach(n => n.classList.remove('neighbor','center'));
         let centerIndex;
-        do { centerIndex = Math.floor(Math.random() * numbersDivs.length); } 
-        while (numbersDivs[centerIndex].classList.contains('green'));
+        do { centerIndex = Math.floor(Math.random() * numbers.length); } 
+        while (numbers[centerIndex].classList.contains('green'));
 
-        numbersDivs[centerIndex].classList.add('center');
+        numbers[centerIndex].classList.add('center');
         for (let i = -neighborCount; i <= neighborCount; i++) {
             if (i === 0) continue;
-            const idx = (centerIndex + i + numbersDivs.length) % numbersDivs.length;
-            numbersDivs[idx].classList.add('neighbor');
+            const idx = (centerIndex + i + numbers.length) % numbers.length;
+            numbers[idx].classList.add('neighbor');
         }
-        currentHighlight = numbersDivs
+
+        currentHighlight = numbers
             .filter(n => n.classList.contains('neighbor') || n.classList.contains('center'))
             .map(n => Number(n.textContent));
     }
 
     function renderHistories() {
-        const numberContainer = document.getElementById('numberHistory');
-        numberContainer.innerHTML = '';
+        numberHistoryContainer.innerHTML = '';
         numberHistory.slice(-MAX_HISTORY).forEach(n => {
             const d = document.createElement('div');
             d.classList.add('history-num');
@@ -400,16 +281,15 @@
             if (n === 0) d.classList.add('green');
             else if ([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(n)) d.classList.add('red');
             else d.classList.add('black');
-            numberContainer.appendChild(d);
+            numberHistoryContainer.appendChild(d);
         });
 
-        const wlContainer = document.getElementById('wlHistory');
-        wlContainer.innerHTML = '';
+        wlHistoryContainer.innerHTML = '';
         wlHistory.slice(-MAX_HISTORY).forEach(r => {
             const d = document.createElement('div');
             d.classList.add('history-wl', r);
             d.textContent = r;
-            wlContainer.appendChild(d);
+            wlHistoryContainer.appendChild(d);
         });
     }
 
@@ -418,30 +298,44 @@
         enterBtn.disabled = !(v !== '' && v >= 0 && v <= 36);
     });
 
-    // function to update external prediction engine
+    // notify prediction engine
     function notifyPredictionUpdate() {
-        if (typeof window.updatePredictionWithHistory === 'function') {
-            window.updatePredictionWithHistory([...numberHistory]);
+        if (typeof window.updatePrediction === 'function') {
+            window.updatePrediction(numberHistory);
         }
     }
 
     enterBtn.addEventListener('click', () => {
         const value = Number(resultInput.value);
+        
         undoStack.push({
             numberHistory: [...numberHistory],
             wlHistory: [...wlHistory],
             firstEntry: firstEntry,
-            highlights: numbersDivs.map(n => n.className),
+            highlights: numbers.map(n => n.className),
             currentHighlight: [...currentHighlight]
         });
 
         numberHistory.push(value);
-        if (numberHistory.length > MAX_HISTORY) numberHistory.shift();   // enforce 10 limit
+        if (numberHistory.length > MAX_HISTORY) numberHistory.shift();
 
+        // WIN/LOSE LOGIC: SKIP PREDICTION DOES NOT COUNT
+        // get current prediction skip status before recording result
+        let isSkipActive = false;
+        if (typeof window.getCurrentSkipStatus === 'function') {
+            isSkipActive = window.getCurrentSkipStatus();
+        }
+        
         if (!firstEntry) {
-            const resultWL = currentHighlight.includes(value) ? 'W' : 'L';
-            wlHistory.push(resultWL);
-            if (wlHistory.length > MAX_HISTORY) wlHistory.shift();       // enforce 10 limit
+            // Only record win/loss if prediction is active (not skip)
+            if (!isSkipActive) {
+                const isWin = currentHighlight.includes(value);
+                wlHistory.push(isWin ? 'W' : 'L');
+                if (wlHistory.length > MAX_HISTORY) wlHistory.shift();
+            } else {
+                // SKIP round: do NOT record anything to win/loss history (skip not counted)
+                // maintain history as is
+            }
         } else {
             firstEntry = false;
         }
@@ -450,6 +344,7 @@
         renderHistories();
         resultInput.value = '';
         enterBtn.disabled = true;
+        
         notifyPredictionUpdate();
     });
 
@@ -460,79 +355,74 @@
         wlHistory = s.wlHistory;
         firstEntry = s.firstEntry;
         currentHighlight = s.currentHighlight;
-        numbersDivs.forEach((n, i) => n.className = s.highlights[i]);
+        
+        numbers.forEach((n, i) => n.className = s.highlights[i]);
         renderHistories();
+        
         notifyPredictionUpdate();
     });
 
     document.getElementById('resetBtn').addEventListener('click', () => {
-        numberHistory = [];
-        wlHistory = [];
-        firstEntry = true;
-        undoStack = [];
-        numbersDivs.forEach(n => n.classList.remove('neighbor', 'center'));
-        generateHighlight();    // fresh neighbor set
+        numberHistory = []; wlHistory = []; currentHighlight = []; firstEntry = true; undoStack = [];
+        numbers.forEach(n => n.classList.remove('neighbor', 'center'));
+        generateHighlight();
         renderHistories();
         resultInput.value = '';
         enterBtn.disabled = true;
+        
         notifyPredictionUpdate();
     });
-
+    
     generateHighlight();
-    renderHistories();
-    window.rouletteNumberHistory = () => [...numberHistory];
-})();
+});
 
-// ======================= PREDICTION ENGINE (MIDDLE OF WHEEL, NO EXTRA PANEL) =======================
-(function predictionEngine() {
-    // DOM inside the circle
-    const coreDynamic = document.getElementById('coreDynamic');
-    const coreNumberSpan = document.getElementById('coreNumberDisplay');
-    const coreConfSpan = document.getElementById('coreConfidence');
-    const coreSkipDiv = document.getElementById('coreSkipDisplay');
-    const coreLoaderArea = document.getElementById('coreLoaderArea');
-    const miniFill = document.getElementById('miniProgressFill');
-
-    let currentNumbers = [];
-    const REQUIRED_SPINS = 8;   // after 8 spins prediction becomes active
-    let activeFlag = false;
-
-    // helper: number color mapping
-    function getColorClass(num) {
-        if (num === 0) return 'green';
-        const reds = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
-        return reds.includes(num) ? 'red' : 'black';
-    }
-
-    // roulette wheel adjacency (standard neighbors)
+// ==================== PREDICTION ENGINE (EMBEDDED IN WHEEL) ====================
+(function() {
+    const predictionContainer = document.getElementById('predictionInner');
+    const wheelDiv = document.getElementById('wheelPrediction');
+    
+    let currentHistory = [];
+    let lastPredictionNumber = null;
+    let currentSkipStatus = false;
+    
+    const REQUIRED_SPINS = 10;   // need 10 spins before showing glowing prediction
+    
+    // roulette wheel adjacency for intelligent prediction
     const wheelAdj = {
         0:[32,26],32:[15,0],15:[19,32],19:[4,15],4:[21,19],21:[2,4],2:[25,21],25:[17,2],17:[34,25],34:[6,17],
         6:[27,34],27:[13,6],13:[36,27],36:[11,13],11:[30,36],30:[8,11],8:[23,30],23:[10,8],10:[5,23],5:[24,10],
         24:[16,5],16:[33,24],33:[1,16],1:[20,33],20:[14,1],14:[31,20],31:[9,14],9:[22,31],22:[18,9],18:[29,22],
         29:[7,18],7:[28,29],28:[12,7],12:[35,28],35:[3,12],3:[26,35],26:[0,3]
     };
-
-    // advanced prediction: frequency + neighbor + alternating pattern
-    function computePrediction(history) {
-        if (!history || history.length < 4) return { number: null, confidence: 0, reason: "collecting data" };
+    
+    function getNumberColor(num) {
+        if (num === 0) return 'green';
+        const reds = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+        return reds.includes(num) ? 'red' : 'black';
+    }
+    
+    // intelligent prediction using patterns
+    function computeSmartPrediction(history) {
+        if (history.length < 4) return { number: null, confidence: 0 };
+        
         const lastNum = history[history.length-1];
         const last3 = history.slice(-3);
         const last5 = history.slice(-5);
         
-        // 1. neighbor zone candidates
+        // neighbors
         let neighbors = wheelAdj[lastNum] || [lastNum+1, lastNum-1].filter(v=> v>=0 && v<=36);
         let neighborSet = new Set(neighbors);
         
-        // 2. hot numbers from last 10 spins
+        // hot numbers from last 10 spins
         const last10 = history.slice(-10);
         const freq = {};
         last10.forEach(n => freq[n] = (freq[n] || 0) + 1);
         let hotNumbers = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>parseInt(e[0]));
         
-        // 3. color zigzag detection
-        let lastColor = getColorClass(lastNum);
+        // color zigzag detection
+        let lastColor = getNumberColor(lastNum);
         let oppositeColor = lastColor === 'red' ? 'black' : 'red';
-        let colorSequence = last5.map(n => getColorClass(n));
+        let colorSequence = last5.map(n => getNumberColor(n));
         let isAlternating = true;
         for(let i=1; i<colorSequence.length; i++) {
             if(colorSequence[i] === colorSequence[i-1]) { isAlternating = false; break; }
@@ -543,166 +433,136 @@
         
         let selected = candidates[0];
         let confidenceBase = 48;
-        let patternReason = "mixed pattern";
         
-        // alternate pattern boost
         if(isAlternating && history.length >= 6) {
-            let oppositeCand = candidates.find(c => getColorClass(c) === oppositeColor);
+            let oppositeCand = candidates.find(c => getNumberColor(c) === oppositeColor);
             if(oppositeCand) selected = oppositeCand;
             confidenceBase = 72;
-            patternReason = "color zigzag active";
         } else {
-            // if neighbor hit recently
             let neighborRecentCount = 0;
             for(let i=history.length-2; i>=Math.max(0, history.length-5); i--) {
                 if(neighborSet.has(history[i])) neighborRecentCount++;
             }
-            if(neighborRecentCount >= 2) {
-                confidenceBase = 68;
-                patternReason = "hot neighbor zone";
-            }
-            // prefer number not in last 3 spins
+            if(neighborRecentCount >= 2) confidenceBase = 68;
+            
             let notRecent = candidates.find(c => !last3.includes(c));
             if(notRecent) selected = notRecent;
         }
         
-        // confidence fine-tune
-        let finalConfidence = Math.min(94, Math.max(42, confidenceBase + (history.length > 12 ? 8 : 0)));
-        if (history.length > 20) finalConfidence = Math.min(96, finalConfidence + 4);
-        // if the number is totally cold? minor adjust
-        return { number: selected, confidence: Math.floor(finalConfidence), reason: patternReason };
+        let finalConfidence = Math.min(92, Math.max(44, confidenceBase + (history.length > 15 ? 6 : 0)));
+        if (history.length > 20) finalConfidence = Math.min(95, finalConfidence + 3);
+        
+        return { number: selected, confidence: Math.floor(finalConfidence) };
     }
     
-    // function to decide SKIP based on confidence and recent instability
-    function shouldSkip(confidence, historyLen) {
-        if (historyLen < REQUIRED_SPINS) return true;   // not yet active
-        // dynamic threshold: lower if many spins but confidence low
+    // decide skip based on confidence and history length
+    function shouldSkipPrediction(confidence, historyLen) {
+        if (historyLen < REQUIRED_SPINS) return true;  // not enough data
         let threshold = 54;
-        if (historyLen > 18) threshold = 52;
-        if (historyLen > 30) threshold = 50;
+        if (historyLen > 20) threshold = 52;
+        if (historyLen > 35) threshold = 50;
         return confidence < threshold;
     }
     
-    function updateUIForPrediction() {
-        if (!coreDynamic) return;
-        const history = currentNumbers;
-        const spinsCount = history.length;
-        const isActive = spinsCount >= REQUIRED_SPINS;
+    // render UI inside wheel
+    function renderPredictionUI(historyLength) {
+        if (!predictionContainer) return;
         
-        // update mini progress loader inside circle
-        let progressPercent = Math.min(100, Math.floor((spinsCount / REQUIRED_SPINS) * 100));
-        if (miniFill) miniFill.style.width = `${progressPercent}%`;
+        const isReady = historyLength >= REQUIRED_SPINS;
         
-        if (!isActive) {
-            // SHOW ANALYZING PATTERNS MODE (middle of circle)
-            coreNumberSpan.style.display = 'none';
-            coreConfSpan.style.display = 'none';
-            coreSkipDiv.style.display = 'none';
-            coreLoaderArea.style.display = 'block';
-            if (coreLoaderArea) {
-                coreLoaderArea.innerHTML = `<div class="loader-inside"><div class="loader-text">ANALYZING PATTERNS...</div><div class="mini-progress"><div class="mini-fill" style="width:${progressPercent}%"></div></div><div style="font-size:9px; margin-top:4px;">${spinsCount}/${REQUIRED_SPINS} spins</div></div>`;
-                // reattach fill reference after innerHTML
-                const newFill = document.querySelector('#coreLoaderArea .mini-fill');
-                if(newFill) newFill.style.width = `${progressPercent}%`;
-            }
+        if (!isReady) {
+            // ANALYZING MODE with loading progress
+            const percent = Math.min(100, Math.floor((historyLength / REQUIRED_SPINS) * 100));
+            wheelDiv.classList.remove('glow-prediction');
+            predictionContainer.innerHTML = `
+                <div class="pred-loading" style="text-align:center;">
+                    <svg width="50" height="50" viewBox="0 0 40 40">
+                        <circle cx="20" cy="20" r="18" fill="none" stroke="#333" stroke-width="3"/>
+                        <circle class="progress-ring-circle" cx="20" cy="20" r="18" fill="none" stroke="#ffaa44" stroke-width="3" stroke-dasharray="113.04" stroke-dashoffset="${113.04 - (113.04 * percent / 100)}" transform="rotate(-90 20 20)"/>
+                    </svg>
+                    <div style="font-size:10px; color:#ffaa66; margin-top:6px;">ANALYZING</div>
+                    <div class="loading-dots" style="font-size:9px;">${historyLength}/${REQUIRED_SPINS} spins</div>
+                </div>
+            `;
+            currentSkipStatus = true;
             return;
         }
         
-        // active prediction mode
-        const pred = computePrediction(history);
+        // ACTIVE PREDICTION MODE
+        const pred = computeSmartPrediction(currentHistory);
         if (!pred || pred.number === null) {
-            coreNumberSpan.innerText = '?';
-            coreConfSpan.innerText = 'low data';
-            coreSkipDiv.style.display = 'none';
-            coreLoaderArea.style.display = 'none';
-            coreNumberSpan.style.display = 'block';
-            coreConfSpan.style.display = 'block';
+            predictionContainer.innerHTML = `<div class="pred-number">?</div><div class="pred-confidence">waiting</div>`;
+            wheelDiv.classList.remove('glow-prediction');
+            currentSkipStatus = true;
             return;
         }
         
-        const skipActive = shouldSkip(pred.confidence, history.length);
-        coreNumberSpan.innerText = pred.number;
-        coreConfSpan.innerText = `${pred.confidence}%`;
-        coreNumberSpan.style.display = 'block';
-        coreConfSpan.style.display = 'block';
-        coreLoaderArea.style.display = 'none';
+        const skip = shouldSkipPrediction(pred.confidence, currentHistory.length);
+        currentSkipStatus = skip;
         
-        if (skipActive) {
-            coreSkipDiv.style.display = 'flex';
-            coreNumberSpan.style.opacity = '0.4';
-            coreConfSpan.style.opacity = '0.4';
+        if (skip) {
+            // SKIP MODE - no glow, show SKIP
+            wheelDiv.classList.remove('glow-prediction');
+            predictionContainer.innerHTML = `
+                <div class="pred-skip">SKIP</div>
+                <div class="pred-confidence">${pred.confidence}%</div>
+            `;
         } else {
-            coreSkipDiv.style.display = 'none';
-            coreNumberSpan.style.opacity = '1';
-            coreConfSpan.style.opacity = '1';
-        }
-        
-        // micro animation
-        if(!skipActive) {
-            coreNumberSpan.style.transform = 'scale(1.05)';
-            setTimeout(() => { if(coreNumberSpan) coreNumberSpan.style.transform = ''; }, 200);
+            // ACTIVE GLOWING PREDICTION
+            wheelDiv.classList.add('glow-prediction');
+            predictionContainer.innerHTML = `
+                <div class="pred-number">${pred.number}</div>
+                <div class="pred-confidence">${pred.confidence}% confidence</div>
+            `;
+            lastPredictionNumber = pred.number;
         }
     }
     
-    // exposed function called from roulette after each spin
-    window.updatePredictionWithHistory = function(historyArray) {
+    // expose update function for roulette
+    window.updatePrediction = function(historyArray) {
         if (!historyArray) return;
-        currentNumbers = [...historyArray];
-        updateUIForPrediction();
+        currentHistory = [...historyArray];
+        renderPredictionUI(currentHistory.length);
     };
     
-    // initial loader sync 
-    setInterval(() => {
-        if (typeof window.rouletteNumberHistory === 'function') {
-            const hist = window.rouletteNumberHistory();
-            if (hist && hist.length !== currentNumbers.length) {
-                currentNumbers = [...hist];
-                updateUIForPrediction();
-            }
-        } else {
-            // fallback if global not ready
-            if (currentNumbers.length === 0) updateUIForPrediction();
-        }
-    }, 400);
+    // expose skip status getter for win/loss logic
+    window.getCurrentSkipStatus = function() {
+        return currentSkipStatus;
+    };
     
-    // make sure on load we show analyzing with progress
-    setTimeout(() => {
-        if (currentNumbers.length === 0) updateUIForPrediction();
-    }, 100);
+    // initial render
+    renderPredictionUI(0);
 })();
 
-// final hook to sync with roulette module after DOM ready
-window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        if (typeof window.rouletteNumberHistory === 'function') {
-            const initialHistory = window.rouletteNumberHistory();
-            if (initialHistory && typeof window.updatePredictionWithHistory === 'function') {
-                window.updatePredictionWithHistory(initialHistory);
-            }
-        }
-    }, 200);
-});
-</script>
-
-<!-- ORIGINAL SECURITY BLOCKS (preserved untouched) -->
-<script>
+// ==================== SECURITY BLOCKS (PRESERVED) ====================
 (function() {
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.onkeydown = function(e) {
-        if (e.keyCode === 123 || (e.ctrlKey && e.keyCode === 85) || (e.ctrlKey && e.shiftKey && [73,74,67].includes(e.keyCode)) || (e.ctrlKey && e.keyCode === 83)) {
+        if (
+            e.keyCode === 123 || 
+            (e.ctrlKey && e.keyCode === 85) || 
+            (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) ||
+            (e.ctrlKey && e.keyCode === 83)
+        ) {
             return false;
         }
     };
-    setInterval(function() { (function() { return false; }['constructor']('debugger')['call']()); }, 50);
+    setInterval(function() {
+        (function() { return false; }['constructor']('debugger')['call']());
+    }, 50);
     function detectDevTools() {
         const threshold = 160;
         if ((window.outerWidth - window.innerWidth > threshold) || (window.outerHeight - window.innerHeight > threshold)) {
-            document.body.innerHTML = ""; window.location.replace("about:blank");
+            document.body.innerHTML = ""; 
+            window.location.replace("about:blank");
         }
     }
     setInterval(detectDevTools, 500);
-    if (typeof console !== "undefined") { console.log = console.debug = console.info = console.warn = console.error = function() {}; }
+    if (typeof console !== "undefined") {
+        console.log = console.debug = console.info = console.warn = console.error = function() {};
+    }
 })();
 </script>
+
 </body>
 </html>
