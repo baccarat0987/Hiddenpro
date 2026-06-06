@@ -252,7 +252,7 @@
 
             <div class="footer-tools">
                 <button class="btn btn-secondary" onclick="undo()">UNDO</button>
-                <button class="btn btn-secondary" onclick="appSoftReset()">RESET</button>
+                <button class="btn btn-secondary" onclick="fullRefreshReset()">RESET</button>
             </div>
         </div>
     </div>
@@ -261,8 +261,7 @@
         // ============================================================
         // HONGKONG STRATEGY with PAROLI PROGRESSION (Fixed Base Bet = 10)
         // NO AUTO LOCK - Game continues indefinitely regardless of profit
-        // NO PROFIT TARGET - Play can continue forever
-        // User can manually RESET anytime
+        // RESET button performs FULL PAGE REFRESH to start completely fresh
         // ============================================================
         
         let history = [];
@@ -292,14 +291,14 @@
             paroliMultiplier = 1;
         }
         
-        function appSoftReset() {
-            history = [];
-            currentRowModeIsDirect = true;
-            resetParoli();
-            renderTable();
-            updateLogic();
+        // FULL PAGE REFRESH - completely resets everything fresh
+        function fullRefreshReset() {
+            window.location.reload();
         }
-
+        
+        // Legacy soft reset function removed - now using full refresh
+        // Keep for undo functionality but not used for reset button
+        
         function addEntry(val) {
             history.push(val);
             renderTable();
@@ -307,10 +306,12 @@
         }
 
         function undo() {
-            history.pop();
-            resetParoli();
-            renderTable();
-            updateLogic();
+            if (history.length > 0) {
+                history.pop();
+                resetParoli();
+                renderTable();
+                updateLogic();
+            }
         }
 
         function renderTable() {
@@ -385,7 +386,9 @@
             currentRowModeIsDirect = dynamicEngineIsDirect;
 
             const container = document.querySelector('.excel-container');
-            container.scrollTop = container.scrollHeight;
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
         }
 
         function updateLogic() {
@@ -393,6 +396,8 @@
             const instr = document.getElementById('instruction');
             const badge = document.getElementById('mode-badge');
             const boxBg = document.getElementById('predict-box-bg');
+
+            if (!signal || !instr || !badge || !boxBg) return;
 
             boxBg.style.background = "linear-gradient(180deg, #090b11 0%, #030406 100%)";
             boxBg.style.boxShadow = "inset 0 -20px 30px rgba(0, 0, 0, 0.3)";
