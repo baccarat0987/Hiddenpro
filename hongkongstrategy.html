@@ -289,8 +289,9 @@
         // ============================================================
         // HONGKONG STRATEGY with PAROLI PROGRESSION (Fixed Base Bet = 10)
         // Base bet is internal, constant, user cannot change or see setter.
-        // After a win: double the bet (max 16x base), after loss: reset to base.
         // Profit target: 4 × base bet (40 units) -> auto "CHANGE TABLE" lock.
+        // DISPLAY: Shows only BET amount without "(BASE X)" suffix
+        // INSTRUCTION: Clean text without extra details about Paroli reset
         // ============================================================
         
         let history = [];
@@ -303,14 +304,12 @@
         
         // Paroli state
         let paroliMultiplier = 1;
-        const MAX_PAROLI_MULTIPLIER = 16;  // prevents runaway, but profit target will lock earlier
+        const MAX_PAROLI_MULTIPLIER = 16;
         
-        // Helper to get current bet amount (fixed base * multiplier)
         function getCurrentBetValue() {
             return FIXED_BASE_BET * paroliMultiplier;
         }
         
-        // Paroli rules: double on win (up to cap)
         function updateParoliOnWin() {
             paroliMultiplier = Math.min(paroliMultiplier * 2, MAX_PAROLI_MULTIPLIER);
         }
@@ -341,7 +340,7 @@
 
         function undo() {
             history.pop();
-            resetParoli();      // reset progression to base when undoing last hand
+            resetParoli();
             renderTable();
             updateLogic();
         }
@@ -357,7 +356,6 @@
             let runningProfitBalance = 0;
             let dynamicEngineIsDirect = true;
             
-            // Reset Paroli state before reprocessing all history
             resetParoli();
             
             const maxTrailingRows = 2; 
@@ -406,30 +404,24 @@
                                     historicPrediction = (masterReferenceValue === 'B') ? 'P' : 'B';
                                 }
 
-                                // Bet amount uses current Paroli multiplier before updating (fixed base)
                                 const betAmount = getCurrentBetValue();
 
                                 if ((dynamicEngineIsDirect && isIdenticalMatch) || (!dynamicEngineIsDirect && !isIdenticalMatch)) {
-                                    // WIN
                                     if (td) td.innerHTML += ' <span class="win-icon">✓</span>';
                                     totalCheckmarks++;
                                     
-                                    // Banker wins take 5% commission
                                     if (historicPrediction === 'B') {
                                         runningProfitBalance += (betAmount * 0.95);
                                     } else {
                                         runningProfitBalance += betAmount;
                                     }
                                     
-                                    // PAROLI: double bet on win
                                     updateParoliOnWin();
                                     dynamicEngineIsDirect = true;
                                 } else {
-                                    // LOSS
                                     if (td) td.innerHTML += ' <span class="loss-icon">X</span>';
                                     runningProfitBalance -= betAmount;
                                     
-                                    // PAROLI: reset to base on loss
                                     updateParoliOnLoss();
                                     dynamicEngineIsDirect = false;
                                 }
@@ -449,20 +441,17 @@
             
             currentRowModeIsDirect = dynamicEngineIsDirect;
             
-            // Profit target: 4 × fixed base bet (40 units)
             evaluateProfitTarget(runningProfitBalance);
 
             const container = document.querySelector('.excel-container');
             container.scrollTop = container.scrollHeight;
         }
 
-        // Evaluate based on net profit vs target (4 * fixed base = 40)
         function evaluateProfitTarget(netProfit) {
-            const targetProfit = FIXED_BASE_BET * 4;  // 40 units
+            const targetProfit = FIXED_BASE_BET * 4;
             if (netProfit >= targetProfit) {
                 const formattedProfit = Number(netProfit.toFixed(2)).toLocaleString();
-                triggerSystemLock("PROFIT TARGET REACHED", "CHANGE TABLE", `Secure your earnings and move to a fresh table.<span class="profit-callout-block">TOTAL PROFIT: +$${formattedProfit}</span>`, "var(--accent)"
-                );
+                triggerSystemLock("PROFIT TARGET REACHED", "CHANGE TABLE", `Secure your earnings and move to a fresh table.<span class="profit-callout-block">TOTAL PROFIT: +$${formattedProfit}</span>`, "var(--accent)");
             }
         }
 
@@ -513,12 +502,13 @@
                 return;
             }
 
+            // Clean instruction text - removed "PAROLI RESET TO BASE" and similar verbose details
             if (currentRowModeIsDirect) {
                 badge.innerText = "STRATEGY: MATCH MODE";
-                instr.innerText = "PATTERN IS HITTING: PAROLI DOUBLING";
+                instr.innerText = "FOLLOWING PATTERN";
             } else {
                 badge.innerText = "STRATEGY: OPPOSITE MODE";
-                instr.innerText = "LOSS DETECTED: PAROLI RESET TO BASE";
+                instr.innerText = "REVERSING PATTERN";
             }
 
             let prediction = "";
@@ -529,7 +519,8 @@
             }
 
             const currentBet = getCurrentBetValue();
-            betAmountLabel.innerText = `BET: $${currentBet.toFixed(2)} (BASE $${FIXED_BASE_BET})`;
+            // Display only the bet amount, no "(BASE X)" suffix
+            betAmountLabel.innerText = `BET: $${currentBet.toFixed(2)}`;
 
             if (prediction === 'B') {
                 signal.innerText = 'BANKER';
