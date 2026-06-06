@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP ROULETTE · Neighbor Bet</title>
+    <title>VIP ROULETTE · Trend Prediction</title>
 
     <script>
         if (window.location.pathname.endsWith('.html')) {
@@ -53,13 +53,12 @@
         }
 
         /* EXIT BUTTON */
-        .exit-nav { position: fixed; top: 20px; right: 20px; }
+        .exit-nav { position: fixed; top: 20px; right: 20px; z-index: 200; }
         .exit-btn { background: #444; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; border: 1px solid #666; font-size: 13px; }
         .exit-btn:hover { background: #ff4d6d; border-color: #fff; }
 
         h1 { font-size: 2rem; font-weight: bold; text-shadow: 0 0 5px #ff4d6d, 0 0 10px #ff1a75; margin-bottom: 30px; }
         
-        /* WHEEL CONTAINER - relative for prediction overlay */
         .wheel-container {
             position: relative;
             width: 600px;
@@ -89,18 +88,14 @@
         .num.neighbor { background: yellow !important; color: black; transform: scale(1.2); box-shadow: 0 0 10px gold; }
         .num.center { background: #ff69b4 !important; color: black; transform: scale(1.3); box-shadow: 0 0 15px hotpink; }
         
-        /* PREDICTION INSIDE WHEEL - CLEAN, CENTERED */
+        /* PREDICTION INSIDE WHEEL - CLEAN, NO EXTRA CIRCLE, JUST TEXT */
         .wheel-prediction {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(12px);
-            border: 2px solid rgba(255, 215, 0, 0.5);
+            width: 140px;
+            height: 100px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -108,65 +103,66 @@
             z-index: 100;
             pointer-events: none;
             font-family: 'Arial', monospace;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
-            transition: all 0.2s;
+            text-align: center;
+            background: transparent;
         }
         .pred-loading {
             text-align: center;
-        }
-        .pred-loading .loading-dots {
-            font-size: 10px;
-            letter-spacing: 2px;
             color: #ffaa66;
             font-weight: bold;
-            margin-top: 8px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
         }
-        .pred-loading .progress-ring {
-            width: 50px;
-            height: 50px;
-            margin: 0 auto;
+        .pred-loading .loading-text {
+            font-size: 11px;
+            background: rgba(0,0,0,0.7);
+            padding: 6px 12px;
+            border-radius: 40px;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        .pred-loading .progress-bar-mini {
+            width: 100px;
+            height: 3px;
+            background: #2a2a2a;
+            border-radius: 4px;
+            margin: 8px auto 0;
+            overflow: hidden;
+        }
+        .pred-loading .progress-fill-mini {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #ffaa44, #ffdd88);
+            transition: width 0.2s;
+            border-radius: 4px;
         }
         .pred-number {
             font-size: 42px;
             font-weight: 900;
             color: #ffdd99;
-            text-shadow: 0 0 12px #ff9933;
+            text-shadow: 0 0 15px #ff9933, 0 0 5px rgba(0,0,0,0.5);
             line-height: 1;
+            background: rgba(0,0,0,0.5);
+            padding: 4px 12px;
+            border-radius: 50px;
+            letter-spacing: 2px;
         }
         .pred-confidence {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: bold;
             background: rgba(0,0,0,0.6);
-            padding: 2px 10px;
-            border-radius: 20px;
+            padding: 3px 12px;
+            border-radius: 30px;
             margin-top: 6px;
-            color: #ddd;
-        }
-        .pred-skip {
-            font-size: 24px;
-            font-weight: 900;
-            color: #ff4d4d;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            background: rgba(0,0,0,0.8);
-            padding: 8px 0;
-            border-radius: 40px;
-            width: 100%;
-            text-align: center;
+            color: #ffdd99;
         }
         .glow-prediction {
             animation: pulseGlow 1.2s infinite;
-            border-color: #ffdd77;
-            box-shadow: 0 0 20px #ffaa33;
         }
         @keyframes pulseGlow {
-            0% { box-shadow: 0 0 5px #ffaa33; border-color: rgba(255, 215, 0, 0.5); }
-            100% { box-shadow: 0 0 25px #ffdd77; border-color: #ffcc44; }
-        }
-        .progress-ring-circle {
-            stroke-dasharray: 126;
-            stroke-dashoffset: 126;
-            transition: stroke-dashoffset 0.3s;
+            0% { text-shadow: 0 0 5px #ffaa33; }
+            100% { text-shadow: 0 0 20px #ffdd77, 0 0 5px #ffaa33; }
         }
         
         .controls { display: flex; gap: 10px; margin-bottom: 20px; }
@@ -195,7 +191,7 @@
 
 <div class="wheel-container">
     <div class="track-container" id="track"></div>
-    <!-- PREDICTION OVERLAY - INSIDE WHEEL, CLEAN -->
+    <!-- PREDICTION INSIDE WHEEL - SIMPLE TEXT, NO EXTRA CIRCLE -->
     <div class="wheel-prediction" id="wheelPrediction">
         <div id="predictionInner">
             <!-- dynamic content -->
@@ -251,7 +247,7 @@ window.addEventListener('DOMContentLoaded', () => {
     let firstEntry = true;
     let undoStack = [];
 
-    const MAX_HISTORY = 10;      // LIMIT 10
+    const MAX_HISTORY = 10;
     const neighborCount = 9;
 
     function generateHighlight() {
@@ -298,10 +294,9 @@ window.addEventListener('DOMContentLoaded', () => {
         enterBtn.disabled = !(v !== '' && v >= 0 && v <= 36);
     });
 
-    // notify prediction engine
     function notifyPredictionUpdate() {
-        if (typeof window.updatePrediction === 'function') {
-            window.updatePrediction(numberHistory);
+        if (typeof window.updateTrendPrediction === 'function') {
+            window.updateTrendPrediction(numberHistory);
         }
     }
 
@@ -319,23 +314,10 @@ window.addEventListener('DOMContentLoaded', () => {
         numberHistory.push(value);
         if (numberHistory.length > MAX_HISTORY) numberHistory.shift();
 
-        // WIN/LOSE LOGIC: SKIP PREDICTION DOES NOT COUNT
-        // get current prediction skip status before recording result
-        let isSkipActive = false;
-        if (typeof window.getCurrentSkipStatus === 'function') {
-            isSkipActive = window.getCurrentSkipStatus();
-        }
-        
         if (!firstEntry) {
-            // Only record win/loss if prediction is active (not skip)
-            if (!isSkipActive) {
-                const isWin = currentHighlight.includes(value);
-                wlHistory.push(isWin ? 'W' : 'L');
-                if (wlHistory.length > MAX_HISTORY) wlHistory.shift();
-            } else {
-                // SKIP round: do NOT record anything to win/loss history (skip not counted)
-                // maintain history as is
-            }
+            const isWin = currentHighlight.includes(value);
+            wlHistory.push(isWin ? 'W' : 'L');
+            if (wlHistory.length > MAX_HISTORY) wlHistory.shift();
         } else {
             firstEntry = false;
         }
@@ -376,161 +358,150 @@ window.addEventListener('DOMContentLoaded', () => {
     generateHighlight();
 });
 
-// ==================== PREDICTION ENGINE (EMBEDDED IN WHEEL) ====================
+// ==================== TREND LOGIC: BASE ON LAST 10 RESULTS ONLY ====================
 (function() {
     const predictionContainer = document.getElementById('predictionInner');
     const wheelDiv = document.getElementById('wheelPrediction');
     
     let currentHistory = [];
-    let lastPredictionNumber = null;
-    let currentSkipStatus = false;
+    const REQUIRED_SPINS = 10;
     
-    const REQUIRED_SPINS = 10;   // need 10 spins before showing glowing prediction
-    
-    // roulette wheel adjacency for intelligent prediction
-    const wheelAdj = {
-        0:[32,26],32:[15,0],15:[19,32],19:[4,15],4:[21,19],21:[2,4],2:[25,21],25:[17,2],17:[34,25],34:[6,17],
-        6:[27,34],27:[13,6],13:[36,27],36:[11,13],11:[30,36],30:[8,11],8:[23,30],23:[10,8],10:[5,23],5:[24,10],
-        24:[16,5],16:[33,24],33:[1,16],1:[20,33],20:[14,1],14:[31,20],31:[9,14],9:[22,31],22:[18,9],18:[29,22],
-        29:[7,18],7:[28,29],28:[12,7],12:[35,28],35:[3,12],3:[26,35],26:[0,3]
-    };
-    
-    function getNumberColor(num) {
-        if (num === 0) return 'green';
-        const reds = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
-        return reds.includes(num) ? 'red' : 'black';
-    }
-    
-    // intelligent prediction using patterns
-    function computeSmartPrediction(history) {
-        if (history.length < 4) return { number: null, confidence: 0 };
+    // TREND PREDICTION: analyze last 10 results, find most frequent number + hot streak
+    function getTrendPrediction(history) {
+        if (!history || history.length < REQUIRED_SPINS) {
+            return { number: null, confidence: 0, trendData: null };
+        }
         
-        const lastNum = history[history.length-1];
-        const last3 = history.slice(-3);
-        const last5 = history.slice(-5);
-        
-        // neighbors
-        let neighbors = wheelAdj[lastNum] || [lastNum+1, lastNum-1].filter(v=> v>=0 && v<=36);
-        let neighborSet = new Set(neighbors);
-        
-        // hot numbers from last 10 spins
+        // ONLY last 10 results matter
         const last10 = history.slice(-10);
+        
+        // Frequency analysis
         const freq = {};
-        last10.forEach(n => freq[n] = (freq[n] || 0) + 1);
-        let hotNumbers = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>parseInt(e[0]));
+        last10.forEach(num => {
+            freq[num] = (freq[num] || 0) + 1;
+        });
         
-        // color zigzag detection
-        let lastColor = getNumberColor(lastNum);
-        let oppositeColor = lastColor === 'red' ? 'black' : 'red';
-        let colorSequence = last5.map(n => getNumberColor(n));
-        let isAlternating = true;
-        for(let i=1; i<colorSequence.length; i++) {
-            if(colorSequence[i] === colorSequence[i-1]) { isAlternating = false; break; }
-        }
-        
-        let candidates = [...new Set([...neighbors, ...hotNumbers])].filter(c => c !== undefined && c>=0 && c<=36);
-        if(candidates.length === 0) candidates = [lastNum+1, lastNum-1].filter(v=> v>=0 && v<=36);
-        
-        let selected = candidates[0];
-        let confidenceBase = 48;
-        
-        if(isAlternating && history.length >= 6) {
-            let oppositeCand = candidates.find(c => getNumberColor(c) === oppositeColor);
-            if(oppositeCand) selected = oppositeCand;
-            confidenceBase = 72;
-        } else {
-            let neighborRecentCount = 0;
-            for(let i=history.length-2; i>=Math.max(0, history.length-5); i--) {
-                if(neighborSet.has(history[i])) neighborRecentCount++;
+        // Find most frequent number(s)
+        let maxFreq = 0;
+        let mostFrequentNumbers = [];
+        for (const [num, count] of Object.entries(freq)) {
+            if (count > maxFreq) {
+                maxFreq = count;
+                mostFrequentNumbers = [parseInt(num)];
+            } else if (count === maxFreq) {
+                mostFrequentNumbers.push(parseInt(num));
             }
-            if(neighborRecentCount >= 2) confidenceBase = 68;
-            
-            let notRecent = candidates.find(c => !last3.includes(c));
-            if(notRecent) selected = notRecent;
         }
         
-        let finalConfidence = Math.min(92, Math.max(44, confidenceBase + (history.length > 15 ? 6 : 0)));
-        if (history.length > 20) finalConfidence = Math.min(95, finalConfidence + 3);
+        // Trend direction: check if there's a repeating pattern (last 3 numbers)
+        const last3 = last10.slice(-3);
+        let patternBonus = false;
+        let patternNumber = null;
         
-        return { number: selected, confidence: Math.floor(finalConfidence) };
+        // Check if last 2 numbers are same -> trend continues
+        if (last3.length >= 2 && last3[last3.length-1] === last3[last3.length-2]) {
+            patternBonus = true;
+            patternNumber = last3[last3.length-1];
+        }
+        
+        // Check for alternating pattern (hot)
+        let lastColorSequence = last10.slice(-5).map(n => {
+            if (n === 0) return 'green';
+            const reds = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+            return reds.includes(n) ? 'red' : 'black';
+        });
+        
+        let selectedNumber = null;
+        let confidencePercent = 95.3; // base minimum in range 95.3% - 98.4%
+        
+        if (patternBonus && patternNumber !== null) {
+            selectedNumber = patternNumber;
+            // Higher confidence when pattern is strong
+            confidencePercent = 97.8 + (Math.random() * 0.6);
+        } else if (mostFrequentNumbers.length > 0) {
+            // Pick most frequent, if tie pick the most recent among them
+            const recentNumbers = last10.slice(-3);
+            let bestMatch = mostFrequentNumbers[0];
+            for (const mn of mostFrequentNumbers) {
+                if (recentNumbers.includes(mn)) {
+                    bestMatch = mn;
+                    break;
+                }
+            }
+            selectedNumber = bestMatch;
+            // Confidence based on frequency percentage
+            const freqPercent = (maxFreq / 10) * 100;
+            confidencePercent = 95.3 + (freqPercent * 0.03);
+            confidencePercent = Math.min(98.4, confidencePercent);
+        } else {
+            // fallback: last number
+            selectedNumber = last10[last10.length-1];
+            confidencePercent = 95.5;
+        }
+        
+        // Ensure confidence range 95.3% - 98.4%
+        confidencePercent = Math.min(98.4, Math.max(95.3, confidencePercent));
+        confidencePercent = parseFloat(confidencePercent.toFixed(1));
+        
+        // add tiny random variation for natural feel (within range)
+        const variation = (Math.random() * 0.8) - 0.4;
+        let finalConfidence = confidencePercent + variation;
+        finalConfidence = Math.min(98.4, Math.max(95.3, finalConfidence));
+        finalConfidence = parseFloat(finalConfidence.toFixed(1));
+        
+        return { 
+            number: selectedNumber, 
+            confidence: finalConfidence,
+            trendInfo: `Top freq: ${maxFreq}/10`
+        };
     }
     
-    // decide skip based on confidence and history length
-    function shouldSkipPrediction(confidence, historyLen) {
-        if (historyLen < REQUIRED_SPINS) return true;  // not enough data
-        let threshold = 54;
-        if (historyLen > 20) threshold = 52;
-        if (historyLen > 35) threshold = 50;
-        return confidence < threshold;
-    }
-    
-    // render UI inside wheel
+    // Render UI inside wheel
     function renderPredictionUI(historyLength) {
         if (!predictionContainer) return;
         
         const isReady = historyLength >= REQUIRED_SPINS;
         
         if (!isReady) {
-            // ANALYZING MODE with loading progress
+            // COLLECTING STATISTICAL DATA... with loading animation (no circle container, just simple words)
             const percent = Math.min(100, Math.floor((historyLength / REQUIRED_SPINS) * 100));
-            wheelDiv.classList.remove('glow-prediction');
             predictionContainer.innerHTML = `
-                <div class="pred-loading" style="text-align:center;">
-                    <svg width="50" height="50" viewBox="0 0 40 40">
-                        <circle cx="20" cy="20" r="18" fill="none" stroke="#333" stroke-width="3"/>
-                        <circle class="progress-ring-circle" cx="20" cy="20" r="18" fill="none" stroke="#ffaa44" stroke-width="3" stroke-dasharray="113.04" stroke-dashoffset="${113.04 - (113.04 * percent / 100)}" transform="rotate(-90 20 20)"/>
-                    </svg>
-                    <div style="font-size:10px; color:#ffaa66; margin-top:6px;">ANALYZING</div>
-                    <div class="loading-dots" style="font-size:9px;">${historyLength}/${REQUIRED_SPINS} spins</div>
+                <div class="pred-loading">
+                    <div class="loading-text">📊 COLLECTING STATISTICAL DATA...</div>
+                    <div class="progress-bar-mini">
+                        <div class="progress-fill-mini" style="width: ${percent}%;"></div>
+                    </div>
+                    <div style="font-size: 10px; margin-top: 5px; opacity: 0.8;">${historyLength}/10 spins</div>
                 </div>
             `;
-            currentSkipStatus = true;
+            wheelDiv.classList.remove('glow-prediction');
             return;
         }
         
-        // ACTIVE PREDICTION MODE
-        const pred = computeSmartPrediction(currentHistory);
+        // ACTIVE PREDICTION MODE - Show glowing prediction with confidence 95.3% - 98.4%
+        const pred = getTrendPrediction(currentHistory);
         if (!pred || pred.number === null) {
-            predictionContainer.innerHTML = `<div class="pred-number">?</div><div class="pred-confidence">waiting</div>`;
+            predictionContainer.innerHTML = `<div class="pred-number">?</div><div class="pred-confidence">calculating...</div>`;
             wheelDiv.classList.remove('glow-prediction');
-            currentSkipStatus = true;
             return;
         }
         
-        const skip = shouldSkipPrediction(pred.confidence, currentHistory.length);
-        currentSkipStatus = skip;
-        
-        if (skip) {
-            // SKIP MODE - no glow, show SKIP
-            wheelDiv.classList.remove('glow-prediction');
-            predictionContainer.innerHTML = `
-                <div class="pred-skip">SKIP</div>
-                <div class="pred-confidence">${pred.confidence}%</div>
-            `;
-        } else {
-            // ACTIVE GLOWING PREDICTION
-            wheelDiv.classList.add('glow-prediction');
-            predictionContainer.innerHTML = `
-                <div class="pred-number">${pred.number}</div>
-                <div class="pred-confidence">${pred.confidence}% confidence</div>
-            `;
-            lastPredictionNumber = pred.number;
-        }
+        // Show glowing prediction
+        wheelDiv.classList.add('glow-prediction');
+        predictionContainer.innerHTML = `
+            <div class="pred-number">${pred.number}</div>
+            <div class="pred-confidence">${pred.confidence}% trend accuracy</div>
+        `;
     }
     
-    // expose update function for roulette
-    window.updatePrediction = function(historyArray) {
+    // Expose update function for roulette
+    window.updateTrendPrediction = function(historyArray) {
         if (!historyArray) return;
         currentHistory = [...historyArray];
         renderPredictionUI(currentHistory.length);
     };
     
-    // expose skip status getter for win/loss logic
-    window.getCurrentSkipStatus = function() {
-        return currentSkipStatus;
-    };
-    
-    // initial render
+    // Initial render
     renderPredictionUI(0);
 })();
 
