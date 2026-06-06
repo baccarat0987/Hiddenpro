@@ -144,7 +144,6 @@
             font-weight: 600; letter-spacing: 3px; opacity: 0.9; margin-top: 2px;
         }
 
-        /* Basebet panel completely removed - user cannot set or see base bet */
         .prediction-box {
             padding: 30px 24px; text-align: center; background: linear-gradient(180deg, #090b11 0%, #030406 100%);
             border-bottom: 1px solid var(--border); transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); position: relative;
@@ -154,7 +153,7 @@
         #instruction { font-size: 0.72rem; color: var(--text-dim); letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; transition: color 0.3s ease; margin-top: 14px; }
         .bet-label { font-size: 0.72rem; color: #475569; letter-spacing: 4px; text-transform: uppercase; font-weight: 800; }
         #bet-signal { font-size: 3.5rem; font-weight: 950; margin: 2px 0; letter-spacing: 4px; text-shadow: 0 0 40px rgba(255,255,255,0.02); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); line-height: 1.1; }
-        #bet-recommendation-amount { font-size: 1.3rem; font-weight: 800; color: #e2e8f0; letter-spacing: 1px; margin: 6px 0; text-transform: uppercase; opacity: 0.95; transition: all 0.3s ease; }
+        /* BET AMOUNT DISPLAY COMPLETELY REMOVED - no longer exists */
 
         .excel-container { max-height: 190px; overflow-y: auto; padding: 16px; background: #040508; box-shadow: inset 0 10px 20px rgba(0,0,0,0.5); }
         table { width: 100%; border-collapse: separate; border-spacing: 3px; table-layout: fixed; }
@@ -248,8 +247,6 @@
             <span id="mode-badge">INITIALIZING</span>
         </div>
 
-        <!-- CONFIG PANEL FULLY REMOVED - NO BASE BET INPUT EXISTS -->
-
         <div class="system-lock-overlay" id="lock-screen">
             <div class="lock-status" id="lock-status-label">SYSTEM ALERT</div>
             <div class="lock-title" id="lock-main-msg">CHANGE TABLE</div>
@@ -262,7 +259,7 @@
                 <div class="bet-action-wrapper">
                     <div class="bet-label">PLACE BET ON</div>
                     <div id="bet-signal">WAIT</div>
-                    <div id="bet-recommendation-amount">---</div>
+                    <!-- BET AMOUNT ELEMENT REMOVED -->
                 </div>
                 <div id="instruction">INPUT FIRST 5 HANDS FOR REFERENCE</div>
             </div>
@@ -288,10 +285,9 @@
     <script>
         // ============================================================
         // HONGKONG STRATEGY with PAROLI PROGRESSION (Fixed Base Bet = 10)
-        // Base bet is internal, constant, user cannot change or see setter.
+        // Base bet is internal, constant, user cannot change.
         // Profit target: 4 × base bet (40 units) -> auto "CHANGE TABLE" lock.
-        // DISPLAY: Shows only BET amount without "(BASE X)" suffix
-        // INSTRUCTION: Clean text without extra details about Paroli reset
+        // BET AMOUNT IS NEVER DISPLAYED - element completely removed
         // ============================================================
         
         let history = [];
@@ -299,7 +295,7 @@
         let currentRowModeIsDirect = true; 
         let currentCalculatedBetValue = 0;
         
-        // FIXED INTERNAL BASE BET - USER CANNOT MODIFY (removed UI element)
+        // FIXED INTERNAL BASE BET - never shown to user
         const FIXED_BASE_BET = 10;
         
         // Paroli state
@@ -475,7 +471,6 @@
             const instr = document.getElementById('instruction');
             const badge = document.getElementById('mode-badge');
             const boxBg = document.getElementById('predict-box-bg');
-            const betAmountLabel = document.getElementById('bet-recommendation-amount');
 
             boxBg.style.background = "linear-gradient(180deg, #090b11 0%, #030406 100%)";
             boxBg.style.boxShadow = "inset 0 -20px 30px rgba(0, 0, 0, 0.3)";
@@ -483,7 +478,6 @@
             if (history.length < ROW_SIZE) {
                 signal.innerText = "WAIT";
                 signal.style.color = "white";
-                betAmountLabel.innerText = "";
                 instr.innerText = `NEED ${ROW_SIZE - history.length} MORE HANDS FOR REFERENCE`;
                 badge.innerText = "GATHERING DATA";
                 return;
@@ -496,13 +490,12 @@
             if (colIndex === 0) {
                 signal.innerText = "SKIP HAND";
                 signal.style.color = "var(--accent)";
-                betAmountLabel.innerText = "NO BET";
                 instr.innerText = "OBSERVE NEW ROW STARTER TO CALCULATE TREND";
                 badge.innerText = "TREND SCANNING";
                 return;
             }
 
-            // Clean instruction text - removed "PAROLI RESET TO BASE" and similar verbose details
+            // Clean instruction text - simple and clear
             if (currentRowModeIsDirect) {
                 badge.innerText = "STRATEGY: MATCH MODE";
                 instr.innerText = "FOLLOWING PATTERN";
@@ -518,9 +511,7 @@
                 prediction = (masterRefValue === 'B') ? 'P' : 'B'; 
             }
 
-            const currentBet = getCurrentBetValue();
-            // Display only the bet amount, no "(BASE X)" suffix
-            betAmountLabel.innerText = `BET: $${currentBet.toFixed(2)}`;
+            // No bet amount display - element removed from HTML
 
             if (prediction === 'B') {
                 signal.innerText = 'BANKER';
