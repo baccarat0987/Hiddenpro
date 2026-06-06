@@ -153,7 +153,6 @@
         #instruction { font-size: 0.72rem; color: var(--text-dim); letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; transition: color 0.3s ease; margin-top: 14px; }
         .bet-label { font-size: 0.72rem; color: #475569; letter-spacing: 4px; text-transform: uppercase; font-weight: 800; }
         #bet-signal { font-size: 3.5rem; font-weight: 950; margin: 2px 0; letter-spacing: 4px; text-shadow: 0 0 40px rgba(255,255,255,0.02); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); line-height: 1.1; }
-        /* BET AMOUNT DISPLAY COMPLETELY REMOVED - no longer exists */
 
         .excel-container { max-height: 190px; overflow-y: auto; padding: 16px; background: #040508; box-shadow: inset 0 10px 20px rgba(0,0,0,0.5); }
         table { width: 100%; border-collapse: separate; border-spacing: 3px; table-layout: fixed; }
@@ -183,21 +182,6 @@
         .footer-tools { display: flex; gap: 12px; padding: 0 24px 24px 24px; }
         #mode-badge { font-size: 0.65rem; background: rgba(30, 41, 59, 0.5); color: #94a3b8; padding: 6px 14px; border-radius: 20px; font-weight: 800; letter-spacing: 1.5px; border: 1px solid var(--border); text-transform: uppercase; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-        .system-lock-overlay { position: absolute; top: 77px; left: 0; width: 100%; height: calc(100% - 77px); background: rgba(3, 4, 7, 0.95); backdrop-filter: blur(16px); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; z-index: 100; text-align: center; animation: overlayFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        .lock-status { font-size: 0.75rem; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 8px; }
-        .lock-title { font-size: 2.4rem; font-weight: 950; letter-spacing: 1px; margin: 12px 0; line-height: 1.1; }
-        .lock-desc { font-size: 0.88rem; color: #64748b; max-width: 380px; line-height: 1.6; margin-bottom: 35px; }
-
-        .profit-callout-block { display: block; margin-top: 14px; font-size: 1.40rem; font-weight: 900; letter-spacing: 1px; color: var(--accent); text-transform: uppercase; text-shadow: 0 0 15px var(--glow-accent); }
-
-        .btn-lock-reset { background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #030407; padding: 18px 44px; font-size: 0.95rem; font-weight: 900; border-radius: 12px; border: none; letter-spacing: 1.5px; cursor: pointer; box-shadow: 0 10px 30px rgba(56, 189, 248, 0.35), 0 1px 0 rgba(255,255,255,0.3) inset; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .btn-lock-reset:hover { transform: scale(1.03) translateY(-2px); box-shadow: 0 15px 35px rgba(56, 189, 248, 0.5); }
-        .btn-lock-reset:active { transform: scale(0.98); }
-
-        .excel-container::-webkit-scrollbar { width: 5px; }
-        .excel-container::-webkit-scrollbar-thumb { background: #161b26; border-radius: 10px; }
-        .excel-container::-webkit-scrollbar-thumb:hover { background: #22293a; }
-
         .exit-nav {
             position: fixed;
             top: 15px;
@@ -224,7 +208,6 @@
         }
 
         @keyframes fadeInContainer { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes overlayFadeIn { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: scale(1); } }
         @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 12px var(--accent); opacity: 0.8; } 50% { box-shadow: 0 0 20px var(--accent); opacity: 1; } }
         @keyframes slideInRow { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -247,19 +230,11 @@
             <span id="mode-badge">INITIALIZING</span>
         </div>
 
-        <div class="system-lock-overlay" id="lock-screen">
-            <div class="lock-status" id="lock-status-label">SYSTEM ALERT</div>
-            <div class="lock-title" id="lock-main-msg">CHANGE TABLE</div>
-            <div class="lock-desc" id="lock-sub-desc">The strategy rules have triggered an exit state.</div>
-            <button class="btn btn-lock-reset" onclick="appSoftReset()">START NEW FRESH</button>
-        </div>
-
         <div id="app-workspace">
             <div class="prediction-box" id="predict-box-bg">
                 <div class="bet-action-wrapper">
                     <div class="bet-label">PLACE BET ON</div>
                     <div id="bet-signal">WAIT</div>
-                    <!-- BET AMOUNT ELEMENT REMOVED -->
                 </div>
                 <div id="instruction">INPUT FIRST 5 HANDS FOR REFERENCE</div>
             </div>
@@ -285,15 +260,14 @@
     <script>
         // ============================================================
         // HONGKONG STRATEGY with PAROLI PROGRESSION (Fixed Base Bet = 10)
-        // Base bet is internal, constant, user cannot change.
-        // Profit target: 4 × base bet (40 units) -> auto "CHANGE TABLE" lock.
-        // BET AMOUNT IS NEVER DISPLAYED - element completely removed
+        // NO AUTO LOCK - Game continues indefinitely regardless of profit
+        // NO PROFIT TARGET - Play can continue forever
+        // User can manually RESET anytime
         // ============================================================
         
         let history = [];
         const ROW_SIZE = 5;
         let currentRowModeIsDirect = true; 
-        let currentCalculatedBetValue = 0;
         
         // FIXED INTERNAL BASE BET - never shown to user
         const FIXED_BASE_BET = 10;
@@ -321,9 +295,7 @@
         function appSoftReset() {
             history = [];
             currentRowModeIsDirect = true;
-            currentCalculatedBetValue = 0;
             resetParoli();
-            document.getElementById('lock-screen').style.display = "none";
             renderTable();
             updateLogic();
         }
@@ -348,8 +320,6 @@
             const rowCount = Math.ceil((history.length + 1) / ROW_SIZE);
             const totalRows = Math.max(1, rowCount);
 
-            let totalCheckmarks = 0;
-            let runningProfitBalance = 0;
             let dynamicEngineIsDirect = true;
             
             resetParoli();
@@ -393,40 +363,17 @@
                                 const masterReferenceValue = history[j];
                                 const isIdenticalMatch = (value === masterReferenceValue);
 
-                                let historicPrediction = "";
-                                if (dynamicEngineIsDirect) {
-                                    historicPrediction = masterReferenceValue;
-                                } else {
-                                    historicPrediction = (masterReferenceValue === 'B') ? 'P' : 'B';
-                                }
-
                                 const betAmount = getCurrentBetValue();
 
                                 if ((dynamicEngineIsDirect && isIdenticalMatch) || (!dynamicEngineIsDirect && !isIdenticalMatch)) {
                                     if (td) td.innerHTML += ' <span class="win-icon">✓</span>';
-                                    totalCheckmarks++;
-                                    
-                                    if (historicPrediction === 'B') {
-                                        runningProfitBalance += (betAmount * 0.95);
-                                    } else {
-                                        runningProfitBalance += betAmount;
-                                    }
-                                    
                                     updateParoliOnWin();
                                     dynamicEngineIsDirect = true;
                                 } else {
                                     if (td) td.innerHTML += ' <span class="loss-icon">X</span>';
-                                    runningProfitBalance -= betAmount;
-                                    
                                     updateParoliOnLoss();
                                     dynamicEngineIsDirect = false;
                                 }
-                            }
-                        }
-                    } else {
-                        if (index === history.length && history.length >= ROW_SIZE) {
-                            if (j !== 0) {
-                                currentCalculatedBetValue = getCurrentBetValue();
                             }
                         }
                     }
@@ -436,34 +383,9 @@
             }
             
             currentRowModeIsDirect = dynamicEngineIsDirect;
-            
-            evaluateProfitTarget(runningProfitBalance);
 
             const container = document.querySelector('.excel-container');
             container.scrollTop = container.scrollHeight;
-        }
-
-        function evaluateProfitTarget(netProfit) {
-            const targetProfit = FIXED_BASE_BET * 4;
-            if (netProfit >= targetProfit) {
-                const formattedProfit = Number(netProfit.toFixed(2)).toLocaleString();
-                triggerSystemLock("PROFIT TARGET REACHED", "CHANGE TABLE", `Secure your earnings and move to a fresh table.<span class="profit-callout-block">TOTAL PROFIT: +$${formattedProfit}</span>`, "var(--accent)");
-            }
-        }
-
-        function triggerSystemLock(badgeText, mainText, descHTML, themeColor) {
-            const lockScreen = document.getElementById('lock-screen');
-            const statusLabel = document.getElementById('lock-status-label');
-            const mainMsg = document.getElementById('lock-main-msg');
-            const subDesc = document.getElementById('lock-sub-desc');
-
-            statusLabel.innerText = badgeText;
-            statusLabel.style.color = themeColor;
-            mainMsg.innerText = mainText;
-            mainMsg.style.color = "#ffffff";
-            subDesc.innerHTML = descHTML; 
-
-            lockScreen.style.display = "flex";
         }
 
         function updateLogic() {
@@ -495,7 +417,7 @@
                 return;
             }
 
-            // Clean instruction text - simple and clear
+            // Clean instruction text
             if (currentRowModeIsDirect) {
                 badge.innerText = "STRATEGY: MATCH MODE";
                 instr.innerText = "FOLLOWING PATTERN";
@@ -510,8 +432,6 @@
             } else {
                 prediction = (masterRefValue === 'B') ? 'P' : 'B'; 
             }
-
-            // No bet amount display - element removed from HTML
 
             if (prediction === 'B') {
                 signal.innerText = 'BANKER';
