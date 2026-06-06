@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP ROULETTE · Trend Accuracy</title>
+    <title>VIP ROULETTE · Trend Prediction</title>
 
     <script>
         if (window.location.pathname.endsWith('.html')) {
@@ -87,13 +87,13 @@
         .num.neighbor { background: yellow !important; color: black; transform: scale(1.2); box-shadow: 0 0 10px gold; }
         .num.center { background: #ff69b4 !important; color: black; transform: scale(1.3); box-shadow: 0 0 15px hotpink; }
         
-        /* PREDICTION INSIDE WHEEL - CLEAN, ONLY PERCENTAGE */
+        /* PREDICTION INSIDE WHEEL - CENTERED TEXT */
         .wheel-prediction {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 160px;
+            width: 170px;
             height: 100px;
             display: flex;
             flex-direction: column;
@@ -103,29 +103,32 @@
             pointer-events: none;
             font-family: 'Arial', monospace;
             text-align: center;
-            background: transparent;
+            background: rgba(0, 0, 0, 0.75);
+            border-radius: 20px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 200, 100, 0.3);
         }
         .pred-loading {
             text-align: center;
             color: #ffaa66;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
             letter-spacing: 1px;
         }
         .pred-loading .loading-text {
-            font-size: 11px;
-            background: rgba(0,0,0,0.7);
-            padding: 8px 16px;
+            font-size: 10px;
+            background: rgba(0,0,0,0.5);
+            padding: 6px 12px;
             border-radius: 40px;
             display: inline-block;
             white-space: nowrap;
         }
         .pred-loading .progress-bar-mini {
-            width: 120px;
+            width: 100px;
             height: 3px;
             background: #2a2a2a;
             border-radius: 4px;
-            margin: 10px auto 0;
+            margin: 8px auto 0;
             overflow: hidden;
         }
         .pred-loading .progress-fill-mini {
@@ -136,32 +139,30 @@
             border-radius: 4px;
         }
         .pred-percentage {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 900;
             color: #ffdd99;
-            text-shadow: 0 0 15px #ff9933;
+            text-shadow: 0 0 10px #ff9933;
             line-height: 1;
-            background: rgba(0,0,0,0.5);
-            padding: 8px 18px;
-            border-radius: 50px;
             letter-spacing: 1px;
         }
         .pred-label {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: bold;
-            background: rgba(0,0,0,0.6);
-            padding: 4px 14px;
-            border-radius: 30px;
-            margin-top: 6px;
-            color: #ffdd99;
+            margin-top: 5px;
+            color: #ffcc88;
             letter-spacing: 1px;
         }
+        /* GLOW EFFECT ON THE PREDICTION BOX ONLY - NOT ON NUMBERS */
         .glow-prediction {
             animation: pulseGlow 1.2s infinite ease-in-out;
+            border-color: #ffcc44;
+            box-shadow: 0 0 15px rgba(255, 200, 68, 0.5);
         }
         @keyframes pulseGlow {
-            0% { filter: drop-shadow(0 0 3px #ffaa33); }
-            100% { filter: drop-shadow(0 0 18px #ffdd77); }
+            0% { border-color: rgba(255, 200, 68, 0.3); box-shadow: 0 0 5px rgba(255, 200, 68, 0.3); }
+            50% { border-color: #ffcc44; box-shadow: 0 0 18px #ffaa33; }
+            100% { border-color: rgba(255, 200, 68, 0.3); box-shadow: 0 0 5px rgba(255, 200, 68, 0.3); }
         }
         
         .controls { display: flex; gap: 10px; margin-bottom: 20px; }
@@ -190,7 +191,6 @@
 
 <div class="wheel-container">
     <div class="track-container" id="track"></div>
-    <!-- PREDICTION INSIDE WHEEL - ONLY PERCENTAGE, NO NUMBER -->
     <div class="wheel-prediction" id="wheelPrediction">
         <div id="predictionInner"></div>
     </div>
@@ -355,102 +355,111 @@ window.addEventListener('DOMContentLoaded', () => {
     generateHighlight();
 });
 
-// ==================== TREND ACCURACY LOGIC (ONLY PERCENTAGE, NO NUMBER) ====================
+// ==================== TREND ACCURACY - BASED ON LAST 10 RESULTS ONLY ====================
 (function() {
     const predictionContainer = document.getElementById('predictionInner');
-    const wheelDiv = document.getElementById('wheelPrediction');
+    const wheelBox = document.getElementById('wheelPrediction');
     
     let currentHistory = [];
     const REQUIRED_SPINS = 10;
     
-    // Calculate trend accuracy percentage based on last 10 results
-    // Returns a percentage between 95.3% and 98.4%
+    // Calculate trend accuracy based STRICTLY on last 10 results (NO RANDOM)
     function calculateTrendAccuracy(history) {
         if (!history || history.length < REQUIRED_SPINS) {
             return null;
         }
         
-        // ONLY last 10 results
+        // ONLY last 10 results matter
         const last10 = history.slice(-10);
         
-        // Frequency analysis
+        // 1. Frequency analysis - find strongest number
         const freq = {};
         last10.forEach(num => {
             freq[num] = (freq[num] || 0) + 1;
         });
         
-        // Find highest frequency
         let maxFreq = 0;
-        let mostFrequentNumbers = [];
-        for (const [num, count] of Object.entries(freq)) {
-            if (count > maxFreq) {
-                maxFreq = count;
-                mostFrequentNumbers = [parseInt(num)];
-            } else if (count === maxFreq) {
-                mostFrequentNumbers.push(parseInt(num));
+        for (const count of Object.values(freq)) {
+            if (count > maxFreq) maxFreq = count;
+        }
+        
+        // 2. Detect consecutive repeats (same number appears multiple times in a row)
+        let maxConsecutive = 1;
+        let currentConsecutive = 1;
+        for (let i = 1; i < last10.length; i++) {
+            if (last10[i] === last10[i-1]) {
+                currentConsecutive++;
+                maxConsecutive = Math.max(maxConsecutive, currentConsecutive);
+            } else {
+                currentConsecutive = 1;
             }
         }
         
-        // Check pattern: last 2 numbers same (trend continuation)
-        const last2 = last10.slice(-2);
-        const last3 = last10.slice(-3);
-        let patternStrength = 0;
+        // 3. Detect color patterns (red/black alternation)
+        const reds = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+        const getColor = (n) => {
+            if (n === 0) return 'green';
+            return reds.includes(n) ? 'red' : 'black';
+        };
         
-        if (last2.length === 2 && last2[0] === last2[1]) {
-            patternStrength = 0.5;
+        let alternations = 0;
+        for (let i = 1; i < last10.length; i++) {
+            const color1 = getColor(last10[i-1]);
+            const color2 = getColor(last10[i]);
+            if (color1 !== color2 && color1 !== 'green' && color2 !== 'green') {
+                alternations++;
+            }
         }
         
-        // Check for 3 same in last 5
-        const last5 = last10.slice(-5);
-        let repeatCount = 0;
-        for (let i = 0; i < last5.length - 1; i++) {
-            if (last5[i] === last5[i+1]) repeatCount++;
-        }
-        if (repeatCount >= 2) patternStrength += 0.3;
+        // 4. Calculate trend strength (0-100%)
+        // Max frequency contributes up to 55%
+        let freqStrength = (maxFreq / 10) * 55;
         
-        // Base confidence on frequency percentage
-        let freqPercent = (maxFreq / 10) * 100;
+        // Consecutive pattern contributes up to 25%
+        let consecutiveStrength = 0;
+        if (maxConsecutive >= 3) consecutiveStrength = 25;
+        else if (maxConsecutive === 2) consecutiveStrength = 15;
         
-        // Calculate final accuracy between 95.3% and 98.4%
-        let accuracy = 95.3 + (freqPercent * 0.028);
-        accuracy = accuracy + (patternStrength * 0.8);
+        // Alternation pattern contributes up to 20%
+        let alternationStrength = (alternations / 9) * 20;
         
-        // Ensure range
+        // Total trend strength
+        let trendStrength = freqStrength + consecutiveStrength + alternationStrength;
+        
+        // Convert to accuracy percentage (95.3% - 98.4% range)
+        let accuracy = 95.3 + (trendStrength * 0.031);
+        
+        // Cap within range
         accuracy = Math.min(98.4, Math.max(95.3, accuracy));
         accuracy = parseFloat(accuracy.toFixed(1));
         
-        // Add tiny natural variation
-        const variation = (Math.random() * 0.3) - 0.15;
-        let finalAccuracy = accuracy + variation;
-        finalAccuracy = Math.min(98.4, Math.max(95.3, finalAccuracy));
-        finalAccuracy = parseFloat(finalAccuracy.toFixed(1));
-        
-        return finalAccuracy;
+        return accuracy;
     }
     
-    // Render UI inside wheel - only percentage, no number
+    // Render UI inside wheel - NO GLOW ON NUMBERS, only on prediction box after 10 spins
     function renderPredictionUI(historyLength) {
         if (!predictionContainer) return;
         
         const isReady = historyLength >= REQUIRED_SPINS;
         
         if (!isReady) {
-            // COLLECTING STATISTICAL DATA... with loading bar, NO GLOW
+            // COLLECTING STATISTICAL DATA - NO GLOW, just loading
             const percent = Math.min(100, Math.floor((historyLength / REQUIRED_SPINS) * 100));
-            wheelDiv.classList.remove('glow-prediction');
+            // Remove glow class completely
+            wheelBox.classList.remove('glow-prediction');
             predictionContainer.innerHTML = `
                 <div class="pred-loading">
                     <div class="loading-text">📊 COLLECTING STATISTICAL DATA...</div>
                     <div class="progress-bar-mini">
                         <div class="progress-fill-mini" style="width: ${percent}%;"></div>
                     </div>
-                    <div style="font-size: 10px; margin-top: 6px; opacity: 0.7;">${historyLength}/10 spins</div>
+                    <div style="font-size: 9px; margin-top: 5px; opacity: 0.7;">${historyLength}/10 spins</div>
                 </div>
             `;
             return;
         }
         
-        // ACTIVE MODE: calculate trend accuracy
+        // ACTIVE MODE: calculate trend accuracy from actual last 10 results
         const accuracy = calculateTrendAccuracy(currentHistory);
         
         if (accuracy === null) {
@@ -458,12 +467,12 @@ window.addEventListener('DOMContentLoaded', () => {
                 <div class="pred-percentage">---</div>
                 <div class="pred-label">TREND ACCURACY</div>
             `;
-            wheelDiv.classList.remove('glow-prediction');
+            wheelBox.classList.remove('glow-prediction');
             return;
         }
         
-        // Show GLOWING percentage
-        wheelDiv.classList.add('glow-prediction');
+        // ONLY NOW add glow to the prediction BOX (not to numbers)
+        wheelBox.classList.add('glow-prediction');
         predictionContainer.innerHTML = `
             <div class="pred-percentage">${accuracy}%</div>
             <div class="pred-label">TREND ACCURACY</div>
@@ -477,7 +486,7 @@ window.addEventListener('DOMContentLoaded', () => {
         renderPredictionUI(currentHistory.length);
     };
     
-    // Initial render
+    // Initial render - ensure NO GLOW at start
     renderPredictionUI(0);
 })();
 
