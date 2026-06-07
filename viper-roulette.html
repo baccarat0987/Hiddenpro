@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>VIP ROULETTE · TREND WHEEL</title>
-    <!-- Firebase imports remain untouched -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
@@ -33,7 +32,6 @@
         });
     </script>
     <style>
-        /* === EXACT ORIGINAL STYLES PRESERVED + minor addition for loading state consistency === */
         body { 
             background: linear-gradient(135deg, #0b0b0b, #1c1c1c, #2c2c2c); 
             display: none;
@@ -80,7 +78,6 @@
         .num.neighbor { background: yellow !important; color: black; transform: scale(1.2); box-shadow: 0 0 10px gold; }
         .num.center { background: #ff69b4 !important; color: black; transform: scale(1.3); box-shadow: 0 0 15px hotpink; }
         
-        /* PREDICTION INSIDE WHEEL - percentage display, no number */
         .wheel-prediction {
             position: absolute;
             top: 50%;
@@ -183,7 +180,6 @@
 
 <div class="wheel-container">
     <div class="track-container" id="track"></div>
-    <!-- PREDICTION INSIDE WHEEL - only percentage / loading, no number -->
     <div class="wheel-prediction" id="wheelPrediction">
         <div id="predictionInner"></div>
     </div>
@@ -202,28 +198,20 @@
 <div class="history-container" id="wlHistory"></div>
 
 <script>
-    // ==================== ORIGINAL WHEEL & UI LAYOUT (minimal modifications for glow rule) ====================
-    // STEP 1: On page load, NO PREDICTION GLOWING on numbers. Only statistical collection phase (0/10 spins)
-    // STEP 2: REMOVED all old prediction logic (random neighbor highlight). 
-    //         NEW GLOWING on numbers is based on LAST 10 RESULT TREND (most frequent numbers & trend patterns)
-    // STEP 3: Glowing numbers on wheel are base on last 10 result calculation - no random glow.
-    // STEP 4: Everything else untouched: wheel design, history, undo/reset, firebase, security.
-    
+    // ==================== ROULETTE ENGINE ====================
     (function() {
-        // DOM elements
         const trackContainer = document.getElementById('track');
         const resultInput = document.getElementById('resultInput');
         const enterBtn = document.getElementById('enterBtn');
         const numberHistoryContainer = document.getElementById('numberHistory');
         const wlHistoryContainer = document.getElementById('wlHistory');
         
-        // Roulette wheel layout (preserved)
         const wheelNumbers = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
-        const numbers = [];      // store number divs
+        const numbers = [];
         const centerX = 300; const centerY = 200;
         const radiusX = 250; const radiusY = 150;
         
-        // Build wheel DOM elements (original positioning)
+        // Build wheel
         wheelNumbers.forEach((num, i) => {
             const angle = (i / wheelNumbers.length) * 2 * Math.PI + Math.PI;
             const x = centerX + radiusX * Math.cos(angle) - 20;
@@ -240,27 +228,19 @@
         });
         
         // Game state
-        let numberHistory = [];      // numbers entered
-        let wlHistory = [];          // W/L based on previous prediction
-        let firstEntry = true;       // first spin doesn't generate W/L
+        let numberHistory = [];
+        let wlHistory = [];
+        let firstEntry = true;
         let undoStack = [];
         const MAX_HISTORY = 10;
+        const NEIGHBORS_ON_EACH_SIDE = 5;  // 5 left + 5 right = 10 neighbors + 1 center = 11 total glowing numbers
         
-        // ========== NEW TREND-BASED GLOW LOGIC (NO RANDOM) ==========
-        // function to compute "trend numbers" from last 10 results.
-        // returns an array of numbers to glow (both center + neighbors pattern)
-        // Glowing convention: center = absolute highest frequency (or tie-breaking) and neighbors = 4 numbers on each side? but we match original visual flair: 1 "center" + 9 "neighbors".
-        // Actually original logic highlighted a center + 9 neighbor numbers (total 10 glowing numbers). But we must base on last 10 results trend.
-        // Strategy: based on last 10 results, pick the most frequent number(s) and then its neighbors on the wheel (adjacent positions) to create glowing set.
-        // This respects "glowing numbers on wheel are base on last 10 result calculation".
-        
-        function getTrendGlowNumbers(history) {
-            // history: array of numbers (max 10). If less than 10, we return empty array = no glow.
-            if (!history || history.length === 0) return { centerNumber: null, glowIndices: [] };
+        // ========== Get center number from trend (most frequent in last 10) ==========
+        function getCenterNumberFromTrend(history) {
+            if (!history || history.length === 0) return null;
             const last10 = history.slice(-MAX_HISTORY);
-            if (last10.length === 0) return { centerNumber: null, glowIndices: [] };
+            if (last10.length < MAX_HISTORY) return null;
             
-            // Frequency analysis
             const freq = {};
             last10.forEach(num => { freq[num] = (freq[num] || 0) + 1; });
             
@@ -276,79 +256,53 @@
                 }
             }
             
-            // Tie-breaking: if multiple numbers have same max frequency, pick the one that appears most recently in history (trend recency)
-            let selectedCenter = null;
+            // Tie-break by most recent
             if (mostFrequentNumbers.length === 1) {
-                selectedCenter = mostFrequentNumbers[0];
+                return mostFrequentNumbers[0];
             } else {
-                // find which of these appears last in the last10 array (from end)
                 for (let i = last10.length - 1; i >= 0; i--) {
                     if (mostFrequentNumbers.includes(last10[i])) {
-                        selectedCenter = last10[i];
-                        break;
+                        return last10[i];
                     }
                 }
-                if (!selectedCenter) selectedCenter = mostFrequentNumbers[0];
+                return mostFrequentNumbers[0];
             }
-            
-            // find index of selectedCenter in wheelNumbers array
-            let centerIndex = wheelNumbers.findIndex(n => n === selectedCenter);
-            if (centerIndex === -1) centerIndex = 0; // fallback (should never happen)
-            
-            // Build set of indices to glow: center + up to 9 neighbor indices (total 10 glowing numbers like original)
-            const neighborCountTotal = 9; // 9 neighbors + center = 10 numbers
-            const glowIndicesSet = new Set();
-            glowIndicesSet.add(centerIndex);
-            for (let offset = 1; offset <= neighborCountTotal; offset++) {
-                const leftIdx = (centerIndex - offset + wheelNumbers.length) % wheelNumbers.length;
-                const rightIdx = (centerIndex + offset) % wheelNumbers.length;
-                if (offset % 2 === 1) glowIndicesSet.add(leftIdx);
-                else glowIndicesSet.add(rightIdx);
-                if (glowIndicesSet.size >= neighborCountTotal + 1) break;
-            }
-            // ensure exactly 10 glowing numbers (original style)
-            let needed = 10 - glowIndicesSet.size;
-            let extraOffset = neighborCountTotal + 1;
-            while (needed > 0) {
-                const idx = (centerIndex + extraOffset) % wheelNumbers.length;
-                if (!glowIndicesSet.has(idx)) {
-                    glowIndicesSet.add(idx);
-                    needed--;
-                }
-                extraOffset++;
-            }
-            
-            return { centerNumber: selectedCenter, glowIndices: Array.from(glowIndicesSet) };
         }
         
-        // Apply glowing effect (center + neighbor) based purely on trend analysis
+        // ========== Apply EUROPEAN FULL NEIGHBORS (5 left + 5 right = 10 neighbors + center = 11 total) ==========
         function applyTrendGlow() {
-            // remove existing glow classes
+            // Remove all existing glow classes
             numbers.forEach(n => n.classList.remove('neighbor', 'center'));
             
-            // If we have less than 10 historical spins -> NO GLOWING on numbers (step 1: waiting for 10 data)
+            // STEP 1: NO GLOWING until 10 spins collected
             if (numberHistory.length < MAX_HISTORY) {
-                // absolutely no glowing numbers, clean wheel
                 return;
             }
             
-            // STEP 3: full glow based on last 10 results
-            const { centerNumber, glowIndices } = getTrendGlowNumbers(numberHistory);
-            if (!glowIndices.length) return;
+            // Get center number from last 10 results trend
+            const centerNumber = getCenterNumberFromTrend(numberHistory);
+            if (centerNumber === null) return;
             
-            // apply center glow to the actual number div
-            for (let idx of glowIndices) {
-                const numDiv = numbers[idx];
-                if (!numDiv) continue;
-                if (idx === glowIndices[0]) {
-                    numDiv.classList.add('center');
-                } else {
-                    numDiv.classList.add('neighbor');
-                }
+            // Find center index in wheel
+            let centerIndex = wheelNumbers.findIndex(n => n === centerNumber);
+            if (centerIndex === -1) return;
+            
+            // Apply center glow
+            numbers[centerIndex].classList.add('center');
+            
+            // Apply 5 neighbors on LEFT side (connected)
+            for (let i = 1; i <= NEIGHBORS_ON_EACH_SIDE; i++) {
+                const leftIndex = (centerIndex - i + wheelNumbers.length) % wheelNumbers.length;
+                numbers[leftIndex].classList.add('neighbor');
+            }
+            
+            // Apply 5 neighbors on RIGHT side (connected)
+            for (let i = 1; i <= NEIGHBORS_ON_EACH_SIDE; i++) {
+                const rightIndex = (centerIndex + i) % wheelNumbers.length;
+                numbers[rightIndex].classList.add('neighbor');
             }
         }
         
-        // ========== History render (unchanged UI) ==========
         function renderHistories() {
             numberHistoryContainer.innerHTML = '';
             numberHistory.slice(-MAX_HISTORY).forEach(n => {
@@ -370,62 +324,60 @@
             });
         }
         
-        // Update W/L calculation based on previous prediction: but prediction = glowing numbers (trend set)
-        // For each spin, check if the entered number was inside the glowing set (trend-based) BEFORE new spin added.
-        function computeWinBasedOnCurrentGlow(enteredNumber) {
-            if (firstEntry) return false; // first spin no win/loss recorded
-            // collect currently glowing numbers before we modify history
+        // Check if current spin wins based on active glowing numbers
+        function isWinBasedOnGlow(enteredNumber) {
+            if (firstEntry) return false;
             const glowingNumbers = [];
-            numbers.forEach((div, idx) => {
+            numbers.forEach(div => {
                 if (div.classList.contains('center') || div.classList.contains('neighbor')) {
-                    const numVal = parseInt(div.textContent);
-                    if (!isNaN(numVal)) glowingNumbers.push(numVal);
+                    glowingNumbers.push(Number(div.textContent));
                 }
             });
             return glowingNumbers.includes(enteredNumber);
         }
         
-        // Core function to add new result (with trend glow and W/L based on previous glow)
         function addResult(value) {
-            // Push state for undo
+            // Save state for undo
             undoStack.push({
                 numberHistory: [...numberHistory],
                 wlHistory: [...wlHistory],
-                firstEntry: firstEntry,
-                // we don't need to save classes because glow is recalc from history
+                firstEntry: firstEntry
             });
             
-            // Determine win before altering history & before reapplying glow
-            const isWin = computeWinBasedOnCurrentGlow(value);
+            // Determine win BEFORE changing history
+            const isWin = isWinBasedOnGlow(value);
             
-            // Add to number history
+            // Add number to history
             numberHistory.push(value);
-            if (numberHistory.length > MAX_HISTORY * 2) numberHistory = numberHistory.slice(-MAX_HISTORY * 2);
             
-            if (!firstEntry) {
+            // ONLY record W/L AFTER we have at least 10 spins in history
+            // AND it's not the first entry
+            // Spins 1-10: NO W/L recorded
+            // Starting from spin 11 (when history.length > 10): record W/L
+            if (!firstEntry && numberHistory.length > MAX_HISTORY) {
                 wlHistory.push(isWin ? 'W' : 'L');
                 if (wlHistory.length > MAX_HISTORY) wlHistory.shift();
-            } else {
+            }
+            
+            if (firstEntry) {
                 firstEntry = false;
             }
             
-            // After updating history, re-apply trend-based glow (based on latest last10)
+            // Apply new glow based on updated history
             applyTrendGlow();
             renderHistories();
             
-            // Notify trend accuracy (percentage) update
+            // Update percentage display
             if (typeof window.updateTrendAccuracyDisplay === 'function') {
                 window.updateTrendAccuracyDisplay(numberHistory);
             }
         }
         
-        // Reset all game data
         function resetGame() {
             numberHistory = [];
             wlHistory = [];
             firstEntry = true;
             undoStack = [];
-            // Remove all glow
             numbers.forEach(n => n.classList.remove('neighbor', 'center'));
             renderHistories();
             if (typeof window.updateTrendAccuracyDisplay === 'function') {
@@ -433,14 +385,12 @@
             }
         }
         
-        // Undo last action
         function undoLast() {
             if (!undoStack.length) return;
             const s = undoStack.pop();
             numberHistory = s.numberHistory;
             wlHistory = s.wlHistory;
             firstEntry = s.firstEntry;
-            // Re-apply glow based on restored history
             applyTrendGlow();
             renderHistories();
             if (typeof window.updateTrendAccuracyDisplay === 'function') {
@@ -448,7 +398,7 @@
             }
         }
         
-        // Event binding & input validation
+        // Event bindings
         resultInput.addEventListener('input', () => {
             const v = resultInput.value;
             enterBtn.disabled = !(v !== '' && v >= 0 && v <= 36);
@@ -469,35 +419,29 @@
             enterBtn.disabled = true;
         });
         
-        // initial: no glowing, no predictions, just clean wheel
-        applyTrendGlow(); // will remove any glow because history length 0
+        // Initialize
+        applyTrendGlow();
         renderHistories();
     })();
     
-    // ========== TREND ACCURACY PERCENTAGE (STEP 1 COLLECTION + STEP 2 base on last10 results) ==========
-    // This part controls the center wheel percentage and glow container.
-    // Requirement: Initially no glowing prediction on numbers, only statistical collection until 10 spins.
-    // The percentage and glow on wheel-prediction container will follow rule: only after 10 spins showing TREND ACCURACY percentage, else collecting data.
+    // ========== TREND ACCURACY PERCENTAGE DISPLAY ==========
     (function() {
         const predictionInner = document.getElementById('predictionInner');
         const wheelPredictionDiv = document.getElementById('wheelPrediction');
-        
-        let currentNumberHistory = [];
+        let currentHistory = [];
         const REQUIRED_SPINS = 10;
         
-        // Function to compute trend accuracy percentage based strictly on LAST 10 result trends (no random influence, deterministic)
-        // Returns a value between 95.3% and 98.4%, reflecting combined frequency/trend strength.
-        function computeTrendAccuracyFromHistory(history) {
+        function calculateTrendAccuracy(history) {
             if (!history || history.length < REQUIRED_SPINS) return null;
             const last10 = history.slice(-REQUIRED_SPINS);
-            // Frequency Distribution
+            
             const freq = {};
             last10.forEach(num => { freq[num] = (freq[num] || 0) + 1; });
+            
             let maxFreq = 0;
             for (let k in freq) if (freq[k] > maxFreq) maxFreq = freq[k];
             const freqPercent = (maxFreq / 10) * 100;
             
-            // Additional pattern detection: consecutive repeat strength
             let patternStrength = 0;
             let consecutiveCount = 0;
             for (let i = 0; i < last10.length - 1; i++) {
@@ -505,30 +449,26 @@
             }
             if (consecutiveCount >= 2) patternStrength += 0.4;
             if (consecutiveCount >= 3) patternStrength += 0.3;
-            // check if last two numbers equal
             if (last10.length >= 2 && last10[last10.length-1] === last10[last10.length-2]) patternStrength += 0.35;
             
-            // Compute base accuracy between range 95.3 - 98.4
-            let accuracy = 95.3 + (freqPercent * 0.028);   // freqPercent max 100 -> +2.8 = 98.1
+            let accuracy = 95.3 + (freqPercent * 0.028);
             accuracy += (patternStrength * 0.4);
             accuracy = Math.min(98.4, Math.max(95.3, accuracy));
-            // remove random variation to keep deterministic but fine (slight natural consistent)
             accuracy = parseFloat(accuracy.toFixed(1));
             return accuracy;
         }
         
-        function renderPercentageUI(historyLength, accuracyValue) {
+        function renderUI(historyLength, accuracy) {
             if (!predictionInner) return;
-            const isReady = historyLength >= REQUIRED_SPINS;
-            if (!isReady) {
-                // STEP 1: COLLECTING STATISTICAL DATA – no outer glow on prediction container (no glowing effect)
+            
+            if (historyLength < REQUIRED_SPINS) {
                 wheelPredictionDiv.classList.remove('glow-prediction');
-                const percentComplete = Math.min(100, Math.floor((historyLength / REQUIRED_SPINS) * 100));
+                const percent = Math.min(100, Math.floor((historyLength / REQUIRED_SPINS) * 100));
                 predictionInner.innerHTML = `
                     <div class="pred-loading">
                         <div class="loading-text">📊 COLLECTING STATISTICAL DATA...</div>
                         <div class="progress-bar-mini">
-                            <div class="progress-fill-mini" style="width: ${percentComplete}%;"></div>
+                            <div class="progress-fill-mini" style="width: ${percent}%;"></div>
                         </div>
                         <div style="font-size: 10px; margin-top: 6px; opacity: 0.7;">${historyLength}/10 spins</div>
                     </div>
@@ -536,11 +476,10 @@
                 return;
             }
             
-            // Active prediction mode: show glowing percentage based on last 10 trend
-            if (accuracyValue !== null && !isNaN(accuracyValue)) {
+            if (accuracy !== null) {
                 wheelPredictionDiv.classList.add('glow-prediction');
                 predictionInner.innerHTML = `
-                    <div class="pred-percentage">${accuracyValue}%</div>
+                    <div class="pred-percentage">${accuracy}%</div>
                     <div class="pred-label">TREND ACCURACY</div>
                 `;
             } else {
@@ -549,19 +488,16 @@
             }
         }
         
-        // Expose update function for roulette core
-        window.updateTrendAccuracyDisplay = function(historyArray) {
-            if (!historyArray) return;
-            currentNumberHistory = [...historyArray];
-            const acc = computeTrendAccuracyFromHistory(currentNumberHistory);
-            renderPercentageUI(currentNumberHistory.length, acc);
+        window.updateTrendAccuracyDisplay = function(history) {
+            currentHistory = [...(history || [])];
+            const accuracy = calculateTrendAccuracy(currentHistory);
+            renderUI(currentHistory.length, accuracy);
         };
         
-        // initial call: no history yet
-        renderPercentageUI(0, null);
+        renderUI(0, null);
     })();
     
-    // ========== SECURITY BLOCKS (FULLY PRESERVED) ==========
+    // ========== SECURITY BLOCKS (PRESERVED) ==========
     (function() {
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = function(e) {
