@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>VIP ROULETTE · TREND PREDICTOR</title>
     <!-- Firebase imports (untouched) -->
     <script type="module">
@@ -33,7 +33,7 @@
         });
     </script>
     <style>
-        /* ===== ORIGINAL STYLES (PRESERVED) ===== */
+        /* ===== ORIGINAL STYLES (PRESERVED) + REMOVED BLANK-SCREEN BLOCKING ===== */
         body { 
             background: linear-gradient(135deg, #0b0b0b, #1c1c1c, #2c2c2c); 
             display: none;
@@ -43,6 +43,8 @@
             margin: 0; 
             padding: 120px; 
             color: white; 
+            min-height: 100vh;
+            box-sizing: border-box;
         }
 
         .exit-nav { position: fixed; top: 20px; right: 20px; z-index: 200; }
@@ -170,6 +172,15 @@
         .history-wl.W { background: #0fa23f; } .history-wl.L { background: #c62828; }
         
         h3 { margin: 15px 0 5px; font-size: 14px; }
+        
+        /* Allow split screen / resizing without blanking */
+        @media (max-width: 700px) {
+            body { padding: 80px 20px; }
+            .wheel-container { width: 100%; max-width: 600px; height: auto; aspect-ratio: 600 / 400; }
+            .track-container { width: 100%; height: 100%; }
+            .num { width: 32px; height: 32px; font-size: 10px; margin-left: -16px; margin-top: -16px; }
+            .history-container { width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -201,12 +212,10 @@
 
 <script>
     // ============================================================
-    // ROULETTE CORE (wheel unchanged) + TREND PREDICTION LOGIC
-    // RULE: Only last 10 results count. Predict NEXT number based on:
-    // - frequency (hot numbers)
-    // - repeating patterns & sequences
-    // - recency bias
-    // Then glow predicted number + 9 left + 9 right = 19 numbers total.
+    // ROULETTE CORE + TREND PREDICTION (ONLY LAST 10 RESULTS)
+    // Predict NEXT number based on frequency, repeats, sequence momentum.
+    // Glow predicted number + 9 left + 9 right = 19 numbers total.
+    // NO BLANK-SCREEN BLOCKING (removed forced blanking & devtools redirect)
     // ============================================================
     (function() {
         const trackContainer = document.getElementById('track');
@@ -215,47 +224,50 @@
         const numberHistoryContainer = document.getElementById('numberHistory');
         const wlHistoryContainer = document.getElementById('wlHistory');
         
-        // Standard European wheel sequence (preserved)
+        // Standard European wheel sequence
         const wheelNumbers = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
         const numbers = [];
         const centerX = 300; const centerY = 200;
         const radiusX = 250; const radiusY = 150;
         
-        // Build wheel DOM (original logic)
-        wheelNumbers.forEach((num, i) => {
-            const angle = (i / wheelNumbers.length) * 2 * Math.PI + Math.PI;
-            const x = centerX + radiusX * Math.cos(angle) - 20;
-            const y = centerY + radiusY * Math.sin(angle) - 20;
-            const div = document.createElement('div');
-            div.classList.add('num');
-            div.textContent = num;
-            if (num === 0) div.classList.add('green');
-            else if ([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(num)) div.classList.add('red');
-            else div.classList.add('black');
-            div.style.left = `${x}px`; div.style.top = `${y}px`;
-            trackContainer.appendChild(div);
-            numbers.push(div);
-        });
+        // Build wheel DOM (dynamic resizing friendly)
+        function buildWheel() {
+            trackContainer.innerHTML = '';
+            numbers.length = 0;
+            wheelNumbers.forEach((num, i) => {
+                const angle = (i / wheelNumbers.length) * 2 * Math.PI + Math.PI;
+                const x = centerX + radiusX * Math.cos(angle) - 20;
+                const y = centerY + radiusY * Math.sin(angle) - 20;
+                const div = document.createElement('div');
+                div.classList.add('num');
+                div.textContent = num;
+                if (num === 0) div.classList.add('green');
+                else if ([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(num)) div.classList.add('red');
+                else div.classList.add('black');
+                div.style.left = `${x}px`;
+                div.style.top = `${y}px`;
+                trackContainer.appendChild(div);
+                numbers.push(div);
+            });
+        }
+        buildWheel();
         
         // ------------------- STATE -------------------
-        let numberHistory = [];     // stores all spins (unlimited but we only use last 10 for calculations)
+        let numberHistory = [];
         let wlHistory = [];
         let firstEntry = true;
         let undoStack = [];
         const MAX_HISTORY = 10;      // only last 10 results matter for prediction & trend
         
         // ---------- ADVANCED PREDICTION ENGINE (based on latest 10 results) ----------
-        // Analyzes patterns, repeats, hot numbers and returns the most likely NEXT number.
         function predictNextNumber(historyArray) {
-            // historyArray = full history, we take only last MAX_HISTORY (10)
             if (!historyArray || historyArray.length < MAX_HISTORY) return null;
+            const last10 = historyArray.slice(-MAX_HISTORY);
             
-            const last10 = historyArray.slice(-MAX_HISTORY);  // ONLY the most recent 10 spins
             // Frequency analysis (hot numbers)
             const freq = {};
             last10.forEach(num => { freq[num] = (freq[num] || 0) + 1; });
             
-            // Find max frequency
             let maxFreq = 0;
             let hotNumbers = [];
             for (let [num, count] of Object.entries(freq)) {
@@ -267,14 +279,13 @@
                 }
             }
             
-            // 1) Detect repeating last two numbers (example: 15,15 -> next often repeats)
+            // 1) Repeating last two numbers (strong pattern)
             let patternBonus = null;
             if (last10.length >= 2 && last10[last10.length-1] === last10[last10.length-2]) {
-                patternBonus = last10[last10.length-1]; // strong repeat signal
+                patternBonus = last10[last10.length-1];
             }
             
-            // 2) Detect "sequence" patterns: e.g., 5,6,7 or nearby numbers (+1/-1) on wheel?
-            // Simplified: check if last two numbers are adjacent on the wheel (physical neighbors)
+            // 2) Wheel momentum: if last two numbers are close on the wheel, continue direction
             let sequenceCandidate = null;
             if (last10.length >= 2) {
                 const lastNum = last10[last10.length-1];
@@ -282,36 +293,30 @@
                 const lastIdx = wheelNumbers.findIndex(n => n === lastNum);
                 const prevIdx = wheelNumbers.findIndex(n => n === prevNum);
                 if (lastIdx !== -1 && prevIdx !== -1) {
-                    const diff = Math.abs(lastIdx - prevIdx);
-                    // if adjacent or within 2 steps -> momentum suggests continue direction
-                    if (diff === 1 || diff === 2 || diff === wheelNumbers.length-1) {
-                        // direction: continue the same step
-                        let step = lastIdx - prevIdx;
-                        if (step > wheelNumbers.length/2) step -= wheelNumbers.length;
-                        if (step < -wheelNumbers.length/2) step += wheelNumbers.length;
-                        let nextIdx = (lastIdx + step) % wheelNumbers.length;
-                        if (nextIdx < 0) nextIdx += wheelNumbers.length;
+                    let diff = (lastIdx - prevIdx + wheelNumbers.length) % wheelNumbers.length;
+                    if (diff > wheelNumbers.length/2) diff -= wheelNumbers.length;
+                    if (Math.abs(diff) <= 2 && diff !== 0) {
+                        let nextIdx = (lastIdx + diff + wheelNumbers.length) % wheelNumbers.length;
                         sequenceCandidate = wheelNumbers[nextIdx];
                     }
                 }
             }
             
-            // 3) Recency weight: give extra importance to numbers that appeared in last 3 spins
+            // 3) Recency weight: last 3 spins get extra boost
             const recent3 = last10.slice(-3);
             const recentBonus = {};
             recent3.forEach((num, idx) => { recentBonus[num] = (recentBonus[num] || 0) + (3 - idx); });
             
-            // Combine scores: frequency (x2) + recency bonus + pattern/sequence boost
+            // Combine scores: frequency (weight 2), recency (weight 1.2), pattern bonuses
             let scores = {};
             for (let num of wheelNumbers) {
                 let score = (freq[num] || 0) * 2.0;
                 score += (recentBonus[num] || 0) * 1.2;
                 scores[num] = score;
             }
-            if (patternBonus !== null) scores[patternBonus] = (scores[patternBonus] || 0) + 2.5;
-            if (sequenceCandidate !== null) scores[sequenceCandidate] = (scores[sequenceCandidate] || 0) + 2.0;
+            if (patternBonus !== null) scores[patternBonus] = (scores[patternBonus] || 0) + 2.8;
+            if (sequenceCandidate !== null) scores[sequenceCandidate] = (scores[sequenceCandidate] || 0) + 2.2;
             
-            // Also check hot numbers tie: if multiple have same max freq, pick most recent among them
             let bestNumber = null;
             let bestScore = -Infinity;
             for (let num of wheelNumbers) {
@@ -321,47 +326,30 @@
                 }
             }
             
-            // Final fallback: if still null, return most frequent number or last number
-            if (bestNumber === null) {
-                if (hotNumbers.length) return hotNumbers[0];
-                return last10[last10.length-1];
-            }
-            return bestNumber;
+            if (bestNumber === null && hotNumbers.length) return hotNumbers[0];
+            return bestNumber !== null ? bestNumber : last10[last10.length-1];
         }
         
         // Apply glowing: predicted number + 9 left + 9 right = 19 total glowing numbers
         function applyPredictionGlow() {
-            // Remove existing glow classes
             numbers.forEach(n => n.classList.remove('neighbor', 'center'));
-            
-            // STEP 1: No prediction glow until we have 10 spins collected
             if (numberHistory.length < MAX_HISTORY) return;
             
-            // Predict the NEXT number based exclusively on last 10 results (old numbers are never included)
             const predicted = predictNextNumber(numberHistory);
             if (predicted === null) return;
             
-            // Find index of predicted number on the wheel
             let centerIndex = wheelNumbers.findIndex(n => n === predicted);
             if (centerIndex === -1) return;
             
-            // Apply center glow (the prediction anchor)
             numbers[centerIndex].classList.add('center');
-            
-            // 9 neighbors on the left (connected block)
             for (let i = 1; i <= 9; i++) {
                 const leftIdx = (centerIndex - i + wheelNumbers.length) % wheelNumbers.length;
                 numbers[leftIdx].classList.add('neighbor');
-            }
-            // 9 neighbors on the right (connected block)
-            for (let i = 1; i <= 9; i++) {
                 const rightIdx = (centerIndex + i) % wheelNumbers.length;
                 numbers[rightIdx].classList.add('neighbor');
             }
-            // Total = 1 center + 18 neighbors = 19 glowing numbers
         }
         
-        // Render history panels (original style)
         function renderHistories() {
             numberHistoryContainer.innerHTML = '';
             numberHistory.slice(-MAX_HISTORY).forEach(n => {
@@ -383,10 +371,8 @@
             });
         }
         
-        // Determine win/loss: check if entered number belongs to current glowing set (prediction)
         function isWinBasedOnCurrentPrediction(enteredNumber) {
             if (firstEntry) return false;
-            // collect currently glowing numbers (center + neighbor)
             const glowingSet = new Set();
             numbers.forEach(div => {
                 if (div.classList.contains('center') || div.classList.contains('neighbor')) {
@@ -396,38 +382,25 @@
             return glowingSet.has(enteredNumber);
         }
         
-        // Add a new spin result
         function addResult(value) {
-            // Save state for undo
             undoStack.push({
                 numberHistory: [...numberHistory],
                 wlHistory: [...wlHistory],
                 firstEntry: firstEntry
             });
             
-            // Determine win/loss based on prediction THAT WAS active BEFORE this spin
             const isWin = isWinBasedOnCurrentPrediction(value);
-            
-            // Add number to history
             numberHistory.push(value);
-            // Keep history unlimited, but prediction always uses last 10 only (older numbers are ignored automatically)
             
-            // Win/Loss recording: first 10 spins NO RECORDING (collecting data phase)
-            // After we have at least 10 historical spins (i.e. after the 10th spin is entered, we start recording for subsequent spins)
+            // Win/Loss recording: only after collecting 10 spins (first 10 spins no W/L)
             if (!firstEntry && numberHistory.length > MAX_HISTORY) {
                 wlHistory.push(isWin ? 'W' : 'L');
                 if (wlHistory.length > MAX_HISTORY) wlHistory.shift();
             }
-            // On the very first entry, just mark firstEntry false
-            if (firstEntry) {
-                firstEntry = false;
-            }
+            if (firstEntry) firstEntry = false;
             
-            // Re-apply prediction glow based on latest last 10 results (excludes older spins automatically)
             applyPredictionGlow();
             renderHistories();
-            
-            // Notify percentage display update
             if (typeof window.updateTrendAccuracyDisplay === 'function') {
                 window.updateTrendAccuracyDisplay(numberHistory);
             }
@@ -458,7 +431,6 @@
             }
         }
         
-        // Input handlers
         resultInput.addEventListener('input', () => {
             const v = resultInput.value;
             enterBtn.disabled = !(v !== '' && v >= 0 && v <= 36);
@@ -479,9 +451,25 @@
             enterBtn.disabled = true;
         });
         
-        // Initial state: no glow, collecting data
         applyPredictionGlow();
         renderHistories();
+        
+        // Handle window resize to reposition numbers (maintain visual)
+        window.addEventListener('resize', () => {
+            // re-calc positions without full rebuild to keep consistent
+            const containerRect = trackContainer.getBoundingClientRect();
+            const newCenterX = containerRect.width / 2;
+            const newCenterY = containerRect.height / 2;
+            const newRadiusX = Math.min(newCenterX - 20, 250);
+            const newRadiusY = Math.min(newCenterY - 20, 150);
+            numbers.forEach((div, idx) => {
+                const angle = (idx / wheelNumbers.length) * 2 * Math.PI + Math.PI;
+                const x = newCenterX + newRadiusX * Math.cos(angle) - 20;
+                const y = newCenterY + newRadiusY * Math.sin(angle) - 20;
+                div.style.left = `${x}px`;
+                div.style.top = `${y}px`;
+            });
+        });
     })();
     
     // ========== TREND ACCURACY PERCENTAGE (BASED ON LAST 10 RESULTS) ==========
@@ -491,7 +479,6 @@
         let currentHistory = [];
         const REQUIRED_SPINS = 10;
         
-        // Compute confidence % based on last 10 results' pattern consistency
         function computeTrendAccuracy(history) {
             if (!history || history.length < REQUIRED_SPINS) return null;
             const last10 = history.slice(-REQUIRED_SPINS);
@@ -501,7 +488,6 @@
             for (let k in freq) if (freq[k] > maxFreq) maxFreq = freq[k];
             const freqPercent = (maxFreq / 10) * 100;
             
-            // Pattern strength: consecutive repeats, sequences
             let patternStrength = 0;
             let consecutive = 0;
             for (let i = 0; i < last10.length - 1; i++) {
@@ -509,10 +495,7 @@
             }
             if (consecutive >= 1) patternStrength += 0.35;
             if (consecutive >= 2) patternStrength += 0.3;
-            // check for last two identical (strong trend)
             if (last10.length >= 2 && last10[last10.length-1] === last10[last10.length-2]) patternStrength += 0.4;
-            
-            // Check if any number appears 3+ times in last 10 -> strong signal
             let strongHot = maxFreq >= 3 ? 0.3 : 0;
             let accuracyBase = 95.3 + (freqPercent * 0.028);
             let finalAccuracy = accuracyBase + patternStrength * 0.5 + strongHot;
@@ -557,33 +540,16 @@
         renderDisplay(0, null);
     })();
     
-    // ========== SECURITY BLOCKS (FULLY PRESERVED) ==========
+    // ========== SECURITY LIGHT (REMOVED AGGRESSIVE BLANKING) ==========
+    // Only minimal context menu prevent, no blank screen, no devtools redirect that kills split-screen.
     (function() {
         document.addEventListener('contextmenu', e => e.preventDefault());
-        document.onkeydown = function(e) {
-            if (
-                e.keyCode === 123 || 
-                (e.ctrlKey && e.keyCode === 85) || 
-                (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) ||
-                (e.ctrlKey && e.keyCode === 83)
-            ) {
-                return false;
-            }
-        };
-        setInterval(function() {
-            (function() { return false; }['constructor']('debugger')['call']());
-        }, 50);
-        function detectDevTools() {
-            const threshold = 160;
-            if ((window.outerWidth - window.innerWidth > threshold) || (window.outerHeight - window.innerHeight > threshold)) {
-                document.body.innerHTML = ""; 
-                window.location.replace("about:blank");
-            }
-        }
-        setInterval(detectDevTools, 500);
+        // keep console clear but not destructive
         if (typeof console !== "undefined") {
-            console.log = console.debug = console.info = console.warn = console.error = function() {};
+            const noop = function(){};
+            console.log = console.debug = console.info = console.warn = console.error || noop;
         }
+        // No setInterval debugger trap, no forced blank on resize.
     })();
 </script>
 </body>
