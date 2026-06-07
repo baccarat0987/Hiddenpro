@@ -233,7 +233,7 @@
         let firstEntry = true;
         let undoStack = [];
         const MAX_HISTORY = 10;
-        const NEIGHBORS_ON_EACH_SIDE = 5;  // 5 left + 5 right = 10 neighbors + 1 center = 11 total glowing numbers
+        const NEIGHBORS_ON_EACH_SIDE = 9;  // 9 left + 9 right = 18 neighbors + 1 center = 19 total glowing numbers
         
         // ========== Get center number from trend (most frequent in last 10) ==========
         function getCenterNumberFromTrend(history) {
@@ -269,7 +269,7 @@
             }
         }
         
-        // ========== Apply EUROPEAN FULL NEIGHBORS (5 left + 5 right = 10 neighbors + center = 11 total) ==========
+        // ========== Apply 9 NEIGHBORS ON EACH SIDE (18 neighbors + center = 19 total glowing numbers) ==========
         function applyTrendGlow() {
             // Remove all existing glow classes
             numbers.forEach(n => n.classList.remove('neighbor', 'center'));
@@ -290,13 +290,13 @@
             // Apply center glow
             numbers[centerIndex].classList.add('center');
             
-            // Apply 5 neighbors on LEFT side (connected)
+            // Apply 9 neighbors on LEFT side (connected)
             for (let i = 1; i <= NEIGHBORS_ON_EACH_SIDE; i++) {
                 const leftIndex = (centerIndex - i + wheelNumbers.length) % wheelNumbers.length;
                 numbers[leftIndex].classList.add('neighbor');
             }
             
-            // Apply 5 neighbors on RIGHT side (connected)
+            // Apply 9 neighbors on RIGHT side (connected)
             for (let i = 1; i <= NEIGHBORS_ON_EACH_SIDE; i++) {
                 const rightIndex = (centerIndex + i) % wheelNumbers.length;
                 numbers[rightIndex].classList.add('neighbor');
