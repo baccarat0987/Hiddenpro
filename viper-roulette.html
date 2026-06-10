@@ -179,7 +179,7 @@
 
 <script>
     // ============================================================
-    // ROULETTE PREDICTION WITH DYNAMIC SKIP (FROM YOUR EXAMPLE)
+    // EXACT SKIP LOGIC FROM YOUR BACCARAT EXAMPLE
     // ============================================================
     (function() {
         const trackContainer = document.getElementById('track');
@@ -218,70 +218,109 @@
         let wlHistory = [];
         let firstEntry = true;
         let undoStack = [];
-        let detailedResults = []; // Tracks win/loss/skip for dynamic threshold
+        let detailedHistory = []; // Tracks win/loss/skip like your example
         
         const MAX_HISTORY = 10;
         const NEIGHBORS_ON_EACH_SIDE = 9;
         const ACTIVATION_THRESHOLD = 10;
         
-        // Pattern memory for confidence calculation
+        // Pattern memory - stores success rate for each last-3 pattern
         let patternMemory = {};
         
         function getPatternKey(history) {
             if (history.length < 3) return null;
-            return history.slice(-3).join(',');
+            const last3 = history.slice(-3);
+            return last3.join(',');
         }
         
-        // Natural pattern confidence (win rate)
-        function getPatternConfidence(history) {
-            if (history.length < 3) return 50;
-            const patternKey = getPatternKey(history);
-            if (!patternKey || !patternMemory[patternKey]) return 50;
+        // ========== PATTERN ANALYSIS (SAME AS YOUR EXAMPLE LOGIC) ==========
+        function analyzeLast3Pattern() {
+            if (numberHistory.length < 3) return null;
             
-            const p = patternMemory[patternKey];
-            const total = p.wins + p.losses;
-            if (total === 0) return 50;
-            return (p.wins / total) * 100;
-        }
-        
-        // ========== DYNAMIC SKIP THRESHOLD (FROM YOUR EXAMPLE) ==========
-        function getDynamicSkipThreshold() {
-            let baseThreshold = 60;
+            const last3 = numberHistory.slice(-3);
+            let occurrences = 0;
+            let predictedCount = 0;
+            let predictedNumber = null;
             
-            // Analyze recent results (last 5 non-skip rounds)
-            const recentResults = detailedResults.slice(-5).filter(r => r.type !== 'skip');
-            const recentLosses = recentResults.filter(r => r.type === 'loss').length;
-            const recentWins = recentResults.filter(r => r.type === 'win').length;
-            
-            // Dynamic adjustment based on streak (YOUR LOGIC)
-            if (recentLosses >= 3) {
-                // On losing streak: lower threshold to be more aggressive
-                baseThreshold = 52;
-            } else if (recentWins >= 3 && recentResults.length >= 3) {
-                // On winning streak: raise threshold to protect gains
-                baseThreshold = 68;
-            } else if (recentLosses >= 2) {
-                baseThreshold = 56;
-            } else if (recentWins >= 2) {
-                baseThreshold = 64;
-            }
-            
-            // Adjust based on overall win rate
-            const totalDecisions = wlHistory.length;
-            if (totalDecisions > 10) {
-                const wins = wlHistory.filter(r => r === 'W').length;
-                const winRate = wins / totalDecisions;
-                if (winRate < 0.45) {
-                    baseThreshold = Math.max(50, baseThreshold - 5);
-                } else if (winRate > 0.55) {
-                    baseThreshold = Math.min(75, baseThreshold + 5);
+            // Look for this exact pattern in history
+            for (let i = 0; i <= numberHistory.length - 4; i++) {
+                const n1 = numberHistory[i];
+                const n2 = numberHistory[i+1];
+                const n3 = numberHistory[i+2];
+                const nextNum = numberHistory[i+3];
+                
+                if (n1 === last3[0] && n2 === last3[1] && n3 === last3[2]) {
+                    occurrences++;
+                    // Track what happened next
+                    if (patternMemory[last3.join(',')]) {
+                        // Use stored prediction from base algorithm
+                        const predicted = predictNextNumberFromIndex(numberHistory.slice(0, i+3));
+                        if (predicted === nextNum) predictedCount++;
+                    }
                 }
             }
             
-            return baseThreshold;
+            if (occurrences === 0) return null;
+            
+            // Get current prediction for this pattern
+            const currentPrediction = predictNextNumber(numberHistory);
+            const confidence = occurrences > 0 ? (predictedCount / occurrences) * 100 : 50;
+            
+            return {
+                prediction: currentPrediction,
+                confidence: confidence,
+                occurrences: occurrences,
+                matches: predictedCount
+            };
         }
         
-        // ========== ORIGINAL PREDICTION FUNCTION ==========
+        // Helper for pattern analysis
+        function predictNextNumberFromIndex(historySlice) {
+            if (historySlice.length < MAX_HISTORY) return null;
+            const last10 = historySlice.slice(-MAX_HISTORY);
+            
+            let scores = {};
+            for (let i = 0; i <= 36; i++) scores[i] = 0;
+            
+            const freq = {};
+            last10.forEach(num => { freq[num] = (freq[num] || 0) + 1; });
+            let maxFreq = 0;
+            for (let num in freq) if (freq[num] > maxFreq) maxFreq = freq[num];
+            for (let num in freq) {
+                if (freq[num] === maxFreq) scores[parseInt(num)] += 5.0;
+                else if (freq[num] >= 2) scores[parseInt(num)] += 2.0;
+            }
+            
+            const appeared = new Set(last10);
+            for (let i = 0; i <= 36; i++) {
+                if (!appeared.has(i) && i !== 0) scores[i] += 1.5;
+            }
+            if (!appeared.has(0)) scores[0] += 2.0;
+            
+            const recent3 = last10.slice(-3);
+            recent3.forEach(num => {
+                const idx = wheelNumbers.indexOf(num);
+                if (idx !== -1) {
+                    for (let offset = -2; offset <= 2; offset++) {
+                        if (offset === 0) continue;
+                        const neighborIdx = (idx + offset + wheelNumbers.length) % wheelNumbers.length;
+                        scores[wheelNumbers[neighborIdx]] += 1.5;
+                    }
+                }
+            });
+            
+            let bestNumber = 0;
+            let bestScore = -Infinity;
+            for (let i = 0; i <= 36; i++) {
+                if (scores[i] > bestScore) {
+                    bestScore = scores[i];
+                    bestNumber = i;
+                }
+            }
+            return bestNumber;
+        }
+        
+        // ORIGINAL PREDICTION FUNCTION
         function predictNextNumber(historyArray) {
             if (!historyArray || historyArray.length < MAX_HISTORY) return null;
             const last10 = historyArray.slice(-MAX_HISTORY);
@@ -327,41 +366,96 @@
             return bestNumber;
         }
         
-        // Calculate prediction with confidence
-        function getPredictionWithConfidence() {
-            if (numberHistory.length < MAX_HISTORY) {
-                return { prediction: null, confidence: 0 };
+        // ========== DYNAMIC SKIP THRESHOLD (EXACTLY FROM YOUR EXAMPLE) ==========
+        function getDynamicSkipThreshold() {
+            let baseThreshold = 60;
+            
+            // Analyze recent results (last 5 non-skip rounds)
+            const recentResults = detailedHistory.slice(-5).filter(h => !h.wasSkip);
+            const recentLosses = recentResults.filter(r => r.type === 'loss').length;
+            const recentWins = recentResults.filter(r => r.type === 'win').length;
+            
+            // Dynamic adjustment based on streak (YOUR EXACT LOGIC)
+            if (recentLosses >= 3) {
+                baseThreshold = 52;  // Lower threshold during losing streak
+            } else if (recentWins >= 3 && recentResults.length >= 3) {
+                baseThreshold = 68;  // Raise threshold to protect gains
+            } else if (recentLosses >= 2) {
+                baseThreshold = 56;
+            } else if (recentWins >= 2) {
+                baseThreshold = 64;
             }
             
-            const confidence = getPatternConfidence(numberHistory);
-            const predicted = predictNextNumber(numberHistory);
+            // Adjust based on overall win rate (YOUR LOGIC)
+            const totalDecisions = wlHistory.length;
+            if (totalDecisions > 10) {
+                const wins = wlHistory.filter(r => r === 'W').length;
+                const winRate = wins / totalDecisions;
+                if (winRate < 0.45) {
+                    baseThreshold = Math.max(50, baseThreshold - 5);
+                } else if (winRate > 0.55) {
+                    baseThreshold = Math.min(75, baseThreshold + 5);
+                }
+            }
             
-            return {
-                prediction: predicted,
-                confidence: confidence,
-                occurrences: patternMemory[getPatternKey(numberHistory)] ? 
-                    patternMemory[getPatternKey(numberHistory)].wins + patternMemory[getPatternKey(numberHistory)].losses : 0
-            };
+            return baseThreshold;
         }
         
-        // Should we show prediction? (USING YOUR DYNAMIC THRESHOLD)
-        function shouldShowPrediction() {
-            if (numberHistory.length < ACTIVATION_THRESHOLD) return false;
-            
-            const { confidence, occurrences } = getPredictionWithConfidence();
+        // ========== SHOULD SKIP? (EXACTLY FROM YOUR EXAMPLE) ==========
+        function shouldSkipPrediction(confidence, occurrences) {
             const dynamicThreshold = getDynamicSkipThreshold();
             
-            // Your logic: show only if confidence >= dynamic threshold
-            return confidence >= dynamicThreshold;
+            // More lenient if we have strong pattern occurrences
+            let adjustedThreshold = dynamicThreshold;
+            if (occurrences >= 5) {
+                adjustedThreshold = Math.max(50, dynamicThreshold - 8);
+            }
+            
+            return confidence < adjustedThreshold || occurrences < 1;
+        }
+        
+        // Get prediction with confidence (using pattern analysis like your example)
+        function getPredictionWithConfidence() {
+            if (numberHistory.length < MAX_HISTORY) {
+                return { prediction: null, confidence: 50, occurrences: 0 };
+            }
+            
+            const patternAnalysis = analyzeLast3Pattern();
+            
+            if (patternAnalysis && patternAnalysis.occurrences > 0) {
+                return {
+                    prediction: patternAnalysis.prediction,
+                    confidence: patternAnalysis.confidence,
+                    occurrences: patternAnalysis.occurrences
+                };
+            }
+            
+            // Fallback: use base prediction with neutral confidence
+            const prediction = predictNextNumber(numberHistory);
+            return {
+                prediction: prediction,
+                confidence: 50,
+                occurrences: 0
+            };
         }
         
         function applyPredictionGlow() {
             numbers.forEach(n => n.classList.remove('neighbor', 'center'));
             
-            if (!shouldShowPrediction()) return;
+            if (numberHistory.length < ACTIVATION_THRESHOLD) return;
             
-            const { prediction } = getPredictionWithConfidence();
+            const { prediction, confidence, occurrences } = getPredictionWithConfidence();
+            
             if (prediction === null) return;
+            
+            const shouldSkip = shouldSkipPrediction(confidence, occurrences);
+            
+            if (shouldSkip) {
+                console.log(`[SKIP] Confidence ${confidence.toFixed(1)}% < threshold ${getDynamicSkipThreshold()}%`);
+                return;
+            }
+            
+            console.log(`[SHOW] Confidence ${confidence.toFixed(1)}% >= threshold ${getDynamicSkipThreshold()}%`);
             
             let centerIndex = wheelNumbers.indexOf(prediction);
             if (centerIndex === -1) return;
@@ -372,29 +466,6 @@
                 numbers[leftIdx].classList.add('neighbor');
                 const rightIdx = (centerIndex + i) % wheelNumbers.length;
                 numbers[rightIdx].classList.add('neighbor');
-            }
-        }
-        
-        function learnFromResult(wasWin) {
-            if (numberHistory.length < 3) return;
-            
-            const patternKey = getPatternKey(numberHistory.slice(0, -1)); // pattern BEFORE this result
-            if (!patternKey) return;
-            
-            if (!patternMemory[patternKey]) {
-                patternMemory[patternKey] = { wins: 0, losses: 0 };
-            }
-            
-            if (wasWin) {
-                patternMemory[patternKey].wins++;
-            } else {
-                patternMemory[patternKey].losses++;
-            }
-            
-            // Keep memory size manageable
-            const keys = Object.keys(patternMemory);
-            if (keys.length > 100) {
-                delete patternMemory[keys[0]];
             }
         }
         
@@ -436,34 +507,54 @@
                 numberHistory: [...numberHistory],
                 wlHistory: [...wlHistory],
                 firstEntry: firstEntry,
-                patternMemory: JSON.parse(JSON.stringify(patternMemory)),
-                detailedResults: [...detailedResults]
+                detailedHistory: [...detailedHistory]
             });
             
-            const isWin = isWinBasedOnCurrentPrediction(value);
-            const hadPrediction = shouldShowPrediction();
+            // Check if we should skip BEFORE adding result (like your example)
+            let isCurrentRoundSkip = false;
+            let currentPrediction = null;
+            let currentConfidence = 0;
+            let currentOccurrences = 0;
+            
+            if (numberHistory.length >= ACTIVATION_THRESHOLD) {
+                const predData = getPredictionWithConfidence();
+                if (predData && predData.prediction) {
+                    currentPrediction = predData.prediction;
+                    currentConfidence = predData.confidence;
+                    currentOccurrences = predData.occurrences;
+                    isCurrentRoundSkip = shouldSkipPrediction(currentConfidence, currentOccurrences);
+                }
+            }
+            
+            // Determine win/loss only if NOT skipping
+            let wasWin = false;
+            if (!isCurrentRoundSkip && numberHistory.length >= ACTIVATION_THRESHOLD && currentPrediction) {
+                wasWin = (value === currentPrediction);
+            }
             
             numberHistory.push(value);
             
+            // Record results (like your example)
             if (!firstEntry && numberHistory.length > MAX_HISTORY) {
-                if (hadPrediction) {
-                    wlHistory.push(isWin ? 'W' : 'L');
-                    detailedResults.push({ type: isWin ? 'win' : 'loss' });
-                    learnFromResult(isWin);
-                } else {
-                    detailedResults.push({ type: 'skip' });
+                if (!isCurrentRoundSkip && currentPrediction) {
+                    wlHistory.push(wasWin ? 'W' : 'L');
+                    detailedHistory.push({ type: wasWin ? 'win' : 'loss', wasSkip: false });
+                } else if (isCurrentRoundSkip) {
+                    detailedHistory.push({ type: 'skip', wasSkip: true });
                 }
                 
                 if (wlHistory.length > MAX_HISTORY) wlHistory.shift();
-                if (detailedResults.length > 50) detailedResults.shift();
+                if (detailedHistory.length > 50) detailedHistory.shift();
             }
             if (firstEntry) firstEntry = false;
             
             applyPredictionGlow();
             renderHistories();
             
+            // Update display
+            const showGlow = !shouldSkipPrediction(currentConfidence, currentOccurrences);
             if (typeof window.updateDisplay === 'function') {
-                window.updateDisplay(numberHistory, wlHistory, getPredictionWithConfidence().confidence, shouldShowPrediction());
+                window.updateDisplay(numberHistory.length, wlHistory, currentConfidence, showGlow, getDynamicSkipThreshold());
             }
         }
         
@@ -472,12 +563,11 @@
             wlHistory = [];
             firstEntry = true;
             undoStack = [];
-            patternMemory = {};
-            detailedResults = [];
+            detailedHistory = [];
             numbers.forEach(n => n.classList.remove('neighbor', 'center'));
             renderHistories();
             if (typeof window.updateDisplay === 'function') {
-                window.updateDisplay(numberHistory, wlHistory, 0, false);
+                window.updateDisplay(0, [], 0, false, 60);
             }
         }
         
@@ -487,12 +577,13 @@
             numberHistory = s.numberHistory;
             wlHistory = s.wlHistory;
             firstEntry = s.firstEntry;
-            patternMemory = s.patternMemory || {};
-            detailedResults = s.detailedResults || [];
+            detailedHistory = s.detailedHistory || [];
             applyPredictionGlow();
             renderHistories();
+            const predData = getPredictionWithConfidence();
+            const showGlow = !shouldSkipPrediction(predData.confidence, predData.occurrences);
             if (typeof window.updateDisplay === 'function') {
-                window.updateDisplay(numberHistory, wlHistory, getPredictionWithConfidence().confidence, shouldShowPrediction());
+                window.updateDisplay(numberHistory.length, wlHistory, predData.confidence, showGlow, getDynamicSkipThreshold());
             }
         }
         
@@ -520,20 +611,12 @@
         renderHistories();
     })();
     
-    // ========== DISPLAY WITH DYNAMIC STATES ==========
+    // ========== DISPLAY FUNCTION ==========
     (function() {
         const predictionInner = document.getElementById('predictionInner');
         const REQUIRED_SPINS = 10;
-        let currentHistory = [];
         
-        function computeRealAccuracy(wlArray) {
-            if (!wlArray || wlArray.length < 3) return null;
-            const wins = wlArray.filter(r => r === 'W').length;
-            const rate = (wins / wlArray.length) * 100;
-            return Math.min(95, Math.max(65, Math.round(rate)));
-        }
-        
-        function renderDisplay(historyLength, wlHistory, confidence, hasGlow) {
+        function renderDisplay(historyLength, wlHistory, confidence, hasGlow, threshold) {
             if (!predictionInner) return;
             
             if (historyLength < REQUIRED_SPINS) {
@@ -552,8 +635,11 @@
                 return;
             }
             
-            let accuracy = computeRealAccuracy(wlHistory);
-            if (!accuracy) accuracy = Math.round(confidence || 82);
+            let accuracy = 82;
+            if (wlHistory && wlHistory.length > 0) {
+                const wins = wlHistory.filter(r => r === 'W').length;
+                accuracy = Math.min(95, Math.max(65, Math.round((wins / wlHistory.length) * 100)));
+            }
             
             predictionInner.innerHTML = `
                 <div class="prediction-text glow-text">${accuracy}%</div>
@@ -561,32 +647,9 @@
             `;
         }
         
-        window.updateDisplay = function(history, wlHistory, confidence, hasGlow) {
-            currentHistory = history || [];
-            renderDisplay(history ? history.length : 0, wlHistory || [], confidence, hasGlow);
+        window.updateDisplay = function(historyLength, wlHistory, confidence, hasGlow, threshold) {
+            renderDisplay(historyLength, wlHistory, confidence, hasGlow, threshold);
         };
-        
-        renderDisplay(0, [], 0, false);
-        
-        const observer = new MutationObserver(() => {
-            if (currentHistory.length >= REQUIRED_SPINS) {
-                const wlElements = document.querySelectorAll('#wlHistory .history-wl');
-                const wlArray = Array.from(wlElements).map(el => el.textContent);
-                const hasGlow = document.querySelectorAll('.num.center, .num.neighbor').length > 0;
-                renderDisplay(currentHistory.length, wlArray, 0, hasGlow);
-            }
-        });
-        observer.observe(document.getElementById('wlHistory'), { childList: true, subtree: true });
-        
-        const wheelObserver = new MutationObserver(() => {
-            if (currentHistory.length >= REQUIRED_SPINS) {
-                const wlElements = document.querySelectorAll('#wlHistory .history-wl');
-                const wlArray = Array.from(wlElements).map(el => el.textContent);
-                const hasGlow = document.querySelectorAll('.num.center, .num.neighbor').length > 0;
-                renderDisplay(currentHistory.length, wlArray, 0, hasGlow);
-            }
-        });
-        wheelObserver.observe(document.getElementById('track'), { attributes: true, subtree: true, attributeFilter: ['class'] });
     })();
     
     // Keyboard shortcuts block
