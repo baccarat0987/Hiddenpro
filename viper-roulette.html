@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>VIPER ROULETTE</title>
+    <title>VIPER ROULETTE </title>
 
     <script>
         if (window.location.pathname.endsWith('.html')) {
@@ -179,8 +179,10 @@
 
 <script>
     // ============================================================
-    // CONTINUOUS ZONE LEARNING – Rolling window of LAST 10 SPINS
-    // Older data is discarded automatically.
+    // 19-NUMBER CONTINUOUS LEARNING
+    // Rolling window of last 10 numbers. Pick most frequent as center.
+    // Glow center + 9 left + 9 right neighbours = 19 numbers.
+    // Always predicts after initial 10 spins.
     // ============================================================
     (function() {
         const trackContainer = document.getElementById('track');
@@ -189,12 +191,13 @@
         const numberHistoryContainer = document.getElementById('numberHistory');
         const wlHistoryContainer = document.getElementById('wlHistory');
         
-        // Official European roulette wheel order (clockwise)
+        // European roulette wheel order (clockwise)
         const wheelNumbers = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
         
         const numbers = [];
         const centerX = 300; const centerY = 200;
         const radiusX = 250; const radiusY = 150;
+        const NEIGHBORS = 9;   // +9 neighbours on each side = 19 numbers total
         
         function buildWheel() {
             trackContainer.innerHTML = '';
@@ -217,77 +220,63 @@
         }
         buildWheel();
         
-        let numberHistory = [];
+        // Rolling window of last 10 numbers (for learning)
+        let rollingNumbers = [];
         let wlHistory = [];
         let firstEntry = true;
         let undoStack = [];
-        const NEIGHBORS_ON_EACH_SIDE = 9;
-        const MIN_SPINS_TO_PREDICT = 10;   // need at least 10 spins before first prediction
         
-        // ========== WHEEL ARC DIVISION (6 equal arcs) ==========
-        const ARCS = 6;
-        // Precompute arc index (0..ARCS-1) for each number based on wheel order
-        const numberToArc = new Array(37);
-        for (let i = 0; i < wheelNumbers.length; i++) {
-            const num = wheelNumbers[i];
-            const arc = Math.floor((i * ARCS) / wheelNumbers.length);
-            numberToArc[num] = arc;
+        const WINDOW_SIZE = 10;
+        const MIN_SPINS_TO_PREDICT = 10;
+        
+        function getWheelIndex(num) {
+            return wheelNumbers.indexOf(num);
         }
         
-        // ========== ROLLING WINDOW FOR TRANSITIONS (LAST 10 SPINS) ==========
-        const MAX_WINDOW_SIZE = 10;   // remember only the last 10 transitions
-        let transitionWindow = [];    // stores objects { from, to }
-        
-        // Transition counts built from the current window
-        let transitionCounts = Array(ARCS).fill().map(() => Array(ARCS).fill(0));
-        
-        function rebuildTransitionCounts() {
-            // reset counts
-            for (let i = 0; i < ARCS; i++) {
-                for (let j = 0; j < ARCS; j++) {
-                    transitionCounts[i][j] = 0;
+        // Find most frequent number in rolling window (tie → most recent)
+        function getMostFrequentNumber() {
+            if (rollingNumbers.length === 0) return null;
+            const freq = {};
+            for (let num of rollingNumbers) {
+                freq[num] = (freq[num] || 0) + 1;
+            }
+            let maxFreq = -1;
+            let candidates = [];
+            for (let num in freq) {
+                if (freq[num] > maxFreq) {
+                    maxFreq = freq[num];
+                    candidates = [parseInt(num)];
+                } else if (freq[num] === maxFreq) {
+                    candidates.push(parseInt(num));
                 }
             }
-            for (let t of transitionWindow) {
-                transitionCounts[t.from][t.to]++;
-            }
-        }
-        
-        function addTransition(from, to) {
-            if (from === null || from === undefined) return;
-            transitionWindow.push({ from, to });
-            if (transitionWindow.length > MAX_WINDOW_SIZE) {
-                transitionWindow.shift();   // remove oldest transition
-            }
-            rebuildTransitionCounts();
-        }
-        
-        function predictNextArc(currentArc) {
-            if (currentArc === null) return null;
-            let bestArc = 0;
-            let bestCount = -1;
-            for (let to = 0; to < ARCS; to++) {
-                if (transitionCounts[currentArc][to] > bestCount) {
-                    bestCount = transitionCounts[currentArc][to];
-                    bestArc = to;
+            if (candidates.length === 1) return candidates[0];
+            // tie: return the most recent among candidates
+            for (let i = rollingNumbers.length - 1; i >= 0; i--) {
+                if (candidates.includes(rollingNumbers[i])) {
+                    return rollingNumbers[i];
                 }
             }
-            // If no transitions yet, fallback: move +2 arcs
-            if (bestCount === 0) {
-                return (currentArc + 2) % ARCS;
+            return candidates[0];
+        }
+        
+        // Get the set of numbers to glow (center + NEIGHBORS left + NEIGHBORS right)
+        function getGlowingNumbers() {
+            if (rollingNumbers.length < MIN_SPINS_TO_PREDICT) return [];
+            const center = getMostFrequentNumber();
+            if (center === null) return [];
+            const centerIdx = getWheelIndex(center);
+            if (centerIdx === -1) return [];
+            const glowing = new Set();
+            glowing.add(center);
+            for (let i = 1; i <= NEIGHBORS; i++) {
+                const leftIdx = (centerIdx - i + wheelNumbers.length) % wheelNumbers.length;
+                const rightIdx = (centerIdx + i) % wheelNumbers.length;
+                glowing.add(wheelNumbers[leftIdx]);
+                glowing.add(wheelNumbers[rightIdx]);
             }
-            return bestArc;
+            return Array.from(glowing);
         }
-        
-        function getNumberForArc(arc) {
-            const arcSize = wheelNumbers.length / ARCS;
-            const startIdx = Math.floor(arc * arcSize);
-            const midIdx = Math.floor(startIdx + arcSize / 2);
-            const idx = Math.min(midIdx, wheelNumbers.length - 1);
-            return wheelNumbers[idx];
-        }
-        
-        let arcHistory = [];   // stores arc of each spin
         
         let currentGlowingNumbers = new Set();
         
@@ -295,35 +284,24 @@
             numbers.forEach(n => n.classList.remove('neighbor', 'center'));
             currentGlowingNumbers.clear();
             
-            if (arcHistory.length < MIN_SPINS_TO_PREDICT) return;
-            
-            const currentArc = arcHistory[arcHistory.length - 1];
-            const predictedArc = predictNextArc(currentArc);
-            if (predictedArc === null) return;
-            
-            const predictedNumber = getNumberForArc(predictedArc);
-            let centerIndex = wheelNumbers.indexOf(predictedNumber);
-            if (centerIndex === -1) return;
-            
-            currentGlowingNumbers.add(predictedNumber);
-            numbers[centerIndex].classList.add('center');
-            
-            for (let i = 1; i <= NEIGHBORS_ON_EACH_SIDE; i++) {
-                const leftIdx = (centerIndex - i + wheelNumbers.length) % wheelNumbers.length;
-                const leftNum = wheelNumbers[leftIdx];
-                currentGlowingNumbers.add(leftNum);
-                numbers[leftIdx].classList.add('neighbor');
-                
-                const rightIdx = (centerIndex + i) % wheelNumbers.length;
-                const rightNum = wheelNumbers[rightIdx];
-                currentGlowingNumbers.add(rightNum);
-                numbers[rightIdx].classList.add('neighbor');
+            const glowing = getGlowingNumbers();
+            const center = getMostFrequentNumber();
+            for (let num of glowing) {
+                const idx = getWheelIndex(num);
+                if (idx !== -1) {
+                    currentGlowingNumbers.add(num);
+                    if (num === center) {
+                        numbers[idx].classList.add('center');
+                    } else {
+                        numbers[idx].classList.add('neighbor');
+                    }
+                }
             }
         }
         
         function renderHistories() {
             numberHistoryContainer.innerHTML = '';
-            numberHistory.slice(-10).forEach(n => {
+            rollingNumbers.slice(-10).forEach(n => {
                 const d = document.createElement('div');
                 d.classList.add('history-num');
                 d.textContent = n;
@@ -349,27 +327,19 @@
         
         function addResult(value) {
             undoStack.push({
-                numberHistory: [...numberHistory],
+                rollingNumbers: [...rollingNumbers],
                 wlHistory: [...wlHistory],
-                firstEntry: firstEntry,
-                transitionWindow: [...transitionWindow],
-                arcHistory: [...arcHistory],
-                transitionCounts: transitionCounts.map(row => [...row])
+                firstEntry: firstEntry
             });
-            
-            const arc = numberToArc[value];
-            const prevArc = arcHistory.length > 0 ? arcHistory[arcHistory.length - 1] : null;
-            
-            if (prevArc !== null) {
-                addTransition(prevArc, arc);
-            }
-            arcHistory.push(arc);
             
             const isWin = isWinBasedOnCurrentPrediction(value);
             
-            numberHistory.push(value);
+            rollingNumbers.push(value);
+            if (rollingNumbers.length > WINDOW_SIZE) {
+                rollingNumbers.shift();
+            }
             
-            if (!firstEntry && numberHistory.length > MIN_SPINS_TO_PREDICT) {
+            if (!firstEntry && rollingNumbers.length >= MIN_SPINS_TO_PREDICT) {
                 wlHistory.push(isWin ? 'W' : 'L');
                 if (wlHistory.length > 10) wlHistory.shift();
             }
@@ -380,18 +350,15 @@
             
             const hasGlow = currentGlowingNumbers.size > 0;
             if (typeof window.updateDisplay === 'function') {
-                window.updateDisplay(numberHistory.length, wlHistory, hasGlow);
+                window.updateDisplay(rollingNumbers.length, wlHistory, hasGlow);
             }
         }
         
         function resetGame() {
-            numberHistory = [];
+            rollingNumbers = [];
             wlHistory = [];
             firstEntry = true;
             undoStack = [];
-            transitionWindow = [];
-            rebuildTransitionCounts();
-            arcHistory = [];
             currentGlowingNumbers.clear();
             numbers.forEach(n => n.classList.remove('neighbor', 'center'));
             renderHistories();
@@ -403,17 +370,14 @@
         function undoLast() {
             if (!undoStack.length) return;
             const s = undoStack.pop();
-            numberHistory = s.numberHistory;
+            rollingNumbers = s.rollingNumbers;
             wlHistory = s.wlHistory;
             firstEntry = s.firstEntry;
-            transitionWindow = s.transitionWindow;
-            arcHistory = s.arcHistory;
-            transitionCounts = s.transitionCounts.map(row => [...row]);
             applyPredictionGlow();
             renderHistories();
             const hasGlow = currentGlowingNumbers.size > 0;
             if (typeof window.updateDisplay === 'function') {
-                window.updateDisplay(numberHistory.length, wlHistory, hasGlow);
+                window.updateDisplay(rollingNumbers.length, wlHistory, hasGlow);
             }
         }
         
@@ -459,8 +423,8 @@
             
             if (!hasGlow) {
                 predictionInner.innerHTML = `
-                    <div class="prediction-text">TRACKING</div>
-                    <div class="prediction-small">LAST 10 SPINS</div>
+                    <div class="prediction-text">PREDICTING</div>
+                    <div class="prediction-small">19 NUMBERS</div>
                 `;
                 return;
             }
@@ -473,7 +437,7 @@
             
             predictionInner.innerHTML = `
                 <div class="prediction-text glow-text">${accuracy}%</div>
-                <div class="prediction-small">ZONE ACCURACY</div>
+                <div class="prediction-small">WIN RATE (LAST 10)</div>
             `;
         }
         
