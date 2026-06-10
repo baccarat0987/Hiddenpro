@@ -94,101 +94,37 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 200px;
-            height: 120px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
             z-index: 100;
             pointer-events: none;
             font-family: 'Arial', monospace;
             text-align: center;
-            background: rgba(0,0,0,0.7);
-            border-radius: 20px;
-            backdrop-filter: blur(8px);
-            transition: all 0.3s ease;
+            background: transparent;
         }
-        .waiting-mode {
-            background: rgba(0,0,0,0.5);
-            border: 1px solid #ffaa44aa;
-        }
-        .waiting-mode .waiting-text {
-            font-size: 14px;
-            color: #ffaa66;
-            letter-spacing: 2px;
+        
+        .prediction-text {
+            font-size: 28px;
             font-weight: bold;
-        }
-        .waiting-mode .small-text {
-            font-size: 10px;
-            color: #888;
-            margin-top: 8px;
-        }
-        .skip-mode {
-            background: rgba(100,50,50,0.6);
-            border: 1px solid #ff6666aa;
-        }
-        .skip-mode .waiting-text {
-            font-size: 14px;
-            color: #ff8888;
-        }
-        .pred-loading {
-            text-align: center;
-            color: #ffaa66;
-            font-weight: bold;
-            font-size: 12px;
+            text-shadow: 0 0 10px #ffaa44, 0 0 20px #ffaa44;
             letter-spacing: 1px;
-        }
-        .pred-loading .loading-text {
-            font-size: 11px;
-            background: rgba(0,0,0,0.7);
-            padding: 8px 16px;
-            border-radius: 40px;
-            display: inline-block;
             white-space: nowrap;
         }
-        .pred-loading .progress-bar-mini {
-            width: 120px;
-            height: 3px;
-            background: #2a2a2a;
-            border-radius: 4px;
-            margin: 10px auto 0;
-            overflow: hidden;
-        }
-        .pred-loading .progress-fill-mini {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #ffaa44, #ffdd88);
-            transition: width 0.2s ease;
-            border-radius: 4px;
-        }
-        .pred-percentage {
-            font-size: 32px;
-            font-weight: 900;
-            color: #ffdd99;
-            text-shadow: 0 0 15px #ff9933;
-            line-height: 1;
-            background: rgba(0,0,0,0.5);
-            padding: 8px 18px;
-            border-radius: 50px;
+        
+        .prediction-small {
+            font-size: 12px;
+            font-weight: normal;
+            text-shadow: 0 0 5px #ffaa66;
+            margin-top: 5px;
+            opacity: 0.9;
             letter-spacing: 1px;
         }
-        .pred-label {
-            font-size: 10px;
-            font-weight: bold;
-            background: rgba(0,0,0,0.6);
-            padding: 4px 14px;
-            border-radius: 30px;
-            margin-top: 6px;
-            color: #ffdd99;
-            letter-spacing: 1px;
+        
+        .glow-text {
+            animation: textPulse 1.2s infinite ease-in-out;
         }
-        .glow-prediction {
-            animation: pulseGlow 1.2s infinite ease-in-out;
-        }
-        @keyframes pulseGlow {
-            0% { filter: drop-shadow(0 0 3px #ffaa33); }
-            100% { filter: drop-shadow(0 0 18px #ffdd77); }
+        
+        @keyframes textPulse {
+            0% { text-shadow: 0 0 5px #ffaa33; opacity: 0.9; }
+            100% { text-shadow: 0 0 25px #ffdd77, 0 0 10px #ffaa33; opacity: 1; }
         }
         
         .controls { display: flex; gap: 10px; margin-bottom: 20px; }
@@ -209,8 +145,8 @@
         @media (max-width: 800px) {
             body { padding: 60px 20px; }
             .wheel-container { width: 100%; max-width: 600px; height: auto; aspect-ratio: 600/400; }
-            .wheel-prediction { width: 170px; height: 100px; }
-            .waiting-mode .waiting-text, .skip-mode .waiting-text { font-size: 11px; }
+            .prediction-text { font-size: 20px; white-space: nowrap; }
+            .prediction-small { font-size: 10px; }
         }
     </style>
 </head>
@@ -243,7 +179,7 @@
 
 <script>
     // ============================================================
-    // PATTERN LEARNING SYSTEM - Learns which patterns to skip
+    // ROULETTE PREDICTION WITH DYNAMIC SKIP (FROM YOUR EXAMPLE)
     // ============================================================
     (function() {
         const trackContainer = document.getElementById('track');
@@ -282,74 +218,70 @@
         let wlHistory = [];
         let firstEntry = true;
         let undoStack = [];
+        let detailedResults = []; // Tracks win/loss/skip for dynamic threshold
+        
         const MAX_HISTORY = 10;
         const NEIGHBORS_ON_EACH_SIDE = 9;
+        const ACTIVATION_THRESHOLD = 10;
         
-        // ========== PATTERN MEMORY ==========
-        // Stores: patternKey -> { wins: 0, losses: 0, skip: false }
+        // Pattern memory for confidence calculation
         let patternMemory = {};
         
-        // Create a unique key from last 3 numbers
         function getPatternKey(history) {
             if (history.length < 3) return null;
-            const last3 = history.slice(-3);
-            return last3.join(',');
+            return history.slice(-3).join(',');
         }
         
-        // Learn from result (called after each prediction result)
-        function learnFromResult(patternKey, wasWin) {
-            if (!patternKey) return;
-            
-            if (!patternMemory[patternKey]) {
-                patternMemory[patternKey] = { wins: 0, losses: 0, skip: false };
-            }
-            
-            if (wasWin) {
-                patternMemory[patternKey].wins++;
-            } else {
-                patternMemory[patternKey].losses++;
-            }
-            
-            // Auto-learn: If a pattern has lost 2+ times in a row, mark to skip
-            if (patternMemory[patternKey].losses >= 2 && patternMemory[patternKey].wins === 0) {
-                patternMemory[patternKey].skip = true;
-            }
-            
-            // If pattern wins 2+ times, un-skip it (it's actually good)
-            if (patternMemory[patternKey].wins >= 2) {
-                patternMemory[patternKey].skip = false;
-            }
-            
-            // Keep memory size manageable (max 100 patterns)
-            const keys = Object.keys(patternMemory);
-            if (keys.length > 100) {
-                delete patternMemory[keys[0]];
-            }
-        }
-        
-        // Check if current pattern should be skipped
-        function shouldSkipPattern(history) {
-            if (history.length < 3) return false;
+        // Natural pattern confidence (win rate)
+        function getPatternConfidence(history) {
+            if (history.length < 3) return 50;
             const patternKey = getPatternKey(history);
-            if (patternKey && patternMemory[patternKey] && patternMemory[patternKey].skip) {
-                return true;
-            }
-            return false;
+            if (!patternKey || !patternMemory[patternKey]) return 50;
+            
+            const p = patternMemory[patternKey];
+            const total = p.wins + p.losses;
+            if (total === 0) return 50;
+            return (p.wins / total) * 100;
         }
         
-        // Get pattern status for display
-        function getPatternStatus(history) {
-            if (history.length < 3) return null;
-            const patternKey = getPatternKey(history);
-            if (patternKey && patternMemory[patternKey]) {
-                const p = patternMemory[patternKey];
-                if (p.skip) return `⚠️ SKIP PATTERN (${p.losses} losses)`;
-                if (p.wins > 0) return `✅ GOOD PATTERN (${p.wins} wins)`;
+        // ========== DYNAMIC SKIP THRESHOLD (FROM YOUR EXAMPLE) ==========
+        function getDynamicSkipThreshold() {
+            let baseThreshold = 60;
+            
+            // Analyze recent results (last 5 non-skip rounds)
+            const recentResults = detailedResults.slice(-5).filter(r => r.type !== 'skip');
+            const recentLosses = recentResults.filter(r => r.type === 'loss').length;
+            const recentWins = recentResults.filter(r => r.type === 'win').length;
+            
+            // Dynamic adjustment based on streak (YOUR LOGIC)
+            if (recentLosses >= 3) {
+                // On losing streak: lower threshold to be more aggressive
+                baseThreshold = 52;
+            } else if (recentWins >= 3 && recentResults.length >= 3) {
+                // On winning streak: raise threshold to protect gains
+                baseThreshold = 68;
+            } else if (recentLosses >= 2) {
+                baseThreshold = 56;
+            } else if (recentWins >= 2) {
+                baseThreshold = 64;
             }
-            return null;
+            
+            // Adjust based on overall win rate
+            const totalDecisions = wlHistory.length;
+            if (totalDecisions > 10) {
+                const wins = wlHistory.filter(r => r === 'W').length;
+                const winRate = wins / totalDecisions;
+                if (winRate < 0.45) {
+                    baseThreshold = Math.max(50, baseThreshold - 5);
+                } else if (winRate > 0.55) {
+                    baseThreshold = Math.min(75, baseThreshold + 5);
+                }
+            }
+            
+            return baseThreshold;
         }
         
-        // ORIGINAL PREDICTION FUNCTION (unchanged)
+        // ========== ORIGINAL PREDICTION FUNCTION ==========
         function predictNextNumber(historyArray) {
             if (!historyArray || historyArray.length < MAX_HISTORY) return null;
             const last10 = historyArray.slice(-MAX_HISTORY);
@@ -395,21 +327,43 @@
             return bestNumber;
         }
         
+        // Calculate prediction with confidence
+        function getPredictionWithConfidence() {
+            if (numberHistory.length < MAX_HISTORY) {
+                return { prediction: null, confidence: 0 };
+            }
+            
+            const confidence = getPatternConfidence(numberHistory);
+            const predicted = predictNextNumber(numberHistory);
+            
+            return {
+                prediction: predicted,
+                confidence: confidence,
+                occurrences: patternMemory[getPatternKey(numberHistory)] ? 
+                    patternMemory[getPatternKey(numberHistory)].wins + patternMemory[getPatternKey(numberHistory)].losses : 0
+            };
+        }
+        
+        // Should we show prediction? (USING YOUR DYNAMIC THRESHOLD)
+        function shouldShowPrediction() {
+            if (numberHistory.length < ACTIVATION_THRESHOLD) return false;
+            
+            const { confidence, occurrences } = getPredictionWithConfidence();
+            const dynamicThreshold = getDynamicSkipThreshold();
+            
+            // Your logic: show only if confidence >= dynamic threshold
+            return confidence >= dynamicThreshold;
+        }
+        
         function applyPredictionGlow() {
             numbers.forEach(n => n.classList.remove('neighbor', 'center'));
             
-            if (numberHistory.length < MAX_HISTORY) return;
+            if (!shouldShowPrediction()) return;
             
-            // NEW: Check if this pattern should be skipped
-            if (shouldSkipPattern(numberHistory)) {
-                // Pattern is known bad - don't show prediction
-                return;
-            }
+            const { prediction } = getPredictionWithConfidence();
+            if (prediction === null) return;
             
-            const predicted = predictNextNumber(numberHistory);
-            if (predicted === null) return;
-            
-            let centerIndex = wheelNumbers.indexOf(predicted);
+            let centerIndex = wheelNumbers.indexOf(prediction);
             if (centerIndex === -1) return;
             
             numbers[centerIndex].classList.add('center');
@@ -418,6 +372,29 @@
                 numbers[leftIdx].classList.add('neighbor');
                 const rightIdx = (centerIndex + i) % wheelNumbers.length;
                 numbers[rightIdx].classList.add('neighbor');
+            }
+        }
+        
+        function learnFromResult(wasWin) {
+            if (numberHistory.length < 3) return;
+            
+            const patternKey = getPatternKey(numberHistory.slice(0, -1)); // pattern BEFORE this result
+            if (!patternKey) return;
+            
+            if (!patternMemory[patternKey]) {
+                patternMemory[patternKey] = { wins: 0, losses: 0 };
+            }
+            
+            if (wasWin) {
+                patternMemory[patternKey].wins++;
+            } else {
+                patternMemory[patternKey].losses++;
+            }
+            
+            // Keep memory size manageable
+            const keys = Object.keys(patternMemory);
+            if (keys.length > 100) {
+                delete patternMemory[keys[0]];
             }
         }
         
@@ -455,27 +432,30 @@
         }
         
         function addResult(value) {
-            // Store pattern BEFORE adding new number (current pattern)
-            const currentPattern = numberHistory.length >= 3 ? getPatternKey(numberHistory) : null;
-            
             undoStack.push({
                 numberHistory: [...numberHistory],
                 wlHistory: [...wlHistory],
                 firstEntry: firstEntry,
-                patternMemory: JSON.parse(JSON.stringify(patternMemory))
+                patternMemory: JSON.parse(JSON.stringify(patternMemory)),
+                detailedResults: [...detailedResults]
             });
             
             const isWin = isWinBasedOnCurrentPrediction(value);
+            const hadPrediction = shouldShowPrediction();
+            
             numberHistory.push(value);
             
             if (!firstEntry && numberHistory.length > MAX_HISTORY) {
-                wlHistory.push(isWin ? 'W' : 'L');
-                if (wlHistory.length > MAX_HISTORY) wlHistory.shift();
-                
-                // LEARN: Record whether this pattern led to win or loss
-                if (currentPattern && numberHistory.length > MAX_HISTORY) {
-                    learnFromResult(currentPattern, isWin);
+                if (hadPrediction) {
+                    wlHistory.push(isWin ? 'W' : 'L');
+                    detailedResults.push({ type: isWin ? 'win' : 'loss' });
+                    learnFromResult(isWin);
+                } else {
+                    detailedResults.push({ type: 'skip' });
                 }
+                
+                if (wlHistory.length > MAX_HISTORY) wlHistory.shift();
+                if (detailedResults.length > 50) detailedResults.shift();
             }
             if (firstEntry) firstEntry = false;
             
@@ -483,7 +463,7 @@
             renderHistories();
             
             if (typeof window.updateDisplay === 'function') {
-                window.updateDisplay(numberHistory, wlHistory, patternMemory);
+                window.updateDisplay(numberHistory, wlHistory, getPredictionWithConfidence().confidence, shouldShowPrediction());
             }
         }
         
@@ -493,10 +473,11 @@
             firstEntry = true;
             undoStack = [];
             patternMemory = {};
+            detailedResults = [];
             numbers.forEach(n => n.classList.remove('neighbor', 'center'));
             renderHistories();
             if (typeof window.updateDisplay === 'function') {
-                window.updateDisplay(numberHistory, wlHistory, patternMemory);
+                window.updateDisplay(numberHistory, wlHistory, 0, false);
             }
         }
         
@@ -507,10 +488,11 @@
             wlHistory = s.wlHistory;
             firstEntry = s.firstEntry;
             patternMemory = s.patternMemory || {};
+            detailedResults = s.detailedResults || [];
             applyPredictionGlow();
             renderHistories();
             if (typeof window.updateDisplay === 'function') {
-                window.updateDisplay(numberHistory, wlHistory, patternMemory);
+                window.updateDisplay(numberHistory, wlHistory, getPredictionWithConfidence().confidence, shouldShowPrediction());
             }
         }
         
@@ -538,12 +520,11 @@
         renderHistories();
     })();
     
-    // ========== SMART DISPLAY - Shows pattern learning status ==========
+    // ========== DISPLAY WITH DYNAMIC STATES ==========
     (function() {
         const predictionInner = document.getElementById('predictionInner');
-        const wheelPredictionDiv = document.getElementById('wheelPrediction');
-        let currentHistory = [];
         const REQUIRED_SPINS = 10;
+        let currentHistory = [];
         
         function computeRealAccuracy(wlArray) {
             if (!wlArray || wlArray.length < 3) return null;
@@ -552,109 +533,57 @@
             return Math.min(95, Math.max(65, Math.round(rate)));
         }
         
-        function getPatternDisplay(history) {
-            if (history.length < 3) return null;
-            const last3 = history.slice(-3);
-            const patternKey = last3.join(',');
-            
-            // Access pattern memory from global
-            if (window.patternMemory && window.patternMemory[patternKey]) {
-                const p = window.patternMemory[patternKey];
-                if (p.skip) return `🔴 SKIP: ${last3.join('-')}`;
-                if (p.wins > 0) return `🟢 GOOD: ${last3.join('-')}`;
-            }
-            return `🟡 NEW: ${last3.join('-')}`;
-        }
-        
-        function renderDisplay(historyLength, wlHistory, patternMem) {
+        function renderDisplay(historyLength, wlHistory, confidence, hasGlow) {
             if (!predictionInner) return;
             
-            // Store pattern memory globally for access
-            window.patternMemory = patternMem;
-            
             if (historyLength < REQUIRED_SPINS) {
-                wheelPredictionDiv.classList.remove('glow-prediction');
-                wheelPredictionDiv.classList.add('waiting-mode');
-                const percent = Math.min(100, Math.floor((historyLength / REQUIRED_SPINS) * 100));
                 predictionInner.innerHTML = `
-                    <div class="pred-loading">
-                        <div class="loading-text">📊 LEARNING PATTERNS...</div>
-                        <div class="progress-bar-mini">
-                            <div class="progress-fill-mini" style="width: ${percent}%;"></div>
-                        </div>
-                        <div style="font-size: 10px; margin-top: 6px; opacity: 0.7;">${historyLength}/${REQUIRED_SPINS} spins</div>
-                    </div>
+                    <div class="prediction-text">ANALYZING</div>
+                    <div class="prediction-small">${historyLength}/${REQUIRED_SPINS} SPINS</div>
                 `;
                 return;
             }
             
-            // Check if prediction is active (glowing on wheel)
-            const hasGlow = document.querySelectorAll('.num.center, .num.neighbor').length > 0;
-            const patternDisplay = getPatternDisplay(window.currentHistoryArray || []);
-            
             if (!hasGlow) {
-                // Check if it's a SKIP pattern or just low confidence
-                const isSkipPattern = patternDisplay && patternDisplay.includes('SKIP');
-                
-                if (isSkipPattern) {
-                    wheelPredictionDiv.classList.remove('glow-prediction');
-                    wheelPredictionDiv.classList.add('skip-mode');
-                    predictionInner.innerHTML = `
-                        <div class="waiting-text">🚫 PATTERN SKIPPED</div>
-                        <div class="small-text">${patternDisplay} → historically loses</div>
-                        <div class="small-text">Continue entering numbers...</div>
-                    `;
-                } else {
-                    wheelPredictionDiv.classList.remove('glow-prediction');
-                    wheelPredictionDiv.classList.add('waiting-mode');
-                    predictionInner.innerHTML = `
-                        <div class="waiting-text">⏳ ANALYZING PATTERN</div>
-                        <div class="small-text">${patternDisplay || 'Learning...'}</div>
-                        <div class="small-text">Prediction will appear when confident</div>
-                    `;
-                }
+                predictionInner.innerHTML = `
+                    <div class="prediction-text">WAITING</div>
+                    <div class="prediction-small">PATTERN DETECTION</div>
+                `;
                 return;
             }
             
-            // Prediction is active - show confidence
             let accuracy = computeRealAccuracy(wlHistory);
-            if (!accuracy) accuracy = 82;
+            if (!accuracy) accuracy = Math.round(confidence || 82);
             
-            let statusText = "";
-            if (patternDisplay && patternDisplay.includes('GOOD')) statusText = "⚡ OPTIMAL";
-            else if (patternDisplay && patternDisplay.includes('NEW')) statusText = "🎯 LEARNING";
-            else statusText = "📈 ACTIVE";
-            
-            wheelPredictionDiv.classList.remove('waiting-mode', 'skip-mode');
-            wheelPredictionDiv.classList.add('glow-prediction');
             predictionInner.innerHTML = `
-                <div class="pred-percentage">${accuracy}%</div>
-                <div class="pred-label">TREND ACCURACY • ${statusText}</div>
+                <div class="prediction-text glow-text">${accuracy}%</div>
+                <div class="prediction-small">TREND ACCURACY</div>
             `;
         }
         
-        window.updateDisplay = function(history, wlHistory, patternMemory) {
-            window.currentHistoryArray = history;
-            renderDisplay(history ? history.length : 0, wlHistory || [], patternMemory || {});
+        window.updateDisplay = function(history, wlHistory, confidence, hasGlow) {
+            currentHistory = history || [];
+            renderDisplay(history ? history.length : 0, wlHistory || [], confidence, hasGlow);
         };
         
-        renderDisplay(0, [], {});
+        renderDisplay(0, [], 0, false);
         
-        // Watch for changes
         const observer = new MutationObserver(() => {
-            if (window.currentHistoryArray && window.currentHistoryArray.length >= REQUIRED_SPINS) {
+            if (currentHistory.length >= REQUIRED_SPINS) {
                 const wlElements = document.querySelectorAll('#wlHistory .history-wl');
                 const wlArray = Array.from(wlElements).map(el => el.textContent);
-                renderDisplay(window.currentHistoryArray.length, wlArray, window.patternMemory || {});
+                const hasGlow = document.querySelectorAll('.num.center, .num.neighbor').length > 0;
+                renderDisplay(currentHistory.length, wlArray, 0, hasGlow);
             }
         });
         observer.observe(document.getElementById('wlHistory'), { childList: true, subtree: true });
         
         const wheelObserver = new MutationObserver(() => {
-            if (window.currentHistoryArray && window.currentHistoryArray.length >= REQUIRED_SPINS) {
+            if (currentHistory.length >= REQUIRED_SPINS) {
                 const wlElements = document.querySelectorAll('#wlHistory .history-wl');
                 const wlArray = Array.from(wlElements).map(el => el.textContent);
-                renderDisplay(window.currentHistoryArray.length, wlArray, window.patternMemory || {});
+                const hasGlow = document.querySelectorAll('.num.center, .num.neighbor').length > 0;
+                renderDisplay(currentHistory.length, wlArray, 0, hasGlow);
             }
         });
         wheelObserver.observe(document.getElementById('track'), { attributes: true, subtree: true, attributeFilter: ['class'] });
