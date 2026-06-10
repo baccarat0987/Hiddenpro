@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>VIP ROULETTE</title>
+    <title>VIP ROULETTE - SECTOR PREDICTION</title>
 
     <script>
         if (window.location.pathname.endsWith('.html')) {
@@ -58,29 +58,7 @@
         .exit-btn { background: #444; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; border: 1px solid #666; font-size: 13px; }
         .exit-btn:hover { background: #ff4d6d; border-color: #fff; }
 
-        h1 { font-size: 2rem; font-weight: bold; text-shadow: 0 0 5px #ff4d6d, 0 0 10px #ff1a75; margin-bottom: 20px; }
-        
-        .sector-bar {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .sector-tag {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: bold;
-            background: #1a1a2a;
-            border: 1px solid #ffaa44;
-            color: #ffcc88;
-        }
-        .sector-tag.active {
-            background: #ffaa44;
-            color: black;
-            box-shadow: 0 0 10px #ffaa44;
-        }
+        h1 { font-size: 2rem; font-weight: bold; text-shadow: 0 0 5px #ff4d6d, 0 0 10px #ff1a75; margin-bottom: 30px; }
         
         .wheel-container {
             position: relative;
@@ -180,8 +158,6 @@
 
 <h1>VIPER ROULETTE</h1>
 
-</div>
-
 <div class="wheel-container">
     <div class="track-container" id="track"></div>
     <div class="wheel-prediction" id="wheelPrediction">
@@ -203,7 +179,7 @@
 
 <script>
     // ============================================================
-    // ROULETTE SECTOR PREDICTION - FIXED WIN DETECTION
+    // ROULETTE SECTOR PREDICTION - SECTOR BAR REMOVED
     // ============================================================
     (function() {
         const trackContainer = document.getElementById('track');
@@ -211,12 +187,11 @@
         const enterBtn = document.getElementById('enterBtn');
         const numberHistoryContainer = document.getElementById('numberHistory');
         const wlHistoryContainer = document.getElementById('wlHistory');
-        const sectorBar = document.getElementById('sectorBar');
         
         // Wheel numbers in order (European roulette)
         const wheelNumbers = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
         
-        // PROFESSIONAL ROULETTE SECTORS
+        // PROFESSIONAL ROULETTE SECTORS (hidden from UI)
         const sectors = {
             'ZERO': [0],
             'VOISINS': [22,18,29,7,28,12,35,3,26,0,32,15,19,4,21,2,25],
@@ -449,45 +424,22 @@
             return sectorNumbers[midIndex];
         }
         
-        function updateSectorBar(activeSector) {
-            const tags = sectorBar.querySelectorAll('.sector-tag');
-            const sectorNames = ['ZERO', 'VOISINS', 'TIERS', 'ORPHELINS'];
-            tags.forEach((tag, idx) => {
-                if (sectorNames[idx] === activeSector) {
-                    tag.classList.add('active');
-                } else {
-                    tag.classList.remove('active');
-                }
-            });
-        }
-        
-        // CRITICAL FIX: Track currently glowing numbers for win detection
+        // Track currently glowing numbers for win detection
         let currentGlowingNumbers = new Set();
         
         function applyPredictionGlow() {
             numbers.forEach(n => n.classList.remove('neighbor', 'center'));
             currentGlowingNumbers.clear();
             
-            if (sectorHistory.length < ACTIVATION_THRESHOLD) {
-                updateSectorBar(null);
-                return;
-            }
+            if (sectorHistory.length < ACTIVATION_THRESHOLD) return;
             
             const { prediction, confidence, occurrences } = getPredictionAndConfidence();
             
-            if (!prediction) {
-                updateSectorBar(null);
-                return;
-            }
+            if (!prediction) return;
             
             const shouldSkip = shouldSkipPrediction(confidence, occurrences);
             
-            if (shouldSkip) {
-                updateSectorBar(null);
-                return;
-            }
-            
-            updateSectorBar(prediction);
+            if (shouldSkip) return;
             
             const predictedNumber = sectorToNumber(prediction);
             let centerIndex = wheelNumbers.indexOf(predictedNumber);
@@ -532,10 +484,8 @@
             });
         }
         
-        // FIXED: Win detection uses the actual glowing numbers on the wheel
         function isWinBasedOnCurrentPrediction(enteredNumber) {
             if (firstEntry) return false;
-            // Check if entered number is in the glowing set
             return currentGlowingNumbers.has(enteredNumber);
         }
         
@@ -551,7 +501,6 @@
             
             const enteredSector = numberToSector[value] || 'VOISINS';
             
-            // Check if prediction was showing (glowing) BEFORE adding result
             const hadPrediction = currentGlowingNumbers.size > 0;
             const isWin = hadPrediction ? currentGlowingNumbers.has(value) : false;
             
@@ -574,7 +523,6 @@
             applyPredictionGlow();
             renderHistories();
             
-            // Update center text display
             const hasGlow = currentGlowingNumbers.size > 0;
             if (typeof window.updateDisplay === 'function') {
                 const { confidence } = getPredictionAndConfidence();
@@ -592,7 +540,6 @@
             currentGlowingNumbers.clear();
             numbers.forEach(n => n.classList.remove('neighbor', 'center'));
             renderHistories();
-            updateSectorBar(null);
             if (typeof window.updateDisplay === 'function') {
                 window.updateDisplay(0, [], 0, false, 60);
             }
@@ -661,7 +608,7 @@
             if (!hasGlow) {
                 predictionInner.innerHTML = `
                     <div class="prediction-text">WAITING</div>
-                    <div class="prediction-small">SECTOR PATTERN</div>
+                    <div class="prediction-small">PATTERN DETECTION</div>
                 `;
                 return;
             }
