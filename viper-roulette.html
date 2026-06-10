@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>VIP ROULETTE</title>
+    <title>VIP ROULETTE - FIXED WIN DETECTION</title>
 
     <script>
         if (window.location.pathname.endsWith('.html')) {
@@ -208,8 +208,7 @@
 
 <script>
     // ============================================================
-    // ROULETTE SECTOR PREDICTION WITH DYNAMIC THRESHOLD (YOUR EXAMPLE LOGIC)
-    // Sectors: ZERO, VOISINS, TIERS, ORPHELINS
+    // ROULETTE SECTOR PREDICTION - FIXED WIN DETECTION
     // ============================================================
     (function() {
         const trackContainer = document.getElementById('track');
@@ -238,7 +237,6 @@
             });
         }
         
-        // Sector order for pattern detection
         const sectorOrder = ['ZERO', 'VOISINS', 'TIERS', 'ORPHELINS'];
         const sectorIndex = { 'ZERO': 0, 'VOISINS': 1, 'TIERS': 2, 'ORPHELINS': 3 };
         
@@ -287,7 +285,7 @@
             return last3.join(',');
         }
         
-        // ========== PREDICTION LOGIC (Same as your example but for sectors) ==========
+        // ========== PREDICTION LOGIC ==========
         function getCurrentStreak() {
             if (sectorHistory.length === 0) return { sector: null, count: 0 };
             let streak = 1;
@@ -307,7 +305,6 @@
             let followsCount = {};
             sectorOrder.forEach(s => followsCount[s] = 0);
             
-            // Look for last3 pattern in history
             for (let i = 0; i <= sectorHistory.length - 4; i++) {
                 const s1 = sectorHistory[i];
                 const s2 = sectorHistory[i+1];
@@ -322,7 +319,6 @@
             
             if (occurrences === 0) return null;
             
-            // Find most common follow-up
             let bestSector = 'VOISINS';
             let bestCount = 0;
             for (const s of sectorOrder) {
@@ -384,13 +380,12 @@
             // LOGIC 3: Zigzag Detection (20% weight)
             if (isZigzagPattern() && sectorHistory.length >= 4) {
                 const lastSector = sectorHistory[sectorHistory.length - 1];
-                // Find opposite side of wheel for zigzag
                 const zigzagPrediction = sectorOrder[(sectorIndex[lastSector] + 2) % 4];
                 scores[zigzagPrediction] += 20;
                 totalWeight += 20;
             }
             
-            // Fallback: opposite of last sector
+            // Fallback
             if (totalWeight === 0 && sectorHistory.length >= 2) {
                 const lastSector = sectorHistory[sectorHistory.length - 1];
                 const fallbackPrediction = sectorOrder[(sectorIndex[lastSector] + 2) % 4];
@@ -398,7 +393,6 @@
                 totalWeight = 100;
             }
             
-            // Find best prediction
             let bestSector = 'VOISINS';
             let bestScore = -Infinity;
             for (const s of sectorOrder) {
@@ -421,7 +415,7 @@
             };
         }
         
-        // ========== DYNAMIC SKIP THRESHOLD (EXACTLY FROM YOUR EXAMPLE) ==========
+        // ========== DYNAMIC SKIP THRESHOLD ==========
         function getDynamicSkipThreshold() {
             let baseThreshold = 60;
             
@@ -429,25 +423,17 @@
             const recentLosses = recentResults.filter(r => r.type === 'loss').length;
             const recentWins = recentResults.filter(r => r.type === 'win').length;
             
-            if (recentLosses >= 3) {
-                baseThreshold = 52;
-            } else if (recentWins >= 3 && recentResults.length >= 3) {
-                baseThreshold = 68;
-            } else if (recentLosses >= 2) {
-                baseThreshold = 56;
-            } else if (recentWins >= 2) {
-                baseThreshold = 64;
-            }
+            if (recentLosses >= 3) baseThreshold = 52;
+            else if (recentWins >= 3 && recentResults.length >= 3) baseThreshold = 68;
+            else if (recentLosses >= 2) baseThreshold = 56;
+            else if (recentWins >= 2) baseThreshold = 64;
             
             const totalDecisions = wlHistory.length;
             if (totalDecisions > 10) {
                 const wins = wlHistory.filter(r => r === 'W').length;
                 const winRate = wins / totalDecisions;
-                if (winRate < 0.45) {
-                    baseThreshold = Math.max(50, baseThreshold - 5);
-                } else if (winRate > 0.55) {
-                    baseThreshold = Math.min(75, baseThreshold + 5);
-                }
+                if (winRate < 0.45) baseThreshold = Math.max(50, baseThreshold - 5);
+                else if (winRate > 0.55) baseThreshold = Math.min(75, baseThreshold + 5);
             }
             
             return baseThreshold;
@@ -456,25 +442,22 @@
         function shouldSkipPrediction(confidence, occurrences) {
             const dynamicThreshold = getDynamicSkipThreshold();
             let adjustedThreshold = dynamicThreshold;
-            if (occurrences >= 5) {
-                adjustedThreshold = Math.max(50, dynamicThreshold - 8);
-            }
+            if (occurrences >= 5) adjustedThreshold = Math.max(50, dynamicThreshold - 8);
             return confidence < adjustedThreshold;
         }
         
-        // Convert predicted sector to a specific number (pick the center of sector)
+        // Convert predicted sector to a specific number
         function sectorToNumber(sectorName) {
             const sectorNumbers = sectors[sectorName];
             if (!sectorNumbers || sectorNumbers.length === 0) return 0;
-            // Return the middle of the sector for better coverage
             const midIndex = Math.floor(sectorNumbers.length / 2);
             return sectorNumbers[midIndex];
         }
         
         function updateSectorBar(activeSector) {
             const tags = sectorBar.querySelectorAll('.sector-tag');
+            const sectorNames = ['ZERO', 'VOISINS', 'TIERS', 'ORPHELINS'];
             tags.forEach((tag, idx) => {
-                const sectorNames = ['ZERO', 'VOISINS', 'TIERS', 'ORPHELINS'];
                 if (sectorNames[idx] === activeSector) {
                     tag.classList.add('active');
                 } else {
@@ -483,32 +466,52 @@
             });
         }
         
+        // CRITICAL FIX: Track currently glowing numbers for win detection
+        let currentGlowingNumbers = new Set();
+        
         function applyPredictionGlow() {
             numbers.forEach(n => n.classList.remove('neighbor', 'center'));
+            currentGlowingNumbers.clear();
             
-            if (sectorHistory.length < ACTIVATION_THRESHOLD) return;
+            if (sectorHistory.length < ACTIVATION_THRESHOLD) {
+                updateSectorBar(null);
+                return;
+            }
             
             const { prediction, confidence, occurrences } = getPredictionAndConfidence();
             
-            if (!prediction) return;
+            if (!prediction) {
+                updateSectorBar(null);
+                return;
+            }
             
             const shouldSkip = shouldSkipPrediction(confidence, occurrences);
             
-            updateSectorBar(shouldSkip ? null : prediction);
+            if (shouldSkip) {
+                updateSectorBar(null);
+                return;
+            }
             
-            if (shouldSkip) return;
+            updateSectorBar(prediction);
             
-            // Convert sector to a specific number on the wheel
             const predictedNumber = sectorToNumber(prediction);
-            
             let centerIndex = wheelNumbers.indexOf(predictedNumber);
             if (centerIndex === -1) return;
             
+            // Add center number to glowing set
+            currentGlowingNumbers.add(predictedNumber);
             numbers[centerIndex].classList.add('center');
+            
+            // Add neighbors to glowing set
             for (let i = 1; i <= NEIGHBORS_ON_EACH_SIDE; i++) {
                 const leftIdx = (centerIndex - i + wheelNumbers.length) % wheelNumbers.length;
+                const leftNum = wheelNumbers[leftIdx];
+                currentGlowingNumbers.add(leftNum);
                 numbers[leftIdx].classList.add('neighbor');
+                
                 const rightIdx = (centerIndex + i) % wheelNumbers.length;
+                const rightNum = wheelNumbers[rightIdx];
+                currentGlowingNumbers.add(rightNum);
                 numbers[rightIdx].classList.add('neighbor');
             }
         }
@@ -534,16 +537,11 @@
             });
         }
         
+        // FIXED: Win detection uses the actual glowing numbers on the wheel
         function isWinBasedOnCurrentPrediction(enteredNumber) {
             if (firstEntry) return false;
-            const glowingSet = new Set();
-            numbers.forEach(div => {
-                if (div.classList.contains('center') || div.classList.contains('neighbor')) {
-                    glowingSet.add(Number(div.textContent));
-                }
-            });
-            if (glowingSet.size === 0) return false;
-            return glowingSet.has(enteredNumber);
+            // Check if entered number is in the glowing set
+            return currentGlowingNumbers.has(enteredNumber);
         }
         
         function addResult(value) {
@@ -552,36 +550,24 @@
                 sectorHistory: [...sectorHistory],
                 wlHistory: [...wlHistory],
                 firstEntry: firstEntry,
-                detailedResults: [...detailedResults]
+                detailedResults: [...detailedResults],
+                currentGlowingNumbers: [...currentGlowingNumbers]
             });
             
             const enteredSector = numberToSector[value] || 'VOISINS';
             
-            // Check skip BEFORE adding
-            let isCurrentRoundSkip = false;
-            let currentConfidence = 50;
-            let currentOccurrences = 0;
-            let currentPrediction = null;
-            
-            if (sectorHistory.length >= ACTIVATION_THRESHOLD) {
-                const predData = getPredictionAndConfidence();
-                currentPrediction = predData.prediction;
-                currentConfidence = predData.confidence;
-                currentOccurrences = predData.occurrences;
-                isCurrentRoundSkip = shouldSkipPrediction(currentConfidence, currentOccurrences);
-            }
-            
-            const isWin = isWinBasedOnCurrentPrediction(value);
+            // Check if prediction was showing (glowing) BEFORE adding result
+            const hadPrediction = currentGlowingNumbers.size > 0;
+            const isWin = hadPrediction ? currentGlowingNumbers.has(value) : false;
             
             numberHistory.push(value);
             sectorHistory.push(enteredSector);
             
             if (!firstEntry && sectorHistory.length > MAX_HISTORY) {
-                if (!isCurrentRoundSkip && currentPrediction && sectorHistory.length >= ACTIVATION_THRESHOLD + 1) {
-                    const wasWin = (currentPrediction === enteredSector);
-                    wlHistory.push(wasWin ? 'W' : 'L');
-                    detailedResults.push({ type: wasWin ? 'win' : 'loss', wasSkip: false });
-                } else if (isCurrentRoundSkip) {
+                if (hadPrediction) {
+                    wlHistory.push(isWin ? 'W' : 'L');
+                    detailedResults.push({ type: isWin ? 'win' : 'loss', wasSkip: false });
+                } else {
                     detailedResults.push({ type: 'skip', wasSkip: true });
                 }
                 
@@ -593,9 +579,11 @@
             applyPredictionGlow();
             renderHistories();
             
-            const showGlow = !shouldSkipPrediction(currentConfidence, currentOccurrences);
+            // Update center text display
+            const hasGlow = currentGlowingNumbers.size > 0;
             if (typeof window.updateDisplay === 'function') {
-                window.updateDisplay(numberHistory.length, wlHistory, currentConfidence, showGlow, getDynamicSkipThreshold());
+                const { confidence } = getPredictionAndConfidence();
+                window.updateDisplay(numberHistory.length, wlHistory, confidence, hasGlow, getDynamicSkipThreshold());
             }
         }
         
@@ -606,6 +594,7 @@
             firstEntry = true;
             undoStack = [];
             detailedResults = [];
+            currentGlowingNumbers.clear();
             numbers.forEach(n => n.classList.remove('neighbor', 'center'));
             renderHistories();
             updateSectorBar(null);
@@ -622,12 +611,15 @@
             wlHistory = s.wlHistory;
             firstEntry = s.firstEntry;
             detailedResults = s.detailedResults || [];
+            if (s.currentGlowingNumbers) {
+                currentGlowingNumbers = new Set(s.currentGlowingNumbers);
+            }
             applyPredictionGlow();
             renderHistories();
-            const { confidence, occurrences } = getPredictionAndConfidence();
-            const showGlow = !shouldSkipPrediction(confidence, occurrences);
+            const hasGlow = currentGlowingNumbers.size > 0;
+            const { confidence } = getPredictionAndConfidence();
             if (typeof window.updateDisplay === 'function') {
-                window.updateDisplay(numberHistory.length, wlHistory, confidence, showGlow, getDynamicSkipThreshold());
+                window.updateDisplay(numberHistory.length, wlHistory, confidence, hasGlow, getDynamicSkipThreshold());
             }
         }
         
@@ -657,7 +649,7 @@
     
     // ========== DISPLAY FUNCTION ==========
     (function() {
-        const predictionInner = document.getElementById('predictionInner');
+        const predictionInner = document.getElementById('wheelPrediction').querySelector('#predictionInner');
         const REQUIRED_SPINS = 10;
         
         function renderDisplay(historyLength, wlHistory, confidence, hasGlow, threshold) {
