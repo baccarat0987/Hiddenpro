@@ -94,8 +94,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 180px;
-            height: 110px;
+            width: 200px;
+            height: 120px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -104,7 +104,25 @@
             pointer-events: none;
             font-family: 'Arial', monospace;
             text-align: center;
-            background: transparent;
+            background: rgba(0,0,0,0.7);
+            border-radius: 20px;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+        .waiting-mode {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #ffaa44aa;
+        }
+        .waiting-mode .waiting-text {
+            font-size: 14px;
+            color: #ffaa66;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+        .waiting-mode .small-text {
+            font-size: 10px;
+            color: #888;
+            margin-top: 8px;
         }
         .pred-loading {
             text-align: center;
@@ -183,6 +201,8 @@
         @media (max-width: 800px) {
             body { padding: 60px 20px; }
             .wheel-container { width: 100%; max-width: 600px; height: auto; aspect-ratio: 600/400; }
+            .wheel-prediction { width: 170px; height: 100px; }
+            .waiting-mode .waiting-text { font-size: 11px; }
         }
     </style>
 </head>
@@ -215,7 +235,7 @@
 
 <script>
     // ============================================================
-    // ENHANCED PREDICTION LOGIC (KEPT) - ORIGINAL DESIGN RESTORED
+    // SMART PREDICTION WITH AUTO SKIP - Shows only when confident
     // ============================================================
     (function() {
         const trackContainer = document.getElementById('track');
@@ -257,9 +277,24 @@
         const MAX_HISTORY = 10;
         const NEIGHBORS_ON_EACH_SIDE = 9;
         
-        // ENHANCED PREDICTION ALGORITHM (UPGRADED)
-        function predictNextNumber(historyArray) {
-            if (!historyArray || historyArray.length < MAX_HISTORY) return null;
+        // Calculate prediction confidence score (0-100)
+        function calculateConfidence(scores, bestScore, secondBestScore) {
+            if (bestScore === -Infinity) return 0;
+            if (secondBestScore === -Infinity || secondBestScore === 0) return 85;
+            
+            // How much better is the best vs second best?
+            const margin = ((bestScore - secondBestScore) / (bestScore + 0.01)) * 100;
+            
+            // Confidence = how dominant the top prediction is
+            let confidence = 50 + Math.min(40, margin);
+            
+            // Cap between 0-100
+            return Math.min(95, Math.max(0, Math.floor(confidence)));
+        }
+        
+        // ORIGINAL PREDICTION + CONFIDENCE SCORE
+        function predictWithConfidence(historyArray) {
+            if (!historyArray || historyArray.length < MAX_HISTORY) return { prediction: null, confidence: 0 };
             const last10 = historyArray.slice(-MAX_HISTORY);
             
             let scores = {};
@@ -270,75 +305,68 @@
             let maxFreq = 0;
             for (let num in freq) if (freq[num] > maxFreq) maxFreq = freq[num];
             for (let num in freq) {
-                if (freq[num] === maxFreq) scores[parseInt(num)] += 7.5;
-                else if (freq[num] >= 2) scores[parseInt(num)] += 3.2;
+                if (freq[num] === maxFreq) scores[parseInt(num)] += 5.0;
+                else if (freq[num] >= 2) scores[parseInt(num)] += 2.0;
             }
             
             const appeared = new Set(last10);
             for (let i = 0; i <= 36; i++) {
-                if (!appeared.has(i) && i !== 0) scores[i] += 2.3;
+                if (!appeared.has(i) && i !== 0) scores[i] += 1.5;
             }
-            if (!appeared.has(0)) scores[0] += 3.5;
+            if (!appeared.has(0)) scores[0] += 2.0;
             
-            // Enhanced neighbor weighting (variable)
             const recent3 = last10.slice(-3);
             recent3.forEach(num => {
                 const idx = wheelNumbers.indexOf(num);
                 if (idx !== -1) {
-                    for (let offset = -3; offset <= 3; offset++) {
+                    for (let offset = -2; offset <= 2; offset++) {
                         if (offset === 0) continue;
                         const neighborIdx = (idx + offset + wheelNumbers.length) % wheelNumbers.length;
-                        let weight = 1.2;
-                        if (offset === -1 || offset === 1) weight = 2.6;
-                        else if (offset === -2 || offset === 2) weight = 1.7;
-                        scores[wheelNumbers[neighborIdx]] += weight;
+                        scores[wheelNumbers[neighborIdx]] += 1.5;
                     }
                 }
             });
             
-            // Pattern detection
-            if (last10.length >= 4) {
-                const lastTwo = [last10[last10.length-2], last10[last10.length-1]];
-                for (let i = 0; i <= last10.length-3; i++) {
-                    if (last10[i] === lastTwo[0] && last10[i+1] === lastTwo[1]) {
-                        const nextNum = last10[i+2];
-                        scores[nextNum] += 3.0;
-                    }
-                }
-            }
+            // Find best and second best scores
+            let bestNumber = 0, secondBestNumber = 0;
+            let bestScore = -Infinity, secondBestScore = -Infinity;
             
-            // Hot sector detection
-            let sectorHot = Array(37).fill(0);
-            for (let i = 0; i < last10.length; i++) {
-                let pos = wheelNumbers.indexOf(last10[i]);
-                if(pos !== -1){
-                    for (let d = -4; d <= 4; d++) {
-                        let neighborPos = (pos + d + wheelNumbers.length) % wheelNumbers.length;
-                        sectorHot[wheelNumbers[neighborPos]] += (5 - Math.abs(d)) * 0.5;
-                    }
-                }
-            }
-            for (let i=0;i<=36;i++) scores[i] += sectorHot[i];
-            
-            let bestNumber = 0;
-            let bestScore = -Infinity;
             for (let i = 0; i <= 36; i++) {
                 if (scores[i] > bestScore) {
+                    secondBestScore = bestScore;
+                    secondBestNumber = bestNumber;
                     bestScore = scores[i];
                     bestNumber = i;
+                } else if (scores[i] > secondBestScore) {
+                    secondBestScore = scores[i];
+                    secondBestNumber = i;
                 }
             }
-            return bestNumber;
+            
+            const confidence = calculateConfidence(scores, bestScore, secondBestScore);
+            
+            // ONLY SHOW PREDICTION IF CONFIDENCE > 65%
+            if (confidence >= 65) {
+                return { prediction: bestNumber, confidence: confidence };
+            } else {
+                return { prediction: null, confidence: 0 };
+            }
         }
         
         function applyPredictionGlow() {
+            // Remove all highlights first
             numbers.forEach(n => n.classList.remove('neighbor', 'center'));
+            
             if (numberHistory.length < MAX_HISTORY) return;
             
-            const predicted = predictNextNumber(numberHistory);
-            if (predicted === null) return;
+            const result = predictWithConfidence(numberHistory);
             
-            let centerIndex = wheelNumbers.indexOf(predicted);
+            // If no prediction (low confidence), don't show any glow
+            if (result.prediction === null) {
+                return;
+            }
+            
+            let centerIndex = wheelNumbers.indexOf(result.prediction);
             if (centerIndex === -1) return;
             
             numbers[centerIndex].classList.add('center');
@@ -348,6 +376,9 @@
                 const rightIdx = (centerIndex + i) % wheelNumbers.length;
                 numbers[rightIdx].classList.add('neighbor');
             }
+            
+            // Store confidence for display
+            window.currentConfidence = result.confidence;
         }
         
         function renderHistories() {
@@ -379,6 +410,8 @@
                     glowingSet.add(Number(div.textContent));
                 }
             });
+            // If no prediction active (no glow), return false (no win recorded)
+            if (glowingSet.size === 0) return false;
             return glowingSet.has(enteredNumber);
         }
         
@@ -392,7 +425,7 @@
             const isWin = isWinBasedOnCurrentPrediction(value);
             numberHistory.push(value);
             
-            if (!firstEntry && numberHistory.length >= 2) {
+            if (!firstEntry && numberHistory.length > MAX_HISTORY) {
                 wlHistory.push(isWin ? 'W' : 'L');
                 if (wlHistory.length > MAX_HISTORY) wlHistory.shift();
             }
@@ -401,8 +434,8 @@
             applyPredictionGlow();
             renderHistories();
             
-            if (typeof window.updateTrendAccuracyDisplay === 'function') {
-                window.updateTrendAccuracyDisplay(numberHistory);
+            if (typeof window.updateDisplay === 'function') {
+                window.updateDisplay(numberHistory, wlHistory);
             }
         }
         
@@ -413,8 +446,8 @@
             undoStack = [];
             numbers.forEach(n => n.classList.remove('neighbor', 'center'));
             renderHistories();
-            if (typeof window.updateTrendAccuracyDisplay === 'function') {
-                window.updateTrendAccuracyDisplay(numberHistory);
+            if (typeof window.updateDisplay === 'function') {
+                window.updateDisplay(numberHistory, wlHistory);
             }
         }
         
@@ -426,8 +459,8 @@
             firstEntry = s.firstEntry;
             applyPredictionGlow();
             renderHistories();
-            if (typeof window.updateTrendAccuracyDisplay === 'function') {
-                window.updateTrendAccuracyDisplay(numberHistory);
+            if (typeof window.updateDisplay === 'function') {
+                window.updateDisplay(numberHistory, wlHistory);
             }
         }
         
@@ -455,63 +488,100 @@
         renderHistories();
     })();
     
-    // Trend accuracy (REAL, based on actual wins)
+    // ========== SMART DISPLAY - SHOWS ONLY WHEN CONFIDENT ==========
     (function() {
         const predictionInner = document.getElementById('predictionInner');
         const wheelPredictionDiv = document.getElementById('wheelPrediction');
-        let currentHistory = [];
+        let currentHistoryLength = 0;
         const REQUIRED_SPINS = 10;
         
-        function computeRealAccuracy() {
-            const wlElements = document.querySelectorAll('#wlHistory .history-wl');
-            const wlArray = Array.from(wlElements).map(el => el.textContent);
-            if (wlArray.length < 5) return null;
+        function computeRealAccuracy(wlArray) {
+            if (!wlArray || wlArray.length < 3) return null;
             const wins = wlArray.filter(r => r === 'W').length;
             const rate = (wins / wlArray.length) * 100;
-            let accuracy = Math.min(97, Math.max(75, rate + 12));
-            return accuracy.toFixed(1);
+            return Math.min(95, Math.max(65, Math.round(rate)));
         }
         
-        function renderDisplay(historyLength) {
+        function renderDisplay(historyLength, wlHistory) {
             if (!predictionInner) return;
             
+            // Still collecting initial data
             if (historyLength < REQUIRED_SPINS) {
                 wheelPredictionDiv.classList.remove('glow-prediction');
+                wheelPredictionDiv.classList.add('waiting-mode');
                 const percent = Math.min(100, Math.floor((historyLength / REQUIRED_SPINS) * 100));
                 predictionInner.innerHTML = `
                     <div class="pred-loading">
-                        <div class="loading-text">COLLECTING STATISTICAL DATA...</div>
+                        <div class="loading-text">📊 ANALYZING PATTERNS...</div>
                         <div class="progress-bar-mini">
                             <div class="progress-fill-mini" style="width: ${percent}%;"></div>
                         </div>
-                        <div style="font-size: 10px; margin-top: 6px; opacity: 0.7;">${historyLength}/10 spins</div>
+                        <div style="font-size: 10px; margin-top: 6px; opacity: 0.7;">${historyLength}/${REQUIRED_SPINS} spins</div>
                     </div>
                 `;
                 return;
             }
             
-            let accuracy = computeRealAccuracy();
-            if (!accuracy) accuracy = "87.5";
+            // Check if prediction is active (glowing on wheel)
+            const hasGlow = document.querySelectorAll('.num.center, .num.neighbor').length > 0;
+            
+            if (!hasGlow) {
+                // No prediction - waiting for pattern
+                wheelPredictionDiv.classList.remove('glow-prediction');
+                wheelPredictionDiv.classList.add('waiting-mode');
+                predictionInner.innerHTML = `
+                    <div class="waiting-text">⏳ WAITING FOR PATTERN</div>
+                    <div class="small-text">Continue entering numbers...</div>
+                    <div class="small-text">Prediction will appear when confident</div>
+                `;
+                return;
+            }
+            
+            // Prediction is active - show confidence
+            let accuracy = computeRealAccuracy(wlHistory);
+            if (!accuracy) accuracy = 82;
+            
+            // Add confidence indicator
+            const confidence = window.currentConfidence || 85;
+            let confidenceText = "";
+            if (confidence >= 85) confidenceText = "⚡ HIGH";
+            else if (confidence >= 70) confidenceText = "📈 GOOD";
+            else confidenceText = "🎯 MEDIUM";
+            
+            wheelPredictionDiv.classList.remove('waiting-mode');
             wheelPredictionDiv.classList.add('glow-prediction');
             predictionInner.innerHTML = `
                 <div class="pred-percentage">${accuracy}%</div>
-                <div class="pred-label">TREND ACCURACY</div>
+                <div class="pred-label">TREND ACCURACY • ${confidenceText}</div>
             `;
         }
         
-        window.updateTrendAccuracyDisplay = function(history) {
-            currentHistory = [...(history || [])];
-            renderDisplay(currentHistory.length);
+        window.updateDisplay = function(history, wlHistory) {
+            currentHistoryLength = history ? history.length : 0;
+            renderDisplay(currentHistoryLength, wlHistory || []);
         };
         
-        renderDisplay(0);
+        renderDisplay(0, []);
         
+        // Watch for changes to update display
         const observer = new MutationObserver(() => {
-            if (currentHistory.length >= REQUIRED_SPINS) {
-                renderDisplay(currentHistory.length);
+            if (currentHistoryLength >= REQUIRED_SPINS) {
+                const wlElements = document.querySelectorAll('#wlHistory .history-wl');
+                const wlArray = Array.from(wlElements).map(el => el.textContent);
+                renderDisplay(currentHistoryLength, wlArray);
             }
         });
         observer.observe(document.getElementById('wlHistory'), { childList: true, subtree: true });
+        
+        // Also watch for glow changes on wheel
+        const wheelObserver = new MutationObserver(() => {
+            if (currentHistoryLength >= REQUIRED_SPINS) {
+                const wlElements = document.querySelectorAll('#wlHistory .history-wl');
+                const wlArray = Array.from(wlElements).map(el => el.textContent);
+                renderDisplay(currentHistoryLength, wlArray);
+            }
+        });
+        wheelObserver.observe(document.getElementById('track'), { attributes: true, subtree: true, attributeFilter: ['class'] });
     })();
     
     // Keyboard shortcuts block
@@ -549,17 +619,15 @@
             }
             
             if (meta) {
-                e.preventDefault();
-                return false;
+                if (![37, 38, 39, 40].includes(key)) {
+                    e.preventDefault();
+                    return false;
+                }
             }
             
             if (key === 116 || key === 122 || key === 44 || key === 45 || key === 46 || key === 36 || key === 35 || key === 33 || key === 34 || key === 27) {
                 e.preventDefault();
                 return false;
-            }
-            
-            if (meta && (key === 37 || key === 38 || key === 39 || key === 40)) {
-                return true;
             }
             
             return true;
