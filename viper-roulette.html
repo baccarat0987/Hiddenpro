@@ -58,7 +58,29 @@
         .exit-btn { background: #444; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; border: 1px solid #666; font-size: 13px; }
         .exit-btn:hover { background: #ff4d6d; border-color: #fff; }
 
-        h1 { font-size: 2rem; font-weight: bold; text-shadow: 0 0 5px #ff4d6d, 0 0 10px #ff1a75; margin-bottom: 30px; }
+        h1 { font-size: 2rem; font-weight: bold; text-shadow: 0 0 5px #ff4d6d, 0 0 10px #ff1a75; margin-bottom: 20px; }
+        
+        .sector-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .sector-tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            background: #1a1a2a;
+            border: 1px solid #ffaa44;
+            color: #ffcc88;
+        }
+        .sector-tag.active {
+            background: #ffaa44;
+            color: black;
+            box-shadow: 0 0 10px #ffaa44;
+        }
         
         .wheel-container {
             position: relative;
@@ -158,6 +180,13 @@
 
 <h1>VIPER ROULETTE</h1>
 
+<div class="sector-bar" id="sectorBar">
+    <span class="sector-tag">ZERO</span>
+    <span class="sector-tag">VOISINS</span>
+    <span class="sector-tag">TIERS</span>
+    <span class="sector-tag">ORPHELINS</span>
+</div>
+
 <div class="wheel-container">
     <div class="track-container" id="track"></div>
     <div class="wheel-prediction" id="wheelPrediction">
@@ -179,7 +208,8 @@
 
 <script>
     // ============================================================
-    // EXACT SKIP LOGIC FROM YOUR BACCARAT EXAMPLE
+    // ROULETTE SECTOR PREDICTION WITH DYNAMIC THRESHOLD (YOUR EXAMPLE LOGIC)
+    // Sectors: ZERO, VOISINS, TIERS, ORPHELINS
     // ============================================================
     (function() {
         const trackContainer = document.getElementById('track');
@@ -187,8 +217,31 @@
         const enterBtn = document.getElementById('enterBtn');
         const numberHistoryContainer = document.getElementById('numberHistory');
         const wlHistoryContainer = document.getElementById('wlHistory');
+        const sectorBar = document.getElementById('sectorBar');
         
+        // Wheel numbers in order (European roulette)
         const wheelNumbers = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+        
+        // PROFESSIONAL ROULETTE SECTORS
+        const sectors = {
+            'ZERO': [0],
+            'VOISINS': [22,18,29,7,28,12,35,3,26,0,32,15,19,4,21,2,25],
+            'TIERS': [33,16,24,5,10,23,8,30,11,36,13,27],
+            'ORPHELINS': [1,20,14,31,9,6,34,17]
+        };
+        
+        // Map each number to its sector
+        const numberToSector = {};
+        for (const [sectorName, numbers] of Object.entries(sectors)) {
+            numbers.forEach(num => {
+                numberToSector[num] = sectorName;
+            });
+        }
+        
+        // Sector order for pattern detection
+        const sectorOrder = ['ZERO', 'VOISINS', 'TIERS', 'ORPHELINS'];
+        const sectorIndex = { 'ZERO': 0, 'VOISINS': 1, 'TIERS': 2, 'ORPHELINS': 3 };
+        
         const numbers = [];
         const centerX = 300; const centerY = 200;
         const radiusX = 250; const radiusY = 150;
@@ -215,178 +268,177 @@
         buildWheel();
         
         let numberHistory = [];
+        let sectorHistory = [];
         let wlHistory = [];
         let firstEntry = true;
         let undoStack = [];
-        let detailedHistory = []; // Tracks win/loss/skip like your example
+        let detailedResults = [];
         
         const MAX_HISTORY = 10;
         const NEIGHBORS_ON_EACH_SIDE = 9;
         const ACTIVATION_THRESHOLD = 10;
         
-        // Pattern memory - stores success rate for each last-3 pattern
-        let patternMemory = {};
+        // Pattern memory for SECTORS
+        let sectorPatternMemory = {};
         
-        function getPatternKey(history) {
+        function getSectorPatternKey(history) {
             if (history.length < 3) return null;
             const last3 = history.slice(-3);
             return last3.join(',');
         }
         
-        // ========== PATTERN ANALYSIS (SAME AS YOUR EXAMPLE LOGIC) ==========
+        // ========== PREDICTION LOGIC (Same as your example but for sectors) ==========
+        function getCurrentStreak() {
+            if (sectorHistory.length === 0) return { sector: null, count: 0 };
+            let streak = 1;
+            const lastSector = sectorHistory[sectorHistory.length - 1];
+            for (let i = sectorHistory.length - 2; i >= 0; i--) {
+                if (sectorHistory[i] === lastSector) streak++;
+                else break;
+            }
+            return { sector: lastSector, count: streak };
+        }
+        
         function analyzeLast3Pattern() {
-            if (numberHistory.length < 3) return null;
+            if (sectorHistory.length < 3) return null;
             
-            const last3 = numberHistory.slice(-3);
+            const last3 = sectorHistory.slice(-3);
             let occurrences = 0;
-            let predictedCount = 0;
-            let predictedNumber = null;
+            let followsCount = {};
+            sectorOrder.forEach(s => followsCount[s] = 0);
             
-            // Look for this exact pattern in history
-            for (let i = 0; i <= numberHistory.length - 4; i++) {
-                const n1 = numberHistory[i];
-                const n2 = numberHistory[i+1];
-                const n3 = numberHistory[i+2];
-                const nextNum = numberHistory[i+3];
+            // Look for last3 pattern in history
+            for (let i = 0; i <= sectorHistory.length - 4; i++) {
+                const s1 = sectorHistory[i];
+                const s2 = sectorHistory[i+1];
+                const s3 = sectorHistory[i+2];
+                const nextSector = sectorHistory[i+3];
                 
-                if (n1 === last3[0] && n2 === last3[1] && n3 === last3[2]) {
+                if (s1 === last3[0] && s2 === last3[1] && s3 === last3[2]) {
                     occurrences++;
-                    // Track what happened next
-                    if (patternMemory[last3.join(',')]) {
-                        // Use stored prediction from base algorithm
-                        const predicted = predictNextNumberFromIndex(numberHistory.slice(0, i+3));
-                        if (predicted === nextNum) predictedCount++;
-                    }
+                    followsCount[nextSector]++;
                 }
             }
             
             if (occurrences === 0) return null;
             
-            // Get current prediction for this pattern
-            const currentPrediction = predictNextNumber(numberHistory);
-            const confidence = occurrences > 0 ? (predictedCount / occurrences) * 100 : 50;
+            // Find most common follow-up
+            let bestSector = 'VOISINS';
+            let bestCount = 0;
+            for (const s of sectorOrder) {
+                if (followsCount[s] > bestCount) {
+                    bestCount = followsCount[s];
+                    bestSector = s;
+                }
+            }
+            
+            const confidence = occurrences > 0 ? (bestCount / occurrences) * 100 : 50;
             
             return {
-                prediction: currentPrediction,
+                prediction: bestSector,
                 confidence: confidence,
                 occurrences: occurrences,
-                matches: predictedCount
+                matches: bestCount
             };
         }
         
-        // Helper for pattern analysis
-        function predictNextNumberFromIndex(historySlice) {
-            if (historySlice.length < MAX_HISTORY) return null;
-            const last10 = historySlice.slice(-MAX_HISTORY);
-            
-            let scores = {};
-            for (let i = 0; i <= 36; i++) scores[i] = 0;
-            
-            const freq = {};
-            last10.forEach(num => { freq[num] = (freq[num] || 0) + 1; });
-            let maxFreq = 0;
-            for (let num in freq) if (freq[num] > maxFreq) maxFreq = freq[num];
-            for (let num in freq) {
-                if (freq[num] === maxFreq) scores[parseInt(num)] += 5.0;
-                else if (freq[num] >= 2) scores[parseInt(num)] += 2.0;
-            }
-            
-            const appeared = new Set(last10);
-            for (let i = 0; i <= 36; i++) {
-                if (!appeared.has(i) && i !== 0) scores[i] += 1.5;
-            }
-            if (!appeared.has(0)) scores[0] += 2.0;
-            
-            const recent3 = last10.slice(-3);
-            recent3.forEach(num => {
-                const idx = wheelNumbers.indexOf(num);
-                if (idx !== -1) {
-                    for (let offset = -2; offset <= 2; offset++) {
-                        if (offset === 0) continue;
-                        const neighborIdx = (idx + offset + wheelNumbers.length) % wheelNumbers.length;
-                        scores[wheelNumbers[neighborIdx]] += 1.5;
-                    }
-                }
-            });
-            
-            let bestNumber = 0;
-            let bestScore = -Infinity;
-            for (let i = 0; i <= 36; i++) {
-                if (scores[i] > bestScore) {
-                    bestScore = scores[i];
-                    bestNumber = i;
+        function isZigzagPattern() {
+            if (sectorHistory.length < 4) return false;
+            let alternating = true;
+            for (let i = sectorHistory.length - 3; i < sectorHistory.length - 1; i++) {
+                if (sectorHistory[i] === sectorHistory[i + 1]) {
+                    alternating = false;
+                    break;
                 }
             }
-            return bestNumber;
+            return alternating;
         }
         
-        // ORIGINAL PREDICTION FUNCTION
-        function predictNextNumber(historyArray) {
-            if (!historyArray || historyArray.length < MAX_HISTORY) return null;
-            const last10 = historyArray.slice(-MAX_HISTORY);
+        function getPredictionAndConfidence() {
+            if (sectorHistory.length < 2) return { prediction: null, confidence: 50, occurrences: 0 };
             
             let scores = {};
-            for (let i = 0; i <= 36; i++) scores[i] = 0;
+            sectorOrder.forEach(s => scores[s] = 0);
+            let totalWeight = 0;
             
-            const freq = {};
-            last10.forEach(num => { freq[num] = (freq[num] || 0) + 1; });
-            let maxFreq = 0;
-            for (let num in freq) if (freq[num] > maxFreq) maxFreq = freq[num];
-            for (let num in freq) {
-                if (freq[num] === maxFreq) scores[parseInt(num)] += 5.0;
-                else if (freq[num] >= 2) scores[parseInt(num)] += 2.0;
+            // LOGIC 1: Streak Detection (30% weight)
+            const streak = getCurrentStreak();
+            if (streak.count >= 3) {
+                const streakBonus = Math.min(40, (streak.count - 2) * 15);
+                scores[streak.sector] += streakBonus;
+                totalWeight += 30;
+            } else if (streak.count === 2) {
+                scores[streak.sector] += 10;
+                totalWeight += 20;
             }
             
-            const appeared = new Set(last10);
-            for (let i = 0; i <= 36; i++) {
-                if (!appeared.has(i) && i !== 0) scores[i] += 1.5;
+            // LOGIC 2: Last-3 Pattern Analysis (50% weight)
+            const patternAnalysis = analyzeLast3Pattern();
+            if (patternAnalysis && patternAnalysis.occurrences > 0) {
+                const patternWeight = 50;
+                const patternScore = (patternAnalysis.confidence / 100) * patternWeight;
+                scores[patternAnalysis.prediction] += patternScore;
+                totalWeight += patternWeight;
             }
-            if (!appeared.has(0)) scores[0] += 2.0;
             
-            const recent3 = last10.slice(-3);
-            recent3.forEach(num => {
-                const idx = wheelNumbers.indexOf(num);
-                if (idx !== -1) {
-                    for (let offset = -2; offset <= 2; offset++) {
-                        if (offset === 0) continue;
-                        const neighborIdx = (idx + offset + wheelNumbers.length) % wheelNumbers.length;
-                        scores[wheelNumbers[neighborIdx]] += 1.5;
-                    }
-                }
-            });
+            // LOGIC 3: Zigzag Detection (20% weight)
+            if (isZigzagPattern() && sectorHistory.length >= 4) {
+                const lastSector = sectorHistory[sectorHistory.length - 1];
+                // Find opposite side of wheel for zigzag
+                const zigzagPrediction = sectorOrder[(sectorIndex[lastSector] + 2) % 4];
+                scores[zigzagPrediction] += 20;
+                totalWeight += 20;
+            }
             
-            let bestNumber = 0;
+            // Fallback: opposite of last sector
+            if (totalWeight === 0 && sectorHistory.length >= 2) {
+                const lastSector = sectorHistory[sectorHistory.length - 1];
+                const fallbackPrediction = sectorOrder[(sectorIndex[lastSector] + 2) % 4];
+                scores[fallbackPrediction] = 55;
+                totalWeight = 100;
+            }
+            
+            // Find best prediction
+            let bestSector = 'VOISINS';
             let bestScore = -Infinity;
-            for (let i = 0; i <= 36; i++) {
-                if (scores[i] > bestScore) {
-                    bestScore = scores[i];
-                    bestNumber = i;
+            for (const s of sectorOrder) {
+                if (scores[s] > bestScore) {
+                    bestScore = scores[s];
+                    bestSector = s;
                 }
             }
-            return bestNumber;
+            
+            let confidence = totalWeight > 0 ? (bestScore / totalWeight) * 100 : 50;
+            confidence = Math.min(96, Math.max(40, confidence));
+            
+            let totalOccurrences = patternAnalysis ? patternAnalysis.occurrences : 0;
+            if (streak.count >= 3) totalOccurrences += streak.count;
+            
+            return {
+                prediction: bestSector,
+                confidence: confidence,
+                occurrences: totalOccurrences || 1
+            };
         }
         
         // ========== DYNAMIC SKIP THRESHOLD (EXACTLY FROM YOUR EXAMPLE) ==========
         function getDynamicSkipThreshold() {
             let baseThreshold = 60;
             
-            // Analyze recent results (last 5 non-skip rounds)
-            const recentResults = detailedHistory.slice(-5).filter(h => !h.wasSkip);
+            const recentResults = detailedResults.slice(-5).filter(h => !h.wasSkip);
             const recentLosses = recentResults.filter(r => r.type === 'loss').length;
             const recentWins = recentResults.filter(r => r.type === 'win').length;
             
-            // Dynamic adjustment based on streak (YOUR EXACT LOGIC)
             if (recentLosses >= 3) {
-                baseThreshold = 52;  // Lower threshold during losing streak
+                baseThreshold = 52;
             } else if (recentWins >= 3 && recentResults.length >= 3) {
-                baseThreshold = 68;  // Raise threshold to protect gains
+                baseThreshold = 68;
             } else if (recentLosses >= 2) {
                 baseThreshold = 56;
             } else if (recentWins >= 2) {
                 baseThreshold = 64;
             }
             
-            // Adjust based on overall win rate (YOUR LOGIC)
             const totalDecisions = wlHistory.length;
             if (totalDecisions > 10) {
                 const wins = wlHistory.filter(r => r === 'W').length;
@@ -401,63 +453,55 @@
             return baseThreshold;
         }
         
-        // ========== SHOULD SKIP? (EXACTLY FROM YOUR EXAMPLE) ==========
         function shouldSkipPrediction(confidence, occurrences) {
             const dynamicThreshold = getDynamicSkipThreshold();
-            
-            // More lenient if we have strong pattern occurrences
             let adjustedThreshold = dynamicThreshold;
             if (occurrences >= 5) {
                 adjustedThreshold = Math.max(50, dynamicThreshold - 8);
             }
-            
-            return confidence < adjustedThreshold || occurrences < 1;
+            return confidence < adjustedThreshold;
         }
         
-        // Get prediction with confidence (using pattern analysis like your example)
-        function getPredictionWithConfidence() {
-            if (numberHistory.length < MAX_HISTORY) {
-                return { prediction: null, confidence: 50, occurrences: 0 };
-            }
-            
-            const patternAnalysis = analyzeLast3Pattern();
-            
-            if (patternAnalysis && patternAnalysis.occurrences > 0) {
-                return {
-                    prediction: patternAnalysis.prediction,
-                    confidence: patternAnalysis.confidence,
-                    occurrences: patternAnalysis.occurrences
-                };
-            }
-            
-            // Fallback: use base prediction with neutral confidence
-            const prediction = predictNextNumber(numberHistory);
-            return {
-                prediction: prediction,
-                confidence: 50,
-                occurrences: 0
-            };
+        // Convert predicted sector to a specific number (pick the center of sector)
+        function sectorToNumber(sectorName) {
+            const sectorNumbers = sectors[sectorName];
+            if (!sectorNumbers || sectorNumbers.length === 0) return 0;
+            // Return the middle of the sector for better coverage
+            const midIndex = Math.floor(sectorNumbers.length / 2);
+            return sectorNumbers[midIndex];
+        }
+        
+        function updateSectorBar(activeSector) {
+            const tags = sectorBar.querySelectorAll('.sector-tag');
+            tags.forEach((tag, idx) => {
+                const sectorNames = ['ZERO', 'VOISINS', 'TIERS', 'ORPHELINS'];
+                if (sectorNames[idx] === activeSector) {
+                    tag.classList.add('active');
+                } else {
+                    tag.classList.remove('active');
+                }
+            });
         }
         
         function applyPredictionGlow() {
             numbers.forEach(n => n.classList.remove('neighbor', 'center'));
             
-            if (numberHistory.length < ACTIVATION_THRESHOLD) return;
+            if (sectorHistory.length < ACTIVATION_THRESHOLD) return;
             
-            const { prediction, confidence, occurrences } = getPredictionWithConfidence();
+            const { prediction, confidence, occurrences } = getPredictionAndConfidence();
             
-            if (prediction === null) return;
+            if (!prediction) return;
             
             const shouldSkip = shouldSkipPrediction(confidence, occurrences);
             
-            if (shouldSkip) {
-                console.log(`[SKIP] Confidence ${confidence.toFixed(1)}% < threshold ${getDynamicSkipThreshold()}%`);
-                return;
-            }
+            updateSectorBar(shouldSkip ? null : prediction);
             
-            console.log(`[SHOW] Confidence ${confidence.toFixed(1)}% >= threshold ${getDynamicSkipThreshold()}%`);
+            if (shouldSkip) return;
             
-            let centerIndex = wheelNumbers.indexOf(prediction);
+            // Convert sector to a specific number on the wheel
+            const predictedNumber = sectorToNumber(prediction);
+            
+            let centerIndex = wheelNumbers.indexOf(predictedNumber);
             if (centerIndex === -1) return;
             
             numbers[centerIndex].classList.add('center');
@@ -505,53 +549,50 @@
         function addResult(value) {
             undoStack.push({
                 numberHistory: [...numberHistory],
+                sectorHistory: [...sectorHistory],
                 wlHistory: [...wlHistory],
                 firstEntry: firstEntry,
-                detailedHistory: [...detailedHistory]
+                detailedResults: [...detailedResults]
             });
             
-            // Check if we should skip BEFORE adding result (like your example)
+            const enteredSector = numberToSector[value] || 'VOISINS';
+            
+            // Check skip BEFORE adding
             let isCurrentRoundSkip = false;
-            let currentPrediction = null;
-            let currentConfidence = 0;
+            let currentConfidence = 50;
             let currentOccurrences = 0;
+            let currentPrediction = null;
             
-            if (numberHistory.length >= ACTIVATION_THRESHOLD) {
-                const predData = getPredictionWithConfidence();
-                if (predData && predData.prediction) {
-                    currentPrediction = predData.prediction;
-                    currentConfidence = predData.confidence;
-                    currentOccurrences = predData.occurrences;
-                    isCurrentRoundSkip = shouldSkipPrediction(currentConfidence, currentOccurrences);
-                }
+            if (sectorHistory.length >= ACTIVATION_THRESHOLD) {
+                const predData = getPredictionAndConfidence();
+                currentPrediction = predData.prediction;
+                currentConfidence = predData.confidence;
+                currentOccurrences = predData.occurrences;
+                isCurrentRoundSkip = shouldSkipPrediction(currentConfidence, currentOccurrences);
             }
             
-            // Determine win/loss only if NOT skipping
-            let wasWin = false;
-            if (!isCurrentRoundSkip && numberHistory.length >= ACTIVATION_THRESHOLD && currentPrediction) {
-                wasWin = (value === currentPrediction);
-            }
+            const isWin = isWinBasedOnCurrentPrediction(value);
             
             numberHistory.push(value);
+            sectorHistory.push(enteredSector);
             
-            // Record results (like your example)
-            if (!firstEntry && numberHistory.length > MAX_HISTORY) {
-                if (!isCurrentRoundSkip && currentPrediction) {
+            if (!firstEntry && sectorHistory.length > MAX_HISTORY) {
+                if (!isCurrentRoundSkip && currentPrediction && sectorHistory.length >= ACTIVATION_THRESHOLD + 1) {
+                    const wasWin = (currentPrediction === enteredSector);
                     wlHistory.push(wasWin ? 'W' : 'L');
-                    detailedHistory.push({ type: wasWin ? 'win' : 'loss', wasSkip: false });
+                    detailedResults.push({ type: wasWin ? 'win' : 'loss', wasSkip: false });
                 } else if (isCurrentRoundSkip) {
-                    detailedHistory.push({ type: 'skip', wasSkip: true });
+                    detailedResults.push({ type: 'skip', wasSkip: true });
                 }
                 
                 if (wlHistory.length > MAX_HISTORY) wlHistory.shift();
-                if (detailedHistory.length > 50) detailedHistory.shift();
+                if (detailedResults.length > 50) detailedResults.shift();
             }
             if (firstEntry) firstEntry = false;
             
             applyPredictionGlow();
             renderHistories();
             
-            // Update display
             const showGlow = !shouldSkipPrediction(currentConfidence, currentOccurrences);
             if (typeof window.updateDisplay === 'function') {
                 window.updateDisplay(numberHistory.length, wlHistory, currentConfidence, showGlow, getDynamicSkipThreshold());
@@ -560,12 +601,14 @@
         
         function resetGame() {
             numberHistory = [];
+            sectorHistory = [];
             wlHistory = [];
             firstEntry = true;
             undoStack = [];
-            detailedHistory = [];
+            detailedResults = [];
             numbers.forEach(n => n.classList.remove('neighbor', 'center'));
             renderHistories();
+            updateSectorBar(null);
             if (typeof window.updateDisplay === 'function') {
                 window.updateDisplay(0, [], 0, false, 60);
             }
@@ -575,15 +618,16 @@
             if (!undoStack.length) return;
             const s = undoStack.pop();
             numberHistory = s.numberHistory;
+            sectorHistory = s.sectorHistory;
             wlHistory = s.wlHistory;
             firstEntry = s.firstEntry;
-            detailedHistory = s.detailedHistory || [];
+            detailedResults = s.detailedResults || [];
             applyPredictionGlow();
             renderHistories();
-            const predData = getPredictionWithConfidence();
-            const showGlow = !shouldSkipPrediction(predData.confidence, predData.occurrences);
+            const { confidence, occurrences } = getPredictionAndConfidence();
+            const showGlow = !shouldSkipPrediction(confidence, occurrences);
             if (typeof window.updateDisplay === 'function') {
-                window.updateDisplay(numberHistory.length, wlHistory, predData.confidence, showGlow, getDynamicSkipThreshold());
+                window.updateDisplay(numberHistory.length, wlHistory, confidence, showGlow, getDynamicSkipThreshold());
             }
         }
         
@@ -630,7 +674,7 @@
             if (!hasGlow) {
                 predictionInner.innerHTML = `
                     <div class="prediction-text">WAITING</div>
-                    <div class="prediction-small">PATTERN DETECTION</div>
+                    <div class="prediction-small">SECTOR PATTERN</div>
                 `;
                 return;
             }
