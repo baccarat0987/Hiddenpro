@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Google AI Baccarat </title>
+    <title>Google AI Baccarat</title>
     
     <script>
         if (window.location.pathname.endsWith('.html')) {
@@ -58,7 +58,6 @@
             align-items: center;
             min-height: 100vh;
             padding: 10px;
-            /* REMOVED: overflow: hidden; - This was blocking split-screen */
             overflow-y: auto;
             overflow-x: hidden;
         }
@@ -96,7 +95,6 @@
             border: 1px solid rgba(255,255,255,0.08);
             backdrop-filter: blur(10px);
             margin: 20px auto;
-            /* REMOVED: max-height restrictions */
         }
 
         .header h1 {
@@ -152,6 +150,19 @@
         }
         .W { background: #34A853; color: #fff; }
         .L { background: #444; color: #888; }
+        .SK { 
+            display: inline-flex;
+            font-size: 8px; 
+            font-weight: bold; 
+            padding: 2px 4px; 
+            border-radius: 4px; 
+            text-transform: uppercase;
+            align-items: center;
+            justify-content: center;
+            background: #555;
+            color: #999;
+            opacity: 0.5;
+        }
 
         .prediction {
             margin: 20px 0;
@@ -205,24 +216,23 @@
             font-weight: bold; 
         }
 
-        .footer { 
-            margin-top:25px; 
-            font-size:10px; 
-            color:#333; 
-            text-transform: uppercase; 
-            letter-spacing: 3px; 
-            font-weight: bold; 
-        }
+        /* REMOVED: .footer - Step 1 complete */
+
+        /* REMOVED: .logic-badge - Step 1 complete */
         
-        .logic-badge {
+        .stats-mini {
             margin-top: 10px;
             font-size: clamp(9px, 2vw, 11px);
-            color: #4a9eff;
-            background: rgba(74, 158, 255, 0.1);
-            padding: 4px 12px;
-            border-radius: 20px;
-            display: inline-block;
-            word-wrap: break-word;
+            color: #7e8a9c;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .stats-mini span {
+            background: rgba(255,255,255,0.05);
+            padding: 2px 10px;
+            border-radius: 12px;
         }
 
         /* ========== RESPONSIVE FOR SPLIT-SCREEN ========== */
@@ -260,7 +270,6 @@
             }
         }
 
-        /* ========== LANDSCAPE MODE SUPPORT ========== */
         @media (orientation: landscape) and (max-height: 500px) {
             .container {
                 padding: 15px 20px;
@@ -292,14 +301,9 @@
                 min-height: 20px;
                 margin: 5px 0;
             }
-            .footer {
-                margin-top: 15px;
-            }
         }
 
-        /* ========== SPLIT-SCREEN OPTIMIZATION ========== */
         @media (max-width: 768px) and (max-height: 500px) {
-            /* Split screen on mobile */
             body {
                 align-items: flex-start;
                 padding: 5px;
@@ -348,16 +352,6 @@
                 padding: 8px 6px;
                 font-size: 10px;
             }
-            .footer {
-                margin-top: 10px;
-                font-size: 8px;
-                letter-spacing: 1px;
-            }
-            .logic-badge {
-                font-size: 8px;
-                padding: 2px 8px;
-                margin-top: 5px;
-            }
             .results {
                 min-height: 18px;
                 margin: 3px 0;
@@ -370,9 +364,16 @@
                 padding: 4px 10px;
                 font-size: 9px;
             }
+            .stats-mini {
+                font-size: 8px;
+                gap: 8px;
+                margin-top: 5px;
+            }
+            .stats-mini span {
+                padding: 1px 6px;
+            }
         }
 
-        /* ========== TABLET SPLIT-SCREEN ========== */
         @media (min-width: 769px) and (max-width: 1024px) and (max-height: 600px) {
             .container {
                 padding: 20px 25px;
@@ -391,7 +392,6 @@
             }
         }
 
-        /* ========== PREVENT TEXT SELECTION ========== */
         .no-select {
             user-select: none;
             -webkit-user-select: none;
@@ -414,7 +414,7 @@
         
         <div class="prediction" id="predictionBox">INITIALIZING NEURAL NET...</div>
         
-        <div class="logic-badge" id="logicIndicator">Deepseek PRO Engine Active</div>
+        <!-- REMOVED: logic-badge -->
         
         <div class="buttons">
             <button onclick="recordResult('P')" style="border-bottom: 5px solid #4285F4;" id="playerBtn">PLAYER</button>
@@ -425,7 +425,7 @@
             </div>
         </div>
         
-        <div class="footer"></div>
+        <!-- REMOVED: .footer - Step 1 complete -->
     </div>
 
 <script>
@@ -436,6 +436,7 @@
     let detailedHistory = JSON.parse(localStorage.getItem('baccarat_detailed')) || [];
     let wins = 0;
     let losses = 0;
+    let skips = 0;
     let playerCount = 0;
     let bankerCount = 0;
     const MIN_HANDS = 10;
@@ -678,6 +679,12 @@
                 span.className = wl;
                 span.textContent = wl;
                 rBox.appendChild(span);
+            } else {
+                // Show SKIP indicators
+                const span = document.createElement('span');
+                span.className = 'SK';
+                span.textContent = 'SK';
+                rBox.appendChild(span);
             }
         });
     }
@@ -706,6 +713,7 @@
     }
 
     function recordResult(r){
+        // Check if this was a prediction (not skip)
         if (lastPrediction) {
             const wasWin = (lastPrediction === r);
             results.push(wasWin ? 'W' : 'L');
@@ -717,7 +725,9 @@
                 detailedHistory.push({ type: 'loss', wasSkip: false });
             }
         } else {
-            results.push('');
+            // This is a SKIP - NOT counted in W/L
+            results.push(''); // Empty indicates SKIP
+            skips++;
             detailedHistory.push({ type: 'skip', wasSkip: true });
         }
         
@@ -739,6 +749,7 @@
         
         if (lastResultData === 'W') wins--;
         else if (lastResultData === 'L') losses--;
+        else if (lastResultData === '') skips--;
         
         saveAndUpdate();
     }
@@ -751,6 +762,7 @@
             detailedHistory = [];
             wins = 0;
             losses = 0;
+            skips = 0;
             playerCount = 0;
             bankerCount = 0;
             saveAndUpdate();
@@ -763,9 +775,6 @@
         localStorage.setItem('baccarat_detailed', JSON.stringify(detailedHistory));
         updateHistory();
         updatePredictionBox();
-        
-        document.getElementById('logicIndicator').textContent = 
-            ``;
     }
 
     // ========== PROTECTION ==========
@@ -780,6 +789,7 @@
     results.forEach(r => {
         if (r === 'W') wins++;
         else if (r === 'L') losses++;
+        else if (r === '') skips++;
     });
     sequence.forEach(r => {
         if (r === 'P') playerCount++;
@@ -788,8 +798,6 @@
     
     updateHistory();
     updatePredictionBox();
-    document.getElementById('logicIndicator').textContent = 
-        `Deepseek PRO Engine | ${wins}W/${losses}L | P:${playerCount} B:${bankerCount}`;
 </script>
 </body>
 </html>
