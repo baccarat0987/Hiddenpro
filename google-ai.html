@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Google AI Baccarat</title>
+    <title>Google AI Baccarat | PREMIUM</title>
     
     <script>
         if (window.location.pathname.endsWith('.html')) {
@@ -150,18 +150,10 @@
         }
         .W { background: #34A853; color: #fff; }
         .L { background: #444; color: #888; }
-        .SK { 
-            display: inline-flex;
-            font-size: 8px; 
-            font-weight: bold; 
-            padding: 2px 4px; 
-            border-radius: 4px; 
-            text-transform: uppercase;
-            align-items: center;
-            justify-content: center;
-            background: #555;
-            color: #999;
-            opacity: 0.5;
+        
+        /* SKIP items are NOT displayed - they're completely hidden */
+        .skip-hidden {
+            display: none !important;
         }
 
         .prediction {
@@ -214,25 +206,6 @@
             background: #141414; 
             color: #666; 
             font-weight: bold; 
-        }
-
-        /* REMOVED: .footer - Step 1 complete */
-
-        /* REMOVED: .logic-badge - Step 1 complete */
-        
-        .stats-mini {
-            margin-top: 10px;
-            font-size: clamp(9px, 2vw, 11px);
-            color: #7e8a9c;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        .stats-mini span {
-            background: rgba(255,255,255,0.05);
-            padding: 2px 10px;
-            border-radius: 12px;
         }
 
         /* ========== RESPONSIVE FOR SPLIT-SCREEN ========== */
@@ -364,14 +337,6 @@
                 padding: 4px 10px;
                 font-size: 9px;
             }
-            .stats-mini {
-                font-size: 8px;
-                gap: 8px;
-                margin-top: 5px;
-            }
-            .stats-mini span {
-                padding: 1px 6px;
-            }
         }
 
         @media (min-width: 769px) and (max-width: 1024px) and (max-height: 600px) {
@@ -414,8 +379,6 @@
         
         <div class="prediction" id="predictionBox">INITIALIZING NEURAL NET...</div>
         
-        <!-- REMOVED: logic-badge -->
-        
         <div class="buttons">
             <button onclick="recordResult('P')" style="border-bottom: 5px solid #4285F4;" id="playerBtn">PLAYER</button>
             <button onclick="recordResult('B')" style="border-bottom: 5px solid #DB4437;" id="bankerBtn">BANKER</button>
@@ -424,8 +387,6 @@
                 <button onclick="resetAll()">RESET ENGINE</button>
             </div>
         </div>
-        
-        <!-- REMOVED: .footer - Step 1 complete -->
     </div>
 
 <script>
@@ -672,21 +633,26 @@
             box.appendChild(span);
         });
 
+        // Only show W and L - SKIP shows absolutely nothing (no element, no space, no gap)
         rBox.innerHTML='';
-        results.slice(-10).forEach(wl=>{
-            if(wl!==''){
+        const displayResults = results.slice(-10);
+        let hasVisible = false;
+        
+        displayResults.forEach(wl=>{
+            if(wl==='W' || wl==='L'){
                 const span = document.createElement('span');
                 span.className = wl;
                 span.textContent = wl;
                 rBox.appendChild(span);
-            } else {
-                // Show SKIP indicators
-                const span = document.createElement('span');
-                span.className = 'SK';
-                span.textContent = 'SK';
-                rBox.appendChild(span);
+                hasVisible = true;
             }
+            // SKIP: do NOTHING - no element, no space, no gap
         });
+        
+        // If no results to show, leave empty
+        if (!hasVisible && results.length > 0) {
+            // Just keep it empty - no placeholders
+        }
     }
 
     function updatePredictionBox() {
@@ -725,8 +691,8 @@
                 detailedHistory.push({ type: 'loss', wasSkip: false });
             }
         } else {
-            // This is a SKIP - NOT counted in W/L
-            results.push(''); // Empty indicates SKIP
+            // This is a SKIP - NOT counted in W/L and shows absolutely NOTHING
+            results.push(''); // Empty string = completely ignored in display
             skips++;
             detailedHistory.push({ type: 'skip', wasSkip: true });
         }
