@@ -81,6 +81,16 @@
       (function() { return false; }['constructor']('debugger')['call']());
     }, 50);
 
+        // 4. Content Wipe on DevTools Detection - DISABLED for split-screen compatibility
+    // function detectDevTools() {
+    //   const threshold = 160;
+    //   if ((window.outerWidth - window.innerWidth > threshold) || (window.outerHeight - window.innerHeight > threshold)) {
+    //     document.body.innerHTML = ""; 
+    //     window.location.replace("about:blank");
+    //   }
+    // }
+    // setInterval(detectDevTools, 500);
+
     // 5. Silent Console
     if (typeof console !== "undefined") {
       console.log = console.debug = console.info = console.warn = console.error = function() {};
@@ -139,22 +149,18 @@
 
     .logo { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:22px; flex-wrap:wrap; }
     
-    /* === ENHANCED NEON LOGO - No circles, pure neon glow === */
+    /* === NEON GLOW LOGO - Only these styles changed === */
     .logo-image {
       width:70px; 
       height:70px; 
       object-fit:contain;
       filter: 
-        hue-rotate(120deg) 
-        saturate(8) 
-        brightness(1.1) 
-        contrast(1.4) 
-        drop-shadow(0 0 15px #33ff33dd)
-        drop-shadow(0 0 30px #33ff33aa)
-        drop-shadow(0 0 60px #33ff3366);
+        drop-shadow(0 0 8px #33ff33)
+        drop-shadow(0 0 20px #33ff33aa)
+        drop-shadow(0 0 40px #33ff3366);
       background:transparent; 
       border-radius:0; 
-      transition:all 0.3s ease; 
+      transition:transform 0.3s,filter 0.3s; 
       flex-shrink:0; 
       padding:0;
       mix-blend-mode: screen;
@@ -162,13 +168,9 @@
     .logo-image:hover { 
       transform:scale(1.08) rotate(-4deg); 
       filter:
-        hue-rotate(120deg) 
-        saturate(9) 
-        brightness(1.2) 
-        contrast(1.5) 
-        drop-shadow(0 0 20px #66ff66ff)
-        drop-shadow(0 0 40px #66ff66cc)
-        drop-shadow(0 0 80px #66ff6688);
+        drop-shadow(0 0 12px #66ff66)
+        drop-shadow(0 0 30px #66ff66cc)
+        drop-shadow(0 0 60px #66ff6688);
     }
 
     .logo h1 {
@@ -304,36 +306,28 @@
     }
     .forecast:hover { border-color:#4a8a4a; box-shadow:0 0 30px #33bb33aa; }
     
-    /* === ENHANCED NEON PREDICTION LOGO - No circles, pure neon glow === */
+    /* === NEON GLOW PREDICTION LOGO - Only these styles changed === */
     .prediction-logo {
       width:120px; 
       height:120px; 
       object-fit:contain;
       filter:
-        hue-rotate(120deg) 
-        saturate(8) 
-        brightness(1.1) 
-        contrast(1.4) 
-        drop-shadow(0 0 15px #33ff33dd)
-        drop-shadow(0 0 30px #33ff33aa)
-        drop-shadow(0 0 60px #33ff3366);
+        drop-shadow(0 0 8px #33ff33)
+        drop-shadow(0 0 20px #33ff33aa)
+        drop-shadow(0 0 40px #33ff3366);
       background:transparent; 
       border:none; 
       padding:0; 
       margin-bottom:16px; 
-      transition:all 0.3s ease;
+      transition:transform 0.3s,filter 0.3s;
       mix-blend-mode: screen;
     }
     .prediction-logo:hover { 
       transform:scale(1.05); 
       filter:
-        hue-rotate(120deg) 
-        saturate(9) 
-        brightness(1.2) 
-        contrast(1.5) 
-        drop-shadow(0 0 20px #66ff66ff)
-        drop-shadow(0 0 40px #66ff66cc)
-        drop-shadow(0 0 80px #66ff6688);
+        drop-shadow(0 0 12px #66ff66)
+        drop-shadow(0 0 30px #66ff66cc)
+        drop-shadow(0 0 60px #66ff6688);
     }
     
     .next-label { font-size:28px; font-weight:700; color:#d0f0d0; letter-spacing:2px; text-shadow:0 0 20px #2a8a2a66; margin:4px 0 6px; }
