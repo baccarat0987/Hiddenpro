@@ -587,6 +587,10 @@
             background: rgba(219, 39, 119, 0.1);
             color: #db2777;
         }
+        
+        .overlay-hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -595,26 +599,34 @@
         <a href="index.html" class="exit-btn">← EXIT TERMINAL</a>
     </div>
 
-    <div class="overlay" id="entryOverlay" style="display:flex;">
+    <!-- OVERLAY - Always visible until user clicks Confirm -->
+    <div class="overlay" id="entryOverlay">
         <div class="overlay-card">
             <h2 class="overlay-title">
                 <span class="title-violet">Baccarat</span>
                 <span class="title-darkblue">VIP</span>
                 <span class="title-redpink">Plus</span>
             </h2>
-            <div class="overlay-welcome">WELCOME</div>
-            <label>Base Unit
+            <div class="overlay-welcome">CONFIGURATION</div>
+            
+            <label>Base Unit (Base Bet)
                 <input type="number" id="overlayBase" value="1" step="0.01" min="0.01">
             </label>
-            <label>Progression
+            
+            <label>Progression System
                 <select id="overlayProgression">
-                    <option value="sentinel">Sentinel</option>
-                    <option value="martingale">Martingale</option>
-                    <option value="fibonacci">Fibonacci</option>
-                    <option value="dalambert">D'Alembert</option>
+                    <option value="sentinel">Sentinel (Adaptive)</option>
+                    <option value="martingale">Martingale (Double on Loss)</option>
+                    <option value="fibonacci">Fibonacci (Sequence)</option>
+                    <option value="dalambert">D'Alembert (+1/-1)</option>
                 </select>
             </label>
-            <button class="start-btn" id="overlayStartBtn">Confirm</button>
+            
+            <button class="start-btn" id="overlayStartBtn">▶ START</button>
+            
+            <div style="margin-top:12px; font-size:10px; color:var(--text-muted); opacity:0.6;">
+                Changes will reset all hand history
+            </div>
         </div>
     </div>
 
@@ -643,7 +655,7 @@
             </div>
 
             <div class="prediction" id="predictionBox">
-                WAITING FOR CONFIG...
+                ⚙️ CONFIGURE SETTINGS ABOVE
                 <div class="bet-line" id="betLine" style="display:none;"></div>
             </div>
             <div class="skip-note" id="skipNote"></div>
@@ -676,7 +688,6 @@
 
         // ========== ENHANCED PATTERN DETECTION ==========
         
-        // 1. Markov Chain Analysis
         function getMarkovPrediction() {
             if (sequence.length < 2) return null;
             
@@ -699,7 +710,6 @@
             return { prediction, confidence };
         }
 
-        // 2. Run Length Analysis
         function getRunLengthPrediction() {
             if (sequence.length < 2) return null;
             
@@ -731,7 +741,6 @@
             return null;
         }
 
-        // 3. Frequency Imbalance Detection
         function getFrequencyPrediction() {
             if (sequence.length < 10) return null;
             
@@ -754,7 +763,6 @@
             return null;
         }
 
-        // 4. Pattern Recognition
         function getPatternPrediction() {
             if (sequence.length < 5) return null;
             
@@ -779,7 +787,6 @@
             return null;
         }
 
-        // 5. Zigzag Detection
         function getZigzagPrediction() {
             if (sequence.length < 5) return null;
             
@@ -807,7 +814,6 @@
             return null;
         }
 
-        // 6. Recent Bias Detection
         function getRecentBiasPrediction() {
             if (sequence.length < 5) return null;
             
@@ -965,7 +971,7 @@
 
         function updatePredictionBox() {
             if (!isInitialized) {
-                document.getElementById('predictionBox').innerHTML = 'WAITING FOR CONFIG...';
+                document.getElementById('predictionBox').innerHTML = '⚙️ CONFIGURE SETTINGS ABOVE';
                 return;
             }
             
@@ -1056,14 +1062,10 @@
             reset() {
                 this.streak = 0;
                 this.round = 0;
-                // Martingale
                 this.martingaleMultiplier = 1;
-                // Fibonacci - FIXED
                 this.fibPrev = 0;
                 this.fibCurr = 1;
-                // D'Alembert
                 this.dalembertUnits = 1;
-                // Sentinel
                 this.shieldCount = 0;
                 this.surgeActive = false;
                 this.currentUnits = 1;
@@ -1105,7 +1107,6 @@
                 
                 switch (this.type) {
                     case 'martingale':
-                        // ✅ CORRECT - Double on loss, reset on win
                         if (isWin) { 
                             this.martingaleMultiplier = 1; 
                         } else { 
@@ -1114,34 +1115,26 @@
                         break;
 
                     case 'fibonacci':
-                        // ✅ FIXED - Proper Fibonacci progression
                         if (isWin) {
-                            // Move back TWO steps in Fibonacci sequence
                             if (this.fibPrev === 0 && this.fibCurr === 1) {
-                                // At start of sequence, stay at 1
                                 this.fibCurr = 1;
                                 this.fibPrev = 0;
                             } else {
-                                // Move back two steps: 0,1,1,2,3,5,8,13...
-                                // If current is 5 (prev=3, prev2=2), go to 2
                                 const prevPrev = this.fibCurr - this.fibPrev;
                                 if (prevPrev >= 1) {
                                     this.fibCurr = prevPrev;
                                     this.fibPrev = this.fibCurr - prevPrev;
                                     if (this.fibPrev < 0) this.fibPrev = 0;
                                 } else {
-                                    // If at 2 (prev=1, prev2=1), go to 1
                                     this.fibCurr = 1;
                                     this.fibPrev = 0;
                                 }
-                                // Ensure minimum of 1
                                 if (this.fibCurr < 1) {
                                     this.fibCurr = 1;
                                     this.fibPrev = 0;
                                 }
                             }
                         } else {
-                            // Move forward one step in Fibonacci sequence
                             const next = this.fibPrev + this.fibCurr;
                             this.fibPrev = this.fibCurr;
                             this.fibCurr = next;
@@ -1150,7 +1143,6 @@
                         break;
 
                     case 'dalambert':
-                        // ✅ CORRECT - +1 on loss, -1 on win
                         if (isWin) {
                             this.dalembertUnits = Math.max(1, this.dalembertUnits - 1);
                         } else {
@@ -1159,14 +1151,12 @@
                         break;
 
                     case 'sentinel':
-                        // ✅ CORRECT - Complex adaptive system
                         if (isWin) {
                             this.streak = this.streak > 0 ? this.streak + 1 : 1;
                         } else {
                             this.streak = this.streak < 0 ? this.streak - 1 : -1;
                         }
                         
-                        // Shield on 5 consecutive losses
                         if (this.streak <= this.SHIELD_THRESHOLD && this.shieldCount === 0) {
                             this.shieldCount = this.SHIELD_DURATION;
                             this.currentUnits = 1;
@@ -1194,7 +1184,6 @@
                         break;
                 }
                 
-                // Update streak for display (non-Sentinel)
                 if (this.type !== 'sentinel') {
                     this.streak = isWin ? Math.abs(this.streak) + 1 : -(Math.abs(this.streak) + 1);
                 }
@@ -1222,6 +1211,8 @@
             renderSentinel();
             saveAndUpdate();
             updatePredictionBox();
+            // Hide overlay
+            document.getElementById('entryOverlay').style.display = 'none';
         }
 
         function renderSentinel() {
@@ -1237,25 +1228,11 @@
         const overlayStartBtn = document.getElementById('overlayStartBtn');
         const DEFAULT_BANKROLL = 100;
 
-        function closeOverlay() { 
-            overlay.style.display = 'none'; 
-        }
-
-        // Check if we have saved config
+        // Pre-fill with saved config if exists
         if (savedConfig && savedConfig.base) {
-            // Pre-fill the values
             overlayBase.value = savedConfig.base;
             overlayProgression.value = savedProgression;
-            // Initialize the app with saved config
-            initializeApp(savedConfig.base, savedProgression);
-            // Close overlay after a short delay
-            setTimeout(() => {
-                closeOverlay();
-            }, 300);
         } else {
-            // No saved config, show overlay and wait for user input
-            overlay.style.display = 'flex';
-            // Pre-fill defaults
             overlayBase.value = 1;
             overlayProgression.value = 'sentinel';
         }
@@ -1278,9 +1255,6 @@
             
             // Initialize the app
             initializeApp(base, prog);
-            
-            // Close overlay
-            closeOverlay();
         });
 
         // Allow Enter key on the base input
@@ -1293,7 +1267,7 @@
         ========================================================= */
         function recordResult(r) {
             if (!isInitialized || !engine) {
-                alert('Please configure the app first!');
+                alert('Please configure the app first! Click START in the settings.');
                 return;
             }
             
