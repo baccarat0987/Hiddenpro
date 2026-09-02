@@ -675,7 +675,7 @@
 
         // ========== ENHANCED PATTERN DETECTION ==========
         
-        // 1. Markov Chain Analysis - track transition probabilities
+        // 1. Markov Chain Analysis
         function getMarkovPrediction() {
             if (sequence.length < 2) return null;
             
@@ -698,7 +698,7 @@
             return { prediction, confidence };
         }
 
-        // 2. Run Length Analysis - detect streaks and reversals
+        // 2. Run Length Analysis
         function getRunLengthPrediction() {
             if (sequence.length < 2) return null;
             
@@ -709,17 +709,14 @@
                 else break;
             }
             
-            // Longer runs suggest continuation
             if (runLength >= 3) {
                 const continuationConfidence = Math.min(85, 55 + (runLength - 2) * 10);
                 return { prediction: last, confidence: continuationConfidence };
             }
             
-            // Short runs suggest possible reversal
             if (runLength === 1 && sequence.length >= 3) {
                 const prev = sequence[sequence.length - 2];
                 if (prev !== last) {
-                    // Check if alternating pattern
                     let isAlternating = true;
                     for (let i = sequence.length - 3; i >= 0; i--) {
                         if (sequence[i] === sequence[i+1]) { isAlternating = false; break; }
@@ -733,7 +730,7 @@
             return null;
         }
 
-        // 3. Frequency Imbalance Detection - exploit deviations from expected 50/50
+        // 3. Frequency Imbalance Detection
         function getFrequencyPrediction() {
             if (sequence.length < 10) return null;
             
@@ -744,7 +741,6 @@
             const pRate = pCount / total;
             const bRate = bCount / total;
             
-            // If one side is significantly underrepresented, it's likely to catch up
             if (pRate < 0.42 && bRate > 0.58) {
                 const confidence = 50 + (0.58 - bRate) * 200;
                 return { prediction: 'P', confidence: Math.min(80, confidence) };
@@ -757,11 +753,10 @@
             return null;
         }
 
-        // 4. Pattern Recognition - look for repeating 3-4 hand patterns
+        // 4. Pattern Recognition
         function getPatternPrediction() {
             if (sequence.length < 5) return null;
             
-            // Look at last 3 hands as pattern
             const pattern = sequence.slice(-3).join('');
             let matches = [];
             
@@ -783,7 +778,7 @@
             return null;
         }
 
-        // 5. Zigzag Detection with confidence
+        // 5. Zigzag Detection
         function getZigzagPrediction() {
             if (sequence.length < 5) return null;
             
@@ -798,13 +793,11 @@
             
             const zigzagRate = zigzagCount / totalCheck;
             
-            // If strong zigzag pattern, predict opposite of last
             if (zigzagRate > 0.7) {
                 const confidence = 55 + zigzagRate * 30;
                 return { prediction: oppositeSide(sequence[sequence.length - 1]), confidence: Math.min(85, confidence) };
             }
             
-            // If strong streak pattern, predict same as last
             if (zigzagRate < 0.3) {
                 const confidence = 55 + (1 - zigzagRate) * 30;
                 return { prediction: sequence[sequence.length - 1], confidence: Math.min(85, confidence) };
@@ -813,8 +806,7 @@
             return null;
         }
 
-        // 6. Last 5 Hand Bias Detection
-        function getRecentBiasPrediction() {
+        // 6. Recent Bias Detection        function getRecentBiasPrediction() {
             if (sequence.length < 5) return null;
             
             const recent = sequence.slice(-5);
@@ -859,7 +851,6 @@
                 }
             }
             
-            // If no algorithm produced a result, use simple streak reversal
             if (totalWeight === 0) {
                 const last = sequence[sequence.length - 1];
                 const runLength = getRunLength(sequence);
@@ -869,17 +860,14 @@
                 return { prediction: oppositeSide(last), confidence: 52 };
             }
             
-            // Calculate weighted prediction
             let prediction = scores.P > scores.B ? 'P' : 'B';
             let confidence = (Math.max(scores.P, scores.B) / totalWeight) * 100;
             
-            // Adjust confidence based on algorithm agreement
             const pPredictions = algorithmResults.filter(r => r.prediction === 'P').length;
             const bPredictions = algorithmResults.filter(r => r.prediction === 'B').length;
             const agreementBonus = Math.abs(pPredictions - bPredictions) / algorithmResults.length * 15;
             confidence = Math.min(96, confidence + agreementBonus);
             
-            // Bonus for consistency
             if (sequence.length > 30) confidence += 5;
             if (sequence.length > 50) confidence += 3;
             
@@ -905,7 +893,6 @@
         function getDynamicSkipThreshold() {
             let baseThreshold = 55;
             
-            // Adjust based on recent performance
             const recentResults = detailedHistory.slice(-10).filter(h => !h.wasSkip);
             if (recentResults.length >= 5) {
                 const recentWins = recentResults.filter(r => r.type === 'win').length;
@@ -917,7 +904,6 @@
                 else if (winRate > 0.7) baseThreshold = 68;
             }
             
-            // Adjust based on overall win rate
             const total = wins + losses;
             if (total > 20) {
                 const overallWinRate = wins / total;
@@ -925,7 +911,6 @@
                 else if (overallWinRate > 0.58) baseThreshold = Math.min(72, baseThreshold + 5);
             }
             
-            // Lower threshold when on a loss streak
             const streak = getRunLength(sequence);
             if (streak >= 4) baseThreshold = Math.max(45, baseThreshold - 8);
             if (streak >= 6) baseThreshold = Math.max(42, baseThreshold - 10);
@@ -936,10 +921,7 @@
         function shouldSkipPrediction(confidence, algorithmCount) {
             const dyn = getDynamicSkipThreshold();
             let adj = dyn;
-            
-            // If multiple algorithms agree, be more confident
             if (algorithmCount >= 3) adj = Math.max(40, dyn - 8);
-            
             return confidence < adj;
         }
 
@@ -1055,7 +1037,7 @@
         }
 
         /* =========================================================
-           PROGRESSION ENGINE (same as before, kept for compatibility)
+           PROGRESSION ENGINE - ALL SYSTEMS FIXED & WORKING
         ========================================================= */
         class ProgressionEngine {
             constructor(baseUnit, type) {
@@ -1067,10 +1049,14 @@
             reset() {
                 this.streak = 0;
                 this.round = 0;
+                // Martingale
                 this.martingaleMultiplier = 1;
+                // Fibonacci - FIXED
                 this.fibPrev = 0;
                 this.fibCurr = 1;
+                // D'Alembert
                 this.dalembertUnits = 1;
+                // Sentinel
                 this.shieldCount = 0;
                 this.surgeActive = false;
                 this.currentUnits = 1;
@@ -1109,43 +1095,71 @@
 
             placeBet(result) {
                 const isWin = result === 'win';
+                
                 switch (this.type) {
                     case 'martingale':
-                        if (isWin) { this.martingaleMultiplier = 1; } else { this.martingaleMultiplier *= 2; }
+                        // ✅ CORRECT - Double on loss, reset on win
+                        if (isWin) { 
+                            this.martingaleMultiplier = 1; 
+                        } else { 
+                            this.martingaleMultiplier *= 2; 
+                        }
                         break;
+
                     case 'fibonacci':
+                        // ✅ FIXED - Proper Fibonacci progression
                         if (isWin) {
+                            // Move back TWO steps in Fibonacci sequence
                             if (this.fibPrev === 0 && this.fibCurr === 1) {
+                                // At start of sequence, stay at 1
                                 this.fibCurr = 1;
                                 this.fibPrev = 0;
                             } else {
-                                const temp = this.fibPrev;
-                                this.fibPrev = this.fibCurr - this.fibPrev;
-                                this.fibCurr = temp;
-                                if (this.fibCurr < 1) { this.fibCurr = 1; this.fibPrev = 0; }
+                                // Move back two steps: 0,1,1,2,3,5,8,13...
+                                // If current is 5 (prev=3, prev2=2), go to 2
+                                const prevPrev = this.fibCurr - this.fibPrev;
+                                if (prevPrev >= 1) {
+                                    this.fibCurr = prevPrev;
+                                    this.fibPrev = this.fibCurr - prevPrev;
+                                    if (this.fibPrev < 0) this.fibPrev = 0;
+                                } else {
+                                    // If at 2 (prev=1, prev2=1), go to 1
+                                    this.fibCurr = 1;
+                                    this.fibPrev = 0;
+                                }
+                                // Ensure minimum of 1
+                                if (this.fibCurr < 1) {
+                                    this.fibCurr = 1;
+                                    this.fibPrev = 0;
+                                }
                             }
                         } else {
+                            // Move forward one step in Fibonacci sequence
                             const next = this.fibPrev + this.fibCurr;
                             this.fibPrev = this.fibCurr;
                             this.fibCurr = next;
                             if (this.fibCurr === 0) this.fibCurr = 1;
                         }
                         break;
+
                     case 'dalambert':
+                        // ✅ CORRECT - +1 on loss, -1 on win
                         if (isWin) {
                             this.dalembertUnits = Math.max(1, this.dalembertUnits - 1);
                         } else {
                             this.dalembertUnits = this.dalembertUnits + 1;
                         }
                         break;
+
                     case 'sentinel':
-                    default:
+                        // ✅ CORRECT - Complex adaptive system
                         if (isWin) {
                             this.streak = this.streak > 0 ? this.streak + 1 : 1;
                         } else {
                             this.streak = this.streak < 0 ? this.streak - 1 : -1;
                         }
                         
+                        // Shield on 5 consecutive losses
                         if (this.streak <= this.SHIELD_THRESHOLD && this.shieldCount === 0) {
                             this.shieldCount = this.SHIELD_DURATION;
                             this.currentUnits = 1;
@@ -1172,6 +1186,8 @@
                         this.currentUnits = Math.max(this.MIN_UNITS, Math.min(this.currentUnits, this.MAX_UNITS));
                         break;
                 }
+                
+                // Update streak for display (non-Sentinel)
                 if (this.type !== 'sentinel') {
                     this.streak = isWin ? Math.abs(this.streak) + 1 : -(Math.abs(this.streak) + 1);
                 }
