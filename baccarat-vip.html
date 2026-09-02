@@ -643,7 +643,7 @@
             </div>
 
             <div class="prediction" id="predictionBox">
-                INITIALIZING...
+                WAITING FOR CONFIG...
                 <div class="bet-line" id="betLine" style="display:none;"></div>
             </div>
             <div class="skip-note" id="skipNote"></div>
@@ -669,6 +669,7 @@
         let detailedHistory = JSON.parse(localStorage.getItem('bt_detailed')) || [];
         let wins = 0, losses = 0, skips = 0, playerCount = 0, bankerCount = 0;
         const MIN_HANDS = 8;
+        let isInitialized = false;
 
         function clampConfidence(raw) { return Math.min(98, Math.max(35, raw)); }
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
@@ -963,6 +964,11 @@
         }
 
         function updatePredictionBox() {
+            if (!isInitialized) {
+                document.getElementById('predictionBox').innerHTML = 'WAITING FOR CONFIG...';
+                return;
+            }
+            
             const box = document.getElementById('predictionBox');
             const betLine = document.getElementById('betLine');
             const skipNote = document.getElementById('skipNote');
@@ -1208,27 +1214,18 @@
         ========================================================= */
         const savedConfig = JSON.parse(localStorage.getItem('bt_sentinel_config')) || null;
         const savedProgression = localStorage.getItem('bt_progression_type') || 'sentinel';
-        let engine = new ProgressionEngine((savedConfig && savedConfig.base) || 1, savedProgression);
+        let engine = null;
 
-        const savedState = JSON.parse(localStorage.getItem('bt_sentinel_state'));
-        if (savedConfig && savedState) {
-            engine.streak = savedState.streak || 0;
-            engine.round = savedState.round || 0;
-            if (engine.type === 'sentinel') {
-                engine.currentUnits = savedState.currentUnits || 1;
-                engine.shieldCount = savedState.shieldCount || 0;
-                engine.surgeActive = savedState.surgeActive || false;
-            } else if (engine.type === 'martingale') {
-                engine.martingaleMultiplier = savedState.currentUnits || 1;
-            } else if (engine.type === 'fibonacci') {
-                engine.fibCurr = savedState.currentUnits || 1;
-                engine.fibPrev = 0;
-            } else if (engine.type === 'dalambert') {
-                engine.dalembertUnits = savedState.currentUnits || 1;
-            }
+        function initializeApp(base, prog) {
+            engine = new ProgressionEngine(base, prog);
+            isInitialized = true;
+            renderSentinel();
+            saveAndUpdate();
+            updatePredictionBox();
         }
 
         function renderSentinel() {
+            if (!engine) return;
             const s = engine.getState();
             localStorage.setItem('bt_sentinel_state', JSON.stringify(s));
             if (lastPrediction) renderBetLine(true);
@@ -1244,15 +1241,23 @@
             overlay.style.display = 'none'; 
         }
 
-        // Check if we have saved config, if yes, close overlay automatically
-        if (savedConfig) {
+        // Check if we have saved config
+        if (savedConfig && savedConfig.base) {
             // Pre-fill the values
-            overlayBase.value = savedConfig.base || 1;
+            overlayBase.value = savedConfig.base;
             overlayProgression.value = savedProgression;
+            // Initialize the app with saved config
+            initializeApp(savedConfig.base, savedProgression);
             // Close overlay after a short delay
             setTimeout(() => {
                 closeOverlay();
-            }, 100);
+            }, 300);
+        } else {
+            // No saved config, show overlay and wait for user input
+            overlay.style.display = 'flex';
+            // Pre-fill defaults
+            overlayBase.value = 1;
+            overlayProgression.value = 'sentinel';
         }
 
         overlayStartBtn.addEventListener('click', function() {
@@ -1263,10 +1268,6 @@
             localStorage.setItem('bt_sentinel_config', JSON.stringify({ base, bankroll: DEFAULT_BANKROLL }));
             localStorage.setItem('bt_progression_type', prog);
             
-            // Initialize engine
-            engine = new ProgressionEngine(base, prog);
-            renderSentinel();
-
             // Reset all data
             sequence = [];
             results = [];
@@ -1274,8 +1275,10 @@
             detailedHistory = [];
             wins = 0; losses = 0; skips = 0;
             playerCount = 0; bankerCount = 0;
-            saveAndUpdate();
-
+            
+            // Initialize the app
+            initializeApp(base, prog);
+            
             // Close overlay
             closeOverlay();
         });
@@ -1289,6 +1292,11 @@
            RECORD RESULT, UNDO, RESET
         ========================================================= */
         function recordResult(r) {
+            if (!isInitialized || !engine) {
+                alert('Please configure the app first!');
+                return;
+            }
+            
             const skipNote = document.getElementById('skipNote');
 
             if (lastPrediction) {
@@ -1313,7 +1321,9 @@
         }
 
         function undo() {
+            if (!isInitialized || !engine) return;
             if (sequence.length === 0) return;
+            
             const lastResult = sequence.pop();
             const lastResultData = results.pop();
             const lastHistory = detailedHistory.pop();
@@ -1336,6 +1346,7 @@
         }
 
         function resetAll() {
+            if (!isInitialized || !engine) return;
             if (confirm("Reset all data?")) {
                 sequence = [];
                 results = [];
@@ -1361,13 +1372,18 @@
             updatePredictionBox();
         }
 
-        // initial stats
-        results.forEach(r => { if (r === 'W') wins++; else if (r === 'L') losses++; else if (r === '') skips++; });
-        sequence.forEach(r => { if (r === 'P') playerCount++; else if (r === 'B') bankerCount++; });
+        // Only initialize stats if we have data
+        if (sequence.length > 0 || results.length > 0) {
+            results.forEach(r => { if (r === 'W') wins++; else if (r === 'L') losses++; else if (r === '') skips++; });
+            sequence.forEach(r => { if (r === 'P') playerCount++; else if (r === 'B') bankerCount++; });
+        }
 
-        updateHistory();
-        updatePredictionBox();
-        renderSentinel();
+        // Update UI if app is initialized
+        if (isInitialized) {
+            updateHistory();
+            updatePredictionBox();
+            renderSentinel();
+        }
     </script>
 </body>
 </html>
