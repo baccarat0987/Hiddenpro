@@ -819,7 +819,7 @@
         }
 
         /* =========================================================
-           PART 2 — Progression Engine Factory (continuous for non-Sentinel)
+           PART 2 — Progression Engine Factory (fixed Fibonacci)
         ========================================================= */
         class ProgressionEngine {
             constructor(baseUnit, type) {
@@ -833,12 +833,12 @@
                 this.round = 0;
                 // Martingale specific
                 this.martingaleMultiplier = 1;
-                // Fibonacci specific
+                // Fibonacci specific (fixed)
                 this.fibPrev = 0;
                 this.fibCurr = 1;
                 // D'Alembert specific
                 this.dalembertUnits = 1;
-                // Sentinel specific (kept for compatibility)
+                // Sentinel specific
                 this.shieldCount = 0;
                 this.surgeActive = false;
                 this.currentUnits = 1;
@@ -864,7 +864,7 @@
                     currentUnits: this.type === 'sentinel' ? this.currentUnits : 
                                   (this.type === 'martingale' ? this.martingaleMultiplier :
                                    this.type === 'fibonacci' ? this.fibCurr : this.dalembertUnits),
-                    bankroll: 0, // not used in this simplified version
+                    bankroll: 0,
                     streak: this.streak,
                     surgeActive: this.surgeActive || false,
                     shieldActive: (this.shieldCount || 0) > 0,
@@ -880,21 +880,29 @@
                 switch (this.type) {
                     case 'martingale':
                         if (isWin) { this.martingaleMultiplier = 1; } else { this.martingaleMultiplier *= 2; }
-                        // No upper limit for Martingale (continues indefinitely)
                         break;
                     case 'fibonacci':
                         if (isWin) {
-                            const temp = this.fibPrev;
-                            this.fibPrev = this.fibCurr - this.fibPrev;
-                            this.fibCurr = temp + this.fibCurr;
-                            if (this.fibPrev < 0) { this.fibPrev = 0; this.fibCurr = 1; }
+                            // Step back two numbers in the sequence
+                            if (this.fibPrev === 0 && this.fibCurr === 1) {
+                                // At the start (1), stay at 1
+                                this.fibCurr = 1;
+                                this.fibPrev = 0;
+                            } else {
+                                // Step back two positions: new current = previous, new previous = previous of previous
+                                const temp = this.fibPrev;
+                                this.fibPrev = this.fibCurr - this.fibPrev;
+                                this.fibCurr = temp;
+                                // Ensure we don't go below 1
+                                if (this.fibCurr < 1) { this.fibCurr = 1; this.fibPrev = 0; }
+                            }
                         } else {
+                            // Move forward in the sequence (next = current + previous)
                             const next = this.fibPrev + this.fibCurr;
                             this.fibPrev = this.fibCurr;
                             this.fibCurr = next;
+                            if (this.fibCurr === 0) this.fibCurr = 1;
                         }
-                        if (this.fibCurr === 0) this.fibCurr = 1;
-                        // No upper limit for Fibonacci (continues indefinitely)
                         break;
                     case 'dalambert':
                         if (isWin) {
@@ -902,7 +910,6 @@
                         } else {
                             this.dalembertUnits = this.dalembertUnits + 1;
                         }
-                        // No upper limit for D'Alembert (continues indefinitely)
                         break;
                     case 'sentinel':
                     default:
@@ -953,7 +960,6 @@
 
         const savedState = JSON.parse(localStorage.getItem('bt_sentinel_state'));
         if (savedConfig && savedState) {
-            // restore basic stats (bankroll not used)
             engine.streak = savedState.streak || 0;
             engine.round = savedState.round || 0;
             if (engine.type === 'sentinel') {
@@ -1052,7 +1058,6 @@
             else if (lastResultData === 'L') losses--;
             else if (lastResultData === '') skips--;
 
-            // Recompute engine state from history (simplified: reset and replay)
             const base = engine.baseUnit;
             const type = engine.type;
             engine = new ProgressionEngine(base, type);
