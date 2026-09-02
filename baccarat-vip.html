@@ -819,7 +819,7 @@
         }
 
         /* =========================================================
-           PART 2 — Progression Engine Factory
+           PART 2 — Progression Engine Factory (continuous for non-Sentinel)
         ========================================================= */
         class ProgressionEngine {
             constructor(baseUnit, type) {
@@ -880,7 +880,7 @@
                 switch (this.type) {
                     case 'martingale':
                         if (isWin) { this.martingaleMultiplier = 1; } else { this.martingaleMultiplier *= 2; }
-                        this.martingaleMultiplier = Math.min(64, Math.max(1, this.martingaleMultiplier));
+                        // No upper limit for Martingale (continues indefinitely)
                         break;
                     case 'fibonacci':
                         if (isWin) {
@@ -894,14 +894,15 @@
                             this.fibCurr = next;
                         }
                         if (this.fibCurr === 0) this.fibCurr = 1;
-                        if (this.fibCurr > 55) this.fibCurr = 55;
+                        // No upper limit for Fibonacci (continues indefinitely)
                         break;
                     case 'dalambert':
                         if (isWin) {
                             this.dalembertUnits = Math.max(1, this.dalembertUnits - 1);
                         } else {
-                            this.dalembertUnits = Math.min(10, this.dalembertUnits + 1);
+                            this.dalembertUnits = this.dalembertUnits + 1;
                         }
+                        // No upper limit for D'Alembert (continues indefinitely)
                         break;
                     case 'sentinel':
                     default:
@@ -962,9 +963,7 @@
             } else if (engine.type === 'martingale') {
                 engine.martingaleMultiplier = savedState.currentUnits || 1;
             } else if (engine.type === 'fibonacci') {
-                // Fibonacci state stored as currentUnits and maybe prev
                 engine.fibCurr = savedState.currentUnits || 1;
-                // prev not stored, we reset to 0 for simplicity
                 engine.fibPrev = 0;
             } else if (engine.type === 'dalambert') {
                 engine.dalembertUnits = savedState.currentUnits || 1;
@@ -1054,11 +1053,9 @@
             else if (lastResultData === '') skips--;
 
             // Recompute engine state from history (simplified: reset and replay)
-            // We'll just reset the progression to avoid complex undo
             const base = engine.baseUnit;
             const type = engine.type;
             engine = new ProgressionEngine(base, type);
-            // replay all results except last
             const replayResults = results.filter(r => r === 'W' || r === 'L');
             for (let i = 0; i < replayResults.length; i++) {
                 engine.placeBet(replayResults[i] === 'W' ? 'win' : 'loss');
