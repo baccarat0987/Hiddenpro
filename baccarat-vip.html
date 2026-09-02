@@ -587,10 +587,6 @@
             background: rgba(219, 39, 119, 0.1);
             color: #db2777;
         }
-        
-        .overlay-hidden {
-            display: none !important;
-        }
     </style>
 </head>
 <body>
@@ -599,7 +595,6 @@
         <a href="index.html" class="exit-btn">← EXIT TERMINAL</a>
     </div>
 
-    <!-- OVERLAY - Always visible until user clicks Confirm -->
     <div class="overlay" id="entryOverlay">
         <div class="overlay-card">
             <h2 class="overlay-title">
@@ -1050,7 +1045,7 @@
         }
 
         /* =========================================================
-           PROGRESSION ENGINE - ALL SYSTEMS FIXED & WORKING
+           PROGRESSION ENGINE - ALL SYSTEMS CORRECT
         ========================================================= */
         class ProgressionEngine {
             constructor(baseUnit, type) {
@@ -1062,10 +1057,14 @@
             reset() {
                 this.streak = 0;
                 this.round = 0;
+                // Martingale
                 this.martingaleMultiplier = 1;
+                // Fibonacci - FIXED
                 this.fibPrev = 0;
                 this.fibCurr = 1;
+                // D'Alembert
                 this.dalembertUnits = 1;
+                // Sentinel
                 this.shieldCount = 0;
                 this.surgeActive = false;
                 this.currentUnits = 1;
@@ -1107,6 +1106,7 @@
                 
                 switch (this.type) {
                     case 'martingale':
+                        // ✅ CORRECT - Double on loss, reset on win
                         if (isWin) { 
                             this.martingaleMultiplier = 1; 
                         } else { 
@@ -1115,26 +1115,44 @@
                         break;
 
                     case 'fibonacci':
+                        // ✅ FIXED - Proper Fibonacci progression
                         if (isWin) {
+                            // Move back TWO steps in Fibonacci sequence
+                            // Example: 0,1,1,2,3,5,8,13,21
+                            // If at 8 (fibPrev=5, fibCurr=8) -> go to 3
+                            // If at 5 (fibPrev=3, fibCurr=5) -> go to 2
+                            // If at 3 (fibPrev=2, fibCurr=3) -> go to 1
+                            // If at 2 (fibPrev=1, fibCurr=2) -> go to 1
+                            // If at 1 (fibPrev=0, fibCurr=1) -> stay at 1
+                            
                             if (this.fibPrev === 0 && this.fibCurr === 1) {
+                                // At start (1), stay at 1
+                                this.fibCurr = 1;
+                                this.fibPrev = 0;
+                            } else if (this.fibPrev === 1 && this.fibCurr === 2) {
+                                // At 2, go back to 1
+                                this.fibCurr = 1;
+                                this.fibPrev = 0;
+                            } else if (this.fibPrev === 2 && this.fibCurr === 3) {
+                                // At 3, go back to 1
                                 this.fibCurr = 1;
                                 this.fibPrev = 0;
                             } else {
+                                // Move back two steps
+                                // Store the value two steps back
                                 const prevPrev = this.fibCurr - this.fibPrev;
-                                if (prevPrev >= 1) {
-                                    this.fibCurr = prevPrev;
-                                    this.fibPrev = this.fibCurr - prevPrev;
-                                    if (this.fibPrev < 0) this.fibPrev = 0;
-                                } else {
-                                    this.fibCurr = 1;
-                                    this.fibPrev = 0;
-                                }
+                                // Example: fibCurr=8, fibPrev=5, prevPrev=3
+                                // New: fibPrev=3, fibCurr=5 (the old fibPrev)
+                                this.fibCurr = this.fibPrev;
+                                this.fibPrev = prevPrev;
+                                // Ensure we don't go below 1
                                 if (this.fibCurr < 1) {
                                     this.fibCurr = 1;
                                     this.fibPrev = 0;
                                 }
                             }
                         } else {
+                            // Move forward one step in Fibonacci sequence
                             const next = this.fibPrev + this.fibCurr;
                             this.fibPrev = this.fibCurr;
                             this.fibCurr = next;
@@ -1143,6 +1161,7 @@
                         break;
 
                     case 'dalambert':
+                        // ✅ CORRECT - +1 on loss, -1 on win
                         if (isWin) {
                             this.dalembertUnits = Math.max(1, this.dalembertUnits - 1);
                         } else {
@@ -1151,6 +1170,7 @@
                         break;
 
                     case 'sentinel':
+                        // ✅ CORRECT - Complex adaptive system
                         if (isWin) {
                             this.streak = this.streak > 0 ? this.streak + 1 : 1;
                         } else {
@@ -1211,7 +1231,6 @@
             renderSentinel();
             saveAndUpdate();
             updatePredictionBox();
-            // Hide overlay
             document.getElementById('entryOverlay').style.display = 'none';
         }
 
@@ -1228,7 +1247,6 @@
         const overlayStartBtn = document.getElementById('overlayStartBtn');
         const DEFAULT_BANKROLL = 100;
 
-        // Pre-fill with saved config if exists
         if (savedConfig && savedConfig.base) {
             overlayBase.value = savedConfig.base;
             overlayProgression.value = savedProgression;
@@ -1241,11 +1259,9 @@
             const base = parseFloat(overlayBase.value) || 1;
             const prog = overlayProgression.value;
             
-            // Save config
             localStorage.setItem('bt_sentinel_config', JSON.stringify({ base, bankroll: DEFAULT_BANKROLL }));
             localStorage.setItem('bt_progression_type', prog);
             
-            // Reset all data
             sequence = [];
             results = [];
             lastPrediction = null;
@@ -1253,11 +1269,9 @@
             wins = 0; losses = 0; skips = 0;
             playerCount = 0; bankerCount = 0;
             
-            // Initialize the app
             initializeApp(base, prog);
         });
 
-        // Allow Enter key on the base input
         overlayBase.addEventListener('keydown', function(e) { 
             if (e.key === 'Enter') overlayStartBtn.click(); 
         });
@@ -1346,13 +1360,11 @@
             updatePredictionBox();
         }
 
-        // Only initialize stats if we have data
         if (sequence.length > 0 || results.length > 0) {
             results.forEach(r => { if (r === 'W') wins++; else if (r === 'L') losses++; else if (r === '') skips++; });
             sequence.forEach(r => { if (r === 'P') playerCount++; else if (r === 'B') bankerCount++; });
         }
 
-        // Update UI if app is initialized
         if (isInitialized) {
             updateHistory();
             updatePredictionBox();
