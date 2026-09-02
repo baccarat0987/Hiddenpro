@@ -819,7 +819,7 @@
         }
 
         /* =========================================================
-           PART 2 — Progression Engine Factory (fixed Fibonacci)
+           PART 2 — Progression Engine Factory (all fixed)
         ========================================================= */
         class ProgressionEngine {
             constructor(baseUnit, type) {
@@ -833,7 +833,7 @@
                 this.round = 0;
                 // Martingale specific
                 this.martingaleMultiplier = 1;
-                // Fibonacci specific (fixed)
+                // Fibonacci specific
                 this.fibPrev = 0;
                 this.fibCurr = 1;
                 // D'Alembert specific
@@ -913,18 +913,27 @@
                         break;
                     case 'sentinel':
                     default:
-                        const betAmount = this.baseUnit * this.currentUnits;
+                        // Track consecutive wins or losses properly
                         if (isWin) {
                             this.streak = this.streak > 0 ? this.streak + 1 : 1;
                         } else {
                             this.streak = this.streak < 0 ? this.streak - 1 : -1;
                         }
+                        
+                        // Shield activates when we hit 5 consecutive losses
                         if (this.streak <= this.SHIELD_THRESHOLD && this.shieldCount === 0) {
                             this.shieldCount = this.SHIELD_DURATION;
                             this.currentUnits = 1;
                         }
+                        
                         let surgeBonus = 0;
-                        if (isWin && this.streak >= this.SURGE_THRESHOLD) { surgeBonus = 1; this.surgeActive = true; } else { this.surgeActive = false; }
+                        // Surge activates on 3+ consecutive wins
+                        if (isWin && this.streak >= this.SURGE_THRESHOLD) { 
+                            surgeBonus = 1; 
+                            this.surgeActive = true; 
+                        } else { 
+                            this.surgeActive = false; 
+                        }
 
                         if (this.shieldCount > 0) {
                             this.shieldCount--;
@@ -939,7 +948,10 @@
                         this.currentUnits = Math.max(this.MIN_UNITS, Math.min(this.currentUnits, this.MAX_UNITS));
                         break;
                 }
-                this.streak = isWin ? Math.abs(this.streak) + 1 : -(Math.abs(this.streak) + 1);
+                // Update streak for display
+                if (this.type !== 'sentinel') {
+                    this.streak = isWin ? Math.abs(this.streak) + 1 : -(Math.abs(this.streak) + 1);
+                }
                 this.round++;
                 return this.getState();
             }
