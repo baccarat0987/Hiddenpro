@@ -819,7 +819,7 @@
         }
 
         /* =========================================================
-           PART 2 — Progression Engine Factory (all fixed)
+           PART 2 — Progression Engine Factory (FIXED SENTINEL)
         ========================================================= */
         class ProgressionEngine {
             constructor(baseUnit, type) {
@@ -885,19 +885,15 @@
                         if (isWin) {
                             // Step back two numbers in the sequence
                             if (this.fibPrev === 0 && this.fibCurr === 1) {
-                                // At the start (1), stay at 1
                                 this.fibCurr = 1;
                                 this.fibPrev = 0;
                             } else {
-                                // Step back two positions: new current = previous, new previous = previous of previous
                                 const temp = this.fibPrev;
                                 this.fibPrev = this.fibCurr - this.fibPrev;
                                 this.fibCurr = temp;
-                                // Ensure we don't go below 1
                                 if (this.fibCurr < 1) { this.fibCurr = 1; this.fibPrev = 0; }
                             }
                         } else {
-                            // Move forward in the sequence (next = current + previous)
                             const next = this.fibPrev + this.fibCurr;
                             this.fibPrev = this.fibCurr;
                             this.fibCurr = next;
@@ -913,10 +909,13 @@
                         break;
                     case 'sentinel':
                     default:
+                        // === FIXED: Proper streak tracking for Sentinel ===
                         // Track consecutive wins or losses properly
                         if (isWin) {
+                            // If streak was negative (losses), reset to 1, otherwise increment
                             this.streak = this.streak > 0 ? this.streak + 1 : 1;
                         } else {
+                            // If streak was positive (wins), reset to -1, otherwise decrement
                             this.streak = this.streak < 0 ? this.streak - 1 : -1;
                         }
                         
@@ -948,7 +947,7 @@
                         this.currentUnits = Math.max(this.MIN_UNITS, Math.min(this.currentUnits, this.MAX_UNITS));
                         break;
                 }
-                // Update streak for display
+                // Update streak for display (non-Sentinel)
                 if (this.type !== 'sentinel') {
                     this.streak = isWin ? Math.abs(this.streak) + 1 : -(Math.abs(this.streak) + 1);
                 }
