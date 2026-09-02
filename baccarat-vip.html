@@ -595,7 +595,7 @@
         <a href="index.html" class="exit-btn">← EXIT TERMINAL</a>
     </div>
 
-    <div class="overlay" id="entryOverlay">
+    <div class="overlay" id="entryOverlay" style="display:flex;">
         <div class="overlay-card">
             <h2 class="overlay-title">
                 <span class="title-violet">Baccarat</span>
@@ -806,7 +806,8 @@
             return null;
         }
 
-        // 6. Recent Bias Detection        function getRecentBiasPrediction() {
+        // 6. Recent Bias Detection
+        function getRecentBiasPrediction() {
             if (sequence.length < 5) return null;
             
             const recent = sequence.slice(-5);
@@ -1239,24 +1240,34 @@
         const overlayStartBtn = document.getElementById('overlayStartBtn');
         const DEFAULT_BANKROLL = 100;
 
-        function openOverlay(prefill) {
-            if (prefill) {
-                overlayBase.value = engine.baseUnit;
-                overlayProgression.value = engine.type;
-            }
-            overlay.style.display = 'flex';
+        function closeOverlay() { 
+            overlay.style.display = 'none'; 
         }
 
-        function closeOverlay() { overlay.style.display = 'none'; }
+        // Check if we have saved config, if yes, close overlay automatically
+        if (savedConfig) {
+            // Pre-fill the values
+            overlayBase.value = savedConfig.base || 1;
+            overlayProgression.value = savedProgression;
+            // Close overlay after a short delay
+            setTimeout(() => {
+                closeOverlay();
+            }, 100);
+        }
 
         overlayStartBtn.addEventListener('click', function() {
             const base = parseFloat(overlayBase.value) || 1;
             const prog = overlayProgression.value;
+            
+            // Save config
             localStorage.setItem('bt_sentinel_config', JSON.stringify({ base, bankroll: DEFAULT_BANKROLL }));
             localStorage.setItem('bt_progression_type', prog);
+            
+            // Initialize engine
             engine = new ProgressionEngine(base, prog);
             renderSentinel();
 
+            // Reset all data
             sequence = [];
             results = [];
             lastPrediction = null;
@@ -1265,11 +1276,14 @@
             playerCount = 0; bankerCount = 0;
             saveAndUpdate();
 
+            // Close overlay
             closeOverlay();
         });
-        overlayBase.addEventListener('keydown', e => { if (e.key === 'Enter') overlayStartBtn.click(); });
 
-        openOverlay(!!savedConfig);
+        // Allow Enter key on the base input
+        overlayBase.addEventListener('keydown', function(e) { 
+            if (e.key === 'Enter') overlayStartBtn.click(); 
+        });
 
         /* =========================================================
            RECORD RESULT, UNDO, RESET
