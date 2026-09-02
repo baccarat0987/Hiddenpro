@@ -226,7 +226,7 @@
         .bet-line .amount { font-size:clamp(19px,4.2vw,23px); font-weight:700; background:linear-gradient(135deg,#7c3aed,#1e3a8a,#db2777); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; transition:text-shadow 0.4s ease; }
         .bet-line .amount.flash { text-shadow:0 0 20px rgba(124,58,237,0.5),0 0 40px rgba(219,39,119,0.3); }
 
-        /* Overlay with progression selection */
+        /* Overlay with progression + risk combined */
         .overlay {
             position: fixed;
             inset: 0;
@@ -303,10 +303,11 @@
         .util-btns button { background: #e4e9f0; color: #3a4555; }
         .util-btns button:hover { background: #d5dce6; color: #1a2535; }
         .overlay-card input, .overlay-card select { background: #f0f3f8; }
-        .risk-tag { display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; margin-top:4px; }
+        .risk-tag { display:inline-block; font-size:10px; font-weight:700; padding:2px 10px; border-radius:20px; margin-left:6px; }
         .risk-low { background:#d4edda; color:#155724; }
         .risk-moderate { background:#fff3cd; color:#856404; }
         .risk-high { background:#f8d7da; color:#721c24; }
+        select option { padding:6px; }
     </style>
 </head>
 <body>
@@ -321,20 +322,15 @@
             </h2>
             <div class="overlay-welcome">BETTING MANAGER</div>
             <label>Base Unit <input type="number" id="overlayBase" value="1" step="0.01" min="0.01"></label>
-            <label>Progression 
-                <select id="overlayProgression">
-                    <option value="sentinel">Sentinel (default)</option>
-                    <option value="martingale">Martingale</option>
-                    <option value="fibonacci">Fibonacci</option>
-                    <option value="dalembert">D'Alembert</option>
-                    <option value="labouchere">Labouchere</option>
-                </select>
-            </label>
-            <label>Risk Profile
-                <select id="overlayRisk">
-                    <option value="low">LOW RISK</option>
-                    <option value="moderate" selected>MODERATE</option>
-                    <option value="high">HIGH RISK</option>
+            <label>Progression + Risk
+                <select id="overlayProgressionRisk">
+                    <option value="sentinel|moderate">Sentinel (MODERATE)</option>
+                    <option value="martingale|high">Martingale (HIGH RISK)</option>
+                    <option value="fibonacci|moderate">Fibonacci (MODERATE)</option>
+                    <option value="dalembert|low">D'Alembert (LOW RISK)</option>
+                    <option value="labouchere|high">Labouchere (HIGH RISK)</option>
+                    <option value="sentinel|low">Sentinel (LOW RISK)</option>
+                    <option value="sentinel|high">Sentinel (HIGH RISK)</option>
                 </select>
             </label>
             <button class="start-btn" id="overlayStartBtn">Confirm & Start</button>
@@ -374,12 +370,12 @@
     </div>
 
     <script>
-        // ========== PROGRESSION ENGINE FACTORY ==========
+        // ========== PROGRESSION ENGINE FACTORY with risk built in ==========
         function createProgression(name, baseUnit, risk) {
             const riskMultiplier = { low:0.5, moderate:1.0, high:1.8 };
             const mult = riskMultiplier[risk] || 1.0;
             let state = { currentBet: baseUnit, bankroll: 100, streak: 0, round: 0, history: [] };
-            let labouchereList = [1,2,3,4]; // default
+            let labouchereList = [1,2,3,4];
 
             const engine = {
                 getState: () => state,
@@ -397,7 +393,6 @@
                     state.round++;
                     state.history.push(result);
 
-                    // update progression
                     switch(name) {
                         case 'martingale': {
                             if (result === 'win') state.currentBet = baseUnit;
@@ -432,7 +427,6 @@
                         }
                         case 'sentinel':
                         default: {
-                            // Sentinel logic (original)
                             if (result === 'win') state.streak = state.streak > 0 ? state.streak + 1 : 1;
                             else state.streak = state.streak < 0 ? state.streak - 1 : -1;
                             let units = state.currentBet / baseUnit;
@@ -461,7 +455,6 @@
         let lastPrediction = null;
         const MIN_HANDS = 10;
 
-        // Engine state
         let currentEngine = null;
         let baseUnit = 1;
         let riskProfile = 'moderate';
@@ -473,10 +466,9 @@
             }
             return currentEngine;
         }
-
         function getEngine() { return currentEngine || initEngine(); }
 
-        // ========== PREDICTION LOGIC (same as original) ==========
+        // ========== PREDICTION LOGIC ==========
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
         function getCurrentStreak() {
             if (sequence.length === 0) return { side: null, count: 0 };
@@ -659,7 +651,6 @@
             const lastResult = sequence.pop();
             const lastResultData = results.pop();
             const lastHistory = detailedHistory.pop();
-            if (lastResult === 'P') playerCount--; else bankerCount--;
             if (lastResultData === 'W') wins--;
             else if (lastResultData === 'L') losses--;
             else if (lastResultData === '') skips--;
@@ -687,18 +678,26 @@
         // ========== OVERLAY ==========
         const overlay = document.getElementById('entryOverlay');
         const overlayBase = document.getElementById('overlayBase');
-        const overlayProgression = document.getElementById('overlayProgression');
-        const overlayRisk = document.getElementById('overlayRisk');
+        const overlayProgressionRisk = document.getElementById('overlayProgressionRisk');
         const overlayStartBtn = document.getElementById('overlayStartBtn');
 
         function openOverlay() { overlay.style.display = 'flex'; }
         function closeOverlay() { overlay.style.display = 'none'; }
 
         overlayStartBtn.addEventListener('click', function() {
-            baseUnit = parseFloat(overlayBase.value) || 1;
-            progressionName = overlayProgression.value;
-            riskProfile = overlayRisk.value;
-            localStorage.setItem('bt_sentinel_config', JSON.stringify({ base: baseUnit, bankroll: 100, progression: progressionName, risk: riskProfile }));
+            const base = parseFloat(overlayBase.value) || 1;
+            const [prog, risk] = overlayProgressionRisk.value.split('|');
+            baseUnit = base;
+            progressionName = prog;
+            riskProfile = risk || 'moderate';
+            
+            localStorage.setItem('bt_sentinel_config', JSON.stringify({ 
+                base: baseUnit, 
+                bankroll: 100, 
+                progression: progressionName, 
+                risk: riskProfile 
+            }));
+            
             currentEngine = createProgression(progressionName, baseUnit, riskProfile);
             // reset history
             sequence = []; results = []; detailedHistory = [];
@@ -711,8 +710,13 @@
         const savedConfig = JSON.parse(localStorage.getItem('bt_sentinel_config'));
         if (savedConfig) {
             overlayBase.value = savedConfig.base || 1;
-            overlayProgression.value = savedConfig.progression || 'sentinel';
-            overlayRisk.value = savedConfig.risk || 'moderate';
+            const progRisk = `${savedConfig.progression || 'sentinel'}|${savedConfig.risk || 'moderate'}`;
+            // try to find matching option
+            let found = false;
+            for (let opt of overlayProgressionRisk.options) {
+                if (opt.value === progRisk) { opt.selected = true; found = true; break; }
+            }
+            if (!found) overlayProgressionRisk.value = 'sentinel|moderate';
             baseUnit = savedConfig.base || 1;
             progressionName = savedConfig.progression || 'sentinel';
             riskProfile = savedConfig.risk || 'moderate';
@@ -721,7 +725,6 @@
             openOverlay();
         }
 
-        // if no engine yet, create default
         if (!currentEngine) {
             currentEngine = createProgression('sentinel', 1, 'moderate');
         }
