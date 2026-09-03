@@ -16,7 +16,7 @@
     <!-- Firebase Authentication & Permission Check -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -33,16 +33,6 @@
         const db = getFirestore(app);
 
         const REQUIRED_ENGINE_ID = "engine_17";
-
-        // Make signOut available globally for the exit button
-        window.signOutUser = function() {
-            signOut(auth).then(() => {
-                window.location.href = "index.html";
-            }).catch((error) => {
-                console.error("Sign out error:", error);
-                window.location.href = "index.html";
-            });
-        };
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
@@ -87,6 +77,11 @@
         if (typeof console !== "undefined") {
             console.log = console.debug = console.info = console.warn = console.error = function() {};
         }
+
+        // Simple exit function - just redirect to portal
+        window.goHome = function() {
+            window.location.href = "index.html";
+        };
     </script>
 
     <style>
@@ -461,7 +456,7 @@
             inset: 0;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(2px);
-            display: none;
+            display: flex;
             justify-content: center;
             align-items: center;
             z-index: 2000;
@@ -649,7 +644,7 @@
 <body>
 
     <div class="exit-nav">
-        <button onclick="window.signOutUser()" class="exit-btn">← EXIT</button>
+        <button onclick="window.goHome()" class="exit-btn">← EXIT</button>
         <button onclick="showOverlay()" class="exit-btn reconfig-btn">⚙️ SETTINGS</button>
     </div>
 
@@ -1053,7 +1048,7 @@
                 return;
             }
             
-            // Show Fibonacci sequence status if using Fibonacci
+            // Show progression status
             if (engine && engine.type === 'fibonacci') {
                 fibDisplay.textContent = `📊 Fib: ${engine.fibPrev},${engine.fibCurr} → Bet: ${engine.fibCurr}x`;
             } else if (engine && engine.type === 'martingale') {
@@ -1327,10 +1322,6 @@
             
             // Hide overlay
             document.getElementById('entryOverlay').classList.remove('active');
-            
-            // Enable buttons
-            document.getElementById('playerBtn').style.opacity = '1';
-            document.getElementById('bankerBtn').style.opacity = '1';
         }
 
         function renderSentinel() {
