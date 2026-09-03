@@ -16,7 +16,7 @@
     <!-- Firebase Authentication & Permission Check -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -33,6 +33,16 @@
         const db = getFirestore(app);
 
         const REQUIRED_ENGINE_ID = "engine_17";
+
+        // Make signOut available globally for the exit button
+        window.signOutUser = function() {
+            signOut(auth).then(() => {
+                window.location.href = "index.html";
+            }).catch((error) => {
+                console.error("Sign out error:", error);
+                window.location.href = "index.html";
+            });
+        };
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
@@ -137,6 +147,8 @@
             top: 15px;
             right: 15px;
             z-index: 2000;
+            display: flex;
+            gap: 8px;
         }
         .exit-btn {
             background: rgba(0, 0, 0, 0.7);
@@ -150,12 +162,23 @@
             backdrop-filter: blur(8px);
             transition: 0.2s;
             font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            cursor: pointer;
         }
         .exit-btn:hover {
             background: #7c3aed;
             color: #ffffff;
             box-shadow: 0 0 12px #7c3aed;
             border-color: #7c3aed;
+        }
+        .reconfig-btn {
+            border-color: rgba(219, 39, 119, 0.5);
+            color: #db2777;
+        }
+        .reconfig-btn:hover {
+            background: #db2777;
+            color: #ffffff;
+            box-shadow: 0 0 12px #db2777;
+            border-color: #db2777;
         }
 
         .container {
@@ -438,7 +461,7 @@
             inset: 0;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(2px);
-            display: flex;
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 2000;
@@ -449,6 +472,9 @@
             position: absolute;
             inset: 0;
             background: rgba(255, 255, 255, 0.1);
+        }
+        .overlay.active {
+            display: flex;
         }
         .overlay-card {
             position: relative;
@@ -544,6 +570,19 @@
         }
         .overlay-card .start-btn:hover { filter: brightness(1.08); transform: scale(1.02); }
         .overlay-card .start-btn:active { transform: scale(0.98); }
+        .overlay-card .close-btn {
+            margin-top: 10px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: underline;
+            opacity: 0.6;
+        }
+        .overlay-card .close-btn:hover {
+            opacity: 1;
+        }
 
         .container, .overlay-card { background-color: #f8fafc; }
         .prediction { background: #f0f3f7; }
@@ -599,34 +638,22 @@
             display: none !important;
         }
         
-        /* Algorithm vote display */
-        .algo-votes {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 3px;
-            margin-top: 6px;
-            font-size: 8px;
+        .prog-display {
+            font-size: 11px;
             color: var(--text-muted);
+            margin-top: 2px;
+            opacity: 0.7;
         }
-        .algo-votes .vote {
-            padding: 1px 5px;
-            border-radius: 4px;
-            background: rgba(0,0,0,0.04);
-            border: 1px solid rgba(0,0,0,0.06);
-        }
-        .algo-votes .vote.P { background: rgba(124, 58, 237, 0.12); border-color: rgba(124, 58, 237, 0.2); }
-        .algo-votes .vote.B { background: rgba(219, 39, 119, 0.12); border-color: rgba(219, 39, 119, 0.2); }
-        .algo-votes .vote.confident { font-weight: 700; }
     </style>
 </head>
 <body>
 
     <div class="exit-nav">
-        <a href="index.html" class="exit-btn">← EXIT TERMINAL</a>
+        <button onclick="window.signOutUser()" class="exit-btn">← EXIT</button>
+        <button onclick="showOverlay()" class="exit-btn reconfig-btn">⚙️ SETTINGS</button>
     </div>
 
-    <div class="overlay" id="entryOverlay">
+    <div class="overlay active" id="entryOverlay">
         <div class="overlay-card">
             <h2 class="overlay-title">
                 <span class="title-violet">Baccarat</span>
@@ -684,7 +711,7 @@
                 ⚙️ CONFIGURE SETTINGS ABOVE
                 <div class="bet-line" id="betLine" style="display:none;"></div>
                 <div class="fib-display" id="fibDisplay"></div>
-                <div class="algo-votes" id="algoVotes"></div>
+                <div class="prog-display" id="progDisplay"></div>
             </div>
             <div class="skip-note" id="skipNote"></div>
 
@@ -701,8 +728,7 @@
 
     <script>
         /* =========================================================
-           MERGED PREDICTION ENGINE - ALL LOGICS COMBINED
-           Six algorithms work together with weighted voting
+           ENHANCED PREDICTION ENGINE WITH MULTIPLE ALGORITHMS
         ========================================================= */
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
         let results = JSON.parse(localStorage.getItem('bt_results')) || [];
@@ -716,7 +742,8 @@
         function clampConfidence(raw) { return Math.min(98, Math.max(35, raw)); }
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
 
-        // ========== ALGORITHM 1: MARKOV CHAIN ==========
+        // ========== ENHANCED PATTERN DETECTION ==========
+        
         function getMarkovPrediction() {
             if (sequence.length < 2) return null;
             
@@ -739,7 +766,6 @@
             return { prediction, confidence };
         }
 
-        // ========== ALGORITHM 2: RUN LENGTH / STREAK ==========
         function getRunLengthPrediction() {
             if (sequence.length < 2) return null;
             
@@ -771,7 +797,6 @@
             return null;
         }
 
-        // ========== ALGORITHM 3: FREQUENCY / REVERSION ==========
         function getFrequencyPrediction() {
             if (sequence.length < 10) return null;
             
@@ -783,18 +808,17 @@
             const bRate = bCount / total;
             
             if (pRate < 0.42 && bRate > 0.58) {
-                const confidence = 50 + (bRate - 0.58) * 200;
+                const confidence = 50 + (0.58 - bRate) * 200;
                 return { prediction: 'P', confidence: Math.min(80, confidence) };
             }
             if (bRate < 0.42 && pRate > 0.58) {
-                const confidence = 50 + (pRate - 0.58) * 200;
+                const confidence = 50 + (0.58 - pRate) * 200;
                 return { prediction: 'B', confidence: Math.min(80, confidence) };
             }
             
             return null;
         }
 
-        // ========== ALGORITHM 4: PATTERN MATCHING ==========
         function getPatternPrediction() {
             if (sequence.length < 5) return null;
             
@@ -819,7 +843,6 @@
             return null;
         }
 
-        // ========== ALGORITHM 5: ZIGZAG DETECTION ==========
         function getZigzagPrediction() {
             if (sequence.length < 5) return null;
             
@@ -847,7 +870,6 @@
             return null;
         }
 
-        // ========== ALGORITHM 6: RECENT BIAS ==========
         function getRecentBiasPrediction() {
             if (sequence.length < 5) return null;
             
@@ -867,15 +889,15 @@
 
         // ========== WEIGHTED VOTING SYSTEM ==========
         function getEnhancedPredictionAndConfidence() {
-            if (sequence.length < MIN_HANDS) return { prediction: null, confidence: 0, algorithmResults: [] };
+            if (sequence.length < MIN_HANDS) return { prediction: null, confidence: 0 };
             
             const algorithms = [
-                { name: 'Markov', fn: getMarkovPrediction, weight: 2.0 },
-                { name: 'Streak', fn: getRunLengthPrediction, weight: 1.5 },
-                { name: 'Frequency', fn: getFrequencyPrediction, weight: 1.0 },
-                { name: 'Pattern', fn: getPatternPrediction, weight: 1.8 },
-                { name: 'Zigzag', fn: getZigzagPrediction, weight: 1.2 },
-                { name: 'Recent Bias', fn: getRecentBiasPrediction, weight: 1.0 }
+                { name: 'markov', fn: getMarkovPrediction, weight: 2.0 },
+                { name: 'runLength', fn: getRunLengthPrediction, weight: 1.5 },
+                { name: 'frequency', fn: getFrequencyPrediction, weight: 1.0 },
+                { name: 'pattern', fn: getPatternPrediction, weight: 1.8 },
+                { name: 'zigzag', fn: getZigzagPrediction, weight: 1.2 },
+                { name: 'recentBias', fn: getRecentBiasPrediction, weight: 1.0 }
             ];
             
             let scores = { P: 0, B: 0 };
@@ -889,12 +911,7 @@
                     const confidenceFactor = result.confidence / 100;
                     scores[result.prediction] += weight * confidenceFactor;
                     totalWeight += weight;
-                    algorithmResults.push({ 
-                        name: algo.name, 
-                        prediction: result.prediction, 
-                        confidence: Math.round(result.confidence),
-                        weight: weight
-                    });
+                    algorithmResults.push({ name: algo.name, prediction: result.prediction, confidence: result.confidence });
                 }
             }
             
@@ -902,25 +919,19 @@
                 const last = sequence[sequence.length - 1];
                 const runLength = getRunLength(sequence);
                 if (runLength >= 3) {
-                    return { prediction: last, confidence: 55 + runLength * 3, algorithmResults: [] };
+                    return { prediction: last, confidence: 55 + runLength * 3 };
                 }
-                return { prediction: oppositeSide(last), confidence: 52, algorithmResults: [] };
+                return { prediction: oppositeSide(last), confidence: 52 };
             }
             
             let prediction = scores.P > scores.B ? 'P' : 'B';
             let confidence = (Math.max(scores.P, scores.B) / totalWeight) * 100;
             
-            // Agreement bonus
             const pPredictions = algorithmResults.filter(r => r.prediction === 'P').length;
             const bPredictions = algorithmResults.filter(r => r.prediction === 'B').length;
-            const totalAlgos = algorithmResults.length;
-            if (totalAlgos > 0) {
-                const agreementRatio = Math.abs(pPredictions - bPredictions) / totalAlgos;
-                const agreementBonus = agreementRatio * 20;
-                confidence = Math.min(96, confidence + agreementBonus);
-            }
+            const agreementBonus = Math.abs(pPredictions - bPredictions) / algorithmResults.length * 15;
+            confidence = Math.min(96, confidence + agreementBonus);
             
-            // Length bonus
             if (sequence.length > 30) confidence += 5;
             if (sequence.length > 50) confidence += 3;
             
@@ -985,9 +996,9 @@
             if (!result || !result.prediction) return null;
             
             const skip = shouldSkipPrediction(result.confidence, result.algorithmResults?.length || 0);
-            if (skip) return { pred: null, confidence: result.confidence, skip: true, algorithmResults: result.algorithmResults };
+            if (skip) return { pred: null, confidence: result.confidence, skip: true };
             
-            return { pred: result.prediction, confidence: result.confidence, skip: false, algorithmResults: result.algorithmResults };
+            return { pred: result.prediction, confidence: result.confidence, skip: false };
         }
 
         // ========== UI FUNCTIONS ==========
@@ -1018,7 +1029,7 @@
             if (!isInitialized || !engine) {
                 document.getElementById('predictionBox').innerHTML = '⚙️ CONFIGURE SETTINGS ABOVE';
                 document.getElementById('fibDisplay').textContent = '';
-                document.getElementById('algoVotes').innerHTML = '';
+                document.getElementById('progDisplay').textContent = '';
                 return;
             }
             
@@ -1026,7 +1037,11 @@
             const betLine = document.getElementById('betLine');
             const skipNote = document.getElementById('skipNote');
             const fibDisplay = document.getElementById('fibDisplay');
-            const algoVotes = document.getElementById('algoVotes');
+            const progDisplay = document.getElementById('progDisplay');
+
+            // Show progression info
+            const progName = engine.type.charAt(0).toUpperCase() + engine.type.slice(1);
+            progDisplay.textContent = `📈 ${progName}`;
 
             if (sequence.length < MIN_HANDS) {
                 box.innerHTML = `<span style="font-size:clamp(11px,2.5vw,13px); color:#7a8595; letter-spacing:1px;">LOGGING: ${MIN_HANDS-sequence.length} MORE HANDS NEEDED</span>`;
@@ -1035,31 +1050,21 @@
                 betLine.style.display = 'none';
                 skipNote.textContent = '';
                 fibDisplay.textContent = '';
-                algoVotes.innerHTML = '';
                 return;
             }
             
             // Show Fibonacci sequence status if using Fibonacci
             if (engine && engine.type === 'fibonacci') {
                 fibDisplay.textContent = `📊 Fib: ${engine.fibPrev},${engine.fibCurr} → Bet: ${engine.fibCurr}x`;
+            } else if (engine && engine.type === 'martingale') {
+                fibDisplay.textContent = `📊 Multiplier: ${engine.martingaleMultiplier}x`;
+            } else if (engine && engine.type === 'dalambert') {
+                fibDisplay.textContent = `📊 Units: ${engine.dalembertUnits}`;
             } else {
                 fibDisplay.textContent = '';
             }
             
             const result = finalPrediction();
-            
-            // Display algorithm votes
-            if (result && result.algorithmResults && result.algorithmResults.length > 0) {
-                let voteHTML = '';
-                for (const algo of result.algorithmResults) {
-                    const cls = algo.prediction + (algo.confidence > 65 ? ' confident' : '');
-                    voteHTML += `<span class="vote ${cls}">${algo.name}: ${algo.prediction} (${algo.confidence}%)</span>`;
-                }
-                algoVotes.innerHTML = voteHTML;
-            } else {
-                algoVotes.innerHTML = '';
-            }
-            
             if (result && result.pred) {
                 const text = result.pred === 'P' ? 'PLAYER' : 'BANKER';
                 const cls = result.pred === 'P' ? 'player' : 'banker';
@@ -1121,7 +1126,7 @@
         }
 
         /* =========================================================
-           PROGRESSION ENGINE
+           PROGRESSION ENGINE - STANDARD FIBONACCI FIXED
         ========================================================= */
         class ProgressionEngine {
             constructor(baseUnit, type) {
@@ -1178,12 +1183,16 @@
                 
                 switch (this.type) {
                     case 'martingale':
-                        if (isWin) { this.martingaleMultiplier = 1; } 
-                        else { this.martingaleMultiplier *= 2; }
+                        if (isWin) { 
+                            this.martingaleMultiplier = 1; 
+                        } else { 
+                            this.martingaleMultiplier *= 2; 
+                        }
                         break;
 
                     case 'fibonacci':
                         if (isWin) {
+                            // WIN: Move back TWO steps
                             if (this.fibPrev === 0 && this.fibCurr === 1) {
                                 this.fibCurr = 1;
                                 this.fibPrev = 0;
@@ -1197,10 +1206,16 @@
                                 const prevPrev = this.fibCurr - this.fibPrev;
                                 this.fibCurr = this.fibPrev;
                                 this.fibPrev = prevPrev;
-                                if (this.fibCurr < 1) { this.fibCurr = 1; this.fibPrev = 0; }
-                                if (this.fibPrev < 0) { this.fibPrev = 0; }
+                                if (this.fibCurr < 1) {
+                                    this.fibCurr = 1;
+                                    this.fibPrev = 0;
+                                }
+                                if (this.fibPrev < 0) {
+                                    this.fibPrev = 0;
+                                }
                             }
                         } else {
+                            // LOSS: Move FORWARD one step
                             const next = this.fibPrev + this.fibCurr;
                             this.fibPrev = this.fibCurr;
                             this.fibCurr = next;
@@ -1209,13 +1224,19 @@
                         break;
 
                     case 'dalambert':
-                        if (isWin) { this.dalembertUnits = Math.max(1, this.dalembertUnits - 1); } 
-                        else { this.dalembertUnits = this.dalembertUnits + 1; }
+                        if (isWin) {
+                            this.dalembertUnits = Math.max(1, this.dalembertUnits - 1);
+                        } else {
+                            this.dalembertUnits = this.dalembertUnits + 1;
+                        }
                         break;
 
                     case 'sentinel':
-                        if (isWin) { this.streak = this.streak > 0 ? this.streak + 1 : 1; } 
-                        else { this.streak = this.streak < 0 ? this.streak - 1 : -1; }
+                        if (isWin) {
+                            this.streak = this.streak > 0 ? this.streak + 1 : 1;
+                        } else {
+                            this.streak = this.streak < 0 ? this.streak - 1 : -1;
+                        }
                         
                         if (this.streak <= this.SHIELD_THRESHOLD && this.shieldCount === 0) {
                             this.shieldCount = this.SHIELD_DURATION;
@@ -1264,10 +1285,25 @@
         const savedConfig = JSON.parse(localStorage.getItem('bt_sentinel_config')) || null;
         const savedProgression = localStorage.getItem('bt_progression_type') || 'sentinel';
 
+        function showOverlay() {
+            const overlay = document.getElementById('entryOverlay');
+            overlay.classList.add('active');
+            // Pre-fill with current config if exists
+            if (engine) {
+                document.getElementById('overlayBase').value = engine.baseUnit;
+                document.getElementById('overlayProgression').value = engine.type;
+            }
+        }
+
+        // Make showOverlay globally available
+        window.showOverlay = showOverlay;
+
         function initializeApp(base, prog) {
+            // Create new engine
             engine = new ProgressionEngine(base, prog);
             isInitialized = true;
             
+            // Reset all data
             sequence = [];
             results = [];
             lastPrediction = null;
@@ -1275,14 +1311,26 @@
             wins = 0; losses = 0; skips = 0;
             playerCount = 0; bankerCount = 0;
             
+            // Save config
             localStorage.setItem('bt_sentinel_config', JSON.stringify({ base, bankroll: 100 }));
             localStorage.setItem('bt_progression_type', prog);
+            
+            // Clear old state
+            localStorage.removeItem('bt_sentinel_state');
+            localStorage.removeItem('bt_sequence');
+            localStorage.removeItem('bt_results');
+            localStorage.removeItem('bt_detailed');
             
             renderSentinel();
             saveAndUpdate();
             updatePredictionBox();
             
-            document.getElementById('entryOverlay').style.display = 'none';
+            // Hide overlay
+            document.getElementById('entryOverlay').classList.remove('active');
+            
+            // Enable buttons
+            document.getElementById('playerBtn').style.opacity = '1';
+            document.getElementById('bankerBtn').style.opacity = '1';
         }
 
         function renderSentinel() {
@@ -1297,23 +1345,62 @@
         const overlayProgression = document.getElementById('overlayProgression');
         const overlayStartBtn = document.getElementById('overlayStartBtn');
 
+        // Pre-fill with saved config if exists
         if (savedConfig && savedConfig.base) {
             overlayBase.value = savedConfig.base;
             overlayProgression.value = savedProgression;
         }
 
+        // START button click handler
         overlayStartBtn.addEventListener('click', function() {
             const base = parseFloat(overlayBase.value) || 1;
             const prog = overlayProgression.value;
             initializeApp(base, prog);
         });
 
+        // Enter key on base input
         overlayBase.addEventListener('keydown', function(e) { 
             if (e.key === 'Enter') overlayStartBtn.click(); 
         });
 
+        // If we have saved config AND saved sequence data, auto-start
         if (savedConfig && savedConfig.base && sequence.length > 0) {
-            initializeApp(savedConfig.base, savedProgression);
+            // Auto-initialize with saved config
+            engine = new ProgressionEngine(savedConfig.base, savedProgression);
+            isInitialized = true;
+            
+            // Load saved state if exists
+            const savedState = JSON.parse(localStorage.getItem('bt_sentinel_state'));
+            if (savedState) {
+                if (savedProgression === 'sentinel') {
+                    engine.currentUnits = savedState.currentUnits || 1;
+                    engine.shieldCount = savedState.shieldCount || 0;
+                    engine.surgeActive = savedState.surgeActive || false;
+                } else if (savedProgression === 'martingale') {
+                    engine.martingaleMultiplier = savedState.currentUnits || 1;
+                } else if (savedProgression === 'fibonacci') {
+                    engine.fibCurr = savedState.currentUnits || 1;
+                    engine.fibPrev = 0;
+                } else if (savedProgression === 'dalambert') {
+                    engine.dalembertUnits = savedState.currentUnits || 1;
+                }
+                engine.streak = savedState.streak || 0;
+                engine.round = savedState.round || 0;
+            }
+            
+            // Replay results to get engine in correct state
+            const replayResults = results.filter(r => r === 'W' || r === 'L');
+            for (let i = 0; i < replayResults.length; i++) {
+                engine.placeBet(replayResults[i] === 'W' ? 'win' : 'loss');
+            }
+            
+            renderSentinel();
+            updateHistory();
+            updatePredictionBox();
+            updateStatsBar();
+            
+            // Hide overlay
+            overlay.classList.remove('active');
         }
 
         /* =========================================================
@@ -1322,6 +1409,7 @@
         function recordResult(r) {
             if (!isInitialized || !engine) {
                 alert('Please configure the app first! Click START in the settings.');
+                showOverlay();
                 return;
             }
             
@@ -1400,11 +1488,13 @@
             updatePredictionBox();
         }
 
+        // Initial stats if we have data
         if (sequence.length > 0 || results.length > 0) {
             results.forEach(r => { if (r === 'W') wins++; else if (r === 'L') losses++; else if (r === '') skips++; });
             sequence.forEach(r => { if (r === 'P') playerCount++; else if (r === 'B') bankerCount++; });
         }
 
+        // Update UI if app is initialized
         if (isInitialized) {
             updateHistory();
             updatePredictionBox();
