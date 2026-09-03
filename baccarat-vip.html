@@ -594,6 +594,10 @@
             margin-top: 4px;
             font-family: 'Courier New', monospace;
         }
+        
+        .overlay-hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -685,6 +689,7 @@
         let wins = 0, losses = 0, skips = 0, playerCount = 0, bankerCount = 0;
         const MIN_HANDS = 8;
         let isInitialized = false;
+        let engine = null;
 
         function clampConfidence(raw) { return Math.min(98, Math.max(35, raw)); }
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
@@ -973,8 +978,9 @@
         }
 
         function updatePredictionBox() {
-            if (!isInitialized) {
+            if (!isInitialized || !engine) {
                 document.getElementById('predictionBox').innerHTML = '⚙️ CONFIGURE SETTINGS ABOVE';
+                document.getElementById('fibDisplay').textContent = '';
                 return;
             }
             
@@ -1049,7 +1055,7 @@
 
         function renderBetLine(show) {
             const betLine = document.getElementById('betLine');
-            if (!show) { betLine.style.display = 'none'; return; }
+            if (!show || !engine) { betLine.style.display = 'none'; return; }
             const s = engine.getState();
             const changed = lastRenderedBet !== null && lastRenderedBet !== s.currentBet;
             lastRenderedBet = s.currentBet;
@@ -1123,7 +1129,6 @@
                 
                 switch (this.type) {
                     case 'martingale':
-                        // ✅ CORRECT - Double on loss, reset on win
                         if (isWin) { 
                             this.martingaleMultiplier = 1; 
                         } else { 
@@ -1132,19 +1137,13 @@
                         break;
 
                     case 'fibonacci':
-                        // ✅ STANDARD FIBONACCI PROGRESSION
+                        // STANDARD FIBONACCI PROGRESSION
                         // Sequence: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55...
                         // On LOSS: Move FORWARD one step
                         // On WIN:  Move BACK two steps
                         
                         if (isWin) {
                             // WIN: Move back TWO steps in the sequence
-                            // Example: If at (5,8) → go to (2,3)
-                            //           If at (3,5) → go to (1,2)
-                            //           If at (2,3) → go to (0,1)
-                            //           If at (1,1) → stay at (0,1)
-                            //           If at (0,1) → stay at (0,1)
-                            
                             if (this.fibPrev === 0 && this.fibCurr === 1) {
                                 // Already at start (bet 1)
                                 this.fibCurr = 1;
@@ -1161,11 +1160,9 @@
                                 // Move back TWO steps
                                 // Current: fibPrev = a, fibCurr = b
                                 // We want: fibPrev = b - a, fibCurr = a
-                                // Example: (5,8) → (3,5)
-                                //           (3,5) → (2,3)
-                                const prevPrev = this.fibCurr - this.fibPrev; // Value at n-2
-                                this.fibCurr = this.fibPrev;  // New current = old previous
-                                this.fibPrev = prevPrev;       // New previous = value at n-2
+                                const prevPrev = this.fibCurr - this.fibPrev;
+                                this.fibCurr = this.fibPrev;
+                                this.fibPrev = prevPrev;
                                 
                                 // Safety check - ensure we don't go below 1
                                 if (this.fibCurr < 1) {
@@ -1181,13 +1178,11 @@
                             const next = this.fibPrev + this.fibCurr;
                             this.fibPrev = this.fibCurr;
                             this.fibCurr = next;
-                            // Ensure we don't have 0
                             if (this.fibCurr === 0) this.fibCurr = 1;
                         }
                         break;
 
                     case 'dalambert':
-                        // ✅ CORRECT - +1 on loss, -1 on win
                         if (isWin) {
                             this.dalembertUnits = Math.max(1, this.dalembertUnits - 1);
                         } else {
@@ -1196,7 +1191,6 @@
                         break;
 
                     case 'sentinel':
-                        // ✅ CORRECT - Complex adaptive system
                         if (isWin) {
                             this.streak = this.streak > 0 ? this.streak + 1 : 1;
                         } else {
@@ -1249,14 +1243,28 @@
         ========================================================= */
         const savedConfig = JSON.parse(localStorage.getItem('bt_sentinel_config')) || null;
         const savedProgression = localStorage.getItem('bt_progression_type') || 'sentinel';
-        let engine = null;
 
         function initializeApp(base, prog) {
             engine = new ProgressionEngine(base, prog);
             isInitialized = true;
+            
+            // Reset all data
+            sequence = [];
+            results = [];
+            lastPrediction = null;
+            detailedHistory = [];
+            wins = 0; losses = 0; skips = 0;
+            playerCount = 0; bankerCount = 0;
+            
+            // Save config
+            localStorage.setItem('bt_sentinel_config', JSON.stringify({ base, bankroll: 100 }));
+            localStorage.setItem('bt_progression_type', prog);
+            
             renderSentinel();
             saveAndUpdate();
             updatePredictionBox();
+            
+            // Hide overlay
             document.getElementById('entryOverlay').style.display = 'none';
         }
 
@@ -1271,36 +1279,33 @@
         const overlayBase = document.getElementById('overlayBase');
         const overlayProgression = document.getElementById('overlayProgression');
         const overlayStartBtn = document.getElementById('overlayStartBtn');
-        const DEFAULT_BANKROLL = 100;
 
+        // Pre-fill with saved config if exists
         if (savedConfig && savedConfig.base) {
             overlayBase.value = savedConfig.base;
             overlayProgression.value = savedProgression;
-        } else {
-            overlayBase.value = 1;
-            overlayProgression.value = 'sentinel';
         }
 
+        // START button click handler
         overlayStartBtn.addEventListener('click', function() {
             const base = parseFloat(overlayBase.value) || 1;
             const prog = overlayProgression.value;
-            
-            localStorage.setItem('bt_sentinel_config', JSON.stringify({ base, bankroll: DEFAULT_BANKROLL }));
-            localStorage.setItem('bt_progression_type', prog);
-            
-            sequence = [];
-            results = [];
-            lastPrediction = null;
-            detailedHistory = [];
-            wins = 0; losses = 0; skips = 0;
-            playerCount = 0; bankerCount = 0;
-            
             initializeApp(base, prog);
         });
 
+        // Enter key on base input
         overlayBase.addEventListener('keydown', function(e) { 
             if (e.key === 'Enter') overlayStartBtn.click(); 
         });
+
+        // If we have saved config and data, auto-start
+        if (savedConfig && savedConfig.base) {
+            // Check if we have saved sequence data
+            if (sequence.length > 0) {
+                // Auto-initialize with saved config
+                initializeApp(savedConfig.base, savedProgression);
+            }
+        }
 
         /* =========================================================
            RECORD RESULT, UNDO, RESET
@@ -1386,11 +1391,13 @@
             updatePredictionBox();
         }
 
+        // Initial stats if we have data
         if (sequence.length > 0 || results.length > 0) {
             results.forEach(r => { if (r === 'W') wins++; else if (r === 'L') losses++; else if (r === '') skips++; });
             sequence.forEach(r => { if (r === 'P') playerCount++; else if (r === 'B') bankerCount++; });
         }
 
+        // Update UI if app is initialized
         if (isInitialized) {
             updateHistory();
             updatePredictionBox();
