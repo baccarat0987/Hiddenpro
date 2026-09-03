@@ -835,7 +835,7 @@
             } else if (result && result.skip) {
                 box.innerHTML = `<span style="font-size:clamp(14px,3vw,16px); color:#db2777;">⏭ SKIP (${result.confidence}%)</span>`;
                 lastPrediction = null;
-                skipNote.textContent = 'Low confidence — skipping this hand';
+                skipNote.textContent = '';
             } else {
                 box.innerHTML = "<span style='font-size:clamp(14px,3vw,16px); color:#7a8595'>ANALYZING TRENDS...</span>";
                 lastPrediction = null;
