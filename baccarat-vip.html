@@ -587,6 +587,13 @@
             background: rgba(219, 39, 119, 0.1);
             color: #db2777;
         }
+        
+        .fib-display {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-family: 'Courier New', monospace;
+        }
     </style>
 </head>
 <body>
@@ -612,7 +619,7 @@
                 <select id="overlayProgression">
                     <option value="sentinel">Sentinel (Adaptive)</option>
                     <option value="martingale">Martingale (Double on Loss)</option>
-                    <option value="fibonacci">Fibonacci (Sequence)</option>
+                    <option value="fibonacci">Fibonacci (1,1,2,3,5,8,13...)</option>
                     <option value="dalambert">D'Alembert (+1/-1)</option>
                 </select>
             </label>
@@ -652,6 +659,7 @@
             <div class="prediction" id="predictionBox">
                 ⚙️ CONFIGURE SETTINGS ABOVE
                 <div class="bet-line" id="betLine" style="display:none;"></div>
+                <div class="fib-display" id="fibDisplay"></div>
             </div>
             <div class="skip-note" id="skipNote"></div>
 
@@ -973,6 +981,7 @@
             const box = document.getElementById('predictionBox');
             const betLine = document.getElementById('betLine');
             const skipNote = document.getElementById('skipNote');
+            const fibDisplay = document.getElementById('fibDisplay');
 
             if (sequence.length < MIN_HANDS) {
                 box.innerHTML = `<span style="font-size:clamp(11px,2.5vw,13px); color:#7a8595; letter-spacing:1px;">LOGGING: ${MIN_HANDS-sequence.length} MORE HANDS NEEDED</span>`;
@@ -980,7 +989,15 @@
                 box.appendChild(betLine);
                 betLine.style.display = 'none';
                 skipNote.textContent = '';
+                fibDisplay.textContent = '';
                 return;
+            }
+            
+            // Show Fibonacci sequence status if using Fibonacci
+            if (engine && engine.type === 'fibonacci') {
+                fibDisplay.textContent = `📊 Fib: ${engine.fibPrev},${engine.fibCurr} → Bet: ${engine.fibCurr}x`;
+            } else {
+                fibDisplay.textContent = '';
             }
             
             const result = finalPrediction();
@@ -1045,7 +1062,7 @@
         }
 
         /* =========================================================
-           PROGRESSION ENGINE - ALL SYSTEMS CORRECT
+           PROGRESSION ENGINE - STANDARD FIBONACCI FIXED
         ========================================================= */
         class ProgressionEngine {
             constructor(baseUnit, type) {
@@ -1059,7 +1076,7 @@
                 this.round = 0;
                 // Martingale
                 this.martingaleMultiplier = 1;
-                // Fibonacci - FIXED
+                // Fibonacci - STANDARD SEQUENCE
                 this.fibPrev = 0;
                 this.fibCurr = 1;
                 // D'Alembert
@@ -1115,47 +1132,56 @@
                         break;
 
                     case 'fibonacci':
-                        // ✅ FIXED - Proper Fibonacci progression
+                        // ✅ STANDARD FIBONACCI PROGRESSION
+                        // Sequence: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55...
+                        // On LOSS: Move FORWARD one step
+                        // On WIN:  Move BACK two steps
+                        
                         if (isWin) {
-                            // Move back TWO steps in Fibonacci sequence
-                            // Example: 0,1,1,2,3,5,8,13,21
-                            // If at 8 (fibPrev=5, fibCurr=8) -> go to 3
-                            // If at 5 (fibPrev=3, fibCurr=5) -> go to 2
-                            // If at 3 (fibPrev=2, fibCurr=3) -> go to 1
-                            // If at 2 (fibPrev=1, fibCurr=2) -> go to 1
-                            // If at 1 (fibPrev=0, fibCurr=1) -> stay at 1
+                            // WIN: Move back TWO steps in the sequence
+                            // Example: If at (5,8) → go to (2,3)
+                            //           If at (3,5) → go to (1,2)
+                            //           If at (2,3) → go to (0,1)
+                            //           If at (1,1) → stay at (0,1)
+                            //           If at (0,1) → stay at (0,1)
                             
                             if (this.fibPrev === 0 && this.fibCurr === 1) {
-                                // At start (1), stay at 1
+                                // Already at start (bet 1)
+                                this.fibCurr = 1;
+                                this.fibPrev = 0;
+                            } else if (this.fibPrev === 1 && this.fibCurr === 1) {
+                                // At (1,1) - move back to start
                                 this.fibCurr = 1;
                                 this.fibPrev = 0;
                             } else if (this.fibPrev === 1 && this.fibCurr === 2) {
-                                // At 2, go back to 1
-                                this.fibCurr = 1;
-                                this.fibPrev = 0;
-                            } else if (this.fibPrev === 2 && this.fibCurr === 3) {
-                                // At 3, go back to 1
+                                // At (1,2) - move back to start
                                 this.fibCurr = 1;
                                 this.fibPrev = 0;
                             } else {
-                                // Move back two steps
-                                // Store the value two steps back
-                                const prevPrev = this.fibCurr - this.fibPrev;
-                                // Example: fibCurr=8, fibPrev=5, prevPrev=3
-                                // New: fibPrev=3, fibCurr=5 (the old fibPrev)
-                                this.fibCurr = this.fibPrev;
-                                this.fibPrev = prevPrev;
-                                // Ensure we don't go below 1
+                                // Move back TWO steps
+                                // Current: fibPrev = a, fibCurr = b
+                                // We want: fibPrev = b - a, fibCurr = a
+                                // Example: (5,8) → (3,5)
+                                //           (3,5) → (2,3)
+                                const prevPrev = this.fibCurr - this.fibPrev; // Value at n-2
+                                this.fibCurr = this.fibPrev;  // New current = old previous
+                                this.fibPrev = prevPrev;       // New previous = value at n-2
+                                
+                                // Safety check - ensure we don't go below 1
                                 if (this.fibCurr < 1) {
                                     this.fibCurr = 1;
                                     this.fibPrev = 0;
                                 }
+                                if (this.fibPrev < 0) {
+                                    this.fibPrev = 0;
+                                }
                             }
                         } else {
-                            // Move forward one step in Fibonacci sequence
+                            // LOSS: Move FORWARD one step in Fibonacci sequence
                             const next = this.fibPrev + this.fibCurr;
                             this.fibPrev = this.fibCurr;
                             this.fibCurr = next;
+                            // Ensure we don't have 0
                             if (this.fibCurr === 0) this.fibCurr = 1;
                         }
                         break;
