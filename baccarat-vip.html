@@ -16,7 +16,7 @@
     <!-- Firebase Authentication & Permission Check -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -33,6 +33,14 @@
         const db = getFirestore(app);
 
         const REQUIRED_ENGINE_ID = "engine_17";
+
+        window.signOutUser = function() {
+            signOut(auth).then(() => {
+                window.location.href = "index.html";
+            }).catch((error) => {
+                window.location.href = "index.html";
+            });
+        };
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
@@ -77,21 +85,6 @@
         if (typeof console !== "undefined") {
             console.log = console.debug = console.info = console.warn = console.error = function() {};
         }
-
-        // ========== FIXED: Simple exit function - redirect to portal ==========
-        window.goHome = function() {
-            window.location.href = "index.html";
-        };
-
-        // ========== FIXED: Make showOverlay globally available ==========
-        window.showOverlay = function() {
-            const overlay = document.getElementById('entryOverlay');
-            overlay.classList.add('active');
-            if (typeof engine !== 'undefined' && engine) {
-                document.getElementById('overlayBase').value = engine.baseUnit || 1;
-                document.getElementById('overlayProgression').value = engine.type || 'sentinel';
-            }
-        };
     </script>
 
     <style>
@@ -152,38 +145,26 @@
             top: 15px;
             right: 15px;
             z-index: 2000;
-            display: flex;
-            gap: 8px;
         }
         .exit-btn {
             background: rgba(0, 0, 0, 0.7);
-            color: #7c3aed;
+            color: #db2777;
             padding: 8px 16px;
             border-radius: 40px;
             text-decoration: none;
             font-weight: 700;
             font-size: 11px;
-            border: 1px solid rgba(124, 58, 237, 0.5);
+            border: 1px solid rgba(219, 39, 119, 0.5);
             backdrop-filter: blur(8px);
             transition: 0.2s;
             font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             cursor: pointer;
+            border: none;
         }
         .exit-btn:hover {
-            background: #7c3aed;
-            color: #ffffff;
-            box-shadow: 0 0 12px #7c3aed;
-            border-color: #7c3aed;
-        }
-        .reconfig-btn {
-            border-color: rgba(219, 39, 119, 0.5);
-            color: #db2777;
-        }
-        .reconfig-btn:hover {
             background: #db2777;
             color: #ffffff;
             box-shadow: 0 0 12px #db2777;
-            border-color: #db2777;
         }
 
         .container {
@@ -334,10 +315,14 @@
             font-weight: 700;
             border-top: 2px solid var(--line);
             border-bottom: 2px solid var(--line);
-            min-height: 32px;
+            min-height: 60px;
             text-align: center;
             transition: box-shadow 0.3s ease;
             color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         .prediction .player {
             background: linear-gradient(135deg, #7c3aed, #6d28d9);
@@ -439,161 +424,10 @@
             margin-top: 6px;
         }
 
-        .bet-line {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px dashed var(--line);
-            font-size: clamp(13px, 3vw, 15px);
-            font-weight: 600;
-            color: var(--text-muted);
-            letter-spacing: 0.3px;
-        }
-        .bet-line .amount {
-            font-size: clamp(19px, 4.2vw, 23px);
-            font-weight: 700;
-            background: linear-gradient(135deg, #7c3aed, #1e3a8a, #db2777);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            transition: text-shadow 0.4s ease;
-        }
-        .bet-line .amount.flash {
-            text-shadow: 0 0 20px rgba(124, 58, 237, 0.5), 0 0 40px rgba(219, 39, 119, 0.3);
-        }
-
-        .overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(2px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            padding: 20px;
-        }
-        .overlay::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: rgba(255, 255, 255, 0.1);
-        }
-        .overlay.active {
-            display: flex;
-        }
-        .overlay-card {
-            position: relative;
-            background-color: #ffffff;
-            border: 1px solid rgba(0, 0, 0, 0.06);
-            border-radius: 24px;
-            max-width: 360px;
-            width: 100%;
-            padding: 32px 26px;
-            text-align: center;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.04);
-            animation: riseIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-        .overlay-card .overlay-title {
-            font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
-            font-size: 1.4rem;
-            font-weight: 600;
-            letter-spacing: 1.5px;
-            margin-bottom: 4px;
-        }
-        .overlay-title .title-violet {
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .overlay-title .title-darkblue {
-            background: linear-gradient(135deg, #1e3a8a, #1e40af);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .overlay-title .title-redpink {
-            background: linear-gradient(135deg, #db2777, #be185d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .overlay-card .overlay-welcome {
-            color: var(--text-muted);
-            font-size: 0.72rem;
-            letter-spacing: 3px;
-            font-weight: 600;
-            margin-bottom: 22px;
-        }
-        .overlay-card label {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            font-size: 12px;
-            color: var(--text-muted);
-            text-align: left;
-            margin-bottom: 16px;
-            letter-spacing: 0.3px;
-        }
-        .overlay-card select, .overlay-card input {
-            background: #f2f5f9;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: 12px;
-            padding: 11px 12px;
-            color: var(--text);
-            font-weight: 600;
-            font-size: 15px;
-            width: 100%;
-            transition: border-color 0.15s ease;
-            appearance: auto;
-        }
-        .overlay-card select:focus, .overlay-card input:focus {
-            outline: none;
-            border-color: #7c3aed;
-            background: #ffffff;
-            box-shadow: 0 0 20px rgba(124, 58, 237, 0.15);
-        }
-        .overlay-card .start-btn {
-            width: 100%;
-            margin-top: 6px;
-            background: linear-gradient(135deg, #7c3aed, #1e3a8a, #db2777);
-            color: #ffffff;
-            border: none;
-            border-radius: 14px;
-            padding: 13px;
-            font-weight: 700;
-            font-size: 15px;
-            cursor: pointer;
-            letter-spacing: 0.5px;
-            box-shadow: 0 0 30px rgba(124, 58, 237, 0.3), 0 0 30px rgba(219, 39, 119, 0.15);
-            transition: filter 0.15s ease, transform 0.12s ease, box-shadow 0.3s ease;
-            animation: glowPulseStart 2.5s ease-in-out infinite;
-        }
-        @keyframes glowPulseStart {
-            0%,100% { box-shadow: 0 0 30px rgba(124, 58, 237, 0.3), 0 0 30px rgba(219, 39, 119, 0.1); }
-            50% { box-shadow: 0 0 45px rgba(124, 58, 237, 0.5), 0 0 45px rgba(219, 39, 119, 0.25); }
-        }
-        .overlay-card .start-btn:hover { filter: brightness(1.08); transform: scale(1.02); }
-        .overlay-card .start-btn:active { transform: scale(0.98); }
-        .overlay-card .close-btn {
-            margin-top: 10px;
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            font-size: 12px;
-            cursor: pointer;
-            text-decoration: underline;
-            opacity: 0.6;
-        }
-        .overlay-card .close-btn:hover {
-            opacity: 1;
-        }
-
-        .container, .overlay-card { background-color: #f8fafc; }
+        .container { background-color: #f8fafc; }
         .prediction { background: #f0f3f7; }
         .util-btns button { background: #e4e9f0; color: #3a4555; }
         .util-btns button:hover { background: #d5dce6; color: #1a2535; }
-        .overlay-card input, .overlay-card select { background: #f0f3f8; }
         
         .stats-bar {
             display: flex;
@@ -632,61 +466,15 @@
             color: #db2777;
         }
         
-        .fib-display {
-            font-size: 10px;
-            color: var(--text-muted);
-            margin-top: 4px;
-            font-family: 'Courier New', monospace;
-        }
-        
-        .overlay-hidden {
+        .hidden {
             display: none !important;
-        }
-        
-        .prog-display {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 2px;
-            opacity: 0.7;
         }
     </style>
 </head>
 <body>
 
-    <!-- ========== FIXED: Exit button now calls goHome() ========== -->
     <div class="exit-nav">
-        <button onclick="window.goHome()" class="exit-btn">← EXIT</button>
-        <button onclick="window.showOverlay()" class="exit-btn reconfig-btn">⚙️ SETTINGS</button>
-    </div>
-
-    <div class="overlay active" id="entryOverlay">
-        <div class="overlay-card">
-            <h2 class="overlay-title">
-                <span class="title-violet">Baccarat</span>
-                <span class="title-darkblue">VIP</span>
-                <span class="title-redpink">Plus</span>
-            </h2>
-            <div class="overlay-welcome">CONFIGURATION</div>
-            
-            <label>Base Unit (Base Bet)
-                <input type="number" id="overlayBase" value="1" step="0.01" min="0.01">
-            </label>
-            
-            <label>Progression System
-                <select id="overlayProgression">
-                    <option value="sentinel">Sentinel (Adaptive)</option>
-                    <option value="martingale">Martingale (Double on Loss)</option>
-                    <option value="fibonacci">Fibonacci (1,1,2,3,5,8,13...)</option>
-                    <option value="dalambert">D'Alembert (+1/-1)</option>
-                </select>
-            </label>
-            
-            <button class="start-btn" id="overlayStartBtn">▶ START</button>
-            
-            <div style="margin-top:12px; font-size:10px; color:var(--text-muted); opacity:0.6;">
-                Changes will reset all hand history
-            </div>
-        </div>
+        <button onclick="window.signOutUser()" class="exit-btn">✕ EXIT</button>
     </div>
 
     <div class="wrap">
@@ -714,10 +502,7 @@
             </div>
 
             <div class="prediction" id="predictionBox">
-                ⚙️ CONFIGURE SETTINGS ABOVE
-                <div class="bet-line" id="betLine" style="display:none;"></div>
-                <div class="fib-display" id="fibDisplay"></div>
-                <div class="prog-display" id="progDisplay"></div>
+                <span>INITIALIZING...</span>
             </div>
             <div class="skip-note" id="skipNote"></div>
 
@@ -734,16 +519,14 @@
 
     <script>
         /* =========================================================
-           ENHANCED PREDICTION ENGINE WITH MULTIPLE ALGORITHMS
+           PURE PREDICTION ENGINE - NO PROGRESSION
         ========================================================= */
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
         let results = JSON.parse(localStorage.getItem('bt_results')) || [];
         let lastPrediction = null;
         let detailedHistory = JSON.parse(localStorage.getItem('bt_detailed')) || [];
-        let wins = 0, losses = 0, skips = 0, playerCount = 0, bankerCount = 0;
+        let wins = 0, losses = 0, skips = 0;
         const MIN_HANDS = 8;
-        let isInitialized = false;
-        let engine = null;
 
         function clampConfidence(raw) { return Math.min(98, Math.max(35, raw)); }
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
@@ -1032,42 +815,14 @@
         }
 
         function updatePredictionBox() {
-            if (!isInitialized || !engine) {
-                document.getElementById('predictionBox').innerHTML = '⚙️ CONFIGURE SETTINGS ABOVE';
-                document.getElementById('fibDisplay').textContent = '';
-                document.getElementById('progDisplay').textContent = '';
-                return;
-            }
-            
             const box = document.getElementById('predictionBox');
-            const betLine = document.getElementById('betLine');
             const skipNote = document.getElementById('skipNote');
-            const fibDisplay = document.getElementById('fibDisplay');
-            const progDisplay = document.getElementById('progDisplay');
-
-            // Show progression info
-            const progName = engine.type.charAt(0).toUpperCase() + engine.type.slice(1);
-            progDisplay.textContent = `📈 ${progName}`;
 
             if (sequence.length < MIN_HANDS) {
                 box.innerHTML = `<span style="font-size:clamp(11px,2.5vw,13px); color:#7a8595; letter-spacing:1px;">LOGGING: ${MIN_HANDS-sequence.length} MORE HANDS NEEDED</span>`;
                 lastPrediction = null;
-                box.appendChild(betLine);
-                betLine.style.display = 'none';
                 skipNote.textContent = '';
-                fibDisplay.textContent = '';
                 return;
-            }
-            
-            // Show progression status
-            if (engine && engine.type === 'fibonacci') {
-                fibDisplay.textContent = `📊 Fib: ${engine.fibPrev},${engine.fibCurr} → Bet: ${engine.fibCurr}x`;
-            } else if (engine && engine.type === 'martingale') {
-                fibDisplay.textContent = `📊 Multiplier: ${engine.martingaleMultiplier}x`;
-            } else if (engine && engine.type === 'dalambert') {
-                fibDisplay.textContent = `📊 Units: ${engine.dalembertUnits}`;
-            } else {
-                fibDisplay.textContent = '';
             }
             
             const result = finalPrediction();
@@ -1076,20 +831,14 @@
                 const cls = result.pred === 'P' ? 'player' : 'banker';
                 box.innerHTML = `NEXT: <span class="${cls}">${text}</span> <span class="confidence">${result.confidence}%</span>`;
                 lastPrediction = result.pred;
-                box.appendChild(betLine);
-                renderBetLine(true);
                 skipNote.textContent = '';
             } else if (result && result.skip) {
                 box.innerHTML = `<span style="font-size:clamp(14px,3vw,16px); color:#db2777;">⏭ SKIP (${result.confidence}%)</span>`;
                 lastPrediction = null;
-                box.appendChild(betLine);
-                betLine.style.display = 'none';
                 skipNote.textContent = 'Low confidence — skipping this hand';
             } else {
                 box.innerHTML = "<span style='font-size:clamp(14px,3vw,16px); color:#7a8595'>ANALYZING TRENDS...</span>";
                 lastPrediction = null;
-                box.appendChild(betLine);
-                betLine.style.display = 'none';
                 skipNote.textContent = '';
             }
             
@@ -1115,296 +864,14 @@
             }
         }
 
-        let lastRenderedBet = null;
-
-        function renderBetLine(show) {
-            const betLine = document.getElementById('betLine');
-            if (!show || !engine) { betLine.style.display = 'none'; return; }
-            const s = engine.getState();
-            const changed = lastRenderedBet !== null && lastRenderedBet !== s.currentBet;
-            lastRenderedBet = s.currentBet;
-            betLine.innerHTML = `Suggested bet: <span class="amount${changed?' flash':''}">$${s.currentBet.toFixed(2)}</span>`;
-            betLine.style.display = 'block';
-            if (changed) {
-                const amt = betLine.querySelector('.amount');
-                setTimeout(() => { if (amt) amt.classList.remove('flash'); }, 500);
-            }
-        }
-
-        /* =========================================================
-           PROGRESSION ENGINE
-        ========================================================= */
-        class ProgressionEngine {
-            constructor(baseUnit, type) {
-                this.baseUnit = baseUnit;
-                this.type = type;
-                this.reset();
-            }
-
-            reset() {
-                this.streak = 0;
-                this.round = 0;
-                this.martingaleMultiplier = 1;
-                this.fibPrev = 0;
-                this.fibCurr = 1;
-                this.dalembertUnits = 1;
-                this.shieldCount = 0;
-                this.surgeActive = false;
-                this.currentUnits = 1;
-                this.MAX_UNITS = 10;
-                this.MIN_UNITS = 1;
-                this.SURGE_THRESHOLD = 3;
-                this.SHIELD_THRESHOLD = -5;
-                this.SHIELD_DURATION = 3;
-                return this.getState();
-            }
-
-            getState() {
-                let currentBet = this.baseUnit;
-                switch (this.type) {
-                    case 'martingale': currentBet = this.baseUnit * this.martingaleMultiplier; break;
-                    case 'fibonacci': currentBet = this.baseUnit * (this.fibCurr || 1); break;
-                    case 'dalambert': currentBet = this.baseUnit * this.dalembertUnits; break;
-                    case 'sentinel':
-                    default: currentBet = this.baseUnit * this.currentUnits; break;
-                }
-                return {
-                    currentBet: currentBet,
-                    currentUnits: this.type === 'sentinel' ? this.currentUnits : 
-                                  (this.type === 'martingale' ? this.martingaleMultiplier :
-                                   this.type === 'fibonacci' ? this.fibCurr : this.dalembertUnits),
-                    bankroll: 0,
-                    streak: this.streak,
-                    surgeActive: this.surgeActive || false,
-                    shieldActive: (this.shieldCount || 0) > 0,
-                    shieldCount: this.shieldCount || 0,
-                    round: this.round,
-                    baseUnit: this.baseUnit,
-                    startingBankroll: 0
-                };
-            }
-
-            placeBet(result) {
-                const isWin = result === 'win';
-                
-                switch (this.type) {
-                    case 'martingale':
-                        if (isWin) { 
-                            this.martingaleMultiplier = 1; 
-                        } else { 
-                            this.martingaleMultiplier *= 2; 
-                        }
-                        break;
-
-                    case 'fibonacci':
-                        if (isWin) {
-                            if (this.fibPrev === 0 && this.fibCurr === 1) {
-                                this.fibCurr = 1;
-                                this.fibPrev = 0;
-                            } else if (this.fibPrev === 1 && this.fibCurr === 1) {
-                                this.fibCurr = 1;
-                                this.fibPrev = 0;
-                            } else if (this.fibPrev === 1 && this.fibCurr === 2) {
-                                this.fibCurr = 1;
-                                this.fibPrev = 0;
-                            } else {
-                                const prevPrev = this.fibCurr - this.fibPrev;
-                                this.fibCurr = this.fibPrev;
-                                this.fibPrev = prevPrev;
-                                if (this.fibCurr < 1) {
-                                    this.fibCurr = 1;
-                                    this.fibPrev = 0;
-                                }
-                                if (this.fibPrev < 0) {
-                                    this.fibPrev = 0;
-                                }
-                            }
-                        } else {
-                            const next = this.fibPrev + this.fibCurr;
-                            this.fibPrev = this.fibCurr;
-                            this.fibCurr = next;
-                            if (this.fibCurr === 0) this.fibCurr = 1;
-                        }
-                        break;
-
-                    case 'dalambert':
-                        if (isWin) {
-                            this.dalembertUnits = Math.max(1, this.dalembertUnits - 1);
-                        } else {
-                            this.dalembertUnits = this.dalembertUnits + 1;
-                        }
-                        break;
-
-                    case 'sentinel':
-                        if (isWin) {
-                            this.streak = this.streak > 0 ? this.streak + 1 : 1;
-                        } else {
-                            this.streak = this.streak < 0 ? this.streak - 1 : -1;
-                        }
-                        
-                        if (this.streak <= this.SHIELD_THRESHOLD && this.shieldCount === 0) {
-                            this.shieldCount = this.SHIELD_DURATION;
-                            this.currentUnits = 1;
-                        }
-                        
-                        let surgeBonus = 0;
-                        if (isWin && this.streak >= this.SURGE_THRESHOLD) { 
-                            surgeBonus = 1; 
-                            this.surgeActive = true; 
-                        } else { 
-                            this.surgeActive = false; 
-                        }
-
-                        if (this.shieldCount > 0) {
-                            this.shieldCount--;
-                            this.currentUnits = 1;
-                        } else {
-                            if (isWin) {
-                                this.currentUnits = Math.min(this.currentUnits + 1 + surgeBonus, this.MAX_UNITS);
-                            } else {
-                                this.currentUnits = Math.max(this.currentUnits - 1, this.MIN_UNITS);
-                            }
-                        }
-                        this.currentUnits = Math.max(this.MIN_UNITS, Math.min(this.currentUnits, this.MAX_UNITS));
-                        break;
-                }
-                
-                if (this.type !== 'sentinel') {
-                    this.streak = isWin ? Math.abs(this.streak) + 1 : -(Math.abs(this.streak) + 1);
-                }
-                this.round++;
-                return this.getState();
-            }
-
-            resetWith(baseUnit, type) {
-                this.baseUnit = baseUnit;
-                this.type = type;
-                return this.reset();
-            }
-        }
-
-        /* =========================================================
-           GLUE CODE
-        ========================================================= */
-        const savedConfig = JSON.parse(localStorage.getItem('bt_sentinel_config')) || null;
-        const savedProgression = localStorage.getItem('bt_progression_type') || 'sentinel';
-
-        function showOverlay() {
-            const overlay = document.getElementById('entryOverlay');
-            overlay.classList.add('active');
-            if (engine) {
-                document.getElementById('overlayBase').value = engine.baseUnit;
-                document.getElementById('overlayProgression').value = engine.type;
-            }
-        }
-
-        function initializeApp(base, prog) {
-            engine = new ProgressionEngine(base, prog);
-            isInitialized = true;
-            
-            sequence = [];
-            results = [];
-            lastPrediction = null;
-            detailedHistory = [];
-            wins = 0; losses = 0; skips = 0;
-            playerCount = 0; bankerCount = 0;
-            
-            localStorage.setItem('bt_sentinel_config', JSON.stringify({ base, bankroll: 100 }));
-            localStorage.setItem('bt_progression_type', prog);
-            
-            localStorage.removeItem('bt_sentinel_state');
-            localStorage.removeItem('bt_sequence');
-            localStorage.removeItem('bt_results');
-            localStorage.removeItem('bt_detailed');
-            
-            renderSentinel();
-            saveAndUpdate();
-            updatePredictionBox();
-            
-            document.getElementById('entryOverlay').classList.remove('active');
-        }
-
-        function renderSentinel() {
-            if (!engine) return;
-            const s = engine.getState();
-            localStorage.setItem('bt_sentinel_state', JSON.stringify(s));
-            if (lastPrediction) renderBetLine(true);
-        }
-
-        const overlay = document.getElementById('entryOverlay');
-        const overlayBase = document.getElementById('overlayBase');
-        const overlayProgression = document.getElementById('overlayProgression');
-        const overlayStartBtn = document.getElementById('overlayStartBtn');
-
-        if (savedConfig && savedConfig.base) {
-            overlayBase.value = savedConfig.base;
-            overlayProgression.value = savedProgression;
-        }
-
-        overlayStartBtn.addEventListener('click', function() {
-            const base = parseFloat(overlayBase.value) || 1;
-            const prog = overlayProgression.value;
-            initializeApp(base, prog);
-        });
-
-        overlayBase.addEventListener('keydown', function(e) { 
-            if (e.key === 'Enter') overlayStartBtn.click(); 
-        });
-
-        if (savedConfig && savedConfig.base && sequence.length > 0) {
-            engine = new ProgressionEngine(savedConfig.base, savedProgression);
-            isInitialized = true;
-            
-            const savedState = JSON.parse(localStorage.getItem('bt_sentinel_state'));
-            if (savedState) {
-                if (savedProgression === 'sentinel') {
-                    engine.currentUnits = savedState.currentUnits || 1;
-                    engine.shieldCount = savedState.shieldCount || 0;
-                    engine.surgeActive = savedState.surgeActive || false;
-                } else if (savedProgression === 'martingale') {
-                    engine.martingaleMultiplier = savedState.currentUnits || 1;
-                } else if (savedProgression === 'fibonacci') {
-                    engine.fibCurr = savedState.currentUnits || 1;
-                    engine.fibPrev = 0;
-                } else if (savedProgression === 'dalambert') {
-                    engine.dalembertUnits = savedState.currentUnits || 1;
-                }
-                engine.streak = savedState.streak || 0;
-                engine.round = savedState.round || 0;
-            }
-            
-            const replayResults = results.filter(r => r === 'W' || r === 'L');
-            for (let i = 0; i < replayResults.length; i++) {
-                engine.placeBet(replayResults[i] === 'W' ? 'win' : 'loss');
-            }
-            
-            renderSentinel();
-            updateHistory();
-            updatePredictionBox();
-            updateStatsBar();
-            
-            overlay.classList.remove('active');
-        }
-
-        /* =========================================================
-           RECORD RESULT, UNDO, RESET
-        ========================================================= */
+        // ========== RECORD RESULT, UNDO, RESET ==========
         function recordResult(r) {
-            if (!isInitialized || !engine) {
-                alert('Please configure the app first! Click START in the settings.');
-                showOverlay();
-                return;
-            }
-            
             const skipNote = document.getElementById('skipNote');
 
             if (lastPrediction) {
                 const wasWin = (lastPrediction === r);
                 results.push(wasWin ? 'W' : 'L');
                 if (wasWin) { wins++; detailedHistory.push({ type: 'win', wasSkip: false }); } else { losses++; detailedHistory.push({ type: 'loss', wasSkip: false }); }
-
-                engine.placeBet(wasWin ? 'win' : 'loss');
-                renderSentinel();
                 skipNote.textContent = '';
             } else {
                 results.push('');
@@ -1414,50 +881,31 @@
             }
 
             sequence.push(r);
-            if (r === 'P') playerCount++; else bankerCount++;
 
             saveAndUpdate();
         }
 
         function undo() {
-            if (!isInitialized || !engine) return;
             if (sequence.length === 0) return;
             
             const lastResult = sequence.pop();
             const lastResultData = results.pop();
             const lastHistory = detailedHistory.pop();
 
-            if (lastResult === 'P') playerCount--; else bankerCount--;
             if (lastResultData === 'W') wins--;
             else if (lastResultData === 'L') losses--;
             else if (lastResultData === '') skips--;
-
-            const base = engine.baseUnit;
-            const type = engine.type;
-            engine = new ProgressionEngine(base, type);
-            const replayResults = results.filter(r => r === 'W' || r === 'L');
-            for (let i = 0; i < replayResults.length; i++) {
-                engine.placeBet(replayResults[i] === 'W' ? 'win' : 'loss');
-            }
-            renderSentinel();
 
             saveAndUpdate();
         }
 
         function resetAll() {
-            if (!isInitialized || !engine) return;
             if (confirm("Reset all data?")) {
                 sequence = [];
                 results = [];
                 lastPrediction = null;
                 detailedHistory = [];
                 wins = 0; losses = 0; skips = 0;
-                playerCount = 0; bankerCount = 0;
-
-                const base = engine.baseUnit;
-                const type = engine.type;
-                engine = new ProgressionEngine(base, type);
-                renderSentinel();
 
                 saveAndUpdate();
             }
@@ -1474,15 +922,11 @@
         // Initial stats if we have data
         if (sequence.length > 0 || results.length > 0) {
             results.forEach(r => { if (r === 'W') wins++; else if (r === 'L') losses++; else if (r === '') skips++; });
-            sequence.forEach(r => { if (r === 'P') playerCount++; else if (r === 'B') bankerCount++; });
         }
 
-        // Update UI if app is initialized
-        if (isInitialized) {
-            updateHistory();
-            updatePredictionBox();
-            renderSentinel();
-        }
+        // Initial render
+        updateHistory();
+        updatePredictionBox();
     </script>
 </body>
 </html>
