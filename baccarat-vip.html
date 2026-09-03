@@ -16,7 +16,7 @@
     <!-- Firebase Authentication & Permission Check -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -33,6 +33,16 @@
         const db = getFirestore(app);
 
         const REQUIRED_ENGINE_ID = "engine_17";
+
+        // Make signOut available globally for the exit button
+        window.signOutUser = function() {
+            signOut(auth).then(() => {
+                window.location.href = "index.html";
+            }).catch((error) => {
+                console.error("Sign out error:", error);
+                window.location.href = "index.html";
+            });
+        };
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
@@ -77,11 +87,6 @@
         if (typeof console !== "undefined") {
             console.log = console.debug = console.info = console.warn = console.error = function() {};
         }
-
-        // Simple exit function - just redirect to portal
-        window.goHome = function() {
-            window.location.href = "index.html";
-        };
     </script>
 
     <style>
@@ -158,22 +163,32 @@
             transition: 0.2s;
             font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             cursor: pointer;
+            border: none;
         }
         .exit-btn:hover {
             background: #7c3aed;
             color: #ffffff;
             box-shadow: 0 0 12px #7c3aed;
-            border-color: #7c3aed;
         }
-        .reconfig-btn {
-            border-color: rgba(219, 39, 119, 0.5);
+        .exit-btn-danger {
+            border: 1px solid rgba(219, 39, 119, 0.5);
             color: #db2777;
+            background: rgba(0,0,0,0.5);
         }
-        .reconfig-btn:hover {
+        .exit-btn-danger:hover {
             background: #db2777;
             color: #ffffff;
             box-shadow: 0 0 12px #db2777;
-            border-color: #db2777;
+        }
+        .exit-btn-settings {
+            border: 1px solid rgba(30, 58, 138, 0.5);
+            color: #1e3a8a;
+            background: rgba(0,0,0,0.5);
+        }
+        .exit-btn-settings:hover {
+            background: #1e3a8a;
+            color: #ffffff;
+            box-shadow: 0 0 12px #1e3a8a;
         }
 
         .container {
@@ -456,7 +471,7 @@
             inset: 0;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(2px);
-            display: flex;
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 2000;
@@ -565,19 +580,6 @@
         }
         .overlay-card .start-btn:hover { filter: brightness(1.08); transform: scale(1.02); }
         .overlay-card .start-btn:active { transform: scale(0.98); }
-        .overlay-card .close-btn {
-            margin-top: 10px;
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            font-size: 12px;
-            cursor: pointer;
-            text-decoration: underline;
-            opacity: 0.6;
-        }
-        .overlay-card .close-btn:hover {
-            opacity: 1;
-        }
 
         .container, .overlay-card { background-color: #f8fafc; }
         .prediction { background: #f0f3f7; }
@@ -629,23 +631,24 @@
             font-family: 'Courier New', monospace;
         }
         
-        .overlay-hidden {
-            display: none !important;
-        }
-        
         .prog-display {
             font-size: 11px;
             color: var(--text-muted);
             margin-top: 2px;
             opacity: 0.7;
         }
+        
+        .btn-disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
 
     <div class="exit-nav">
-        <button onclick="window.goHome()" class="exit-btn">← EXIT</button>
-        <button onclick="showOverlay()" class="exit-btn reconfig-btn">⚙️ SETTINGS</button>
+        <button onclick="window.signOutUser()" class="exit-btn exit-btn-danger">✕ EXIT</button>
+        <button onclick="showOverlay()" class="exit-btn exit-btn-settings">⚙️ SETTINGS</button>
     </div>
 
     <div class="overlay active" id="entryOverlay">
@@ -1055,6 +1058,8 @@
                 fibDisplay.textContent = `📊 Multiplier: ${engine.martingaleMultiplier}x`;
             } else if (engine && engine.type === 'dalambert') {
                 fibDisplay.textContent = `📊 Units: ${engine.dalembertUnits}`;
+            } else if (engine && engine.type === 'sentinel') {
+                fibDisplay.textContent = `📊 Units: ${engine.currentUnits}`;
             } else {
                 fibDisplay.textContent = '';
             }
@@ -1287,6 +1292,12 @@
             if (engine) {
                 document.getElementById('overlayBase').value = engine.baseUnit;
                 document.getElementById('overlayProgression').value = engine.type;
+            } else {
+                // Use saved config or defaults
+                if (savedConfig) {
+                    document.getElementById('overlayBase').value = savedConfig.base || 1;
+                    document.getElementById('overlayProgression').value = savedProgression;
+                }
             }
         }
 
@@ -1322,6 +1333,10 @@
             
             // Hide overlay
             document.getElementById('entryOverlay').classList.remove('active');
+            
+            // Enable buttons
+            document.getElementById('playerBtn').style.opacity = '1';
+            document.getElementById('bankerBtn').style.opacity = '1';
         }
 
         function renderSentinel() {
@@ -1340,18 +1355,24 @@
         if (savedConfig && savedConfig.base) {
             overlayBase.value = savedConfig.base;
             overlayProgression.value = savedProgression;
+        } else {
+            overlayBase.value = 1;
+            overlayProgression.value = 'sentinel';
         }
 
         // START button click handler
-        overlayStartBtn.addEventListener('click', function() {
+        overlayStartBtn.onclick = function() {
             const base = parseFloat(overlayBase.value) || 1;
             const prog = overlayProgression.value;
             initializeApp(base, prog);
-        });
+        };
 
         // Enter key on base input
         overlayBase.addEventListener('keydown', function(e) { 
-            if (e.key === 'Enter') overlayStartBtn.click(); 
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                overlayStartBtn.click();
+            }
         });
 
         // If we have saved config AND saved sequence data, auto-start
