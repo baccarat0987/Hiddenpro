@@ -16,7 +16,7 @@
     <!-- Firebase Authentication & Permission Check -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -33,16 +33,6 @@
         const db = getFirestore(app);
 
         const REQUIRED_ENGINE_ID = "engine_17";
-
-        // Make signOut available globally for the exit button
-        window.signOutUser = function() {
-            signOut(auth).then(() => {
-                window.location.href = "index.html";
-            }).catch((error) => {
-                console.error("Sign out error:", error);
-                window.location.href = "index.html";
-            });
-        };
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
@@ -87,6 +77,21 @@
         if (typeof console !== "undefined") {
             console.log = console.debug = console.info = console.warn = console.error = function() {};
         }
+
+        // ========== FIXED: Simple exit function - redirect to portal ==========
+        window.goHome = function() {
+            window.location.href = "index.html";
+        };
+
+        // ========== FIXED: Make showOverlay globally available ==========
+        window.showOverlay = function() {
+            const overlay = document.getElementById('entryOverlay');
+            overlay.classList.add('active');
+            if (typeof engine !== 'undefined' && engine) {
+                document.getElementById('overlayBase').value = engine.baseUnit || 1;
+                document.getElementById('overlayProgression').value = engine.type || 'sentinel';
+            }
+        };
     </script>
 
     <style>
@@ -163,32 +168,22 @@
             transition: 0.2s;
             font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             cursor: pointer;
-            border: none;
         }
         .exit-btn:hover {
             background: #7c3aed;
             color: #ffffff;
             box-shadow: 0 0 12px #7c3aed;
+            border-color: #7c3aed;
         }
-        .exit-btn-danger {
-            border: 1px solid rgba(219, 39, 119, 0.5);
+        .reconfig-btn {
+            border-color: rgba(219, 39, 119, 0.5);
             color: #db2777;
-            background: rgba(0,0,0,0.5);
         }
-        .exit-btn-danger:hover {
+        .reconfig-btn:hover {
             background: #db2777;
             color: #ffffff;
             box-shadow: 0 0 12px #db2777;
-        }
-        .exit-btn-settings {
-            border: 1px solid rgba(30, 58, 138, 0.5);
-            color: #1e3a8a;
-            background: rgba(0,0,0,0.5);
-        }
-        .exit-btn-settings:hover {
-            background: #1e3a8a;
-            color: #ffffff;
-            box-shadow: 0 0 12px #1e3a8a;
+            border-color: #db2777;
         }
 
         .container {
@@ -580,6 +575,19 @@
         }
         .overlay-card .start-btn:hover { filter: brightness(1.08); transform: scale(1.02); }
         .overlay-card .start-btn:active { transform: scale(0.98); }
+        .overlay-card .close-btn {
+            margin-top: 10px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: underline;
+            opacity: 0.6;
+        }
+        .overlay-card .close-btn:hover {
+            opacity: 1;
+        }
 
         .container, .overlay-card { background-color: #f8fafc; }
         .prediction { background: #f0f3f7; }
@@ -631,24 +639,24 @@
             font-family: 'Courier New', monospace;
         }
         
+        .overlay-hidden {
+            display: none !important;
+        }
+        
         .prog-display {
             font-size: 11px;
             color: var(--text-muted);
             margin-top: 2px;
             opacity: 0.7;
         }
-        
-        .btn-disabled {
-            opacity: 0.5;
-            pointer-events: none;
-        }
     </style>
 </head>
 <body>
 
+    <!-- ========== FIXED: Exit button now calls goHome() ========== -->
     <div class="exit-nav">
-        <button onclick="window.signOutUser()" class="exit-btn exit-btn-danger">✕ EXIT</button>
-        <button onclick="showOverlay()" class="exit-btn exit-btn-settings">⚙️ SETTINGS</button>
+        <button onclick="window.goHome()" class="exit-btn">← EXIT</button>
+        <button onclick="window.showOverlay()" class="exit-btn reconfig-btn">⚙️ SETTINGS</button>
     </div>
 
     <div class="overlay active" id="entryOverlay">
@@ -1058,8 +1066,6 @@
                 fibDisplay.textContent = `📊 Multiplier: ${engine.martingaleMultiplier}x`;
             } else if (engine && engine.type === 'dalambert') {
                 fibDisplay.textContent = `📊 Units: ${engine.dalembertUnits}`;
-            } else if (engine && engine.type === 'sentinel') {
-                fibDisplay.textContent = `📊 Units: ${engine.currentUnits}`;
             } else {
                 fibDisplay.textContent = '';
             }
@@ -1126,7 +1132,7 @@
         }
 
         /* =========================================================
-           PROGRESSION ENGINE - STANDARD FIBONACCI FIXED
+           PROGRESSION ENGINE
         ========================================================= */
         class ProgressionEngine {
             constructor(baseUnit, type) {
@@ -1192,7 +1198,6 @@
 
                     case 'fibonacci':
                         if (isWin) {
-                            // WIN: Move back TWO steps
                             if (this.fibPrev === 0 && this.fibCurr === 1) {
                                 this.fibCurr = 1;
                                 this.fibPrev = 0;
@@ -1215,7 +1220,6 @@
                                 }
                             }
                         } else {
-                            // LOSS: Move FORWARD one step
                             const next = this.fibPrev + this.fibCurr;
                             this.fibPrev = this.fibCurr;
                             this.fibCurr = next;
@@ -1288,28 +1292,16 @@
         function showOverlay() {
             const overlay = document.getElementById('entryOverlay');
             overlay.classList.add('active');
-            // Pre-fill with current config if exists
             if (engine) {
                 document.getElementById('overlayBase').value = engine.baseUnit;
                 document.getElementById('overlayProgression').value = engine.type;
-            } else {
-                // Use saved config or defaults
-                if (savedConfig) {
-                    document.getElementById('overlayBase').value = savedConfig.base || 1;
-                    document.getElementById('overlayProgression').value = savedProgression;
-                }
             }
         }
 
-        // Make showOverlay globally available
-        window.showOverlay = showOverlay;
-
         function initializeApp(base, prog) {
-            // Create new engine
             engine = new ProgressionEngine(base, prog);
             isInitialized = true;
             
-            // Reset all data
             sequence = [];
             results = [];
             lastPrediction = null;
@@ -1317,11 +1309,9 @@
             wins = 0; losses = 0; skips = 0;
             playerCount = 0; bankerCount = 0;
             
-            // Save config
             localStorage.setItem('bt_sentinel_config', JSON.stringify({ base, bankroll: 100 }));
             localStorage.setItem('bt_progression_type', prog);
             
-            // Clear old state
             localStorage.removeItem('bt_sentinel_state');
             localStorage.removeItem('bt_sequence');
             localStorage.removeItem('bt_results');
@@ -1331,12 +1321,7 @@
             saveAndUpdate();
             updatePredictionBox();
             
-            // Hide overlay
             document.getElementById('entryOverlay').classList.remove('active');
-            
-            // Enable buttons
-            document.getElementById('playerBtn').style.opacity = '1';
-            document.getElementById('bankerBtn').style.opacity = '1';
         }
 
         function renderSentinel() {
@@ -1351,37 +1336,25 @@
         const overlayProgression = document.getElementById('overlayProgression');
         const overlayStartBtn = document.getElementById('overlayStartBtn');
 
-        // Pre-fill with saved config if exists
         if (savedConfig && savedConfig.base) {
             overlayBase.value = savedConfig.base;
             overlayProgression.value = savedProgression;
-        } else {
-            overlayBase.value = 1;
-            overlayProgression.value = 'sentinel';
         }
 
-        // START button click handler
-        overlayStartBtn.onclick = function() {
+        overlayStartBtn.addEventListener('click', function() {
             const base = parseFloat(overlayBase.value) || 1;
             const prog = overlayProgression.value;
             initializeApp(base, prog);
-        };
-
-        // Enter key on base input
-        overlayBase.addEventListener('keydown', function(e) { 
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                overlayStartBtn.click();
-            }
         });
 
-        // If we have saved config AND saved sequence data, auto-start
+        overlayBase.addEventListener('keydown', function(e) { 
+            if (e.key === 'Enter') overlayStartBtn.click(); 
+        });
+
         if (savedConfig && savedConfig.base && sequence.length > 0) {
-            // Auto-initialize with saved config
             engine = new ProgressionEngine(savedConfig.base, savedProgression);
             isInitialized = true;
             
-            // Load saved state if exists
             const savedState = JSON.parse(localStorage.getItem('bt_sentinel_state'));
             if (savedState) {
                 if (savedProgression === 'sentinel') {
@@ -1400,7 +1373,6 @@
                 engine.round = savedState.round || 0;
             }
             
-            // Replay results to get engine in correct state
             const replayResults = results.filter(r => r === 'W' || r === 'L');
             for (let i = 0; i < replayResults.length; i++) {
                 engine.placeBet(replayResults[i] === 'W' ? 'win' : 'loss');
@@ -1411,7 +1383,6 @@
             updatePredictionBox();
             updateStatsBar();
             
-            // Hide overlay
             overlay.classList.remove('active');
         }
 
