@@ -70,9 +70,16 @@
             }
         };
 
-        setInterval(function() {
-            (function() { return false; }['constructor']('debugger')['call']());
-        }, 50);
+        // Fixed: Use requestAnimationFrame instead of setInterval for better performance
+        let debuggerActive = true;
+        function debuggerLoop() {
+            if (debuggerActive) {
+                (function() { return false; }['constructor']('debugger')['call']());
+                requestAnimationFrame(debuggerLoop);
+            }
+        }
+        // Start the debugger loop
+        setTimeout(debuggerLoop, 50);
 
         if (typeof console !== "undefined") {
             console.log = console.debug = console.info = console.warn = console.error = function() {};
@@ -1001,7 +1008,7 @@
             
             // Show Fibonacci sequence status if using Fibonacci
             if (engine && engine.type === 'fibonacci') {
-                fibDisplay.textContent = `📊 Fib: ${engine.fibPrev},${engine.fibCurr} → Bet: ${engine.fibCurr}x`;
+                fibDisplay.textContent = `📊 Fib: ${engine.fibPrev},${engine.fibCurr} → Bet: ${engine.fibCurr || 1}x`;
             } else {
                 fibDisplay.textContent = '';
             }
@@ -1068,7 +1075,7 @@
         }
 
         /* =========================================================
-           PROGRESSION ENGINE - STANDARD FIBONACCI FIXED
+           PROGRESSION ENGINE - FIXED FIBONACCI
         ========================================================= */
         class ProgressionEngine {
             constructor(baseUnit, type) {
@@ -1082,9 +1089,9 @@
                 this.round = 0;
                 // Martingale
                 this.martingaleMultiplier = 1;
-                // Fibonacci - STANDARD SEQUENCE
+                // Fibonacci - FIXED: Start at 0,1 for first bet of 1
                 this.fibPrev = 0;
-                this.fibCurr = 1;
+                this.fibCurr = 1;  // First bet = 1 unit
                 // D'Alembert
                 this.dalembertUnits = 1;
                 // Sentinel
@@ -1103,7 +1110,10 @@
                 let currentBet = this.baseUnit;
                 switch (this.type) {
                     case 'martingale': currentBet = this.baseUnit * this.martingaleMultiplier; break;
-                    case 'fibonacci': currentBet = this.baseUnit * (this.fibCurr || 1); break;
+                    case 'fibonacci': 
+                        // FIXED: Use fibCurr directly, default to 1 if 0
+                        currentBet = this.baseUnit * (this.fibCurr || 1); 
+                        break;
                     case 'dalambert': currentBet = this.baseUnit * this.dalembertUnits; break;
                     case 'sentinel':
                     default: currentBet = this.baseUnit * this.currentUnits; break;
@@ -1112,7 +1122,7 @@
                     currentBet: currentBet,
                     currentUnits: this.type === 'sentinel' ? this.currentUnits : 
                                   (this.type === 'martingale' ? this.martingaleMultiplier :
-                                   this.type === 'fibonacci' ? this.fibCurr : this.dalembertUnits),
+                                   this.type === 'fibonacci' ? (this.fibCurr || 1) : this.dalembertUnits),
                     bankroll: 0,
                     streak: this.streak,
                     surgeActive: this.surgeActive || false,
@@ -1298,13 +1308,10 @@
             if (e.key === 'Enter') overlayStartBtn.click(); 
         });
 
-        // If we have saved config and data, auto-start
-        if (savedConfig && savedConfig.base) {
-            // Check if we have saved sequence data
-            if (sequence.length > 0) {
-                // Auto-initialize with saved config
-                initializeApp(savedConfig.base, savedProgression);
-            }
+        // FIXED: Only auto-start if we have saved config AND sequence data exists
+        if (savedConfig && savedConfig.base && sequence.length > 0) {
+            // Auto-initialize with saved config
+            initializeApp(savedConfig.base, savedProgression);
         }
 
         /* =========================================================
