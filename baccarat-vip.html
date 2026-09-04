@@ -472,6 +472,20 @@
             color: #db2777;
             font-weight: 700;
         }
+        .threshold-indicator {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            opacity: 0.6;
+        }
+        .pattern-learn {
+            font-size: 10px;
+            color: #7c3aed;
+            margin-top: 2px;
+            opacity: 0.7;
+            font-weight: 600;
+            min-height: 16px;
+        }
     </style>
 </head>
 <body>
@@ -507,6 +521,8 @@
             <div class="prediction" id="predictionBox">
                 <span>INITIALIZING...</span>
             </div>
+            <div class="threshold-indicator" id="thresholdDisplay">Threshold: 60%</div>
+            <div class="pattern-learn" id="patternLearnDisplay"></div>
 
             <div class="buttons">
                 <button onclick="recordResult('P')" id="playerBtn">PLAYER</button>
@@ -522,19 +538,24 @@
     <script>
         /* =========================================================
            PURE PATTERN RECOGNITION & ADAPTIVE LEARNING ENGINE
-           - No voting, no conflict resolution
            - Pattern detection from historical sequences
            - Bias detection (streak bias, zigzag bias, frequency bias)
-           - Adaptive learning based on recent accuracy
-           - WORKING SKIP LOGIC from Deepseek PRO
+           - PATTERN-BASED SKIP LEARNING: 
+             If a pattern causes a loss, remember it and SKIP next time
+           - Simple display: just shows SKIP in prediction box
         ========================================================= */
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
         let results = JSON.parse(localStorage.getItem('bt_results')) || [];
         let lastPrediction = null;
         let lastPredictionConfidence = 0;
+        let isCurrentlySkip = false;
+        let skipReason = '';
         let detailedHistory = JSON.parse(localStorage.getItem('bt_detailed')) || [];
         let wins = 0, losses = 0, skips = 0;
         const MIN_HANDS = 10;
+
+        // ========== PATTERN SKIP LEARNING DATABASE ==========
+        let patternMemory = JSON.parse(localStorage.getItem('bt_pattern_memory')) || {};
 
         // Adaptive learning weights
         let patternAccuracy = { P: 0.5, B: 0.5 };
@@ -544,6 +565,99 @@
 
         function clampConfidence(raw) { return Math.min(96, Math.max(40, raw)); }
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
+
+        // ========== PATTERN LEARNING FUNCTIONS ==========
+        function getCurrentPattern(n) {
+            if (sequence.length < n) return null;
+            return sequence.slice(-n).join('');
+        }
+
+        function getPredictedPattern() {
+            if (sequence.length < 3) return null;
+            return sequence.slice(-3).join('');
+        }
+
+        function shouldSkipBasedOnPattern() {
+            if (sequence.length < 4) return { skip: false, reason: '' };
+            
+            const patternLengths = [2, 3, 4];
+            
+            for (const len of patternLengths) {
+                const pattern = getCurrentPattern(len);
+                if (!pattern) continue;
+                
+                const memory = patternMemory[pattern];
+                if (memory) {
+                    const lossRate = memory.losses / memory.occurrences;
+                    if (lossRate > 0.65 && memory.occurrences >= 2) {
+                        return { 
+                            skip: true, 
+                            reason: `Pattern "${pattern}" ${Math.round(lossRate * 100)}% loss (${memory.losses}/${memory.occurrences})`
+                        };
+                    }
+                    if (memory.consecutiveLosses >= 2) {
+                        return { 
+                            skip: true, 
+                            reason: `Pattern "${pattern}" ${memory.consecutiveLosses}x consecutive losses`
+                        };
+                    }
+                }
+            }
+            
+            const predPattern = getPredictedPattern();
+            if (predPattern && predPattern.length >= 3) {
+                const memory = patternMemory[predPattern];
+                if (memory && memory.losses / memory.occurrences > 0.6 && memory.occurrences >= 2) {
+                    return { 
+                        skip: true, 
+                        reason: `Predicted pattern "${predPattern}" ${Math.round((memory.losses/memory.occurrences) * 100)}% loss`
+                    };
+                }
+            }
+            
+            return { skip: false, reason: '' };
+        }
+
+        function updatePatternMemory(side, wasWin) {
+            const patternLengths = [2, 3, 4];
+            
+            for (const len of patternLengths) {
+                if (sequence.length < len) continue;
+                const pattern = sequence.slice(-len).join('');
+                
+                if (!patternMemory[pattern]) {
+                    patternMemory[pattern] = { 
+                        losses: 0, 
+                        occurrences: 0, 
+                        consecutiveLosses: 0,
+                        lastResult: null
+                    };
+                }
+                
+                patternMemory[pattern].occurrences++;
+                
+                if (!wasWin) {
+                    patternMemory[pattern].losses++;
+                    if (patternMemory[pattern].lastResult === 'L') {
+                        patternMemory[pattern].consecutiveLosses++;
+                    } else {
+                        patternMemory[pattern].consecutiveLosses = 1;
+                    }
+                } else {
+                    patternMemory[pattern].consecutiveLosses = 0;
+                }
+                
+                patternMemory[pattern].lastResult = wasWin ? 'W' : 'L';
+            }
+            
+            for (const key in patternMemory) {
+                if (patternMemory[key].occurrences === 0) {
+                    delete patternMemory[key];
+                }
+            }
+            
+            localStorage.setItem('bt_pattern_memory', JSON.stringify(patternMemory));
+        }
 
         // ========== 1. PATTERN DETECTION ==========
         function detectPatterns() {
@@ -809,7 +923,7 @@
                 confidence: clampConfidence(Math.round(finalConfidence * 10) / 10),
                 patternCount: patterns.length,
                 agreement: agreement,
-                patterns: patterns // Store full patterns for skip logic
+                patterns: patterns
             };
         }
 
@@ -824,16 +938,14 @@
             return count;
         }
 
-        // ========== WORKING SKIP LOGIC (from Deepseek PRO with fixes) ==========
+        // ========== SKIP LOGIC WITH PATTERN LEARNING ==========
         function getDynamicSkipThreshold() {
             let baseThreshold = 60;
             
-            // Analyze recent results (last 5 non-skip rounds)
             const recentResults = detailedHistory.slice(-5).filter(h => !h.wasSkip);
             const recentLosses = recentResults.filter(r => r.type === 'loss').length;
             const recentWins = recentResults.filter(r => r.type === 'win').length;
             
-            // Dynamic adjustment based on streak
             if (recentLosses >= 3) {
                 baseThreshold = 52;
             } else if (recentWins >= 3 && recentResults.length >= 3) {
@@ -844,7 +956,6 @@
                 baseThreshold = 64;
             }
             
-            // Adjust based on overall win rate
             const totalDecisions = wins + losses;
             if (totalDecisions > 10) {
                 const winRate = wins / totalDecisions;
@@ -859,33 +970,49 @@
         }
 
         function shouldSkip(confidence, patternCount, patterns) {
-            const dynamicThreshold = getDynamicSkipThreshold();
-            
-            // PRIMARY CONDITION: If confidence is below threshold, SKIP
-            if (confidence < dynamicThreshold) {
+            // FIRST: Check pattern-based skip learning
+            const patternCheck = shouldSkipBasedOnPattern();
+            if (patternCheck.skip) {
+                skipReason = patternCheck.reason;
                 return true;
             }
             
-            // SECONDARY CONDITION: If we have very few patterns AND confidence isn't high enough
-            // This catches low-confidence predictions even if they barely meet the threshold
-            if (patternCount <= 1 && confidence < 65) {
-                return true;
-            }
-            
-            // TERTIARY CONDITION: If we have 2 patterns but confidence is below 58, skip
-            if (patternCount <= 2 && confidence < 58) {
-                return true;
-            }
-            
-            // QUATERNARY CONDITION: If all patterns have low individual confidence
-            // Check if all detected patterns have confidence below 60%
-            if (patterns && patterns.length > 0) {
-                const allLow = patterns.every(p => p.confidence < 60);
-                if (allLow && confidence < 62) {
+            // SECOND: Check if current sequence end matches a known losing pattern
+            if (sequence.length >= 3) {
+                const pattern3 = sequence.slice(-3).join('');
+                if (patternMemory[pattern3] && patternMemory[pattern3].losses / patternMemory[pattern3].occurrences > 0.6) {
+                    skipReason = `Pattern "${pattern3}" has high loss rate`;
                     return true;
                 }
             }
             
+            // THIRD: Standard threshold-based skip
+            const dynamicThreshold = getDynamicSkipThreshold();
+            
+            if (confidence < dynamicThreshold) {
+                skipReason = `Confidence ${confidence}% < threshold ${dynamicThreshold}%`;
+                return true;
+            }
+            
+            if (patternCount <= 1 && confidence < 65) {
+                skipReason = `Only ${patternCount} pattern(s) with ${confidence}% confidence`;
+                return true;
+            }
+            
+            if (patternCount <= 2 && confidence < 58) {
+                skipReason = `Only ${patternCount} pattern(s) with ${confidence}% confidence`;
+                return true;
+            }
+            
+            if (patterns && patterns.length > 0) {
+                const allLow = patterns.every(p => p.confidence < 60);
+                if (allLow && confidence < 62) {
+                    skipReason = `All patterns have low confidence`;
+                    return true;
+                }
+            }
+            
+            skipReason = '';
             return false;
         }
 
@@ -895,15 +1022,17 @@
             const result = getAdaptivePrediction();
             if (!result) return null;
             
-            // Store the full patterns array for skip logic
             const patterns = result.patterns || [];
             const skip = shouldSkip(result.confidence, result.patternCount || 0, patterns);
             
-            if (skip) {
-                return { pred: null, confidence: result.confidence, skip: true, patterns: result.patternCount };
-            }
-            
-            return { pred: result.prediction, confidence: result.confidence, skip: false, patterns: result.patternCount };
+            return { 
+                pred: skip ? null : result.prediction, 
+                confidence: result.confidence, 
+                skip: skip, 
+                patterns: result.patternCount,
+                threshold: getDynamicSkipThreshold(),
+                skipReason: skipReason
+            };
         }
 
         // ========== UI FUNCTIONS ==========
@@ -932,31 +1061,45 @@
 
         function updatePredictionBox() {
             const box = document.getElementById('predictionBox');
+            const thresholdDisplay = document.getElementById('thresholdDisplay');
+            const patternLearnDisplay = document.getElementById('patternLearnDisplay');
 
             if (sequence.length < MIN_HANDS) {
                 box.innerHTML = `<span style="font-size:clamp(11px,2.5vw,13px); color:#7a8595; letter-spacing:1px;">LOGGING: ${MIN_HANDS-sequence.length} MORE HANDS NEEDED</span>`;
                 lastPrediction = null;
                 lastPredictionConfidence = 0;
+                isCurrentlySkip = false;
+                thresholdDisplay.textContent = 'Threshold: --';
+                patternLearnDisplay.textContent = '';
                 return;
             }
             
             const result = finalPrediction();
+            const threshold = result ? result.threshold : 60;
+            thresholdDisplay.textContent = `Threshold: ${threshold}%`;
             
             if (result && result.pred) {
                 const text = result.pred === 'P' ? 'PLAYER' : 'BANKER';
                 const cls = result.pred === 'P' ? 'player' : 'banker';
-                const patternLabel = result.patterns ? `${result.patterns} patterns detected` : '';
                 box.innerHTML = `NEXT: <span class="${cls}">${text}</span> <span class="confidence">${result.confidence}%</span>`;
                 lastPrediction = result.pred;
                 lastPredictionConfidence = result.confidence;
+                isCurrentlySkip = false;
+                patternLearnDisplay.textContent = '';
             } else if (result && result.skip) {
+                // Show SKIP like original - just display in prediction box
                 box.innerHTML = `<span style="font-size:clamp(14px,3vw,16px);" class="skip-display">⏭ SKIP (${result.confidence}%)</span>`;
                 lastPrediction = null;
                 lastPredictionConfidence = result.confidence;
+                isCurrentlySkip = true;
+                // Show the reason below
+                patternLearnDisplay.textContent = result.skipReason || 'Pattern learning triggered skip';
             } else {
                 box.innerHTML = "<span style='font-size:clamp(14px,3vw,16px); color:#7a8595'>ANALYZING PATTERNS...</span>";
                 lastPrediction = null;
                 lastPredictionConfidence = 0;
+                isCurrentlySkip = false;
+                patternLearnDisplay.textContent = '';
             }
             
             updateStatsBar();
@@ -982,33 +1125,111 @@
         }
 
         // ========== RECORD RESULT, UNDO, RESET ==========
-        function recordResult(r) {
+        function recordResult(side) {
+            // If currently in skip mode, record as skip without registering a bet
+            if (isCurrentlySkip) {
+                results.push('');
+                skips++;
+                detailedHistory.push({ type: 'skip', wasSkip: true });
+                saveAndUpdate();
+                return;
+            }
+            
+            let wasWin = false;
+            
             if (lastPrediction) {
-                const wasWin = (lastPrediction === r);
+                wasWin = (lastPrediction === side);
                 results.push(wasWin ? 'W' : 'L');
-                if (wasWin) { wins++; detailedHistory.push({ type: 'win', wasSkip: false }); } else { losses++; detailedHistory.push({ type: 'loss', wasSkip: false }); }
+                if (wasWin) { 
+                    wins++; 
+                    detailedHistory.push({ type: 'win', wasSkip: false }); 
+                } else { 
+                    losses++; 
+                    detailedHistory.push({ type: 'loss', wasSkip: false }); 
+                }
             } else {
                 results.push('');
                 skips++;
                 detailedHistory.push({ type: 'skip', wasSkip: true });
             }
 
-            sequence.push(r);
+            sequence.push(side);
+            
+            // Update pattern memory with the result
+            updatePatternMemory(side, wasWin);
+            
             saveAndUpdate();
         }
 
         function undo() {
-            if (sequence.length === 0) return;
+            if (sequence.length === 0 && results.length === 0) return;
             
-            sequence.pop();
-            const lastResultData = results.pop();
-            const lastHistory = detailedHistory.pop();
+            if (results.length > 0 && results[results.length - 1] === '' && sequence.length > 0) {
+                const lastHistory = detailedHistory[detailedHistory.length - 1];
+                if (lastHistory && lastHistory.wasSkip) {
+                    results.pop();
+                    detailedHistory.pop();
+                    skips--;
+                    saveAndUpdate();
+                    return;
+                }
+            }
+            
+            if (sequence.length > 0) {
+                sequence.pop();
+                const lastResultData = results.pop();
+                const lastHistory = detailedHistory.pop();
+                
+                if (lastResultData === 'W') wins--;
+                else if (lastResultData === 'L') losses--;
+                else if (lastResultData === '') skips--;
+                
+                rebuildPatternMemory();
+                saveAndUpdate();
+            }
+        }
 
-            if (lastResultData === 'W') wins--;
-            else if (lastResultData === 'L') losses--;
-            else if (lastResultData === '') skips--;
-
-            saveAndUpdate();
+        function rebuildPatternMemory() {
+            patternMemory = {};
+            
+            for (let i = 0; i < sequence.length; i++) {
+                const side = sequence[i];
+                const result = results[i];
+                if (result === 'W' || result === 'L') {
+                    const wasWin = result === 'W';
+                    if (i >= 2) {
+                        const subSequence = sequence.slice(0, i + 1);
+                        const patternLengths = [2, 3, 4];
+                        for (const len of patternLengths) {
+                            if (subSequence.length >= len) {
+                                const pattern = subSequence.slice(-len).join('');
+                                if (!patternMemory[pattern]) {
+                                    patternMemory[pattern] = { 
+                                        losses: 0, 
+                                        occurrences: 0, 
+                                        consecutiveLosses: 0,
+                                        lastResult: null
+                                    };
+                                }
+                                patternMemory[pattern].occurrences++;
+                                if (!wasWin) {
+                                    patternMemory[pattern].losses++;
+                                    if (patternMemory[pattern].lastResult === 'L') {
+                                        patternMemory[pattern].consecutiveLosses++;
+                                    } else {
+                                        patternMemory[pattern].consecutiveLosses = 1;
+                                    }
+                                } else {
+                                    patternMemory[pattern].consecutiveLosses = 0;
+                                }
+                                patternMemory[pattern].lastResult = wasWin ? 'W' : 'L';
+                            }
+                        }
+                    }
+                }
+            }
+            
+            localStorage.setItem('bt_pattern_memory', JSON.stringify(patternMemory));
         }
 
         function resetAll() {
@@ -1017,12 +1238,16 @@
                 results = [];
                 lastPrediction = null;
                 lastPredictionConfidence = 0;
+                isCurrentlySkip = false;
+                skipReason = '';
                 detailedHistory = [];
+                patternMemory = {};
                 wins = 0; losses = 0; skips = 0;
                 patternAccuracy = { P: 0.5, B: 0.5 };
                 recentCorrect = 0;
                 recentTotal = 0;
 
+                localStorage.setItem('bt_pattern_memory', JSON.stringify(patternMemory));
                 saveAndUpdate();
             }
         }
@@ -1038,6 +1263,7 @@
         // Initial stats if we have data
         if (sequence.length > 0 || results.length > 0) {
             results.forEach(r => { if (r === 'W') wins++; else if (r === 'L') losses++; else if (r === '') skips++; });
+            rebuildPatternMemory();
         }
 
         // Initial render
