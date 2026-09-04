@@ -528,7 +528,7 @@
         let lastPrediction = null;
         let detailedHistory = JSON.parse(localStorage.getItem('bt_detailed')) || [];
         let wins = 0, losses = 0, skips = 0;
-        const MIN_HANDS = 6;
+        const MIN_HANDS = 10;
 
         // Adaptive learning weights
         let patternAccuracy = { P: 0.5, B: 0.5 };
