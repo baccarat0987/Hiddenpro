@@ -838,41 +838,54 @@
             return count;
         }
 
-        // ========== DYNAMIC SKIP THRESHOLD ==========
+        // ========== NEW DYNAMIC SKIP THRESHOLD (from Deepseek PRO) ==========
         function getDynamicSkipThreshold() {
-            let baseThreshold = 53;
+            let baseThreshold = 60;
             
-            const recentResults = detailedHistory.slice(-15).filter(h => !h.wasSkip);
-            if (recentResults.length >= 5) {
-                const recentWins = recentResults.filter(r => r.type === 'win').length;
-                const winRate = recentWins / recentResults.length;
-                
-                if (winRate < 0.35) baseThreshold = 48;
-                else if (winRate < 0.45) baseThreshold = 52;
-                else if (winRate > 0.6) baseThreshold = 62;
-                else if (winRate > 0.7) baseThreshold = 68;
+            // Analyze recent results (last 5 non-skip rounds)
+            const recentResults = detailedHistory.slice(-5).filter(h => !h.wasSkip);
+            const recentLosses = recentResults.filter(r => r.type === 'loss').length;
+            const recentWins = recentResults.filter(r => r.type === 'win').length;
+            
+            // Dynamic adjustment based on streak
+            if (recentLosses >= 3) {
+                // On losing streak: lower threshold to be more aggressive
+                baseThreshold = 52;
+            } else if (recentWins >= 3 && recentResults.length >= 3) {
+                // On winning streak: raise threshold to protect gains
+                baseThreshold = 68;
+            } else if (recentLosses >= 2) {
+                baseThreshold = 56;
+            } else if (recentWins >= 2) {
+                baseThreshold = 64;
             }
             
-            const total = wins + losses;
-            if (total > 20) {
-                const overallWinRate = wins / total;
-                if (overallWinRate < 0.4) baseThreshold = Math.max(42, baseThreshold - 8);
-                else if (overallWinRate > 0.6) baseThreshold = Math.min(72, baseThreshold + 8);
+            // Adjust based on overall win rate
+            const totalDecisions = wins + losses;
+            if (totalDecisions > 10) {
+                const winRate = wins / totalDecisions;
+                if (winRate < 0.45) {
+                    // Below 45% win rate: lower threshold
+                    baseThreshold = Math.max(50, baseThreshold - 5);
+                } else if (winRate > 0.55) {
+                    // Above 55% win rate: raise threshold
+                    baseThreshold = Math.min(75, baseThreshold + 5);
+                }
             }
             
-            return Math.min(72, Math.max(42, baseThreshold));
+            return baseThreshold;
         }
 
         function shouldSkip(confidence, patternCount) {
-            const threshold = getDynamicSkipThreshold();
-            let adjusted = threshold;
+            const dynamicThreshold = getDynamicSkipThreshold();
             
-            // More patterns = more confidence to bet
-            if (patternCount >= 4) adjusted = Math.max(38, threshold - 10);
-            else if (patternCount >= 3) adjusted = Math.max(40, threshold - 6);
-            else if (patternCount <= 1) adjusted = Math.min(72, threshold + 10);
+            // More lenient if we have strong pattern occurrences
+            let adjustedThreshold = dynamicThreshold;
+            if (patternCount >= 5) {
+                adjustedThreshold = Math.max(50, dynamicThreshold - 8);
+            }
             
-            return confidence < adjusted;
+            return confidence < adjustedThreshold || patternCount < 1;
         }
 
         function finalPrediction() {
@@ -1023,5 +1036,6 @@
         updateHistory();
         updatePredictionBox();
     </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"45a606eccca84059b53fcc46a592a23b","r":1,"spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
