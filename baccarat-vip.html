@@ -876,16 +876,18 @@
         }
 
         function finalPrediction() {
-            if (sequence.length < MIN_HANDS) return null;
-            
-            const result = getEnhancedPredictionAndConfidence();
-            if (!result || !result.prediction) return null;
-            
-            const skip = shouldSkipPrediction(result.confidence, result.algorithmResults?.length || 0);
-            if (skip) return { pred: null, confidence: result.confidence, skip: true };
-            
-            return { pred: result.prediction, confidence: result.confidence, skip: false };
-        }
+    if (sequence.length < MIN_HANDS) return null;
+    
+    const result = getAdaptivePrediction();
+    if (!result) return null;
+    
+    const skip = shouldSkipPrediction(result.confidence, result.patternCount || 0);
+    if (skip) {
+        return { pred: null, confidence: result.confidence, skip: true };
+    }
+    
+    return { pred: result.prediction, confidence: result.confidence, skip: false };
+}
 
         // ========== UI FUNCTIONS ==========
         function updateHistory() {
