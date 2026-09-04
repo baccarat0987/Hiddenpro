@@ -468,24 +468,6 @@
         .hidden {
             display: none !important;
         }
-        .skip-display {
-            color: #db2777;
-            font-weight: 700;
-        }
-        .threshold-indicator {
-            font-size: 10px;
-            color: var(--text-muted);
-            margin-top: 4px;
-            opacity: 0.6;
-        }
-        .pattern-learn {
-            font-size: 10px;
-            color: #7c3aed;
-            margin-top: 2px;
-            opacity: 0.7;
-            font-weight: 600;
-            min-height: 16px;
-        }
     </style>
 </head>
 <body>
@@ -521,8 +503,6 @@
             <div class="prediction" id="predictionBox">
                 <span>INITIALIZING...</span>
             </div>
-            <div class="threshold-indicator" id="thresholdDisplay">Threshold: 60%</div>
-            <div class="pattern-learn" id="patternLearnDisplay"></div>
 
             <div class="buttons">
                 <button onclick="recordResult('P')" id="playerBtn">PLAYER</button>
@@ -538,25 +518,17 @@
     <script>
         /* =========================================================
            PURE PATTERN RECOGNITION & ADAPTIVE LEARNING ENGINE
+           - No voting, no conflict resolution
            - Pattern detection from historical sequences
            - Bias detection (streak bias, zigzag bias, frequency bias)
-           - BALANCED SKIP LOGIC:
-             - Pattern learning only triggers skip in extreme cases
-             - Dynamic threshold handles most skip decisions
-             - Continues to play more often
+           - Adaptive learning based on recent accuracy
         ========================================================= */
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
         let results = JSON.parse(localStorage.getItem('bt_results')) || [];
         let lastPrediction = null;
-        let lastPredictionConfidence = 0;
-        let isCurrentlySkip = false;
-        let skipReason = '';
         let detailedHistory = JSON.parse(localStorage.getItem('bt_detailed')) || [];
         let wins = 0, losses = 0, skips = 0;
         const MIN_HANDS = 10;
-
-        // ========== PATTERN SKIP LEARNING DATABASE ==========
-        let patternMemory = JSON.parse(localStorage.getItem('bt_pattern_memory')) || {};
 
         // Adaptive learning weights
         let patternAccuracy = { P: 0.5, B: 0.5 };
@@ -567,105 +539,6 @@
         function clampConfidence(raw) { return Math.min(96, Math.max(40, raw)); }
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
 
-        // ========== PATTERN LEARNING FUNCTIONS ==========
-        function getCurrentPattern(n) {
-            if (sequence.length < n) return null;
-            return sequence.slice(-n).join('');
-        }
-
-        function getPredictedPattern() {
-            if (sequence.length < 3) return null;
-            return sequence.slice(-3).join('');
-        }
-
-        // BALANCED: Only skip on extreme pattern loss cases
-        function shouldSkipBasedOnPattern() {
-            if (sequence.length < 6) return { skip: false, reason: '' };
-            
-            // Only check length 3 and 4 patterns (more reliable)
-            const patternLengths = [3, 4];
-            
-            for (const len of patternLengths) {
-                const pattern = getCurrentPattern(len);
-                if (!pattern) continue;
-                
-                const memory = patternMemory[pattern];
-                if (memory && memory.occurrences >= 3) {  // Need at least 3 occurrences to be reliable
-                    const lossRate = memory.losses / memory.occurrences;
-                    // Only skip if loss rate is VERY high (75%+) - extreme cases only
-                    if (lossRate > 0.75) {
-                        return { 
-                            skip: true, 
-                            reason: `Pattern "${pattern}" ${Math.round(lossRate * 100)}% loss (${memory.losses}/${memory.occurrences})`
-                        };
-                    }
-                    // Only skip on 3+ consecutive losses (extreme streak)
-                    if (memory.consecutiveLosses >= 3) {
-                        return { 
-                            skip: true, 
-                            reason: `Pattern "${pattern}" ${memory.consecutiveLosses}x consecutive losses`
-                        };
-                    }
-                }
-            }
-            
-            // Check predicted pattern only if very reliable
-            const predPattern = getPredictedPattern();
-            if (predPattern && predPattern.length >= 3) {
-                const memory = patternMemory[predPattern];
-                if (memory && memory.occurrences >= 3 && memory.losses / memory.occurrences > 0.75) {
-                    return { 
-                        skip: true, 
-                        reason: `Predicted pattern "${predPattern}" ${Math.round((memory.losses/memory.occurrences) * 100)}% loss`
-                    };
-                }
-            }
-            
-            return { skip: false, reason: '' };
-        }
-
-        function updatePatternMemory(side, wasWin) {
-            const patternLengths = [2, 3, 4];
-            
-            for (const len of patternLengths) {
-                if (sequence.length < len) continue;
-                const pattern = sequence.slice(-len).join('');
-                
-                if (!patternMemory[pattern]) {
-                    patternMemory[pattern] = { 
-                        losses: 0, 
-                        occurrences: 0, 
-                        consecutiveLosses: 0,
-                        lastResult: null
-                    };
-                }
-                
-                patternMemory[pattern].occurrences++;
-                
-                if (!wasWin) {
-                    patternMemory[pattern].losses++;
-                    if (patternMemory[pattern].lastResult === 'L') {
-                        patternMemory[pattern].consecutiveLosses++;
-                    } else {
-                        patternMemory[pattern].consecutiveLosses = 1;
-                    }
-                } else {
-                    patternMemory[pattern].consecutiveLosses = 0;
-                }
-                
-                patternMemory[pattern].lastResult = wasWin ? 'W' : 'L';
-            }
-            
-            // Clean up old patterns (keep only patterns with occurrences > 0)
-            for (const key in patternMemory) {
-                if (patternMemory[key].occurrences === 0) {
-                    delete patternMemory[key];
-                }
-            }
-            
-            localStorage.setItem('bt_pattern_memory', JSON.stringify(patternMemory));
-        }
-
         // ========== 1. PATTERN DETECTION ==========
         function detectPatterns() {
             if (sequence.length < 4) return null;
@@ -673,6 +546,7 @@
             const patterns = {};
             const maxLen = Math.min(8, sequence.length - 1);
             
+            // Scan for repeating patterns
             for (let len = 2; len <= maxLen; len++) {
                 const pattern = sequence.slice(-len).join('');
                 let occurrences = [];
@@ -690,6 +564,7 @@
                     const confidence = (Math.max(pCount, bCount) / occurrences.length) * 100;
                     const prediction = pCount > bCount ? 'P' : 'B';
                     
+                    // Weight longer patterns more heavily
                     const weight = len * occurrences.length;
                     if (!patterns[prediction] || patterns[prediction].weight < weight) {
                         patterns[prediction] = { confidence, weight, matches: occurrences.length };
@@ -699,6 +574,7 @@
             
             if (Object.keys(patterns).length === 0) return null;
             
+            // Find the best pattern
             let best = null;
             let bestScore = 0;
             for (const [side, data] of Object.entries(patterns)) {
@@ -723,6 +599,7 @@
                 else break;
             }
             
+            // Look at historical streak behavior
             let streakData = { P: { continue: 0, break: 0 }, B: { continue: 0, break: 0 } };
             
             for (let i = 1; i < sequence.length; i++) {
@@ -741,11 +618,13 @@
             if (total >= 2) {
                 const continueRate = streakData[side].continue / total;
                 
+                // If streak is long and historical data shows streaks tend to continue
                 if (streakLength >= 3 && continueRate > 0.55) {
                     const confidence = Math.min(78, 55 + (continueRate - 0.5) * 100 + streakLength * 2);
                     return { prediction: side, confidence: clampConfidence(confidence), type: 'streak_continue' };
                 }
                 
+                // If streak is long and historical data shows streaks tend to break
                 if (streakLength >= 3 && continueRate < 0.45) {
                     const confidence = Math.min(78, 55 + (0.5 - continueRate) * 100 + streakLength * 2);
                     return { prediction: oppositeSide(side), confidence: clampConfidence(confidence), type: 'streak_break' };
@@ -772,11 +651,13 @@
             
             const zigzagRate = alternations / totalChecks;
             
+            // Strong zigzag pattern - bet on alternation
             if (zigzagRate > 0.7) {
                 const confidence = 55 + (zigzagRate - 0.5) * 80;
                 return { prediction: oppositeSide(sequence[sequence.length - 1]), confidence: clampConfidence(confidence), type: 'zigzag' };
             }
             
+            // Strong streak pattern - bet on continuation
             if (zigzagRate < 0.3) {
                 const confidence = 55 + (0.5 - zigzagRate) * 80;
                 return { prediction: sequence[sequence.length - 1], confidence: clampConfidence(confidence), type: 'streak' };
@@ -796,9 +677,11 @@
             const pRate = pCount / total;
             const bRate = bCount / total;
             
+            // Expected baccarat probabilities
             const expectedP = 0.4462;
             const expectedB = 0.4586;
             
+            // Detect significant deviation from expected
             if (pRate < expectedP - 0.06) {
                 const confidence = Math.min(75, 50 + (expectedP - pRate) * 350);
                 return { prediction: 'P', confidence: clampConfidence(confidence), type: 'regression' };
@@ -808,6 +691,7 @@
                 return { prediction: 'B', confidence: clampConfidence(confidence), type: 'regression' };
             }
             
+            // Detect over-representation (potential reversal)
             if (pRate > 0.55) {
                 const confidence = 50 + (pRate - 0.5) * 100;
                 return { prediction: 'B', confidence: clampConfidence(confidence), type: 'overbias' };
@@ -857,6 +741,7 @@
         function getAdaptivePrediction() {
             if (sequence.length < 4) return null;
             
+            // Calculate accuracy of previous predictions
             if (detailedHistory.length >= 7) {
                 const recent = detailedHistory.slice(-MAX_RECENT);
                 const valid = recent.filter(h => !h.wasSkip);
@@ -867,16 +752,20 @@
                     patternAccuracy.P = 0.5;
                     patternAccuracy.B = 0.5;
                     
+                    // Adjust based on recent performance
                     if (recentCorrect / recentTotal > 0.55) {
+                        // We're doing well, trust patterns more
                         patternAccuracy.P = 0.55;
                         patternAccuracy.B = 0.55;
                     } else if (recentCorrect / recentTotal < 0.45) {
+                        // We're doing poorly, be more conservative
                         patternAccuracy.P = 0.45;
                         patternAccuracy.B = 0.45;
                     }
                 }
             }
             
+            // Get all pattern detections
             const patterns = [
                 detectPatterns(),
                 detectStreakBias(),
@@ -887,6 +776,7 @@
             
             if (patterns.length === 0) return null;
             
+            // Score each side based on pattern confidence and adaptive weight
             let pScore = 0, bScore = 0;
             let pWeighted = 0, bWeighted = 0;
             
@@ -903,14 +793,17 @@
                 }
             }
             
+            // Normalize scores
             pScore = pWeighted > 0 ? pScore / pWeighted : 0;
             bScore = bWeighted > 0 ? bScore / bWeighted : 0;
             
             if (pScore === 0 && bScore === 0) return null;
             
+            // Determine prediction
             const prediction = pScore > bScore ? 'P' : 'B';
             const confidence = Math.max(pScore, bScore) * 100;
             
+            // Boost confidence if multiple patterns agree
             const pCount = patterns.filter(p => p.prediction === 'P').length;
             const bCount = patterns.filter(p => p.prediction === 'B').length;
             const agreement = Math.abs(pCount - bCount) / patterns.length;
@@ -920,6 +813,7 @@
             if (agreement > 0.6) finalConfidence += 8;
             if (patterns.length >= 4) finalConfidence += 5;
             
+            // If we're on a losing streak, be more conservative
             const total = wins + losses;
             if (total > 10 && wins / total < 0.4) {
                 finalConfidence -= 8;
@@ -929,8 +823,7 @@
                 prediction, 
                 confidence: clampConfidence(Math.round(finalConfidence * 10) / 10),
                 patternCount: patterns.length,
-                agreement: agreement,
-                patterns: patterns
+                agreement: agreement
             };
         }
 
@@ -945,73 +838,45 @@
             return count;
         }
 
-        // ========== BALANCED SKIP LOGIC ==========
+        // ========== DYNAMIC SKIP THRESHOLD (BALANCED) ==========
         function getDynamicSkipThreshold() {
-            let baseThreshold = 58; // Slightly lower to encourage more play
+            // Base threshold starts lower for more betting opportunities
+            let baseThreshold = 50;
             
-            const recentResults = detailedHistory.slice(-5).filter(h => !h.wasSkip);
-            const recentLosses = recentResults.filter(r => r.type === 'loss').length;
-            const recentWins = recentResults.filter(r => r.type === 'win').length;
-            
-            // More balanced adjustments
-            if (recentLosses >= 3) {
-                baseThreshold = 52; // Lower to be more aggressive on losing streaks
-            } else if (recentWins >= 3 && recentResults.length >= 3) {
-                baseThreshold = 65; // Higher to protect gains on winning streaks
-            } else if (recentLosses >= 2) {
-                baseThreshold = 55;
-            } else if (recentWins >= 2) {
-                baseThreshold = 62;
+            const recentResults = detailedHistory.slice(-15).filter(h => !h.wasSkip);
+            if (recentResults.length >= 5) {
+                const recentWins = recentResults.filter(r => r.type === 'win').length;
+                const winRate = recentWins / recentResults.length;
+                
+                // Smoother adjustments
+                if (winRate < 0.35) baseThreshold = 46;
+                else if (winRate < 0.45) baseThreshold = 50;
+                else if (winRate > 0.6) baseThreshold = 56;
+                else if (winRate > 0.7) baseThreshold = 60;
             }
             
-            // Overall win rate adjustment (more moderate)
-            const totalDecisions = wins + losses;
-            if (totalDecisions > 15) {
-                const winRate = wins / totalDecisions;
-                if (winRate < 0.42) {
-                    baseThreshold = Math.max(48, baseThreshold - 4);
-                } else if (winRate > 0.58) {
-                    baseThreshold = Math.min(72, baseThreshold + 4);
-                }
+            const total = wins + losses;
+            if (total > 20) {
+                const overallWinRate = wins / total;
+                if (overallWinRate < 0.4) baseThreshold = Math.max(44, baseThreshold - 4);
+                else if (overallWinRate > 0.6) baseThreshold = Math.min(62, baseThreshold + 4);
             }
             
-            return baseThreshold;
+            // Ensure threshold stays within reasonable bounds
+            return Math.min(65, Math.max(42, baseThreshold));
         }
 
-        function shouldSkip(confidence, patternCount, patterns) {
-            // ===== FIRST: Pattern-based skip (only in extreme cases) =====
-            const patternCheck = shouldSkipBasedOnPattern();
-            if (patternCheck.skip) {
-                skipReason = patternCheck.reason;
-                return true;
-            }
+        function shouldSkip(confidence, patternCount) {
+            const threshold = getDynamicSkipThreshold();
+            let adjusted = threshold;
             
-            // ===== SECOND: Dynamic threshold (main skip logic) =====
-            const dynamicThreshold = getDynamicSkipThreshold();
+            // More balanced pattern adjustments
+            if (patternCount >= 4) adjusted = Math.max(40, threshold - 8);
+            else if (patternCount >= 3) adjusted = Math.max(42, threshold - 5);
+            else if (patternCount >= 2) adjusted = Math.max(44, threshold - 2);
+            else if (patternCount <= 1) adjusted = Math.min(68, threshold + 8);
             
-            // Only skip if confidence is significantly below threshold
-            if (confidence < dynamicThreshold - 3) {  // -3 gives a small buffer
-                skipReason = `Confidence ${confidence}% < threshold ${dynamicThreshold}%`;
-                return true;
-            }
-            
-            // ===== THIRD: Pattern count check (only for very low pattern count) =====
-            if (patternCount <= 1 && confidence < 58) {
-                skipReason = `Only ${patternCount} pattern(s) with ${confidence}% confidence`;
-                return true;
-            }
-            
-            // ===== FOURTH: All patterns low confidence (only if extreme) =====
-            if (patterns && patterns.length > 0 && patterns.length <= 2) {
-                const allLow = patterns.every(p => p.confidence < 55);
-                if (allLow && confidence < 55) {
-                    skipReason = `All patterns have low confidence`;
-                    return true;
-                }
-            }
-            
-            skipReason = '';
-            return false;
+            return confidence < adjusted;
         }
 
         function finalPrediction() {
@@ -1020,17 +885,13 @@
             const result = getAdaptivePrediction();
             if (!result) return null;
             
-            const patterns = result.patterns || [];
-            const skip = shouldSkip(result.confidence, result.patternCount || 0, patterns);
+            const skip = shouldSkip(result.confidence, result.patternCount || 0);
             
-            return { 
-                pred: skip ? null : result.prediction, 
-                confidence: result.confidence, 
-                skip: skip, 
-                patterns: result.patternCount,
-                threshold: getDynamicSkipThreshold(),
-                skipReason: skipReason
-            };
+            if (skip) {
+                return { pred: null, confidence: result.confidence, skip: true, patterns: result.patternCount };
+            }
+            
+            return { pred: result.prediction, confidence: result.confidence, skip: false, patterns: result.patternCount };
         }
 
         // ========== UI FUNCTIONS ==========
@@ -1059,43 +920,27 @@
 
         function updatePredictionBox() {
             const box = document.getElementById('predictionBox');
-            const thresholdDisplay = document.getElementById('thresholdDisplay');
-            const patternLearnDisplay = document.getElementById('patternLearnDisplay');
 
             if (sequence.length < MIN_HANDS) {
                 box.innerHTML = `<span style="font-size:clamp(11px,2.5vw,13px); color:#7a8595; letter-spacing:1px;">LOGGING: ${MIN_HANDS-sequence.length} MORE HANDS NEEDED</span>`;
                 lastPrediction = null;
-                lastPredictionConfidence = 0;
-                isCurrentlySkip = false;
-                thresholdDisplay.textContent = 'Threshold: --';
-                patternLearnDisplay.textContent = '';
                 return;
             }
             
             const result = finalPrediction();
-            const threshold = result ? result.threshold : 58;
-            thresholdDisplay.textContent = `Threshold: ${threshold}%`;
             
             if (result && result.pred) {
                 const text = result.pred === 'P' ? 'PLAYER' : 'BANKER';
                 const cls = result.pred === 'P' ? 'player' : 'banker';
+                const patternLabel = result.patterns ? `${result.patterns} patterns detected` : '';
                 box.innerHTML = `NEXT: <span class="${cls}">${text}</span> <span class="confidence">${result.confidence}%</span>`;
                 lastPrediction = result.pred;
-                lastPredictionConfidence = result.confidence;
-                isCurrentlySkip = false;
-                patternLearnDisplay.textContent = '';
             } else if (result && result.skip) {
-                box.innerHTML = `<span style="font-size:clamp(14px,3vw,16px);" class="skip-display">⏭ SKIP (${result.confidence}%)</span>`;
+                box.innerHTML = `<span style="font-size:clamp(14px,3vw,16px); color:#db2777;">⏭ SKIP (${result.confidence}%)</span>`;
                 lastPrediction = null;
-                lastPredictionConfidence = result.confidence;
-                isCurrentlySkip = true;
-                patternLearnDisplay.textContent = result.skipReason || 'Pattern learning triggered skip';
             } else {
                 box.innerHTML = "<span style='font-size:clamp(14px,3vw,16px); color:#7a8595'>ANALYZING PATTERNS...</span>";
                 lastPrediction = null;
-                lastPredictionConfidence = 0;
-                isCurrentlySkip = false;
-                patternLearnDisplay.textContent = '';
             }
             
             updateStatsBar();
@@ -1121,107 +966,33 @@
         }
 
         // ========== RECORD RESULT, UNDO, RESET ==========
-        function recordResult(side) {
-            if (isCurrentlySkip) {
-                results.push('');
-                skips++;
-                detailedHistory.push({ type: 'skip', wasSkip: true });
-                saveAndUpdate();
-                return;
-            }
-            
-            let wasWin = false;
-            
+        function recordResult(r) {
             if (lastPrediction) {
-                wasWin = (lastPrediction === side);
+                const wasWin = (lastPrediction === r);
                 results.push(wasWin ? 'W' : 'L');
-                if (wasWin) { 
-                    wins++; 
-                    detailedHistory.push({ type: 'win', wasSkip: false }); 
-                } else { 
-                    losses++; 
-                    detailedHistory.push({ type: 'loss', wasSkip: false }); 
-                }
+                if (wasWin) { wins++; detailedHistory.push({ type: 'win', wasSkip: false }); } else { losses++; detailedHistory.push({ type: 'loss', wasSkip: false }); }
             } else {
                 results.push('');
                 skips++;
                 detailedHistory.push({ type: 'skip', wasSkip: true });
             }
 
-            sequence.push(side);
-            updatePatternMemory(side, wasWin);
+            sequence.push(r);
             saveAndUpdate();
         }
 
         function undo() {
-            if (sequence.length === 0 && results.length === 0) return;
+            if (sequence.length === 0) return;
             
-            if (results.length > 0 && results[results.length - 1] === '' && sequence.length > 0) {
-                const lastHistory = detailedHistory[detailedHistory.length - 1];
-                if (lastHistory && lastHistory.wasSkip) {
-                    results.pop();
-                    detailedHistory.pop();
-                    skips--;
-                    saveAndUpdate();
-                    return;
-                }
-            }
-            
-            if (sequence.length > 0) {
-                sequence.pop();
-                const lastResultData = results.pop();
-                const lastHistory = detailedHistory.pop();
-                
-                if (lastResultData === 'W') wins--;
-                else if (lastResultData === 'L') losses--;
-                else if (lastResultData === '') skips--;
-                
-                rebuildPatternMemory();
-                saveAndUpdate();
-            }
-        }
+            sequence.pop();
+            const lastResultData = results.pop();
+            const lastHistory = detailedHistory.pop();
 
-        function rebuildPatternMemory() {
-            patternMemory = {};
-            
-            for (let i = 0; i < sequence.length; i++) {
-                const side = sequence[i];
-                const result = results[i];
-                if (result === 'W' || result === 'L') {
-                    const wasWin = result === 'W';
-                    if (i >= 2) {
-                        const subSequence = sequence.slice(0, i + 1);
-                        const patternLengths = [2, 3, 4];
-                        for (const len of patternLengths) {
-                            if (subSequence.length >= len) {
-                                const pattern = subSequence.slice(-len).join('');
-                                if (!patternMemory[pattern]) {
-                                    patternMemory[pattern] = { 
-                                        losses: 0, 
-                                        occurrences: 0, 
-                                        consecutiveLosses: 0,
-                                        lastResult: null
-                                    };
-                                }
-                                patternMemory[pattern].occurrences++;
-                                if (!wasWin) {
-                                    patternMemory[pattern].losses++;
-                                    if (patternMemory[pattern].lastResult === 'L') {
-                                        patternMemory[pattern].consecutiveLosses++;
-                                    } else {
-                                        patternMemory[pattern].consecutiveLosses = 1;
-                                    }
-                                } else {
-                                    patternMemory[pattern].consecutiveLosses = 0;
-                                }
-                                patternMemory[pattern].lastResult = wasWin ? 'W' : 'L';
-                            }
-                        }
-                    }
-                }
-            }
-            
-            localStorage.setItem('bt_pattern_memory', JSON.stringify(patternMemory));
+            if (lastResultData === 'W') wins--;
+            else if (lastResultData === 'L') losses--;
+            else if (lastResultData === '') skips--;
+
+            saveAndUpdate();
         }
 
         function resetAll() {
@@ -1229,17 +1000,12 @@
                 sequence = [];
                 results = [];
                 lastPrediction = null;
-                lastPredictionConfidence = 0;
-                isCurrentlySkip = false;
-                skipReason = '';
                 detailedHistory = [];
-                patternMemory = {};
                 wins = 0; losses = 0; skips = 0;
                 patternAccuracy = { P: 0.5, B: 0.5 };
                 recentCorrect = 0;
                 recentTotal = 0;
 
-                localStorage.setItem('bt_pattern_memory', JSON.stringify(patternMemory));
                 saveAndUpdate();
             }
         }
@@ -1255,7 +1021,6 @@
         // Initial stats if we have data
         if (sequence.length > 0 || results.length > 0) {
             results.forEach(r => { if (r === 'W') wins++; else if (r === 'L') losses++; else if (r === '') skips++; });
-            rebuildPatternMemory();
         }
 
         // Initial render
