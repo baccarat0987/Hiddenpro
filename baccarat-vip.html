@@ -518,7 +518,7 @@
     <script>
         /* =========================================================
            ORIGINAL APP 1 PREDICTION ALGORITHM (UNCHANGED)
-           + APP 2 SKIP THRESHOLD
+           + VERY STRICT APP 2 SKIP THRESHOLD
         ========================================================= */
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
         let results = JSON.parse(localStorage.getItem('bt_results')) || [];
@@ -536,7 +536,7 @@
         function clampConfidence(raw) { return Math.min(96, Math.max(40, raw)); }
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
 
-        // ========== getRunLength Function (from App 2) ==========
+        // ========== getRunLength Function ==========
         function getRunLength(arr) {
             if (arr.length === 0) return 0;
             const last = arr[arr.length - 1];
@@ -555,7 +555,6 @@
             const patterns = {};
             const maxLen = Math.min(8, sequence.length - 1);
             
-            // Scan for repeating patterns
             for (let len = 2; len <= maxLen; len++) {
                 const pattern = sequence.slice(-len).join('');
                 let occurrences = [];
@@ -573,7 +572,6 @@
                     const confidence = (Math.max(pCount, bCount) / occurrences.length) * 100;
                     const prediction = pCount > bCount ? 'P' : 'B';
                     
-                    // Weight longer patterns more heavily
                     const weight = len * occurrences.length;
                     if (!patterns[prediction] || patterns[prediction].weight < weight) {
                         patterns[prediction] = { confidence, weight, matches: occurrences.length };
@@ -583,7 +581,6 @@
             
             if (Object.keys(patterns).length === 0) return null;
             
-            // Find the best pattern
             let best = null;
             let bestScore = 0;
             for (const [side, data] of Object.entries(patterns)) {
@@ -608,7 +605,6 @@
                 else break;
             }
             
-            // Look at historical streak behavior
             let streakData = { P: { continue: 0, break: 0 }, B: { continue: 0, break: 0 } };
             
             for (let i = 1; i < sequence.length; i++) {
@@ -627,13 +623,11 @@
             if (total >= 2) {
                 const continueRate = streakData[side].continue / total;
                 
-                // If streak is long and historical data shows streaks tend to continue
                 if (streakLength >= 3 && continueRate > 0.55) {
                     const confidence = Math.min(78, 55 + (continueRate - 0.5) * 100 + streakLength * 2);
                     return { prediction: side, confidence: clampConfidence(confidence), type: 'streak_continue' };
                 }
                 
-                // If streak is long and historical data shows streaks tend to break
                 if (streakLength >= 3 && continueRate < 0.45) {
                     const confidence = Math.min(78, 55 + (0.5 - continueRate) * 100 + streakLength * 2);
                     return { prediction: oppositeSide(side), confidence: clampConfidence(confidence), type: 'streak_break' };
@@ -660,13 +654,11 @@
             
             const zigzagRate = alternations / totalChecks;
             
-            // Strong zigzag pattern - bet on alternation
             if (zigzagRate > 0.7) {
                 const confidence = 55 + (zigzagRate - 0.5) * 80;
                 return { prediction: oppositeSide(sequence[sequence.length - 1]), confidence: clampConfidence(confidence), type: 'zigzag' };
             }
             
-            // Strong streak pattern - bet on continuation
             if (zigzagRate < 0.3) {
                 const confidence = 55 + (0.5 - zigzagRate) * 80;
                 return { prediction: sequence[sequence.length - 1], confidence: clampConfidence(confidence), type: 'streak' };
@@ -686,11 +678,9 @@
             const pRate = pCount / total;
             const bRate = bCount / total;
             
-            // Expected baccarat probabilities
             const expectedP = 0.4462;
             const expectedB = 0.4586;
             
-            // Detect significant deviation from expected
             if (pRate < expectedP - 0.06) {
                 const confidence = Math.min(75, 50 + (expectedP - pRate) * 350);
                 return { prediction: 'P', confidence: clampConfidence(confidence), type: 'regression' };
@@ -700,7 +690,6 @@
                 return { prediction: 'B', confidence: clampConfidence(confidence), type: 'regression' };
             }
             
-            // Detect over-representation (potential reversal)
             if (pRate > 0.55) {
                 const confidence = 50 + (pRate - 0.5) * 100;
                 return { prediction: 'B', confidence: clampConfidence(confidence), type: 'overbias' };
@@ -750,7 +739,6 @@
         function getAdaptivePrediction() {
             if (sequence.length < 4) return null;
             
-            // Calculate accuracy of previous predictions
             if (detailedHistory.length >= 7) {
                 const recent = detailedHistory.slice(-MAX_RECENT);
                 const valid = recent.filter(h => !h.wasSkip);
@@ -761,20 +749,16 @@
                     patternAccuracy.P = 0.5;
                     patternAccuracy.B = 0.5;
                     
-                    // Adjust based on recent performance
                     if (recentCorrect / recentTotal > 0.55) {
-                        // We're doing well, trust patterns more
                         patternAccuracy.P = 0.55;
                         patternAccuracy.B = 0.55;
                     } else if (recentCorrect / recentTotal < 0.45) {
-                        // We're doing poorly, be more conservative
                         patternAccuracy.P = 0.45;
                         patternAccuracy.B = 0.45;
                     }
                 }
             }
             
-            // Get all pattern detections
             const patterns = [
                 detectPatterns(),
                 detectStreakBias(),
@@ -785,7 +769,6 @@
             
             if (patterns.length === 0) return null;
             
-            // Score each side based on pattern confidence and adaptive weight
             let pScore = 0, bScore = 0;
             let pWeighted = 0, bWeighted = 0;
             
@@ -802,17 +785,14 @@
                 }
             }
             
-            // Normalize scores
             pScore = pWeighted > 0 ? pScore / pWeighted : 0;
             bScore = bWeighted > 0 ? bScore / bWeighted : 0;
             
             if (pScore === 0 && bScore === 0) return null;
             
-            // Determine prediction
             const prediction = pScore > bScore ? 'P' : 'B';
             const confidence = Math.max(pScore, bScore) * 100;
             
-            // Boost confidence if multiple patterns agree
             const pCount = patterns.filter(p => p.prediction === 'P').length;
             const bCount = patterns.filter(p => p.prediction === 'B').length;
             const agreement = Math.abs(pCount - bCount) / patterns.length;
@@ -822,7 +802,6 @@
             if (agreement > 0.6) finalConfidence += 8;
             if (patterns.length >= 4) finalConfidence += 5;
             
-            // If we're on a losing streak, be more conservative
             const total = wins + losses;
             if (total > 10 && wins / total < 0.4) {
                 finalConfidence -= 8;
@@ -836,40 +815,46 @@
             };
         }
 
-        // ========== DYNAMIC SKIP THRESHOLD (APP 2) ==========
+        // ========== VERY STRICT DYNAMIC SKIP THRESHOLD ==========
         function getDynamicSkipThreshold() {
-            let baseThreshold = 55;
+            // MUCH HIGHER base threshold = MORE skips
+            let baseThreshold = 68;  // Was 55 - now MUCH stricter!
             
             const recentResults = detailedHistory.slice(-10).filter(h => !h.wasSkip);
             if (recentResults.length >= 5) {
                 const recentWins = recentResults.filter(r => r.type === 'win').length;
                 const winRate = recentWins / recentResults.length;
                 
-                if (winRate < 0.4) baseThreshold = 48;
-                else if (winRate < 0.5) baseThreshold = 52;
-                else if (winRate > 0.6) baseThreshold = 62;
-                else if (winRate > 0.7) baseThreshold = 68;
+                // Higher thresholds across the board
+                if (winRate < 0.4) baseThreshold = 60;   // Was 48
+                else if (winRate < 0.5) baseThreshold = 65; // Was 52
+                else if (winRate > 0.6) baseThreshold = 75; // Was 62
+                else if (winRate > 0.7) baseThreshold = 80; // Was 68
             }
             
             const total = wins + losses;
             if (total > 20) {
                 const overallWinRate = wins / total;
-                if (overallWinRate < 0.45) baseThreshold = Math.max(45, baseThreshold - 5);
-                else if (overallWinRate > 0.58) baseThreshold = Math.min(72, baseThreshold + 5);
+                if (overallWinRate < 0.45) baseThreshold = Math.max(55, baseThreshold - 5);
+                else if (overallWinRate > 0.58) baseThreshold = Math.min(85, baseThreshold + 5);
             }
             
             const streak = getRunLength(sequence);
-            if (streak >= 4) baseThreshold = Math.max(45, baseThreshold - 8);
-            if (streak >= 6) baseThreshold = Math.max(42, baseThreshold - 10);
+            // Only reduce threshold slightly on long streaks
+            if (streak >= 4) baseThreshold = Math.max(55, baseThreshold - 5);
+            if (streak >= 6) baseThreshold = Math.max(52, baseThreshold - 8);
             
-            return Math.min(75, Math.max(42, baseThreshold));
+            // Much higher bounds
+            return Math.min(88, Math.max(52, baseThreshold));
         }
 
-        // ========== SHOULD SKIP PREDICTION (APP 2) ==========
+        // ========== SHOULD SKIP PREDICTION ==========
         function shouldSkipPrediction(confidence, algorithmCount) {
             const dyn = getDynamicSkipThreshold();
             let adj = dyn;
-            if (algorithmCount >= 3) adj = Math.max(40, dyn - 8);
+            // Only reduce threshold if MANY patterns agree
+            if (algorithmCount >= 4) adj = Math.max(55, dyn - 8);
+            else if (algorithmCount >= 3) adj = Math.max(58, dyn - 5);
             return confidence < adj;
         }
 
