@@ -522,7 +522,7 @@
            - Pattern detection from historical sequences
            - Bias detection (streak bias, zigzag bias, frequency bias)
            - Adaptive learning based on recent accuracy
-           - DYNAMIC SKIP THRESHOLD: Slightly More Strict
+           - DYNAMIC SKIP THRESHOLD: App 2 Version
         ========================================================= */
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
         let results = JSON.parse(localStorage.getItem('bt_results')) || [];
@@ -539,6 +539,18 @@
 
         function clampConfidence(raw) { return Math.min(96, Math.max(40, raw)); }
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
+
+        // ========== getRunLength Function (from App 2) ==========
+        function getRunLength(arr) {
+            if (arr.length === 0) return 0;
+            const last = arr[arr.length - 1];
+            let count = 1;
+            for (let i = arr.length - 2; i >= 0; i--) {
+                if (arr[i] === last) count++;
+                else break;
+            }
+            return count;
+        }
 
         // ========== 1. PATTERN DETECTION ==========
         function detectPatterns() {
@@ -828,18 +840,7 @@
             };
         }
 
-        function getRunLength(arr) {
-            if (arr.length === 0) return 0;
-            const last = arr[arr.length - 1];
-            let count = 1;
-            for (let i = arr.length - 2; i >= 0; i--) {
-                if (arr[i] === last) count++;
-                else break;
-            }
-            return count;
-        }
-
-        // ========== DYNAMIC SKIP THRESHOLD ==========
+        // ========== DYNAMIC SKIP THRESHOLD (FROM APP 2) ==========
         function getDynamicSkipThreshold() {
             let baseThreshold = 55;
             
@@ -868,6 +869,7 @@
             return Math.min(75, Math.max(42, baseThreshold));
         }
 
+        // ========== SHOULD SKIP PREDICTION (FROM APP 2) ==========
         function shouldSkipPrediction(confidence, algorithmCount) {
             const dyn = getDynamicSkipThreshold();
             let adj = dyn;
@@ -875,19 +877,20 @@
             return confidence < adj;
         }
 
+        // ========== FINAL PREDICTION ==========
         function finalPrediction() {
-    if (sequence.length < MIN_HANDS) return null;
-    
-    const result = getAdaptivePrediction();
-    if (!result) return null;
-    
-    const skip = shouldSkipPrediction(result.confidence, result.patternCount || 0);
-    if (skip) {
-        return { pred: null, confidence: result.confidence, skip: true };
-    }
-    
-    return { pred: result.prediction, confidence: result.confidence, skip: false };
-}
+            if (sequence.length < MIN_HANDS) return null;
+            
+            const result = getAdaptivePrediction();
+            if (!result) return null;
+            
+            const skip = shouldSkipPrediction(result.confidence, result.patternCount || 0);
+            if (skip) {
+                return { pred: null, confidence: result.confidence, skip: true };
+            }
+            
+            return { pred: result.prediction, confidence: result.confidence, skip: false };
+        }
 
         // ========== UI FUNCTIONS ==========
         function updateHistory() {
@@ -927,7 +930,6 @@
             if (result && result.pred) {
                 const text = result.pred === 'P' ? 'PLAYER' : 'BANKER';
                 const cls = result.pred === 'P' ? 'player' : 'banker';
-                const patternLabel = result.patterns ? `${result.patterns} patterns detected` : '';
                 box.innerHTML = `NEXT: <span class="${cls}">${text}</span> <span class="confidence">${result.confidence}%</span>`;
                 lastPrediction = result.pred;
             } else if (result && result.skip) {
