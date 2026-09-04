@@ -107,7 +107,6 @@
             --line-soft: rgba(0, 0, 0, 0.04);
             --text: #2d3748;
             --text-muted: #6b7a8f;
-
             --violet: #7c3aed;
             --violet-dim: rgba(124, 58, 237, 0.25);
             --darkblue: #1e3a8a;
@@ -116,7 +115,6 @@
             --redpink-dim: rgba(219, 39, 119, 0.25);
             --win: #4a9a6a;
             --loss: #8a97a4;
-
             --player: #7c3aed;
             --banker: #db2777;
         }
@@ -408,7 +406,6 @@
             border-radius: 10px;
             box-shadow: 0 0 12px rgba(124, 58, 237, 0.1);
             transition: box-shadow 0.3s ease;
-            cursor: pointer;
         }
         .util-btns button:hover {
             filter: none;
@@ -466,19 +463,38 @@
             background: rgba(219, 39, 119, 0.1);
             color: #db2777;
         }
-
-        .streak-alert {
-            color: #db2777;
-            font-weight: 700;
-            animation: pulseAlert 1s ease-in-out infinite;
-        }
-        @keyframes pulseAlert {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
         
         .hidden {
             display: none !important;
+        }
+
+        .algorithm-detail {
+            font-size: 9px;
+            color: var(--text-muted);
+            margin-top: 2px;
+            text-align: center;
+            opacity: 0.6;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.3px;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .conflict-indicator {
+            font-size: 9px;
+            color: #db2777;
+            margin-top: 2px;
+            text-align: center;
+            opacity: 0.7;
+        }
+        .agreement-indicator {
+            font-size: 9px;
+            color: #4a9a6a;
+            margin-top: 2px;
+            text-align: center;
+            opacity: 0.7;
         }
     </style>
 </head>
@@ -500,7 +516,7 @@
                     <span class="ai-text">AI</span>
                 </div>
             </div>
-            <div class="tag" style="text-align:center; color:var(--text-muted); font-size:11px; letter-spacing:2px; margin-bottom:18px; opacity:0.7;">Bet AGAINST streaks - Randomness favors reversal</div>
+            <div class="tag" style="text-align:center; color:var(--text-muted); font-size:11px; letter-spacing:2px; margin-bottom:18px; opacity:0.7;">Results are insights, not Guarantees</div>
 
             <div class="sequence" id="historyBox">READY FOR DATA</div>
             <div class="results" id="resultsBox"></div>
@@ -513,8 +529,10 @@
             </div>
 
             <div class="prediction" id="predictionBox">
-                <span>WAITING FOR DATA...</span>
+                <span>INITIALIZING...</span>
             </div>
+            <div class="algorithm-detail" id="algoDetail"></div>
+            <div class="conflict-indicator" id="conflictIndicator"></div>
             <div class="skip-note" id="skipNote"></div>
 
             <div class="buttons">
@@ -530,17 +548,380 @@
 
     <script>
         /* =========================================================
-           SIMPLE BUT EFFECTIVE - BET AGAINST STREAKS
-           Based on the Gambler's Fallacy - streaks are rare in random data
+           PREDICTION ENGINE - 6 ALGORITHMS
+           Pattern Matching: Last 7 outcomes
+           Recent Weighted Bias: Last 7 hands
         ========================================================= */
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
         let results = JSON.parse(localStorage.getItem('bt_results')) || [];
         let lastPrediction = null;
         let detailedHistory = JSON.parse(localStorage.getItem('bt_detailed')) || [];
         let wins = 0, losses = 0, skips = 0;
+        let conflictData = null;
         const MIN_HANDS = 10;
 
+        function clampConfidence(raw) { return Math.min(98, Math.max(35, raw)); }
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
+
+        // ========== ALGORITHM 1: MARKOV CHAIN (2nd Order) ==========
+        function getMarkovPrediction() {
+            if (sequence.length < 3) return null;
+            
+            const last2 = sequence.slice(-2).join('');
+            const transitions = {};
+            
+            for (let i = 0; i < sequence.length - 2; i++) {
+                const key = sequence[i] + sequence[i+1];
+                const next = sequence[i+2];
+                if (!transitions[key]) transitions[key] = { P: 0, B: 0 };
+                transitions[key][next]++;
+            }
+            
+            if (transitions[last2]) {
+                const total = transitions[last2].P + transitions[last2].B;
+                if (total > 0) {
+                    const pProb = transitions[last2].P / total;
+                    const bProb = transitions[last2].B / total;
+                    const prediction = pProb > bProb ? 'P' : 'B';
+                    const confidence = Math.max(pProb, bProb) * 100;
+                    return { prediction, confidence: clampConfidence(confidence + 5) };
+                }
+            }
+            
+            // Fallback to 1st order
+            const trans = { P: { P: 0, B: 0 }, B: { P: 0, B: 0 } };
+            for (let i = 0; i < sequence.length - 1; i++) {
+                const current = sequence[i];
+                const next = sequence[i + 1];
+                trans[current][next]++;
+            }
+            
+            const last = sequence[sequence.length - 1];
+            const total = trans[last].P + trans[last].B;
+            if (total === 0) return null;
+            
+            const pProb = trans[last].P / total;
+            const bProb = trans[last].B / total;
+            const prediction = pProb > bProb ? 'P' : 'B';
+            const confidence = Math.max(pProb, bProb) * 100;
+            
+            return { prediction, confidence: clampConfidence(confidence) };
+        }
+
+        // ========== ALGORITHM 2: FREQUENCY/REGRESSION TO MEAN ==========
+        function getFrequencyPrediction() {
+            if (sequence.length < 8) return null;
+            
+            const total = sequence.length;
+            const pCount = sequence.filter(s => s === 'P').length;
+            const bCount = total - pCount;
+            
+            const pRate = pCount / total;
+            const bRate = bCount / total;
+            
+            // If one side is significantly underrepresented, bet on it
+            if (pRate < 0.43 && bRate > 0.57) {
+                const confidence = Math.min(80, 55 + (0.57 - bRate) * 300);
+                return { prediction: 'P', confidence: clampConfidence(confidence) };
+            }
+            if (bRate < 0.43 && pRate > 0.57) {
+                const confidence = Math.min(80, 55 + (0.57 - pRate) * 300);
+                return { prediction: 'B', confidence: clampConfidence(confidence) };
+            }
+            
+            return null;
+        }
+
+        // ========== ALGORITHM 3: PATTERN MATCHING (LAST 7 OUTCOMES) ==========
+        function getPatternPrediction() {
+            if (sequence.length < 7) return null;
+            
+            // Use up to 7 outcomes for pattern matching
+            const maxPatternLength = Math.min(7, sequence.length);
+            let bestPrediction = null;
+            let bestConfidence = 0;
+            let bestMatches = 0;
+            
+            // Try pattern lengths from 2 to maxPatternLength
+            for (let patternLength = 2; patternLength <= maxPatternLength; patternLength++) {
+                const pattern = sequence.slice(-patternLength).join('');
+                let matches = [];
+                
+                // Find all occurrences of this pattern in history
+                for (let i = 0; i <= sequence.length - patternLength - 1; i++) {
+                    const currentPattern = sequence.slice(i, i + patternLength).join('');
+                    if (currentPattern === pattern && i + patternLength < sequence.length) {
+                        matches.push(sequence[i + patternLength]);
+                    }
+                }
+                
+                // If we have enough matches, calculate prediction
+                if (matches.length >= 2) {
+                    const pCount = matches.filter(m => m === 'P').length;
+                    const bCount = matches.length - pCount;
+                    const prediction = pCount > bCount ? 'P' : 'B';
+                    const matchRatio = Math.max(pCount, bCount) / matches.length;
+                    const confidence = 50 + matchRatio * 40;
+                    
+                    // Prefer longer patterns with more matches
+                    const weight = patternLength * matches.length;
+                    const weightedConfidence = confidence * (1 + (patternLength / 20));
+                    
+                    if (weightedConfidence > bestConfidence) {
+                        bestConfidence = weightedConfidence;
+                        bestPrediction = prediction;
+                        bestMatches = matches.length;
+                    }
+                }
+            }
+            
+            if (bestPrediction && bestConfidence > 0) {
+                return { 
+                    prediction: bestPrediction, 
+                    confidence: clampConfidence(Math.min(85, bestConfidence)),
+                    matches: bestMatches
+                };
+            }
+            
+            return null;
+        }
+
+        // ========== ALGORITHM 4: ZIGZAG DETECTION ==========
+        function getZigzagPrediction() {
+            if (sequence.length < 6) return null;
+            
+            let zigzagCount = 0;
+            let totalCheck = 0;
+            const checkLength = Math.min(12, sequence.length - 1);
+            const startIdx = Math.max(0, sequence.length - checkLength - 1);
+            
+            for (let i = startIdx; i < sequence.length - 1; i++) {
+                if (sequence[i] !== sequence[i+1]) zigzagCount++;
+                totalCheck++;
+            }
+            
+            if (totalCheck === 0) return null;
+            const zigzagRate = zigzagCount / totalCheck;
+            
+            // Strong zigzag pattern (alternating)
+            if (zigzagRate > 0.7) {
+                const confidence = 55 + zigzagRate * 25;
+                return { prediction: oppositeSide(sequence[sequence.length - 1]), confidence: clampConfidence(confidence) };
+            }
+            
+            // Strong streak pattern (not alternating)
+            if (zigzagRate < 0.35) {
+                const confidence = 55 + (1 - zigzagRate) * 25;
+                return { prediction: sequence[sequence.length - 1], confidence: clampConfidence(confidence) };
+            }
+            
+            return null;
+        }
+
+        // ========== ALGORITHM 5: RECENT WEIGHTED BIAS (LAST 7 HANDS) ==========
+        function getRecentBiasPrediction() {
+            if (sequence.length < 3) return null;
+            
+            // Weighted: most recent gets highest weight (7 to 1 for last 7 hands)
+            const weights = [7, 6, 5, 4, 3, 2, 1];
+            const recentLength = Math.min(7, sequence.length);
+            const recent = sequence.slice(-recentLength);
+            
+            let pWeight = 0, bWeight = 0;
+            for (let i = 0; i < recent.length; i++) {
+                const weight = weights[i] || 1;
+                if (recent[i] === 'P') pWeight += weight;
+                else bWeight += weight;
+            }
+            
+            const totalWeight = pWeight + bWeight;
+            if (totalWeight === 0) return null;
+            
+            const pRate = pWeight / totalWeight;
+            const bRate = bWeight / totalWeight;
+            
+            // If one side has significantly higher weighted count
+            if (pRate > 0.62) {
+                const confidence = 50 + (pRate - 0.5) * 120;
+                return { prediction: 'B', confidence: clampConfidence(confidence) };
+            }
+            if (bRate > 0.62) {
+                const confidence = 50 + (bRate - 0.5) * 120;
+                return { prediction: 'P', confidence: clampConfidence(confidence) };
+            }
+            
+            return null;
+        }
+
+        // ========== ALGORITHM 6: STATISTICAL EDGE ==========
+        function getStatisticalEdge() {
+            if (sequence.length < 20) return null;
+            
+            const total = sequence.length;
+            const pCount = sequence.filter(s => s === 'P').length;
+            const bCount = total - pCount;
+            
+            // Actual baccarat probabilities
+            const expectedP = 0.4462;  // Player wins 44.62%
+            const expectedB = 0.4586;  // Banker wins 45.86%
+            
+            const actualP = pCount / total;
+            const actualB = bCount / total;
+            
+            // If Player is significantly underperforming, bet Player
+            if (actualP < expectedP - 0.06) {
+                const confidence = Math.min(75, 50 + (expectedP - actualP) * 400);
+                return { prediction: 'P', confidence: clampConfidence(confidence) };
+            }
+            // If Banker is significantly underperforming, bet Banker
+            if (actualB < expectedB - 0.06) {
+                const confidence = Math.min(75, 50 + (expectedB - actualB) * 400);
+                return { prediction: 'B', confidence: clampConfidence(confidence) };
+            }
+            
+            return null;
+        }
+
+        // ========== CONFLICT RESOLUTION ENGINE ==========
+        function resolveConflicts(algorithmResults) {
+            if (!algorithmResults || algorithmResults.length === 0) {
+                return { resolution: 'NO_DATA', side: null, confidenceModifier: 0, agreement: 0 };
+            }
+            
+            const pVotes = algorithmResults.filter(a => a.prediction === 'P');
+            const bVotes = algorithmResults.filter(a => a.prediction === 'B');
+            const total = algorithmResults.length;
+            const pCount = pVotes.length;
+            const bCount = bVotes.length;
+            
+            const agreement = Math.abs(pCount - bCount) / total;
+            
+            if (agreement > 0.4) {
+                const side = pCount > bCount ? 'P' : 'B';
+                const confidenceBonus = 15;
+                return { 
+                    resolution: 'STRONG_AGREEMENT', 
+                    side, 
+                    confidenceModifier: confidenceBonus,
+                    agreement: agreement,
+                    details: `${Math.max(pCount, bCount)}/${total} algorithms agree`
+                };
+            }
+            
+            if (agreement > 0.2) {
+                const side = pCount > bCount ? 'P' : 'B';
+                const confidenceBonus = 5;
+                return { 
+                    resolution: 'MODERATE_AGREEMENT', 
+                    side, 
+                    confidenceModifier: confidenceBonus,
+                    agreement: agreement,
+                    details: `Split vote, leaning ${side}`
+                };
+            }
+            
+            if (pCount > 0 && bCount > 0 && agreement <= 0.2) {
+                const avgPConf = pVotes.reduce((sum, a) => sum + a.confidence, 0) / pCount;
+                const avgBConf = bVotes.reduce((sum, a) => sum + a.confidence, 0) / bCount;
+                
+                const side = avgPConf > avgBConf ? 'P' : 'B';
+                const confidencePenalty = 10;
+                
+                return { 
+                    resolution: 'CONFLICT_RESOLVED_BY_CONFIDENCE', 
+                    side, 
+                    confidenceModifier: -confidencePenalty,
+                    agreement: agreement,
+                    details: `Conflict! Resolved by confidence (P:${Math.round(avgPConf)}% vs B:${Math.round(avgBConf)}%)`
+                };
+            }
+            
+            if (pCount === total || bCount === total) {
+                const side = pCount > 0 ? 'P' : 'B';
+                const confidenceBonus = 20;
+                return { 
+                    resolution: 'UNANIMOUS', 
+                    side, 
+                    confidenceModifier: confidenceBonus,
+                    agreement: 1.0,
+                    details: `All ${total} algorithms agree on ${side}`
+                };
+            }
+            
+            return { resolution: 'UNRESOLVED', side: null, confidenceModifier: 0, agreement: 0 };
+        }
+
+        // ========== ENSEMBLE VOTING ==========
+        function getEnhancedPredictionAndConfidence() {
+            if (sequence.length < MIN_HANDS) return { prediction: null, confidence: 0, algorithmResults: [], conflict: null };
+            
+            const algorithms = [
+                { name: 'markov', fn: getMarkovPrediction, baseWeight: 2.0 },
+                { name: 'frequency', fn: getFrequencyPrediction, baseWeight: 1.2 },
+                { name: 'pattern', fn: getPatternPrediction, baseWeight: 1.8 },
+                { name: 'zigzag', fn: getZigzagPrediction, baseWeight: 1.3 },
+                { name: 'recentBias', fn: getRecentBiasPrediction, baseWeight: 1.5 },
+                { name: 'statEdge', fn: getStatisticalEdge, baseWeight: 1.4 }
+            ];
+            
+            let scores = { P: 0, B: 0 };
+            let totalWeight = 0;
+            let activeAlgorithms = [];
+            
+            for (const algo of algorithms) {
+                const result = algo.fn();
+                if (result) {
+                    const effectiveWeight = algo.baseWeight;
+                    const confidenceFactor = result.confidence / 100;
+                    scores[result.prediction] += effectiveWeight * confidenceFactor;
+                    totalWeight += effectiveWeight;
+                    activeAlgorithms.push({ 
+                        name: algo.name, 
+                        prediction: result.prediction, 
+                        confidence: result.confidence,
+                        weight: effectiveWeight,
+                        matches: result.matches || null
+                    });
+                }
+            }
+            
+            if (totalWeight === 0) {
+                return { 
+                    prediction: oppositeSide(sequence[sequence.length - 1]), 
+                    confidence: 50, 
+                    algorithmResults: [],
+                    conflict: null 
+                };
+            }
+            
+            let prediction = scores.P > scores.B ? 'P' : 'B';
+            let confidence = (Math.max(scores.P, scores.B) / totalWeight) * 100;
+            
+            const conflictResolution = resolveConflicts(activeAlgorithms);
+            conflictData = conflictResolution;
+            
+            if (conflictResolution.resolution !== 'NO_DATA' && conflictResolution.resolution !== 'UNRESOLVED') {
+                if (conflictResolution.side && conflictResolution.side !== prediction) {
+                    prediction = conflictResolution.side;
+                }
+                confidence += conflictResolution.confidenceModifier;
+            }
+            
+            if (conflictResolution.agreement > 0.3) {
+                const bonus = conflictResolution.agreement * 15;
+                confidence += bonus;
+            }
+            
+            if (sequence.length > 30) confidence += 4;
+            if (sequence.length > 50) confidence += 3;
+            
+            return { 
+                prediction, 
+                confidence: clampConfidence(Math.round(confidence * 10) / 10),
+                algorithmResults: activeAlgorithms,
+                conflict: conflictResolution
+            };
+        }
 
         function getRunLength(arr) {
             if (arr.length === 0) return 0;
@@ -553,91 +934,68 @@
             return count;
         }
 
-        // ========== SIMPLE PREDICTION - BET AGAINST STREAKS ==========
-        function getPrediction() {
-            if (sequence.length < MIN_HANDS) return null;
+        // ========== DYNAMIC SKIP THRESHOLD ==========
+        function getDynamicSkipThreshold() {
+            let baseThreshold = 55;
             
-            const streak = getRunLength(sequence);
-            const last = sequence[sequence.length - 1];
-            
-            // If streak is 3 or more, bet AGAINST it (reversal)
-            if (streak >= 3) {
-                // Higher streak = higher confidence
-                const confidence = Math.min(75, 55 + (streak - 2) * 8);
-                return { 
-                    prediction: oppositeSide(last), 
-                    confidence: confidence,
-                    reason: `Streak of ${streak} ${last}s - betting reversal`
-                };
-            }
-            
-            // Check if there's a strong recent bias (5 out of last 7)
-            if (sequence.length >= 7) {
-                const recent = sequence.slice(-7);
-                const pCount = recent.filter(s => s === 'P').length;
-                const bCount = 7 - pCount;
+            const recentResults = detailedHistory.slice(-15).filter(h => !h.wasSkip);
+            if (recentResults.length >= 5) {
+                const recentWins = recentResults.filter(r => r.type === 'win').length;
+                const winRate = recentWins / recentResults.length;
                 
-                if (pCount >= 5) {
-                    return { 
-                        prediction: 'B', 
-                        confidence: 60,
-                        reason: `Player bias ${pCount}/7 - betting Banker`
-                    };
-                }
-                if (bCount >= 5) {
-                    return { 
-                        prediction: 'P', 
-                        confidence: 60,
-                        reason: `Banker bias ${bCount}/7 - betting Player`
-                    };
-                }
+                if (winRate < 0.35) baseThreshold = 45;
+                else if (winRate < 0.45) baseThreshold = 50;
+                else if (winRate > 0.6) baseThreshold = 63;
+                else if (winRate > 0.7) baseThreshold = 68;
             }
             
-            // If no strong pattern, look at last hand - bet the opposite
-            // This gives ~50% win rate over time
-            if (sequence.length >= 2) {
-                const secondLast = sequence[sequence.length - 2];
-                if (last !== secondLast) {
-                    // Alternating pattern - continue it
-                    return { 
-                        prediction: oppositeSide(last), 
-                        confidence: 52,
-                        reason: 'Alternating pattern - continue'
-                    };
-                } else {
-                    // Same pattern - bet reversal
-                    return { 
-                        prediction: oppositeSide(last), 
-                        confidence: 55,
-                        reason: 'Same pattern - betting reversal'
-                    };
-                }
+            const total = wins + losses;
+            if (total > 25) {
+                const overallWinRate = wins / total;
+                if (overallWinRate < 0.42) baseThreshold = Math.max(44, baseThreshold - 6);
+                else if (overallWinRate > 0.58) baseThreshold = Math.min(70, baseThreshold + 6);
             }
             
-            // Default: bet opposite of last
-            return { 
-                prediction: oppositeSide(last), 
-                confidence: 52,
-                reason: 'Default - betting opposite'
-            };
+            return Math.min(72, Math.max(42, baseThreshold));
         }
 
-        function shouldSkip(confidence) {
-            // Skip if confidence is too low
-            if (confidence < 50) return true;
+        function shouldSkipPrediction(confidence, algorithmCount, conflict) {
+            const dyn = getDynamicSkipThreshold();
+            let adj = dyn;
+            if (algorithmCount >= 4) adj = Math.max(40, dyn - 8);
+            else if (algorithmCount >= 3) adj = Math.max(42, dyn - 4);
             
-            // Dynamic skip based on recent performance
-            const recent = detailedHistory.slice(-5).filter(h => !h.wasSkip);
-            if (recent.length >= 3) {
-                const recentWins = recent.filter(r => r.type === 'win').length;
-                const winRate = recentWins / recent.length;
-                // If losing streak, be more aggressive (skip less)
-                if (winRate < 0.3) return false;
-                // If winning, be more conservative (skip more)
-                if (winRate > 0.7 && confidence < 60) return true;
+            if (conflict && conflict.resolution === 'CONFLICT_RESOLVED_BY_CONFIDENCE') {
+                adj += 5;
             }
             
-            return confidence < 52;
+            return confidence < adj;
+        }
+
+        function finalPrediction() {
+            if (sequence.length < MIN_HANDS) return null;
+            
+            const result = getEnhancedPredictionAndConfidence();
+            if (!result || !result.prediction) return null;
+            
+            const skip = shouldSkipPrediction(result.confidence, result.algorithmResults?.length || 0, result.conflict);
+            if (skip) { 
+                return { 
+                    pred: null, 
+                    confidence: result.confidence, 
+                    skip: true, 
+                    algoResults: result.algorithmResults,
+                    conflict: result.conflict
+                }; 
+            }
+            
+            return { 
+                pred: result.prediction, 
+                confidence: result.confidence, 
+                skip: false, 
+                algoResults: result.algorithmResults,
+                conflict: result.conflict
+            };
         }
 
         // ========== UI FUNCTIONS ==========
@@ -667,33 +1025,86 @@
         function updatePredictionBox() {
             const box = document.getElementById('predictionBox');
             const skipNote = document.getElementById('skipNote');
+            const algoDetail = document.getElementById('algoDetail');
+            const conflictIndicator = document.getElementById('conflictIndicator');
 
             if (sequence.length < MIN_HANDS) {
                 box.innerHTML = `<span style="font-size:clamp(11px,2.5vw,13px); color:#7a8595; letter-spacing:1px;">LOGGING: ${MIN_HANDS-sequence.length} MORE HANDS NEEDED</span>`;
                 lastPrediction = null;
                 skipNote.textContent = '';
+                algoDetail.textContent = '';
+                conflictIndicator.textContent = '';
                 return;
             }
             
-            const result = getPrediction();
-            if (result && result.prediction) {
-                const skip = shouldSkip(result.confidence);
+            const result = finalPrediction();
+            
+            if (result && result.pred) {
+                const text = result.pred === 'P' ? 'PLAYER' : 'BANKER';
+                const cls = result.pred === 'P' ? 'player' : 'banker';
+                box.innerHTML = `NEXT: <span class="${cls}">${text}</span> <span class="confidence">${result.confidence}%</span>`;
+                lastPrediction = result.pred;
+                skipNote.textContent = '';
                 
-                if (skip) {
-                    box.innerHTML = `<span style="font-size:clamp(14px,3vw,16px); color:#db2777;">⏭ SKIP (${result.confidence}%)</span>`;
-                    lastPrediction = null;
-                    skipNote.textContent = `Low confidence (${result.confidence}%) - skipping`;
+                if (result.algoResults && result.algoResults.length > 0) {
+                    const summary = result.algoResults.map(a => {
+                        let name = a.name;
+                        if (a.name === 'pattern' && a.matches) {
+                            name = `pattern(${a.matches}matches)`;
+                        }
+                        if (a.name === 'recentBias') {
+                            name = 'recentBias(7h)';
+                        }
+                        return `${name}:${a.prediction}(${Math.round(a.confidence)}%)`;
+                    }).join(' ');
+                    algoDetail.textContent = `Algorithms: ${summary}`;
                 } else {
-                    const text = result.prediction === 'P' ? 'PLAYER' : 'BANKER';
-                    const cls = result.prediction === 'P' ? 'player' : 'banker';
-                    box.innerHTML = `NEXT: <span class="${cls}">${text}</span> <span class="confidence">${result.confidence}%</span>`;
-                    lastPrediction = result.prediction;
-                    skipNote.textContent = result.reason || '';
+                    algoDetail.textContent = '';
+                }
+                
+                if (result.conflict) {
+                    const c = result.conflict;
+                    if (c.resolution === 'STRONG_AGREEMENT') {
+                        conflictIndicator.textContent = `✅ ${c.details} (+${c.confidenceModifier}% confidence)`;
+                        conflictIndicator.className = 'agreement-indicator';
+                    } else if (c.resolution === 'MODERATE_AGREEMENT') {
+                        conflictIndicator.textContent = `📊 ${c.details} (+${c.confidenceModifier}% confidence)`;
+                        conflictIndicator.className = 'agreement-indicator';
+                    } else if (c.resolution === 'UNANIMOUS') {
+                        conflictIndicator.textContent = `🎯 ${c.details} (+${c.confidenceModifier}% confidence)`;
+                        conflictIndicator.className = 'agreement-indicator';
+                    } else if (c.resolution === 'CONFLICT_RESOLVED_BY_CONFIDENCE') {
+                        conflictIndicator.textContent = `⚡ ${c.details} (${c.confidenceModifier}% penalty)`;
+                        conflictIndicator.className = 'conflict-indicator';
+                    } else {
+                        conflictIndicator.textContent = '';
+                    }
+                } else {
+                    conflictIndicator.textContent = '';
+                }
+            } else if (result && result.skip) {
+                box.innerHTML = `<span style="font-size:clamp(14px,3vw,16px); color:#db2777;">⏭ SKIP (${result.confidence}%)</span>`;
+                lastPrediction = null;
+                skipNote.textContent = 'Low confidence — skipping this hand';
+                if (result.algoResults && result.algoResults.length > 0) {
+                    const summary = result.algoResults.map(a => `${a.name}:${a.prediction}(${Math.round(a.confidence)}%)`).join(' ');
+                    algoDetail.textContent = `Algorithms: ${summary}`;
+                } else {
+                    algoDetail.textContent = '';
+                }
+                
+                if (result.conflict && result.conflict.resolution === 'CONFLICT_RESOLVED_BY_CONFIDENCE') {
+                    conflictIndicator.textContent = `⚡ Conflict detected — skipping due to uncertainty`;
+                    conflictIndicator.className = 'conflict-indicator';
+                } else {
+                    conflictIndicator.textContent = '';
                 }
             } else {
-                box.innerHTML = "<span style='font-size:clamp(14px,3vw,16px); color:#7a8595'>ANALYZING...</span>";
+                box.innerHTML = "<span style='font-size:clamp(14px,3vw,16px); color:#7a8595'>ANALYZING TRENDS...</span>";
                 lastPrediction = null;
                 skipNote.textContent = '';
+                algoDetail.textContent = '';
+                conflictIndicator.textContent = '';
             }
             
             updateStatsBar();
@@ -711,10 +1122,7 @@
             const streakDisplay = document.getElementById('streakDisplay');
             if (last && streak > 0) {
                 streakDisplay.textContent = `Streak: ${streak} ${last}`;
-                streakDisplay.className = 'streak-indicator ' + (streak >= 3 ? 'loss-streak' : 'win-streak');
-                if (streak >= 4) {
-                    streakDisplay.textContent += ' 🔥';
-                }
+                streakDisplay.className = 'streak-indicator ' + (streak >= 3 ? 'win-streak' : '');
             } else {
                 streakDisplay.textContent = 'Streak: 0';
                 streakDisplay.className = 'streak-indicator';
@@ -729,7 +1137,7 @@
                 const wasWin = (lastPrediction === r);
                 results.push(wasWin ? 'W' : 'L');
                 if (wasWin) { wins++; detailedHistory.push({ type: 'win', wasSkip: false }); } else { losses++; detailedHistory.push({ type: 'loss', wasSkip: false }); }
-                skipNote.textContent = wasWin ? '✅ WIN!' : '❌ LOSS';
+                skipNote.textContent = '';
             } else {
                 results.push('');
                 skips++;
@@ -738,14 +1146,13 @@
             }
 
             sequence.push(r);
-
             saveAndUpdate();
         }
 
         function undo() {
             if (sequence.length === 0) return;
             
-            const lastResult = sequence.pop();
+            sequence.pop();
             const lastResultData = results.pop();
             const lastHistory = detailedHistory.pop();
 
@@ -763,6 +1170,7 @@
                 lastPrediction = null;
                 detailedHistory = [];
                 wins = 0; losses = 0; skips = 0;
+                conflictData = null;
 
                 saveAndUpdate();
             }
