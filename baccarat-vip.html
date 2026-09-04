@@ -547,18 +547,18 @@
             const maxLen = Math.min(8, sequence.length - 1);
             
             // Scan for repeating patterns
-            for (let len = 3; len <= maxLen; len++) {
+            for (let len = 2; len <= maxLen; len++) {
                 const pattern = sequence.slice(-len).join('');
                 let occurrences = [];
                 
-                for (let i = 0; i <= sequence.length - len - 2; i++) {
+                for (let i = 0; i <= sequence.length - len - 1; i++) {
                     const current = sequence.slice(i, i + len).join('');
                     if (current === pattern && i + len < sequence.length) {
                         occurrences.push(sequence[i + len]);
                     }
                 }
                 
-                if (occurrences.length >= 3) {
+                if (occurrences.length >= 2) {
                     const pCount = occurrences.filter(o => o === 'P').length;
                     const bCount = occurrences.length - pCount;
                     const confidence = (Math.max(pCount, bCount) / occurrences.length) * 100;
@@ -742,7 +742,7 @@
             if (sequence.length < 4) return null;
             
             // Calculate accuracy of previous predictions
-            if (detailedHistory.length >= 5) {
+            if (detailedHistory.length >= 7) {
                 const recent = detailedHistory.slice(-MAX_RECENT);
                 const valid = recent.filter(h => !h.wasSkip);
                 if (valid.length >= 3) {
