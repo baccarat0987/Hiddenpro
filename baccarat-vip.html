@@ -521,7 +521,7 @@
         let detailedHistory = JSON.parse(localStorage.getItem('bt_detailed')) || [];
         let wins = 0, losses = 0, skips = 0;
         let conflictData = null;
-        const MIN_HANDS = 8;
+        const MIN_HANDS = 10;
 
         function clampConfidence(raw) { return Math.min(98, Math.max(35, raw)); }
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
