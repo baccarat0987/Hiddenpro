@@ -841,7 +841,7 @@
 
         // ========== DYNAMIC SKIP THRESHOLD (Slightly More Strict) ==========
         function getDynamicSkipThreshold() {
-            let baseThreshold = 70; // Was 50, increased by 2
+            let baseThreshold = 67; // Was 50, increased by 2
             
             const recentResults = detailedHistory.slice(-15).filter(h => !h.wasSkip);
             if (recentResults.length >= 5) {
@@ -849,21 +849,21 @@
                 const winRate = recentWins / recentResults.length;
                 
                 // All increased by 2
-                if (winRate < 0.35) baseThreshold = 63;  // Was 46
-                else if (winRate < 0.45) baseThreshold = 67; // Was 50
-                else if (winRate > 0.6) baseThreshold = 73;  // Was 56
-                else if (winRate > 0.7) baseThreshold = 77;  // Was 60
+                if (winRate < 0.35) baseThreshold = 60;  // Was 46
+                else if (winRate < 0.45) baseThreshold = 64; // Was 50
+                else if (winRate > 0.6) baseThreshold = 70;  // Was 56
+                else if (winRate > 0.7) baseThreshold = 74;  // Was 60
             }
             
             const total = wins + losses;
             if (total > 20) {
                 const overallWinRate = wins / total;
-                if (overallWinRate < 0.4) baseThreshold = Math.max(61, baseThreshold - 4); // Was 44
-                else if (overallWinRate > 0.6) baseThreshold = Math.min(79, baseThreshold + 4); // Was 62
+                if (overallWinRate < 0.4) baseThreshold = Math.max(58, baseThreshold - 4); // Was 44
+                else if (overallWinRate > 0.6) baseThreshold = Math.min(76, baseThreshold + 4); // Was 62
             }
             
             // Bounds increased by 2
-            return Math.min(82, Math.max(59, baseThreshold)); // Was 65, 42
+            return Math.min(79, Math.max(55, baseThreshold)); // Was 65, 42
         }
 
         function shouldSkip(confidence, patternCount) {
@@ -871,10 +871,10 @@
             let adjusted = threshold;
             
             // Pattern adjustments increased by 2
-            if (patternCount >= 4) adjusted = Math.max(57, threshold - 8); // Was 40
-            else if (patternCount >= 3) adjusted = Math.max(59, threshold - 5); // Was 42
-            else if (patternCount >= 2) adjusted = Math.max(61, threshold - 2); // Was 44
-            else if (patternCount <= 1) adjusted = Math.min(85, threshold + 8); // Was 68
+            if (patternCount >= 4) adjusted = Math.max(54, threshold - 8); // Was 40
+            else if (patternCount >= 3) adjusted = Math.max(55, threshold - 5); // Was 42
+            else if (patternCount >= 2) adjusted = Math.max(58, threshold - 2); // Was 44
+            else if (patternCount <= 1) adjusted = Math.min(82, threshold + 8); // Was 68
             
             return confidence < adjusted;
         }
