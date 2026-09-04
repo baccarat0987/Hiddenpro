@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Baccarat VIP Plus</title>
+    <title>Baccarat VIP Plus · AI</title>
 
     <!-- Clean URL script -->
     <script>
@@ -187,7 +187,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 12px;
+            margin-bottom: 6px;
         }
         .header h1 {
             font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
@@ -245,6 +245,15 @@
         @keyframes pulseGlowContainer {
             0%,100% { box-shadow: 0 0 20px rgba(124, 58, 237, 0.4), 0 0 40px rgba(219, 39, 119, 0.2); }
             50% { box-shadow: 0 0 30px rgba(124, 58, 237, 0.7), 0 0 50px rgba(219, 39, 119, 0.4); }
+        }
+
+        .header .tag {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 11px;
+            letter-spacing: 2px;
+            margin-top: 2px;
+            opacity: 0.7;
         }
 
         .sequence {
@@ -447,19 +456,18 @@
             background: rgba(219, 39, 119, 0.1);
             color: #db2777;
         }
-
-        .skip-note {
-            text-align: center;
-            font-size: 10px;
-            color: var(--text-muted);
-            margin-top: 6px;
+        
+        .hidden {
+            display: none !important;
         }
+
+        /* Removed all explanatory text elements */
     </style>
 </head>
 <body>
 
     <div class="exit-nav">
-        <button onclick="window.signOutUser()" class="exit-btn">✕</button>
+        <button onclick="window.signOutUser()" class="exit-btn">✕ EXIT</button>
     </div>
 
     <div class="wrap">
@@ -474,28 +482,28 @@
                     <span class="ai-text">AI</span>
                 </div>
             </div>
+            <div class="tag" style="text-align:center; color:var(--text-muted); font-size:11px; letter-spacing:2px; margin-bottom:18px; opacity:0.7;">Results are insights, not Guarantees</div>
 
-            <div class="sequence" id="historyBox">◆</div>
+            <div class="sequence" id="historyBox">READY FOR DATA</div>
             <div class="results" id="resultsBox"></div>
             
             <div class="stats-bar" id="statsBar">
-                <span><strong id="winCount">0</strong></span>
-                <span><strong id="lossCount">0</strong></span>
-                <span class="win-rate" id="winRateDisplay">0%</span>
-                <span id="streakDisplay">0</span>
+                <span>W: <strong id="winCount">0</strong></span>
+                <span>L: <strong id="lossCount">0</strong></span>
+                <span class="win-rate" id="winRateDisplay">WR: 0%</span>
+                <span id="streakDisplay">Streak: 0</span>
             </div>
 
             <div class="prediction" id="predictionBox">
-                <span>◆</span>
+                <span>INITIALIZING...</span>
             </div>
-            <div class="skip-note" id="skipNote"></div>
 
             <div class="buttons">
-                <button onclick="recordResult('P')" id="playerBtn">P</button>
-                <button onclick="recordResult('B')" id="bankerBtn">B</button>
+                <button onclick="recordResult('P')" id="playerBtn">PLAYER</button>
+                <button onclick="recordResult('B')" id="bankerBtn">BANKER</button>
                 <div class="util-btns">
-                    <button onclick="undo()">↺</button>
-                    <button onclick="resetAll()">⟳</button>
+                    <button onclick="undo()">UNDO LAST</button>
+                    <button onclick="resetAll()">RESET SHOE</button>
                 </div>
             </div>
         </div>
@@ -504,6 +512,8 @@
     <script>
         /* =========================================================
            PREDICTION ENGINE - 6 ALGORITHMS
+           Pattern Matching: Last 7 outcomes
+           Recent Weighted Bias: Last 7 hands
         ========================================================= */
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
         let results = JSON.parse(localStorage.getItem('bt_results')) || [];
@@ -516,7 +526,7 @@
         function clampConfidence(raw) { return Math.min(98, Math.max(35, raw)); }
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
 
-        // ========== ALGORITHM 1: MARKOV CHAIN ==========
+        // ========== ALGORITHM 1: MARKOV CHAIN (2nd Order) ==========
         function getMarkovPrediction() {
             if (sequence.length < 3) return null;
             
@@ -541,6 +551,7 @@
                 }
             }
             
+            // Fallback to 1st order
             const trans = { P: { P: 0, B: 0 }, B: { P: 0, B: 0 } };
             for (let i = 0; i < sequence.length - 1; i++) {
                 const current = sequence[i];
@@ -560,7 +571,7 @@
             return { prediction, confidence: clampConfidence(confidence) };
         }
 
-        // ========== ALGORITHM 2: FREQUENCY ==========
+        // ========== ALGORITHM 2: FREQUENCY/REGRESSION TO MEAN ==========
         function getFrequencyPrediction() {
             if (sequence.length < 8) return null;
             
@@ -571,6 +582,7 @@
             const pRate = pCount / total;
             const bRate = bCount / total;
             
+            // If one side is significantly underrepresented, bet on it
             if (pRate < 0.43 && bRate > 0.57) {
                 const confidence = Math.min(80, 55 + (0.57 - bRate) * 300);
                 return { prediction: 'P', confidence: clampConfidence(confidence) };
@@ -583,19 +595,22 @@
             return null;
         }
 
-        // ========== ALGORITHM 3: PATTERN MATCHING (LAST 7) ==========
+        // ========== ALGORITHM 3: PATTERN MATCHING (LAST 7 OUTCOMES) ==========
         function getPatternPrediction() {
             if (sequence.length < 7) return null;
             
+            // Use up to 7 outcomes for pattern matching
             const maxPatternLength = Math.min(7, sequence.length);
             let bestPrediction = null;
             let bestConfidence = 0;
             let bestMatches = 0;
             
+            // Try pattern lengths from 2 to maxPatternLength
             for (let patternLength = 2; patternLength <= maxPatternLength; patternLength++) {
                 const pattern = sequence.slice(-patternLength).join('');
                 let matches = [];
                 
+                // Find all occurrences of this pattern in history
                 for (let i = 0; i <= sequence.length - patternLength - 1; i++) {
                     const currentPattern = sequence.slice(i, i + patternLength).join('');
                     if (currentPattern === pattern && i + patternLength < sequence.length) {
@@ -603,6 +618,7 @@
                     }
                 }
                 
+                // If we have enough matches, calculate prediction
                 if (matches.length >= 2) {
                     const pCount = matches.filter(m => m === 'P').length;
                     const bCount = matches.length - pCount;
@@ -610,6 +626,7 @@
                     const matchRatio = Math.max(pCount, bCount) / matches.length;
                     const confidence = 50 + matchRatio * 40;
                     
+                    // Prefer longer patterns with more matches
                     const weight = patternLength * matches.length;
                     const weightedConfidence = confidence * (1 + (patternLength / 20));
                     
@@ -632,7 +649,7 @@
             return null;
         }
 
-        // ========== ALGORITHM 4: ZIGZAG ==========
+        // ========== ALGORITHM 4: ZIGZAG DETECTION ==========
         function getZigzagPrediction() {
             if (sequence.length < 6) return null;
             
@@ -649,11 +666,13 @@
             if (totalCheck === 0) return null;
             const zigzagRate = zigzagCount / totalCheck;
             
+            // Strong zigzag pattern (alternating)
             if (zigzagRate > 0.7) {
                 const confidence = 55 + zigzagRate * 25;
                 return { prediction: oppositeSide(sequence[sequence.length - 1]), confidence: clampConfidence(confidence) };
             }
             
+            // Strong streak pattern (not alternating)
             if (zigzagRate < 0.35) {
                 const confidence = 55 + (1 - zigzagRate) * 25;
                 return { prediction: sequence[sequence.length - 1], confidence: clampConfidence(confidence) };
@@ -662,10 +681,11 @@
             return null;
         }
 
-        // ========== ALGORITHM 5: RECENT BIAS (LAST 7) ==========
+        // ========== ALGORITHM 5: RECENT WEIGHTED BIAS (LAST 7 HANDS) ==========
         function getRecentBiasPrediction() {
             if (sequence.length < 3) return null;
             
+            // Weighted: most recent gets highest weight (7 to 1 for last 7 hands)
             const weights = [7, 6, 5, 4, 3, 2, 1];
             const recentLength = Math.min(7, sequence.length);
             const recent = sequence.slice(-recentLength);
@@ -683,6 +703,7 @@
             const pRate = pWeight / totalWeight;
             const bRate = bWeight / totalWeight;
             
+            // If one side has significantly higher weighted count
             if (pRate > 0.62) {
                 const confidence = 50 + (pRate - 0.5) * 120;
                 return { prediction: 'B', confidence: clampConfidence(confidence) };
@@ -703,16 +724,19 @@
             const pCount = sequence.filter(s => s === 'P').length;
             const bCount = total - pCount;
             
-            const expectedP = 0.4462;
-            const expectedB = 0.4586;
+            // Actual baccarat probabilities
+            const expectedP = 0.4462;  // Player wins 44.62%
+            const expectedB = 0.4586;  // Banker wins 45.86%
             
             const actualP = pCount / total;
             const actualB = bCount / total;
             
+            // If Player is significantly underperforming, bet Player
             if (actualP < expectedP - 0.06) {
                 const confidence = Math.min(75, 50 + (expectedP - actualP) * 400);
                 return { prediction: 'P', confidence: clampConfidence(confidence) };
             }
+            // If Banker is significantly underperforming, bet Banker
             if (actualB < expectedB - 0.06) {
                 const confidence = Math.min(75, 50 + (expectedB - actualB) * 400);
                 return { prediction: 'B', confidence: clampConfidence(confidence) };
@@ -721,7 +745,7 @@
             return null;
         }
 
-        // ========== CONFLICT RESOLUTION ==========
+        // ========== CONFLICT RESOLUTION ENGINE ==========
         function resolveConflicts(algorithmResults) {
             if (!algorithmResults || algorithmResults.length === 0) {
                 return { resolution: 'NO_DATA', side: null, confidenceModifier: 0, agreement: 0 };
@@ -737,21 +761,25 @@
             
             if (agreement > 0.4) {
                 const side = pCount > bCount ? 'P' : 'B';
+                const confidenceBonus = 15;
                 return { 
                     resolution: 'STRONG_AGREEMENT', 
                     side, 
-                    confidenceModifier: 15,
-                    agreement: agreement
+                    confidenceModifier: confidenceBonus,
+                    agreement: agreement,
+                    details: `${Math.max(pCount, bCount)}/${total} algorithms agree`
                 };
             }
             
             if (agreement > 0.2) {
                 const side = pCount > bCount ? 'P' : 'B';
+                const confidenceBonus = 5;
                 return { 
                     resolution: 'MODERATE_AGREEMENT', 
                     side, 
-                    confidenceModifier: 5,
-                    agreement: agreement
+                    confidenceModifier: confidenceBonus,
+                    agreement: agreement,
+                    details: `Split vote, leaning ${side}`
                 };
             }
             
@@ -760,22 +788,26 @@
                 const avgBConf = bVotes.reduce((sum, a) => sum + a.confidence, 0) / bCount;
                 
                 const side = avgPConf > avgBConf ? 'P' : 'B';
+                const confidencePenalty = 10;
                 
                 return { 
                     resolution: 'CONFLICT_RESOLVED_BY_CONFIDENCE', 
                     side, 
-                    confidenceModifier: -10,
-                    agreement: agreement
+                    confidenceModifier: -confidencePenalty,
+                    agreement: agreement,
+                    details: `Conflict! Resolved by confidence (P:${Math.round(avgPConf)}% vs B:${Math.round(avgBConf)}%)`
                 };
             }
             
             if (pCount === total || bCount === total) {
                 const side = pCount > 0 ? 'P' : 'B';
+                const confidenceBonus = 20;
                 return { 
                     resolution: 'UNANIMOUS', 
                     side, 
-                    confidenceModifier: 20,
-                    agreement: 1.0
+                    confidenceModifier: confidenceBonus,
+                    agreement: 1.0,
+                    details: `All ${total} algorithms agree on ${side}`
                 };
             }
             
@@ -933,7 +965,7 @@
         function updateHistory() {
             const box = document.getElementById('historyBox');
             const rBox = document.getElementById('resultsBox');
-            if (sequence.length === 0) { box.innerHTML = "◆"; rBox.innerHTML = ""; return; }
+            if (sequence.length === 0) { box.innerHTML = "READY FOR DATA"; rBox.innerHTML = ""; return; }
             box.innerHTML = '';
             sequence.slice(-10).forEach(r => {
                 const span = document.createElement('span');
@@ -955,31 +987,26 @@
 
         function updatePredictionBox() {
             const box = document.getElementById('predictionBox');
-            const skipNote = document.getElementById('skipNote');
 
             if (sequence.length < MIN_HANDS) {
-                box.innerHTML = `<span style="font-size:clamp(11px,2.5vw,13px); color:#7a8595;">◆</span>`;
+                box.innerHTML = `<span style="font-size:clamp(11px,2.5vw,13px); color:#7a8595; letter-spacing:1px;">LOGGING: ${MIN_HANDS-sequence.length} MORE HANDS NEEDED</span>`;
                 lastPrediction = null;
-                skipNote.textContent = '';
                 return;
             }
             
             const result = finalPrediction();
             
             if (result && result.pred) {
-                const text = result.pred === 'P' ? 'P' : 'B';
+                const text = result.pred === 'P' ? 'PLAYER' : 'BANKER';
                 const cls = result.pred === 'P' ? 'player' : 'banker';
-                box.innerHTML = `<span class="${cls}">${text}</span> <span class="confidence">${result.confidence}%</span>`;
+                box.innerHTML = `NEXT: <span class="${cls}">${text}</span> <span class="confidence">${result.confidence}%</span>`;
                 lastPrediction = result.pred;
-                skipNote.textContent = '';
             } else if (result && result.skip) {
-                box.innerHTML = `<span style="font-size:clamp(14px,3vw,16px); color:#db2777;">⏭</span>`;
+                box.innerHTML = `<span style="font-size:clamp(14px,3vw,16px); color:#db2777;">⏭ SKIP (${result.confidence}%)</span>`;
                 lastPrediction = null;
-                skipNote.textContent = '';
             } else {
-                box.innerHTML = "<span style='font-size:clamp(14px,3vw,16px); color:#7a8595'>◆</span>";
+                box.innerHTML = "<span style='font-size:clamp(14px,3vw,16px); color:#7a8595'>ANALYZING TRENDS...</span>";
                 lastPrediction = null;
-                skipNote.textContent = '';
             }
             
             updateStatsBar();
@@ -990,34 +1017,30 @@
             document.getElementById('lossCount').textContent = losses;
             const total = wins + losses;
             const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
-            document.getElementById('winRateDisplay').textContent = winRate + '%';
+            document.getElementById('winRateDisplay').textContent = `WR: ${winRate}%`;
             
             const streak = getRunLength(sequence);
             const last = sequence.length > 0 ? sequence[sequence.length - 1] : null;
             const streakDisplay = document.getElementById('streakDisplay');
             if (last && streak > 0) {
-                streakDisplay.textContent = streak + ' ' + last;
+                streakDisplay.textContent = `Streak: ${streak} ${last}`;
                 streakDisplay.className = 'streak-indicator ' + (streak >= 3 ? 'win-streak' : '');
             } else {
-                streakDisplay.textContent = '0';
+                streakDisplay.textContent = 'Streak: 0';
                 streakDisplay.className = 'streak-indicator';
             }
         }
 
         // ========== RECORD RESULT, UNDO, RESET ==========
         function recordResult(r) {
-            const skipNote = document.getElementById('skipNote');
-
             if (lastPrediction) {
                 const wasWin = (lastPrediction === r);
                 results.push(wasWin ? 'W' : 'L');
                 if (wasWin) { wins++; detailedHistory.push({ type: 'win', wasSkip: false }); } else { losses++; detailedHistory.push({ type: 'loss', wasSkip: false }); }
-                skipNote.textContent = '';
             } else {
                 results.push('');
                 skips++;
                 detailedHistory.push({ type: 'skip', wasSkip: true });
-                skipNote.textContent = '';
             }
 
             sequence.push(r);
