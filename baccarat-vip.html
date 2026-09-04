@@ -839,59 +839,52 @@
             return count;
         }
 
-        // ========== DYNAMIC SKIP THRESHOLD (Slightly More Strict) ==========
+        // ========== DYNAMIC SKIP THRESHOLD ==========
         function getDynamicSkipThreshold() {
-            let baseThreshold = 67; // Was 50, increased by 2
+            let baseThreshold = 55;
             
-            const recentResults = detailedHistory.slice(-15).filter(h => !h.wasSkip);
+            const recentResults = detailedHistory.slice(-10).filter(h => !h.wasSkip);
             if (recentResults.length >= 5) {
                 const recentWins = recentResults.filter(r => r.type === 'win').length;
                 const winRate = recentWins / recentResults.length;
                 
-                // All increased by 2
-                if (winRate < 0.35) baseThreshold = 60;  // Was 46
-                else if (winRate < 0.45) baseThreshold = 64; // Was 50
-                else if (winRate > 0.6) baseThreshold = 70;  // Was 56
-                else if (winRate > 0.7) baseThreshold = 74;  // Was 60
+                if (winRate < 0.4) baseThreshold = 48;
+                else if (winRate < 0.5) baseThreshold = 52;
+                else if (winRate > 0.6) baseThreshold = 62;
+                else if (winRate > 0.7) baseThreshold = 68;
             }
             
             const total = wins + losses;
             if (total > 20) {
                 const overallWinRate = wins / total;
-                if (overallWinRate < 0.4) baseThreshold = Math.max(58, baseThreshold - 4); // Was 44
-                else if (overallWinRate > 0.6) baseThreshold = Math.min(76, baseThreshold + 4); // Was 62
+                if (overallWinRate < 0.45) baseThreshold = Math.max(45, baseThreshold - 5);
+                else if (overallWinRate > 0.58) baseThreshold = Math.min(72, baseThreshold + 5);
             }
             
-            // Bounds increased by 2
-            return Math.min(79, Math.max(55, baseThreshold)); // Was 65, 42
+            const streak = getRunLength(sequence);
+            if (streak >= 4) baseThreshold = Math.max(45, baseThreshold - 8);
+            if (streak >= 6) baseThreshold = Math.max(42, baseThreshold - 10);
+            
+            return Math.min(75, Math.max(42, baseThreshold));
         }
 
-        function shouldSkip(confidence, patternCount) {
-            const threshold = getDynamicSkipThreshold();
-            let adjusted = threshold;
-            
-            // Pattern adjustments increased by 2
-            if (patternCount >= 4) adjusted = Math.max(54, threshold - 8); // Was 40
-            else if (patternCount >= 3) adjusted = Math.max(55, threshold - 5); // Was 42
-            else if (patternCount >= 2) adjusted = Math.max(58, threshold - 2); // Was 44
-            else if (patternCount <= 1) adjusted = Math.min(82, threshold + 8); // Was 68
-            
-            return confidence < adjusted;
+        function shouldSkipPrediction(confidence, algorithmCount) {
+            const dyn = getDynamicSkipThreshold();
+            let adj = dyn;
+            if (algorithmCount >= 3) adj = Math.max(40, dyn - 8);
+            return confidence < adj;
         }
 
         function finalPrediction() {
             if (sequence.length < MIN_HANDS) return null;
             
-            const result = getAdaptivePrediction();
-            if (!result) return null;
+            const result = getEnhancedPredictionAndConfidence();
+            if (!result || !result.prediction) return null;
             
-            const skip = shouldSkip(result.confidence, result.patternCount || 0);
+            const skip = shouldSkipPrediction(result.confidence, result.algorithmResults?.length || 0);
+            if (skip) return { pred: null, confidence: result.confidence, skip: true };
             
-            if (skip) {
-                return { pred: null, confidence: result.confidence, skip: true, patterns: result.patternCount };
-            }
-            
-            return { pred: result.prediction, confidence: result.confidence, skip: false, patterns: result.patternCount };
+            return { pred: result.prediction, confidence: result.confidence, skip: false };
         }
 
         // ========== UI FUNCTIONS ==========
