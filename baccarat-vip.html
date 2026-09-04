@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -517,8 +518,11 @@
 
     <script>
         /* =========================================================
-           ORIGINAL APP 1 PREDICTION ALGORITHM (UNCHANGED)
-           + VERY STRICT APP 2 SKIP THRESHOLD
+           PURE PATTERN RECOGNITION & ADAPTIVE LEARNING ENGINE
+           - No voting, no conflict resolution
+           - Pattern detection from historical sequences
+           - Bias detection (streak bias, zigzag bias, frequency bias)
+           - Adaptive learning based on recent accuracy
         ========================================================= */
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
         let results = JSON.parse(localStorage.getItem('bt_results')) || [];
@@ -536,25 +540,14 @@
         function clampConfidence(raw) { return Math.min(96, Math.max(40, raw)); }
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
 
-        // ========== getRunLength Function ==========
-        function getRunLength(arr) {
-            if (arr.length === 0) return 0;
-            const last = arr[arr.length - 1];
-            let count = 1;
-            for (let i = arr.length - 2; i >= 0; i--) {
-                if (arr[i] === last) count++;
-                else break;
-            }
-            return count;
-        }
-
-        // ========== 1. PATTERN DETECTION (ORIGINAL APP 1) ==========
+        // ========== 1. PATTERN DETECTION ==========
         function detectPatterns() {
             if (sequence.length < 4) return null;
             
             const patterns = {};
             const maxLen = Math.min(8, sequence.length - 1);
             
+            // Scan for repeating patterns
             for (let len = 2; len <= maxLen; len++) {
                 const pattern = sequence.slice(-len).join('');
                 let occurrences = [];
@@ -572,6 +565,7 @@
                     const confidence = (Math.max(pCount, bCount) / occurrences.length) * 100;
                     const prediction = pCount > bCount ? 'P' : 'B';
                     
+                    // Weight longer patterns more heavily
                     const weight = len * occurrences.length;
                     if (!patterns[prediction] || patterns[prediction].weight < weight) {
                         patterns[prediction] = { confidence, weight, matches: occurrences.length };
@@ -581,6 +575,7 @@
             
             if (Object.keys(patterns).length === 0) return null;
             
+            // Find the best pattern
             let best = null;
             let bestScore = 0;
             for (const [side, data] of Object.entries(patterns)) {
@@ -594,7 +589,7 @@
             return best;
         }
 
-        // ========== 2. STREAK BIAS DETECTION (ORIGINAL APP 1) ==========
+        // ========== 2. STREAK BIAS DETECTION ==========
         function detectStreakBias() {
             if (sequence.length < 3) return null;
             
@@ -605,6 +600,7 @@
                 else break;
             }
             
+            // Look at historical streak behavior
             let streakData = { P: { continue: 0, break: 0 }, B: { continue: 0, break: 0 } };
             
             for (let i = 1; i < sequence.length; i++) {
@@ -623,11 +619,13 @@
             if (total >= 2) {
                 const continueRate = streakData[side].continue / total;
                 
+                // If streak is long and historical data shows streaks tend to continue
                 if (streakLength >= 3 && continueRate > 0.55) {
                     const confidence = Math.min(78, 55 + (continueRate - 0.5) * 100 + streakLength * 2);
                     return { prediction: side, confidence: clampConfidence(confidence), type: 'streak_continue' };
                 }
                 
+                // If streak is long and historical data shows streaks tend to break
                 if (streakLength >= 3 && continueRate < 0.45) {
                     const confidence = Math.min(78, 55 + (0.5 - continueRate) * 100 + streakLength * 2);
                     return { prediction: oppositeSide(side), confidence: clampConfidence(confidence), type: 'streak_break' };
@@ -637,7 +635,7 @@
             return null;
         }
 
-        // ========== 3. ZIGZAG BIAS DETECTION (ORIGINAL APP 1) ==========
+        // ========== 3. ZIGZAG BIAS DETECTION ==========
         function detectZigzagBias() {
             if (sequence.length < 5) return null;
             
@@ -654,11 +652,13 @@
             
             const zigzagRate = alternations / totalChecks;
             
+            // Strong zigzag pattern - bet on alternation
             if (zigzagRate > 0.7) {
                 const confidence = 55 + (zigzagRate - 0.5) * 80;
                 return { prediction: oppositeSide(sequence[sequence.length - 1]), confidence: clampConfidence(confidence), type: 'zigzag' };
             }
             
+            // Strong streak pattern - bet on continuation
             if (zigzagRate < 0.3) {
                 const confidence = 55 + (0.5 - zigzagRate) * 80;
                 return { prediction: sequence[sequence.length - 1], confidence: clampConfidence(confidence), type: 'streak' };
@@ -667,7 +667,7 @@
             return null;
         }
 
-        // ========== 4. FREQUENCY BIAS DETECTION (ORIGINAL APP 1) ==========
+        // ========== 4. FREQUENCY BIAS DETECTION ==========
         function detectFrequencyBias() {
             if (sequence.length < 8) return null;
             
@@ -678,9 +678,11 @@
             const pRate = pCount / total;
             const bRate = bCount / total;
             
+            // Expected baccarat probabilities
             const expectedP = 0.4462;
             const expectedB = 0.4586;
             
+            // Detect significant deviation from expected
             if (pRate < expectedP - 0.06) {
                 const confidence = Math.min(75, 50 + (expectedP - pRate) * 350);
                 return { prediction: 'P', confidence: clampConfidence(confidence), type: 'regression' };
@@ -690,6 +692,7 @@
                 return { prediction: 'B', confidence: clampConfidence(confidence), type: 'regression' };
             }
             
+            // Detect over-representation (potential reversal)
             if (pRate > 0.55) {
                 const confidence = 50 + (pRate - 0.5) * 100;
                 return { prediction: 'B', confidence: clampConfidence(confidence), type: 'overbias' };
@@ -702,7 +705,7 @@
             return null;
         }
 
-        // ========== 5. RECENT BIAS (ORIGINAL APP 1) ==========
+        // ========== 5. RECENT BIAS (Weighted) ==========
         function detectRecentBias() {
             if (sequence.length < 5) return null;
             
@@ -735,10 +738,11 @@
             return null;
         }
 
-        // ========== 6. ADAPTIVE LEARNING (ORIGINAL APP 1) ==========
+        // ========== 6. ADAPTIVE LEARNING ==========
         function getAdaptivePrediction() {
             if (sequence.length < 4) return null;
             
+            // Calculate accuracy of previous predictions
             if (detailedHistory.length >= 7) {
                 const recent = detailedHistory.slice(-MAX_RECENT);
                 const valid = recent.filter(h => !h.wasSkip);
@@ -749,16 +753,20 @@
                     patternAccuracy.P = 0.5;
                     patternAccuracy.B = 0.5;
                     
+                    // Adjust based on recent performance
                     if (recentCorrect / recentTotal > 0.55) {
+                        // We're doing well, trust patterns more
                         patternAccuracy.P = 0.55;
                         patternAccuracy.B = 0.55;
                     } else if (recentCorrect / recentTotal < 0.45) {
+                        // We're doing poorly, be more conservative
                         patternAccuracy.P = 0.45;
                         patternAccuracy.B = 0.45;
                     }
                 }
             }
             
+            // Get all pattern detections
             const patterns = [
                 detectPatterns(),
                 detectStreakBias(),
@@ -769,6 +777,7 @@
             
             if (patterns.length === 0) return null;
             
+            // Score each side based on pattern confidence and adaptive weight
             let pScore = 0, bScore = 0;
             let pWeighted = 0, bWeighted = 0;
             
@@ -785,14 +794,17 @@
                 }
             }
             
+            // Normalize scores
             pScore = pWeighted > 0 ? pScore / pWeighted : 0;
             bScore = bWeighted > 0 ? bScore / bWeighted : 0;
             
             if (pScore === 0 && bScore === 0) return null;
             
+            // Determine prediction
             const prediction = pScore > bScore ? 'P' : 'B';
             const confidence = Math.max(pScore, bScore) * 100;
             
+            // Boost confidence if multiple patterns agree
             const pCount = patterns.filter(p => p.prediction === 'P').length;
             const bCount = patterns.filter(p => p.prediction === 'B').length;
             const agreement = Math.abs(pCount - bCount) / patterns.length;
@@ -802,6 +814,7 @@
             if (agreement > 0.6) finalConfidence += 8;
             if (patterns.length >= 4) finalConfidence += 5;
             
+            // If we're on a losing streak, be more conservative
             const total = wins + losses;
             if (total > 10 && wins / total < 0.4) {
                 finalConfidence -= 8;
@@ -815,62 +828,67 @@
             };
         }
 
-        // ========== VERY STRICT DYNAMIC SKIP THRESHOLD ==========
+        function getRunLength(arr) {
+            if (arr.length === 0) return 0;
+            const last = arr[arr.length - 1];
+            let count = 1;
+            for (let i = arr.length - 2; i >= 0; i--) {
+                if (arr[i] === last) count++;
+                else break;
+            }
+            return count;
+        }
+
+        // ========== DYNAMIC SKIP THRESHOLD ==========
         function getDynamicSkipThreshold() {
-            // MUCH HIGHER base threshold = MORE skips
-            let baseThreshold = 68;  // Was 55 - now MUCH stricter!
+            let baseThreshold = 53;
             
-            const recentResults = detailedHistory.slice(-10).filter(h => !h.wasSkip);
+            const recentResults = detailedHistory.slice(-15).filter(h => !h.wasSkip);
             if (recentResults.length >= 5) {
                 const recentWins = recentResults.filter(r => r.type === 'win').length;
                 const winRate = recentWins / recentResults.length;
                 
-                // Higher thresholds across the board
-                if (winRate < 0.4) baseThreshold = 60;   // Was 48
-                else if (winRate < 0.5) baseThreshold = 65; // Was 52
-                else if (winRate > 0.6) baseThreshold = 75; // Was 62
-                else if (winRate > 0.7) baseThreshold = 80; // Was 68
+                if (winRate < 0.35) baseThreshold = 48;
+                else if (winRate < 0.45) baseThreshold = 52;
+                else if (winRate > 0.6) baseThreshold = 62;
+                else if (winRate > 0.7) baseThreshold = 68;
             }
             
             const total = wins + losses;
             if (total > 20) {
                 const overallWinRate = wins / total;
-                if (overallWinRate < 0.45) baseThreshold = Math.max(55, baseThreshold - 5);
-                else if (overallWinRate > 0.58) baseThreshold = Math.min(85, baseThreshold + 5);
+                if (overallWinRate < 0.4) baseThreshold = Math.max(42, baseThreshold - 8);
+                else if (overallWinRate > 0.6) baseThreshold = Math.min(72, baseThreshold + 8);
             }
             
-            const streak = getRunLength(sequence);
-            // Only reduce threshold slightly on long streaks
-            if (streak >= 4) baseThreshold = Math.max(55, baseThreshold - 5);
-            if (streak >= 6) baseThreshold = Math.max(52, baseThreshold - 8);
+            return Math.min(72, Math.max(42, baseThreshold));
+        }
+
+        function shouldSkip(confidence, patternCount) {
+            const threshold = getDynamicSkipThreshold();
+            let adjusted = threshold;
             
-            // Much higher bounds
-            return Math.min(88, Math.max(52, baseThreshold));
+            // More patterns = more confidence to bet
+            if (patternCount >= 4) adjusted = Math.max(38, threshold - 10);
+            else if (patternCount >= 3) adjusted = Math.max(40, threshold - 6);
+            else if (patternCount <= 1) adjusted = Math.min(72, threshold + 10);
+            
+            return confidence < adjusted;
         }
 
-        // ========== SHOULD SKIP PREDICTION ==========
-        function shouldSkipPrediction(confidence, algorithmCount) {
-            const dyn = getDynamicSkipThreshold();
-            let adj = dyn;
-            // Only reduce threshold if MANY patterns agree
-            if (algorithmCount >= 4) adj = Math.max(55, dyn - 8);
-            else if (algorithmCount >= 3) adj = Math.max(58, dyn - 5);
-            return confidence < adj;
-        }
-
-        // ========== FINAL PREDICTION ==========
         function finalPrediction() {
             if (sequence.length < MIN_HANDS) return null;
             
             const result = getAdaptivePrediction();
             if (!result) return null;
             
-            const skip = shouldSkipPrediction(result.confidence, result.patternCount || 0);
+            const skip = shouldSkip(result.confidence, result.patternCount || 0);
+            
             if (skip) {
-                return { pred: null, confidence: result.confidence, skip: true };
+                return { pred: null, confidence: result.confidence, skip: true, patterns: result.patternCount };
             }
             
-            return { pred: result.prediction, confidence: result.confidence, skip: false };
+            return { pred: result.prediction, confidence: result.confidence, skip: false, patterns: result.patternCount };
         }
 
         // ========== UI FUNCTIONS ==========
@@ -911,6 +929,7 @@
             if (result && result.pred) {
                 const text = result.pred === 'P' ? 'PLAYER' : 'BANKER';
                 const cls = result.pred === 'P' ? 'player' : 'banker';
+                const patternLabel = result.patterns ? `${result.patterns} patterns detected` : '';
                 box.innerHTML = `NEXT: <span class="${cls}">${text}</span> <span class="confidence">${result.confidence}%</span>`;
                 lastPrediction = result.pred;
             } else if (result && result.skip) {
