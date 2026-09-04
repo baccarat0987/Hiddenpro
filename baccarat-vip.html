@@ -540,9 +540,10 @@
            PURE PATTERN RECOGNITION & ADAPTIVE LEARNING ENGINE
            - Pattern detection from historical sequences
            - Bias detection (streak bias, zigzag bias, frequency bias)
-           - PATTERN-BASED SKIP LEARNING: 
-             If a pattern causes a loss, remember it and SKIP next time
-           - Simple display: just shows SKIP in prediction box
+           - BALANCED SKIP LOGIC:
+             - Pattern learning only triggers skip in extreme cases
+             - Dynamic threshold handles most skip decisions
+             - Continues to play more often
         ========================================================= */
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
         let results = JSON.parse(localStorage.getItem('bt_results')) || [];
@@ -577,25 +578,29 @@
             return sequence.slice(-3).join('');
         }
 
+        // BALANCED: Only skip on extreme pattern loss cases
         function shouldSkipBasedOnPattern() {
-            if (sequence.length < 4) return { skip: false, reason: '' };
+            if (sequence.length < 6) return { skip: false, reason: '' };
             
-            const patternLengths = [2, 3, 4];
+            // Only check length 3 and 4 patterns (more reliable)
+            const patternLengths = [3, 4];
             
             for (const len of patternLengths) {
                 const pattern = getCurrentPattern(len);
                 if (!pattern) continue;
                 
                 const memory = patternMemory[pattern];
-                if (memory) {
+                if (memory && memory.occurrences >= 3) {  // Need at least 3 occurrences to be reliable
                     const lossRate = memory.losses / memory.occurrences;
-                    if (lossRate > 0.65 && memory.occurrences >= 2) {
+                    // Only skip if loss rate is VERY high (75%+) - extreme cases only
+                    if (lossRate > 0.75) {
                         return { 
                             skip: true, 
                             reason: `Pattern "${pattern}" ${Math.round(lossRate * 100)}% loss (${memory.losses}/${memory.occurrences})`
                         };
                     }
-                    if (memory.consecutiveLosses >= 2) {
+                    // Only skip on 3+ consecutive losses (extreme streak)
+                    if (memory.consecutiveLosses >= 3) {
                         return { 
                             skip: true, 
                             reason: `Pattern "${pattern}" ${memory.consecutiveLosses}x consecutive losses`
@@ -604,10 +609,11 @@
                 }
             }
             
+            // Check predicted pattern only if very reliable
             const predPattern = getPredictedPattern();
             if (predPattern && predPattern.length >= 3) {
                 const memory = patternMemory[predPattern];
-                if (memory && memory.losses / memory.occurrences > 0.6 && memory.occurrences >= 2) {
+                if (memory && memory.occurrences >= 3 && memory.losses / memory.occurrences > 0.75) {
                     return { 
                         skip: true, 
                         reason: `Predicted pattern "${predPattern}" ${Math.round((memory.losses/memory.occurrences) * 100)}% loss`
@@ -650,6 +656,7 @@
                 patternMemory[pattern].lastResult = wasWin ? 'W' : 'L';
             }
             
+            // Clean up old patterns (keep only patterns with occurrences > 0)
             for (const key in patternMemory) {
                 if (patternMemory[key].occurrences === 0) {
                     delete patternMemory[key];
@@ -938,31 +945,33 @@
             return count;
         }
 
-        // ========== SKIP LOGIC WITH PATTERN LEARNING ==========
+        // ========== BALANCED SKIP LOGIC ==========
         function getDynamicSkipThreshold() {
-            let baseThreshold = 60;
+            let baseThreshold = 58; // Slightly lower to encourage more play
             
             const recentResults = detailedHistory.slice(-5).filter(h => !h.wasSkip);
             const recentLosses = recentResults.filter(r => r.type === 'loss').length;
             const recentWins = recentResults.filter(r => r.type === 'win').length;
             
+            // More balanced adjustments
             if (recentLosses >= 3) {
-                baseThreshold = 52;
+                baseThreshold = 52; // Lower to be more aggressive on losing streaks
             } else if (recentWins >= 3 && recentResults.length >= 3) {
-                baseThreshold = 68;
+                baseThreshold = 65; // Higher to protect gains on winning streaks
             } else if (recentLosses >= 2) {
-                baseThreshold = 56;
+                baseThreshold = 55;
             } else if (recentWins >= 2) {
-                baseThreshold = 64;
+                baseThreshold = 62;
             }
             
+            // Overall win rate adjustment (more moderate)
             const totalDecisions = wins + losses;
-            if (totalDecisions > 10) {
+            if (totalDecisions > 15) {
                 const winRate = wins / totalDecisions;
-                if (winRate < 0.45) {
-                    baseThreshold = Math.max(50, baseThreshold - 5);
-                } else if (winRate > 0.55) {
-                    baseThreshold = Math.min(75, baseThreshold + 5);
+                if (winRate < 0.42) {
+                    baseThreshold = Math.max(48, baseThreshold - 4);
+                } else if (winRate > 0.58) {
+                    baseThreshold = Math.min(72, baseThreshold + 4);
                 }
             }
             
@@ -970,43 +979,32 @@
         }
 
         function shouldSkip(confidence, patternCount, patterns) {
-            // FIRST: Check pattern-based skip learning
+            // ===== FIRST: Pattern-based skip (only in extreme cases) =====
             const patternCheck = shouldSkipBasedOnPattern();
             if (patternCheck.skip) {
                 skipReason = patternCheck.reason;
                 return true;
             }
             
-            // SECOND: Check if current sequence end matches a known losing pattern
-            if (sequence.length >= 3) {
-                const pattern3 = sequence.slice(-3).join('');
-                if (patternMemory[pattern3] && patternMemory[pattern3].losses / patternMemory[pattern3].occurrences > 0.6) {
-                    skipReason = `Pattern "${pattern3}" has high loss rate`;
-                    return true;
-                }
-            }
-            
-            // THIRD: Standard threshold-based skip
+            // ===== SECOND: Dynamic threshold (main skip logic) =====
             const dynamicThreshold = getDynamicSkipThreshold();
             
-            if (confidence < dynamicThreshold) {
+            // Only skip if confidence is significantly below threshold
+            if (confidence < dynamicThreshold - 3) {  // -3 gives a small buffer
                 skipReason = `Confidence ${confidence}% < threshold ${dynamicThreshold}%`;
                 return true;
             }
             
-            if (patternCount <= 1 && confidence < 65) {
+            // ===== THIRD: Pattern count check (only for very low pattern count) =====
+            if (patternCount <= 1 && confidence < 58) {
                 skipReason = `Only ${patternCount} pattern(s) with ${confidence}% confidence`;
                 return true;
             }
             
-            if (patternCount <= 2 && confidence < 58) {
-                skipReason = `Only ${patternCount} pattern(s) with ${confidence}% confidence`;
-                return true;
-            }
-            
-            if (patterns && patterns.length > 0) {
-                const allLow = patterns.every(p => p.confidence < 60);
-                if (allLow && confidence < 62) {
+            // ===== FOURTH: All patterns low confidence (only if extreme) =====
+            if (patterns && patterns.length > 0 && patterns.length <= 2) {
+                const allLow = patterns.every(p => p.confidence < 55);
+                if (allLow && confidence < 55) {
                     skipReason = `All patterns have low confidence`;
                     return true;
                 }
@@ -1075,7 +1073,7 @@
             }
             
             const result = finalPrediction();
-            const threshold = result ? result.threshold : 60;
+            const threshold = result ? result.threshold : 58;
             thresholdDisplay.textContent = `Threshold: ${threshold}%`;
             
             if (result && result.pred) {
@@ -1087,12 +1085,10 @@
                 isCurrentlySkip = false;
                 patternLearnDisplay.textContent = '';
             } else if (result && result.skip) {
-                // Show SKIP like original - just display in prediction box
                 box.innerHTML = `<span style="font-size:clamp(14px,3vw,16px);" class="skip-display">⏭ SKIP (${result.confidence}%)</span>`;
                 lastPrediction = null;
                 lastPredictionConfidence = result.confidence;
                 isCurrentlySkip = true;
-                // Show the reason below
                 patternLearnDisplay.textContent = result.skipReason || 'Pattern learning triggered skip';
             } else {
                 box.innerHTML = "<span style='font-size:clamp(14px,3vw,16px); color:#7a8595'>ANALYZING PATTERNS...</span>";
@@ -1126,7 +1122,6 @@
 
         // ========== RECORD RESULT, UNDO, RESET ==========
         function recordResult(side) {
-            // If currently in skip mode, record as skip without registering a bet
             if (isCurrentlySkip) {
                 results.push('');
                 skips++;
@@ -1154,10 +1149,7 @@
             }
 
             sequence.push(side);
-            
-            // Update pattern memory with the result
             updatePatternMemory(side, wasWin);
-            
             saveAndUpdate();
         }
 
