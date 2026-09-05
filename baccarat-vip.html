@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -489,7 +488,7 @@
                     <span class="ai-text">AI</span>
                 </div>
             </div>
-            <div class="tag" style="text-align:center; color:var(--text-muted); font-size:11px; letter-spacing:2px; margin-bottom:18px; opacity:0.7;">Pattern Recognition · Adaptive Learning</div>
+            <div class="tag" style="text-align:center; color:var(--text-muted); font-size:11px; letter-spacing:2px; margin-bottom:18px; opacity:0.7;">Results are insights, not Guarantees</div>
 
             <div class="sequence" id="historyBox">READY FOR DATA</div>
             <div class="results" id="resultsBox"></div>
@@ -518,36 +517,51 @@
 
     <script>
         /* =========================================================
-           PURE PATTERN RECOGNITION & ADAPTIVE LEARNING ENGINE
-           - No voting, no conflict resolution
-           - Pattern detection from historical sequences
-           - Bias detection (streak bias, zigzag bias, frequency bias)
-           - Adaptive learning based on recent accuracy
+           REAL PREDICTION PERCENTAGE SYSTEM
+           - Tracks actual prediction accuracy
+           - Confidence = real historical accuracy
+           - Dynamic threshold based on actual performance
+           - NO forced skips - threshold adapts to reality
         ========================================================= */
+        
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
         let results = JSON.parse(localStorage.getItem('bt_results')) || [];
         let lastPrediction = null;
+        let lastPredictionConfidence = 0;
         let detailedHistory = JSON.parse(localStorage.getItem('bt_detailed')) || [];
         let wins = 0, losses = 0, skips = 0;
         const MIN_HANDS = 10;
 
-        // Adaptive learning weights
-        let patternAccuracy = { P: 0.5, B: 0.5 };
-        let recentCorrect = 0;
-        let recentTotal = 0;
-        const MAX_RECENT = 10;
+        // ========== REAL ACCURACY TRACKING ==========
+        let predictionHistory = JSON.parse(localStorage.getItem('bt_prediction_history')) || [];
+        let patternAccuracy = { P: { correct: 0, total: 0 }, B: { correct: 0, total: 0 } };
+        let overallAccuracy = { correct: 0, total: 0 };
 
-        function clampConfidence(raw) { return Math.min(96, Math.max(40, raw)); }
+        // Load historical accuracy data
+        if (predictionHistory.length > 0) {
+            predictionHistory.forEach(p => {
+                if (p.prediction === 'P') {
+                    patternAccuracy.P.total++;
+                    if (p.correct) patternAccuracy.P.correct++;
+                } else if (p.prediction === 'B') {
+                    patternAccuracy.B.total++;
+                    if (p.correct) patternAccuracy.B.correct++;
+                }
+                overallAccuracy.total++;
+                if (p.correct) overallAccuracy.correct++;
+            });
+        }
+
+        function clampConfidence(raw) { return Math.min(95, Math.max(35, Math.round(raw))); }
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
 
-        // ========== 1. PATTERN DETECTION ==========
+        // ========== 1. PATTERN DETECTION (Pattern Matching) ==========
         function detectPatterns() {
             if (sequence.length < 4) return null;
             
             const patterns = {};
             const maxLen = Math.min(8, sequence.length - 1);
             
-            // Scan for repeating patterns
             for (let len = 2; len <= maxLen; len++) {
                 const pattern = sequence.slice(-len).join('');
                 let occurrences = [];
@@ -565,7 +579,6 @@
                     const confidence = (Math.max(pCount, bCount) / occurrences.length) * 100;
                     const prediction = pCount > bCount ? 'P' : 'B';
                     
-                    // Weight longer patterns more heavily
                     const weight = len * occurrences.length;
                     if (!patterns[prediction] || patterns[prediction].weight < weight) {
                         patterns[prediction] = { confidence, weight, matches: occurrences.length };
@@ -575,7 +588,6 @@
             
             if (Object.keys(patterns).length === 0) return null;
             
-            // Find the best pattern
             let best = null;
             let bestScore = 0;
             for (const [side, data] of Object.entries(patterns)) {
@@ -600,7 +612,6 @@
                 else break;
             }
             
-            // Look at historical streak behavior
             let streakData = { P: { continue: 0, break: 0 }, B: { continue: 0, break: 0 } };
             
             for (let i = 1; i < sequence.length; i++) {
@@ -619,13 +630,11 @@
             if (total >= 2) {
                 const continueRate = streakData[side].continue / total;
                 
-                // If streak is long and historical data shows streaks tend to continue
                 if (streakLength >= 3 && continueRate > 0.55) {
                     const confidence = Math.min(78, 55 + (continueRate - 0.5) * 100 + streakLength * 2);
                     return { prediction: side, confidence: clampConfidence(confidence), type: 'streak_continue' };
                 }
                 
-                // If streak is long and historical data shows streaks tend to break
                 if (streakLength >= 3 && continueRate < 0.45) {
                     const confidence = Math.min(78, 55 + (0.5 - continueRate) * 100 + streakLength * 2);
                     return { prediction: oppositeSide(side), confidence: clampConfidence(confidence), type: 'streak_break' };
@@ -652,13 +661,11 @@
             
             const zigzagRate = alternations / totalChecks;
             
-            // Strong zigzag pattern - bet on alternation
             if (zigzagRate > 0.7) {
                 const confidence = 55 + (zigzagRate - 0.5) * 80;
                 return { prediction: oppositeSide(sequence[sequence.length - 1]), confidence: clampConfidence(confidence), type: 'zigzag' };
             }
             
-            // Strong streak pattern - bet on continuation
             if (zigzagRate < 0.3) {
                 const confidence = 55 + (0.5 - zigzagRate) * 80;
                 return { prediction: sequence[sequence.length - 1], confidence: clampConfidence(confidence), type: 'streak' };
@@ -678,11 +685,9 @@
             const pRate = pCount / total;
             const bRate = bCount / total;
             
-            // Expected baccarat probabilities
             const expectedP = 0.4462;
             const expectedB = 0.4586;
             
-            // Detect significant deviation from expected
             if (pRate < expectedP - 0.06) {
                 const confidence = Math.min(75, 50 + (expectedP - pRate) * 350);
                 return { prediction: 'P', confidence: clampConfidence(confidence), type: 'regression' };
@@ -692,7 +697,6 @@
                 return { prediction: 'B', confidence: clampConfidence(confidence), type: 'regression' };
             }
             
-            // Detect over-representation (potential reversal)
             if (pRate > 0.55) {
                 const confidence = 50 + (pRate - 0.5) * 100;
                 return { prediction: 'B', confidence: clampConfidence(confidence), type: 'overbias' };
@@ -705,7 +709,7 @@
             return null;
         }
 
-        // ========== 5. RECENT BIAS (Weighted) ==========
+        // ========== 5. RECENT BIAS ==========
         function detectRecentBias() {
             if (sequence.length < 5) return null;
             
@@ -738,35 +742,10 @@
             return null;
         }
 
-        // ========== 6. ADAPTIVE LEARNING ==========
-        function getAdaptivePrediction() {
+        // ========== 6. GET PATTERN-BASED PREDICTION ==========
+        function getPatternPrediction() {
             if (sequence.length < 4) return null;
             
-            // Calculate accuracy of previous predictions
-            if (detailedHistory.length >= 7) {
-                const recent = detailedHistory.slice(-MAX_RECENT);
-                const valid = recent.filter(h => !h.wasSkip);
-                if (valid.length >= 3) {
-                    const correct = valid.filter(h => h.type === 'win').length;
-                    recentCorrect = correct;
-                    recentTotal = valid.length;
-                    patternAccuracy.P = 0.5;
-                    patternAccuracy.B = 0.5;
-                    
-                    // Adjust based on recent performance
-                    if (recentCorrect / recentTotal > 0.55) {
-                        // We're doing well, trust patterns more
-                        patternAccuracy.P = 0.55;
-                        patternAccuracy.B = 0.55;
-                    } else if (recentCorrect / recentTotal < 0.45) {
-                        // We're doing poorly, be more conservative
-                        patternAccuracy.P = 0.45;
-                        patternAccuracy.B = 0.45;
-                    }
-                }
-            }
-            
-            // Get all pattern detections
             const patterns = [
                 detectPatterns(),
                 detectStreakBias(),
@@ -777,54 +756,129 @@
             
             if (patterns.length === 0) return null;
             
-            // Score each side based on pattern confidence and adaptive weight
             let pScore = 0, bScore = 0;
             let pWeighted = 0, bWeighted = 0;
             
             for (const p of patterns) {
                 const confidenceFactor = p.confidence / 100;
-                const adaptiveWeight = patternAccuracy[p.prediction] || 0.5;
                 
                 if (p.prediction === 'P') {
-                    pScore += confidenceFactor * (1 + adaptiveWeight);
-                    pWeighted += (1 + adaptiveWeight);
+                    pScore += confidenceFactor;
+                    pWeighted += 1;
                 } else {
-                    bScore += confidenceFactor * (1 + adaptiveWeight);
-                    bWeighted += (1 + adaptiveWeight);
+                    bScore += confidenceFactor;
+                    bWeighted += 1;
                 }
             }
             
-            // Normalize scores
             pScore = pWeighted > 0 ? pScore / pWeighted : 0;
             bScore = bWeighted > 0 ? bScore / bWeighted : 0;
             
             if (pScore === 0 && bScore === 0) return null;
             
-            // Determine prediction
             const prediction = pScore > bScore ? 'P' : 'B';
             const confidence = Math.max(pScore, bScore) * 100;
             
-            // Boost confidence if multiple patterns agree
             const pCount = patterns.filter(p => p.prediction === 'P').length;
             const bCount = patterns.filter(p => p.prediction === 'B').length;
             const agreement = Math.abs(pCount - bCount) / patterns.length;
             
             let finalConfidence = confidence;
-            if (agreement > 0.4) finalConfidence += 10;
-            if (agreement > 0.6) finalConfidence += 8;
+            if (agreement > 0.4) finalConfidence += 5;
+            if (agreement > 0.6) finalConfidence += 5;
             if (patterns.length >= 4) finalConfidence += 5;
-            
-            // If we're on a losing streak, be more conservative
-            const total = wins + losses;
-            if (total > 10 && wins / total < 0.4) {
-                finalConfidence -= 8;
-            }
             
             return { 
                 prediction, 
                 confidence: clampConfidence(Math.round(finalConfidence * 10) / 10),
                 patternCount: patterns.length,
                 agreement: agreement
+            };
+        }
+
+        // ========== 7. REAL CONFIDENCE = HISTORICAL ACCURACY ==========
+        function getRealConfidence(prediction, patternConfidence) {
+            // Get historical accuracy for this side
+            const sideData = prediction === 'P' ? patternAccuracy.P : patternAccuracy.B;
+            const totalPredictions = sideData.total;
+            
+            // If we have enough history, use real accuracy
+            if (totalPredictions >= 10) {
+                const realAccuracy = (sideData.correct / totalPredictions) * 100;
+                // Weight: 70% real accuracy, 30% pattern confidence
+                return clampConfidence((realAccuracy * 0.7) + (patternConfidence * 0.3));
+            } 
+            // If not enough history, use pattern confidence with a penalty
+            else if (totalPredictions >= 3) {
+                const realAccuracy = (sideData.correct / totalPredictions) * 100;
+                // Weight: 40% real accuracy, 60% pattern confidence
+                return clampConfidence((realAccuracy * 0.4) + (patternConfidence * 0.6));
+            }
+            // Very little history: use pattern confidence but cap it
+            else {
+                return clampConfidence(Math.min(patternConfidence, 70));
+            }
+        }
+
+        // ========== 8. DYNAMIC SKIP THRESHOLD (Based on Real Performance) ==========
+        function getDynamicSkipThreshold() {
+            const total = overallAccuracy.total;
+            
+            // Start with a reasonable base
+            let baseThreshold = 55;
+            
+            // If we have enough data, base threshold = real accuracy + small buffer
+            if (total >= 20) {
+                const realAccuracy = (overallAccuracy.correct / total) * 100;
+                // Threshold = accuracy + 5% buffer (but never below 50 or above 85)
+                baseThreshold = Math.min(85, Math.max(50, realAccuracy + 5));
+            }
+            
+            // Adjust based on recent performance
+            const recentPredictions = predictionHistory.slice(-20);
+            if (recentPredictions.length >= 10) {
+                const recentCorrect = recentPredictions.filter(p => p.correct).length;
+                const recentAccuracy = (recentCorrect / recentPredictions.length) * 100;
+                
+                // If recent accuracy is better than overall, raise threshold slightly
+                // If recent accuracy is worse, lower threshold slightly
+                const overall = (overallAccuracy.correct / overallAccuracy.total) * 100;
+                if (recentAccuracy > overall + 5) {
+                    baseThreshold = Math.min(85, baseThreshold + 3);
+                } else if (recentAccuracy < overall - 5) {
+                    baseThreshold = Math.max(50, baseThreshold - 3);
+                }
+            }
+            
+            // Ensure threshold is reasonable
+            return Math.round(Math.min(85, Math.max(50, baseThreshold)));
+        }
+
+        // ========== 9. FINAL PREDICTION ==========
+        function finalPrediction() {
+            if (sequence.length < MIN_HANDS) return null;
+            
+            // Get pattern-based prediction
+            const patternResult = getPatternPrediction();
+            if (!patternResult) return null;
+            
+            // Calculate REAL confidence based on historical accuracy
+            const realConfidence = getRealConfidence(patternResult.prediction, patternResult.confidence);
+            
+            // Get dynamic threshold based on real performance
+            const threshold = getDynamicSkipThreshold();
+            
+            // Decision: Bet if confidence >= threshold (NOT FORCED, just natural comparison)
+            const shouldBet = realConfidence >= threshold;
+            
+            return { 
+                pred: shouldBet ? patternResult.prediction : null,
+                confidence: realConfidence,
+                threshold: threshold,
+                skip: !shouldBet,
+                patterns: patternResult.patternCount,
+                historicalAccuracy: (overallAccuracy.total > 0) ? 
+                    Math.round((overallAccuracy.correct / overallAccuracy.total) * 100) : 0
             };
         }
 
@@ -837,58 +891,6 @@
                 else break;
             }
             return count;
-        }
-
-        // ========== DYNAMIC SKIP THRESHOLD ==========
-        function getDynamicSkipThreshold() {
-            let baseThreshold = 80;
-            
-            const recentResults = detailedHistory.slice(-15).filter(h => !h.wasSkip);
-            if (recentResults.length >= 5) {
-                const recentWins = recentResults.filter(r => r.type === 'win').length;
-                const winRate = recentWins / recentResults.length;
-                
-                if (winRate < 0.35) baseThreshold = 48;
-                else if (winRate < 0.45) baseThreshold = 52;
-                else if (winRate > 0.6) baseThreshold = 62;
-                else if (winRate > 0.7) baseThreshold = 68;
-            }
-            
-            const total = wins + losses;
-            if (total > 20) {
-                const overallWinRate = wins / total;
-                if (overallWinRate < 0.4) baseThreshold = Math.max(42, baseThreshold - 8);
-                else if (overallWinRate > 0.6) baseThreshold = Math.min(72, baseThreshold + 8);
-            }
-            
-            return Math.min(72, Math.max(42, baseThreshold));
-        }
-
-        function shouldSkip(confidence, patternCount) {
-            const threshold = getDynamicSkipThreshold();
-            let adjusted = threshold;
-            
-            // More patterns = more confidence to bet
-            if (patternCount >= 4) adjusted = Math.max(38, threshold - 10);
-            else if (patternCount >= 3) adjusted = Math.max(40, threshold - 6);
-            else if (patternCount <= 1) adjusted = Math.min(72, threshold + 10);
-            
-            return confidence < adjusted;
-        }
-
-        function finalPrediction() {
-            if (sequence.length < MIN_HANDS) return null;
-            
-            const result = getAdaptivePrediction();
-            if (!result) return null;
-            
-            const skip = shouldSkip(result.confidence, result.patternCount || 0);
-            
-            if (skip) {
-                return { pred: null, confidence: result.confidence, skip: true, patterns: result.patternCount };
-            }
-            
-            return { pred: result.prediction, confidence: result.confidence, skip: false, patterns: result.patternCount };
         }
 
         // ========== UI FUNCTIONS ==========
@@ -929,11 +931,19 @@
             if (result && result.pred) {
                 const text = result.pred === 'P' ? 'PLAYER' : 'BANKER';
                 const cls = result.pred === 'P' ? 'player' : 'banker';
-                const patternLabel = result.patterns ? `${result.patterns} patterns detected` : '';
-                box.innerHTML = `NEXT: <span class="${cls}">${text}</span> <span class="confidence">${result.confidence}%</span>`;
+                const accText = result.historicalAccuracy > 0 ? ` | Real Acc: ${result.historicalAccuracy}%` : '';
+                box.innerHTML = `NEXT: <span class="${cls}">${text}</span> <span class="confidence">${result.confidence}%</span>
+                                <span style="font-size:10px; color:#6b7a8f; display:block; margin-top:4px;">
+                                Threshold: ${result.threshold}%${accText} | ${result.patterns} patterns
+                                </span>`;
                 lastPrediction = result.pred;
+                lastPredictionConfidence = result.confidence;
             } else if (result && result.skip) {
-                box.innerHTML = `<span style="font-size:clamp(14px,3vw,16px); color:#db2777;">⏭ SKIP (${result.confidence}%)</span>`;
+                const accText = result.historicalAccuracy > 0 ? ` | Real Acc: ${result.historicalAccuracy}%` : '';
+                box.innerHTML = `<span style="font-size:clamp(14px,3vw,16px); color:#db2777;">⏭ SKIP</span>
+                                <span style="font-size:10px; color:#6b7a8f; display:block; margin-top:4px;">
+                                Confidence: ${result.confidence}% | Threshold: ${result.threshold}%${accText}
+                                </span>`;
                 lastPrediction = null;
             } else {
                 box.innerHTML = "<span style='font-size:clamp(14px,3vw,16px); color:#7a8595'>ANALYZING PATTERNS...</span>";
@@ -948,7 +958,12 @@
             document.getElementById('lossCount').textContent = losses;
             const total = wins + losses;
             const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
-            document.getElementById('winRateDisplay').textContent = `WR: ${winRate}%`;
+            
+            // Show real prediction accuracy
+            const realAcc = (overallAccuracy.total > 0) ? 
+                Math.round((overallAccuracy.correct / overallAccuracy.total) * 100) : 0;
+            
+            document.getElementById('winRateDisplay').textContent = `WR: ${winRate}% | Real: ${realAcc}%`;
             
             const streak = getRunLength(sequence);
             const last = sequence.length > 0 ? sequence[sequence.length - 1] : null;
@@ -964,10 +979,37 @@
 
         // ========== RECORD RESULT, UNDO, RESET ==========
         function recordResult(r) {
+            // Track prediction accuracy
             if (lastPrediction) {
-                const wasWin = (lastPrediction === r);
-                results.push(wasWin ? 'W' : 'L');
-                if (wasWin) { wins++; detailedHistory.push({ type: 'win', wasSkip: false }); } else { losses++; detailedHistory.push({ type: 'loss', wasSkip: false }); }
+                const wasCorrect = (lastPrediction === r);
+                
+                // Update prediction history
+                predictionHistory.push({
+                    prediction: lastPrediction,
+                    actual: r,
+                    correct: wasCorrect,
+                    confidence: lastPredictionConfidence,
+                    timestamp: Date.now()
+                });
+                
+                // Update accuracy tracking
+                if (lastPrediction === 'P') {
+                    patternAccuracy.P.total++;
+                    if (wasCorrect) patternAccuracy.P.correct++;
+                } else if (lastPrediction === 'B') {
+                    patternAccuracy.B.total++;
+                    if (wasCorrect) patternAccuracy.B.correct++;
+                }
+                overallAccuracy.total++;
+                if (wasCorrect) overallAccuracy.correct++;
+                
+                // Save prediction history
+                localStorage.setItem('bt_prediction_history', JSON.stringify(predictionHistory));
+                
+                // Update results
+                results.push(wasCorrect ? 'W' : 'L');
+                if (wasCorrect) { wins++; detailedHistory.push({ type: 'win', wasSkip: false }); } 
+                else { losses++; detailedHistory.push({ type: 'loss', wasSkip: false }); }
             } else {
                 results.push('');
                 skips++;
@@ -980,6 +1022,21 @@
 
         function undo() {
             if (sequence.length === 0) return;
+            
+            // Remove last prediction from history if it was tracked
+            if (predictionHistory.length > 0 && predictionHistory[predictionHistory.length - 1].actual === null) {
+                const lastPred = predictionHistory.pop();
+                if (lastPred.prediction === 'P') {
+                    patternAccuracy.P.total--;
+                    if (lastPred.correct) patternAccuracy.P.correct--;
+                } else if (lastPred.prediction === 'B') {
+                    patternAccuracy.B.total--;
+                    if (lastPred.correct) patternAccuracy.B.correct--;
+                }
+                overallAccuracy.total--;
+                if (lastPred.correct) overallAccuracy.correct--;
+                localStorage.setItem('bt_prediction_history', JSON.stringify(predictionHistory));
+            }
             
             sequence.pop();
             const lastResultData = results.pop();
@@ -998,11 +1055,12 @@
                 results = [];
                 lastPrediction = null;
                 detailedHistory = [];
+                predictionHistory = [];
+                patternAccuracy = { P: { correct: 0, total: 0 }, B: { correct: 0, total: 0 } };
+                overallAccuracy = { correct: 0, total: 0 };
                 wins = 0; losses = 0; skips = 0;
-                patternAccuracy = { P: 0.5, B: 0.5 };
-                recentCorrect = 0;
-                recentTotal = 0;
-
+                
+                localStorage.setItem('bt_prediction_history', JSON.stringify(predictionHistory));
                 saveAndUpdate();
             }
         }
