@@ -841,7 +841,7 @@
 
         // ========== DYNAMIC SKIP THRESHOLD ==========
         function getDynamicSkipThreshold() {
-            let baseThreshold = 75;
+            let baseThreshold = 80;
             
             const recentResults = detailedHistory.slice(-15).filter(h => !h.wasSkip);
             if (recentResults.length >= 5) {
