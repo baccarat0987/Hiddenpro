@@ -591,7 +591,7 @@
         let wins = 0,
             losses = 0,
             skips = 0;
-        const MIN_HANDS = 30;
+        const MIN_HANDS = 7;
 
         // Adaptive learning weights
         let patternAccuracy = { P: 0.5, B: 0.5 };
@@ -615,7 +615,7 @@
 
         // ========== 1. PATTERN DETECTION ==========
         function detectPatterns() {
-            if (sequence.length < 4) return null;
+            if (sequence.length < 7) return null;
 
             const patterns = {};
             const maxLen = Math.min(8, sequence.length - 1);
@@ -661,7 +661,7 @@
 
         // ========== 2. STREAK BIAS DETECTION ==========
         function detectStreakBias() {
-            if (sequence.length < 3) return null;
+            if (sequence.length < 7) return null;
 
             const last = sequence[sequence.length - 1];
             let streakLength = 1;
