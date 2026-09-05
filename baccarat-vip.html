@@ -591,13 +591,13 @@
         let wins = 0,
             losses = 0,
             skips = 0;
-        const MIN_HANDS = 10;
+        const MIN_HANDS = 30;
 
         // Adaptive learning weights
         let patternAccuracy = { P: 0.5, B: 0.5 };
         let recentCorrect = 0;
         let recentTotal = 0;
-        const MAX_RECENT = 10;
+        const MAX_RECENT = 7;
 
         // ===== ADAPTIVE LOSE MODULE (internal) =====
         let loseTracker = JSON.parse(localStorage.getItem('bt_lose_tracker')) || {
@@ -704,7 +704,7 @@
 
         // ========== 3. ZIGZAG BIAS DETECTION ==========
         function detectZigzagBias() {
-            if (sequence.length < 5) return null;
+            if (sequence.length < 7) return null;
 
             let alternations = 0;
             const checkLen = Math.min(10, sequence.length);
@@ -736,7 +736,7 @@
 
         // ========== 4. FREQUENCY BIAS DETECTION ==========
         function detectFrequencyBias() {
-            if (sequence.length < 8) return null;
+            if (sequence.length < 7) return null;
 
             const total = sequence.length;
             const pCount = sequence.filter(s => s === 'P').length;
@@ -771,7 +771,7 @@
 
         // ========== 5. RECENT BIAS (Weighted) ==========
         function detectRecentBias() {
-            if (sequence.length < 5) return null;
+            if (sequence.length < 7) return null;
 
             const weights = [8, 7, 6, 5, 4, 3, 2, 1];
             const recentLen = Math.min(8, sequence.length);
@@ -806,7 +806,7 @@
         // ========== 6. ADAPTIVE LOSE DETECTION (internal) ==========
         function detectAdaptiveLose() {
             const recent = loseTracker.recent;
-            if (recent.length < 3) return null;
+            if (recent.length < 7) return null;
 
             const lookback = Math.min(6, recent.length);
             const recentSlice = recent.slice(-lookback);
@@ -867,7 +867,7 @@
 
         // ========== 7. ADAPTIVE LEARNING ==========
         function getAdaptivePrediction() {
-            if (sequence.length < 4) return null;
+            if (sequence.length < 7) return null;
 
             if (detailedHistory.length >= 7) {
                 const recent = detailedHistory.slice(-MAX_RECENT);
@@ -970,7 +970,7 @@
 
         // ========== DYNAMIC SKIP THRESHOLD ==========
         function getDynamicSkipThreshold() {
-            let baseThreshold = 53;
+            let baseThreshold = 65;
 
             const recentResults = detailedHistory.slice(-15).filter(h => !h.wasSkip);
             if (recentResults.length >= 5) {
