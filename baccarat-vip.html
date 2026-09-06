@@ -361,16 +361,6 @@
             0%,100% { box-shadow: 0 0 10px rgba(219, 39, 119, 0.2); transform: scale(1); }
             50% { box-shadow: 0 0 25px rgba(219, 39, 119, 0.5); transform: scale(1.05); }
         }
-        .change-table.good {
-            color: #4a9a6a;
-            border-color: #4a9a6a;
-            background: rgba(74, 154, 106, 0.1);
-            animation: pulseChangeGood 1.5s ease-in-out infinite;
-        }
-        @keyframes pulseChangeGood {
-            0%,100% { box-shadow: 0 0 10px rgba(74, 154, 106, 0.2); transform: scale(1); }
-            50% { box-shadow: 0 0 25px rgba(74, 154, 106, 0.5); transform: scale(1.05); }
-        }
 
         .buttons {
             margin-top: 18px;
@@ -542,7 +532,7 @@
            - REAL confidence based on historical prediction accuracy
            - Dynamic skip threshold based on real performance
            - Analyzes last 7 recent hands for pattern matching
-           - CHANGE TABLE alert based on last 7 results
+           - CHANGE TABLE alert based on last 9 results
         ========================================================= */
         
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
@@ -577,18 +567,17 @@
         function clampConfidence(raw) { return Math.min(96, Math.max(40, Math.round(raw))); }
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
 
-        // ========== CHANGE TABLE DETECTION ==========
+        // ========== CHANGE TABLE DETECTION - BASED ON LAST 9 RESULTS ==========
         function checkChangeTable() {
-            // Get last 7 results (W/L only, ignore skips)
-            const lastResults = results.filter(r => r === 'W' || r === 'L').slice(-7);
+            // Get last 9 results (W/L only, ignore skips/empty)
+            const lastResults = results.filter(r => r === 'W' || r === 'L').slice(-9);
             
-            if (lastResults.length < 5) return { show: false, reason: '' };
+            // Need at least 7 results to make a decision
+            if (lastResults.length < 7) return { show: false, reason: '', wins: 0, losses: 0, winRate: 0 };
             
             const winsCount = lastResults.filter(r => r === 'W').length;
             const lossesCount = lastResults.filter(r => r === 'L').length;
             const total = winsCount + lossesCount;
-            
-            // Calculate win rate in last 7
             const winRate = winsCount / total;
             
             // If more losses than wins (win rate < 50%) - SHOW CHANGE TABLE
@@ -1005,7 +994,7 @@
                 lastPrediction = null;
             }
             
-            // Add CHANGE TABLE if needed
+            // Add CHANGE TABLE if needed (based on last 9 results)
             if (changeTable.show) {
                 html += `<br><span class="change-table">⚠️ ${changeTable.reason}</span>`;
             }
