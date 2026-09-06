@@ -1004,38 +1004,63 @@
             saveAndUpdate();
         }
 
-    function undo() {
-    if (sequence.length === 0) return;
-    
-    // Check if there's a prediction that hasn't been recorded yet
-    if (predictionHistory.length > 0) {
-        const lastPred = predictionHistory[predictionHistory.length - 1];
-        // If actual is undefined or null, it hasn't been recorded yet
-        if (lastPred.actual === undefined || lastPred.actual === null) {
-            predictionHistory.pop();
-            if (lastPred.prediction === 'P') {
-                patternAccuracy.P.total--;
-                if (lastPred.correct) patternAccuracy.P.correct--;
-            } else if (lastPred.prediction === 'B') {
-                patternAccuracy.B.total--;
-                if (lastPred.correct) patternAccuracy.B.correct--;
+        function undo() {
+            if (sequence.length === 0) return;
+            
+            // Check if there's a prediction that hasn't been recorded yet
+            if (predictionHistory.length > 0) {
+                const lastPred = predictionHistory[predictionHistory.length - 1];
+                // If actual is undefined or null, it hasn't been recorded yet
+                if (lastPred.actual === undefined || lastPred.actual === null) {
+                    predictionHistory.pop();
+                    if (lastPred.prediction === 'P') {
+                        patternAccuracy.P.total--;
+                        if (lastPred.correct) patternAccuracy.P.correct--;
+                    } else if (lastPred.prediction === 'B') {
+                        patternAccuracy.B.total--;
+                        if (lastPred.correct) patternAccuracy.B.correct--;
+                    }
+                    overallAccuracy.total--;
+                    if (lastPred.correct) overallAccuracy.correct--;
+                    localStorage.setItem('bt_prediction_history', JSON.stringify(predictionHistory));
+                }
             }
-            overallAccuracy.total--;
-            if (lastPred.correct) overallAccuracy.correct--;
-            localStorage.setItem('bt_prediction_history', JSON.stringify(predictionHistory));
+            
+            sequence.pop();
+            const lastResultData = results.pop();
+            const lastHistory = detailedHistory.pop();
+
+            if (lastResultData === 'W') wins--;
+            else if (lastResultData === 'L') losses--;
+            else if (lastResultData === '') skips--;
+
+            saveAndUpdate();
         }
-    
-    
-    sequence.pop();
-    const lastResultData = results.pop();
-    const lastHistory = detailedHistory.pop();
 
-    if (lastResultData === 'W') wins--;
-    else if (lastResultData === 'L') losses--;
-    else if (lastResultData === '') skips--;
-
-    saveAndUpdate();
-}
+        function resetAll() {
+            if (confirm("Reset all data?")) {
+                // Clear all data arrays
+                sequence = [];
+                results = [];
+                lastPrediction = null;
+                lastPredictionConfidence = 0;
+                detailedHistory = [];
+                predictionHistory = [];
+                patternAccuracy = { P: { correct: 0, total: 0 }, B: { correct: 0, total: 0 } };
+                overallAccuracy = { correct: 0, total: 0 };
+                wins = 0;
+                losses = 0;
+                skips = 0;
+                
+                // Clear localStorage
+                localStorage.setItem('bt_sequence', JSON.stringify(sequence));
+                localStorage.setItem('bt_results', JSON.stringify(results));
+                localStorage.setItem('bt_detailed', JSON.stringify(detailedHistory));
+                localStorage.setItem('bt_prediction_history', JSON.stringify(predictionHistory));
+                
+                // Update UI
+                saveAndUpdate();
+            }
         }
 
         function saveAndUpdate() {
