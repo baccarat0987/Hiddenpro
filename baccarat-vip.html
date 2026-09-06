@@ -346,20 +346,41 @@
             opacity: 0.95;
         }
         .change-table {
-            font-size: clamp(14px, 3vw, 18px);
-            font-weight: 800;
+            font-size: clamp(20px, 5vw, 28px);
+            font-weight: 900;
             color: #db2777;
-            background: rgba(219, 39, 119, 0.1);
-            padding: 4px 16px;
+            background: rgba(219, 39, 119, 0.15);
+            padding: 12px 24px;
             border-radius: 20px;
-            border: 2px solid #db2777;
+            border: 3px solid #db2777;
             animation: pulseChange 1.5s ease-in-out infinite;
-            margin-top: 4px;
             display: inline-block;
+            letter-spacing: 2px;
         }
         @keyframes pulseChange {
             0%,100% { box-shadow: 0 0 10px rgba(219, 39, 119, 0.2); transform: scale(1); }
-            50% { box-shadow: 0 0 25px rgba(219, 39, 119, 0.5); transform: scale(1.05); }
+            50% { box-shadow: 0 0 30px rgba(219, 39, 119, 0.6); transform: scale(1.05); }
+        }
+        .change-table .sub {
+            font-size: clamp(11px, 2.5vw, 15px);
+            font-weight: 500;
+            color: #db2777;
+            display: block;
+            margin-top: 6px;
+            letter-spacing: 1px;
+            animation: none;
+            border: none;
+            padding: 0;
+            background: transparent;
+        }
+        .change-table .sub .highlight {
+            color: #1e3a8a;
+            font-weight: 700;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .change-table .sub .highlight:hover {
+            color: #7c3aed;
         }
 
         .buttons {
@@ -532,7 +553,7 @@
            - REAL confidence based on historical prediction accuracy
            - Dynamic skip threshold based on real performance
            - Analyzes last 7 recent hands for pattern matching
-           - CHANGE TABLE alert based on last 9 results
+           - CHANGE TABLE alert based on last 9 results (REPLACES prediction)
         ========================================================= */
         
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
@@ -975,9 +996,23 @@
                 return;
             }
             
-            const result = finalPrediction();
             const changeTable = checkChangeTable();
             
+            // If CHANGE TABLE should show, display ONLY the change table message
+            if (changeTable.show) {
+                box.innerHTML = `
+                    <span class="change-table">
+                        ⚠️ ${changeTable.reason}
+                        <span class="sub">Please click <span class="highlight" onclick="resetAll()">RESET</span> and find another table</span>
+                    </span>
+                `;
+                lastPrediction = null;
+                updateStatsBar();
+                return;
+            }
+            
+            // Otherwise, show prediction
+            const result = finalPrediction();
             let html = '';
             
             if (result && result.pred) {
@@ -992,11 +1027,6 @@
             } else {
                 html = "<span style='font-size:clamp(14px,3vw,16px); color:#7a8595'>ANALYZING PATTERNS...</span>";
                 lastPrediction = null;
-            }
-            
-            // Add CHANGE TABLE if needed (based on last 9 results)
-            if (changeTable.show) {
-                html += `<br><span class="change-table">⚠️ ${changeTable.reason}</span>`;
             }
             
             box.innerHTML = html;
