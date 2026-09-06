@@ -1052,14 +1052,14 @@
                 losses = 0;
                 skips = 0;
                 
-                // Clear localStorage
-                localStorage.setItem('bt_sequence', JSON.stringify(sequence));
-                localStorage.setItem('bt_results', JSON.stringify(results));
-                localStorage.setItem('bt_detailed', JSON.stringify(detailedHistory));
-                localStorage.setItem('bt_prediction_history', JSON.stringify(predictionHistory));
+                // Remove ALL localStorage items
+                localStorage.removeItem('bt_sequence');
+                localStorage.removeItem('bt_results');
+                localStorage.removeItem('bt_detailed');
+                localStorage.removeItem('bt_prediction_history');
                 
-                // Update UI
-                saveAndUpdate();
+                // Force page refresh to completely reset everything
+                window.location.reload();
             }
         }
 
