@@ -589,38 +589,45 @@
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
 
         // ========== CHANGE TABLE DETECTION - BASED ON LAST 9 RESULTS ==========
-        function checkChangeTable() {
-            // Get last 9 results (W/L only, ignore skips/empty)
-            const lastResults = results.filter(r => r === 'W' || r === 'L').slice(-9);
-            
-            // Need at least 7 results to make a decision
-            if (lastResults.length < 7) return { show: false, reason: '', wins: 0, losses: 0, winRate: 0 };
-            
-            const winsCount = lastResults.filter(r => r === 'W').length;
-            const lossesCount = lastResults.filter(r => r === 'L').length;
-            const total = winsCount + lossesCount;
-            const winRate = winsCount / total;
-            
-            // If more losses than wins (win rate < 50%) - SHOW CHANGE TABLE
-            if (winRate < 0.5) {
-                return { 
-                    show: true, 
-                    reason: 'CHANGE TABLE',
-                    wins: winsCount,
-                    losses: lossesCount,
-                    winRate: Math.round(winRate * 100)
-                };
-            }
-            
-            // If more wins than losses (win rate >= 50%) - DON'T SHOW
-            return { 
-                show: false, 
-                reason: '',
-                wins: winsCount,
-                losses: lossesCount,
-                winRate: Math.round(winRate * 100)
-            };
-        }
+function checkChangeTable() {
+    // Get last 9 results (W/L only, ignore skips/empty)
+    const lastResults = results.filter(r => r === 'W' || r === 'L').slice(-9);
+    
+    // Need at least 7 results to make a decision
+    if (lastResults.length < 7) return { show: false, reason: '', wins: 0, losses: 0, winRate: 0 };
+    
+    const winsCount = lastResults.filter(r => r === 'W').length;
+    const lossesCount = lastResults.filter(r => r === 'L').length;
+    const total = winsCount + lossesCount;
+    const winRate = winsCount / total;
+    
+    // Calculate the difference (losses - wins)
+    const lossDiff = lossesCount - winsCount;
+    
+    // SHOW CHANGE TABLE only if losses are at least 2 ahead of wins (lossDiff >= 2)
+    // 4W 5L (diff=1) → NO SHOW
+    // 3W 6L (diff=3) → SHOW
+    if (lossDiff >= 2) {
+        return { 
+            show: true, 
+            reason: 'CHANGE TABLE',
+            wins: winsCount,
+            losses: lossesCount,
+            winRate: Math.round(winRate * 100),
+            lossDiff: lossDiff
+        };
+    }
+    
+    // DON'T SHOW if losses are 0 or 1 ahead of wins
+    return { 
+        show: false, 
+        reason: '',
+        wins: winsCount,
+        losses: lossesCount,
+        winRate: Math.round(winRate * 100),
+        lossDiff: lossDiff
+    };
+}
 
         // ========== 1. PATTERN DETECTION ==========
         function detectPatterns() {
