@@ -49,7 +49,6 @@
       --tie-green: #2e7d32;
       --lightning-yellow: #ffea00;
       --lightning-glow: rgba(255, 234, 0, 0.6);
-      /* container gradient: navy → violet → pink → blue */
       --container-grad: linear-gradient(145deg, #0a192f 0%, #2d1b69 35%, #7a2b5a 70%, #1a3a8a 100%);
       --card-bg: rgba(10, 25, 47, 0.88);
       --border-glow: rgba(187, 134, 252, 0.25);
@@ -88,7 +87,6 @@
       z-index: 0;
     }
 
-    /* WELCOME OVERLAY */
     #welcomeOverlay {
       position: fixed;
       top: 0;
@@ -220,7 +218,6 @@
       box-shadow: 0 0 15px rgba(45, 27, 105, 0.2);
     }
 
-    /* HEADER WITH LOGO - NO CONTAINER */
     .header {
       display: flex;
       align-items: center;
@@ -406,21 +403,6 @@
       min-width: 30px;
     }
 
-    /* LIGHTNING YELLOW HIGHLIGHT - FIXED BLINKING */
-    .highlight {
-      background: var(--lightning-yellow) !important;
-      color: #0a192f !important;
-      font-weight: bold;
-      box-shadow: 0 0 25px var(--lightning-glow) !important;
-      border-radius: 4px;
-      border: 1px solid rgba(255, 234, 0, 0.3);
-      display: table-cell !important;
-    }
-
-    .highlight.blink-active {
-      animation: lightningBlink 0.8s ease-in-out infinite !important;
-    }
-
     .highlight-win {
       color: #81c784 !important;
       font-weight: bold;
@@ -444,7 +426,6 @@
 </head>
 <body oncontextmenu="return false;">
 
-  <!-- WELCOME OVERLAY -->
   <div id="welcomeOverlay">
     <div class="welcome-box">
       <h1>WELCOME</h1>
@@ -493,13 +474,14 @@
     let sequence = [];
     let currentPrediction = null;
     let currentRow = 0;
-    let currentCol = 0;
+    currentCol = 0;
     let isGameOver = false;
     let baseBet = 10;
     let baseBetString = "10";
     const maxCols = 8;
     const maxRows = 10;
     let blinkInterval = null;
+    let currentHighlightedCell = null;
 
     function initBetTable() {
       const tbody = document.getElementById('betBody');
@@ -604,43 +586,81 @@
       updateBetTable();
     }
 
-    function updateBetTable() {
-      const rows = document.getElementById('betBody').rows;
-      
-      // Clear all highlights and stop any blinking
+    function startBlinking(cell) {
+      // Stop any existing blinking
       if (blinkInterval) {
         clearInterval(blinkInterval);
         blinkInterval = null;
       }
       
+      // Reset the cell to initial state
+      if (currentHighlightedCell) {
+        currentHighlightedCell.style.background = 'var(--lightning-yellow)';
+        currentHighlightedCell.style.color = '#0a192f';
+        currentHighlightedCell.style.boxShadow = '0 0 25px var(--lightning-glow)';
+      }
+      
+      currentHighlightedCell = cell;
+      
+      // Start blinking
+      let isYellow = true;
+      blinkInterval = setInterval(() => {
+        if (!cell || isGameOver) {
+          clearInterval(blinkInterval);
+          blinkInterval = null;
+          return;
+        }
+        
+        if (isYellow) {
+          cell.style.background = '#0a192f';
+          cell.style.color = '#e8e0f0';
+          cell.style.boxShadow = 'none';
+          cell.style.borderColor = 'rgba(255, 255, 255, 0.06)';
+        } else {
+          cell.style.background = 'var(--lightning-yellow)';
+          cell.style.color = '#0a192f';
+          cell.style.boxShadow = '0 0 25px var(--lightning-glow)';
+          cell.style.borderColor = 'rgba(255, 234, 0, 0.3)';
+        }
+        isYellow = !isYellow;
+      }, 400);
+    }
+
+    function updateBetTable() {
+      const rows = document.getElementById('betBody').rows;
+      
+      // Clear all highlights
+      if (blinkInterval) {
+        clearInterval(blinkInterval);
+        blinkInterval = null;
+      }
+      
+      if (currentHighlightedCell) {
+        currentHighlightedCell.style.background = '';
+        currentHighlightedCell.style.color = '';
+        currentHighlightedCell.style.boxShadow = '';
+        currentHighlightedCell.style.borderColor = '';
+        currentHighlightedCell = null;
+      }
+      
       for (let r = 0; r < maxRows; r++) {
         for (let c = 0; c < maxCols; c++) {
           const cell = rows[r].cells[c];
-          cell.classList.remove('highlight', 'blink-active');
           cell.style.background = '';
           cell.style.color = '';
           cell.style.boxShadow = '';
+          cell.style.borderColor = '';
         }
       }
       
       if (currentPrediction && sequence.length >= 7 && rows[currentRow] && !isGameOver) {
         const cell = rows[currentRow].cells[currentCol];
-        cell.classList.add('highlight');
-        
-        // Start blinking with interval
-        let isYellow = true;
-        blinkInterval = setInterval(() => {
-          if (isYellow) {
-            cell.style.background = '#0a192f';
-            cell.style.color = '#e8e0f0';
-            cell.style.boxShadow = 'none';
-          } else {
-            cell.style.background = 'var(--lightning-yellow)';
-            cell.style.color = '#0a192f';
-            cell.style.boxShadow = '0 0 25px var(--lightning-glow)';
-          }
-          isYellow = !isYellow;
-        }, 400);
+        // Set initial yellow state
+        cell.style.background = 'var(--lightning-yellow)';
+        cell.style.color = '#0a192f';
+        cell.style.boxShadow = '0 0 25px var(--lightning-glow)';
+        cell.style.borderColor = 'rgba(255, 234, 0, 0.3)';
+        startBlinking(cell);
       }
     }
 
@@ -714,6 +734,14 @@
       if (blinkInterval) {
         clearInterval(blinkInterval);
         blinkInterval = null;
+      }
+      
+      if (currentHighlightedCell) {
+        currentHighlightedCell.style.background = '';
+        currentHighlightedCell.style.color = '';
+        currentHighlightedCell.style.boxShadow = '';
+        currentHighlightedCell.style.borderColor = '';
+        currentHighlightedCell = null;
       }
       
       initBetTable();
