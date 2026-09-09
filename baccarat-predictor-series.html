@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Baccarat Pro Series | PREMIUM</title>
+  <title>Baccarat Pro Series</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
   <script>
@@ -43,9 +43,12 @@
 
   <style>
     :root {
-      --purple-glow: #bb86fc;
-      --player-blue: #2196f3;
-      --banker-red: #f44336;
+      --deep-navy: #0A1628;
+      --dark-burgundy: #6B1D2B;
+      --deep-teal: #1A3A3A;
+      --silver: #B0B5B9;
+      --dark-charcoal: #1A1A1A;
+      --crimson-glow: rgba(107, 29, 43, 0.6);
     }
 
     body {
@@ -55,9 +58,9 @@
       color: #eee;
       font-size: 17px;
       display: none;
-      background: linear-gradient(-45deg, #1a0026, #2e004f, #4b0082, #310652);
+      background: linear-gradient(-45deg, #0A0A0F, #0A1628, #1A0A15, #0A0A1A);
       background-size: 400% 400%;
-      animation: galaxy 15s ease infinite;
+      animation: galaxy 20s ease infinite;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -99,21 +102,21 @@
       display: none;
     }
     .welcome-box {
-      background: rgba(20, 15, 35, 0.95);
-      border: 2px solid var(--purple-glow);
+      background: rgba(10, 10, 20, 0.98);
+      border: 2px solid rgba(176, 181, 185, 0.2);
       border-radius: 25px;
       padding: 50px 45px 40px;
       max-width: 420px;
       width: 90%;
       text-align: center;
-      box-shadow: 0 0 60px rgba(187, 134, 252, 0.3);
+      box-shadow: 0 0 80px rgba(10, 22, 40, 0.8);
     }
     .welcome-box h1 {
       font-family: 'Orbitron', sans-serif;
       font-size: 38px;
-      color: #fff;
+      color: #E8E8E8;
       margin: 0 0 10px 0;
-      text-shadow: 0 0 30px var(--purple-glow);
+      text-shadow: 0 0 40px rgba(176, 181, 185, 0.2);
       letter-spacing: 4px;
     }
     .welcome-box .subtitle {
@@ -137,18 +140,18 @@
       padding: 14px 18px;
       font-size: 20px;
       font-family: 'Orbitron', sans-serif;
-      background: rgba(255, 255, 255, 0.05);
-      border: 2px solid #555;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(176, 181, 185, 0.15);
       border-radius: 12px;
-      color: #fff;
+      color: #E8E8E8;
       outline: none;
       transition: 0.3s;
       box-sizing: border-box;
       text-align: center;
     }
     .welcome-box input:focus {
-      border-color: var(--purple-glow);
-      box-shadow: 0 0 20px rgba(187, 134, 252, 0.3);
+      border-color: var(--dark-burgundy);
+      box-shadow: 0 0 30px rgba(107, 29, 43, 0.3);
     }
     .welcome-box input::placeholder {
       color: #666;
@@ -161,18 +164,18 @@
       font-family: 'Orbitron', sans-serif;
       font-size: 18px;
       font-weight: bold;
-      background: linear-gradient(135deg, #7c3aed, #a855f7);
-      border: none;
+      background: linear-gradient(135deg, var(--dark-burgundy), #4A1520);
+      border: 1px solid rgba(176, 181, 185, 0.2);
       border-radius: 12px;
-      color: #fff;
+      color: #FFFFFF;
       cursor: pointer;
       transition: 0.3s;
       letter-spacing: 2px;
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      text-shadow: none;
     }
     .welcome-box .confirm-btn:hover {
       transform: scale(1.03);
-      box-shadow: 0 0 30px rgba(168, 85, 247, 0.5);
+      box-shadow: 0 0 40px rgba(107, 29, 43, 0.5);
     }
     .welcome-box .confirm-btn:active {
       transform: scale(0.97);
@@ -185,21 +188,22 @@
       z-index: 1000;
     }
     .exit-btn {
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
+      background: rgba(10, 22, 40, 0.8);
+      color: var(--silver);
       padding: 8px 15px;
       border-radius: 5px;
       text-decoration: none;
       font-weight: bold;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(176, 181, 185, 0.15);
       font-size: 12px;
       font-family: 'Orbitron';
       transition: 0.3s;
     }
     .exit-btn:hover {
-      background: #8a2be2;
-      border-color: #fff;
-      box-shadow: 0 0 10px #8a2be2;
+      background: var(--dark-burgundy);
+      border-color: var(--silver);
+      color: #FFFFFF;
+      box-shadow: 0 0 30px rgba(107, 29, 43, 0.4);
     }
 
     .header {
@@ -212,11 +216,11 @@
     .header h1 {
       font-family: 'Orbitron', sans-serif;
       font-size: 28px;
-      color: #ffffff;
+      color: #E8E8E8;
       margin: 0;
       font-weight: bold;
-      letter-spacing: 2px;
-      text-shadow: 0 0 15px var(--purple-glow);
+      letter-spacing: 4px;
+      text-shadow: 0 0 30px rgba(176, 181, 185, 0.2);
     }
 
     .container {
@@ -224,12 +228,12 @@
       width: 95%;
       margin: 20px auto;
       padding: 20px 20px 25px;
-      background: rgba(15, 15, 25, 0.92);
-      border: 1px solid #444;
+      background: rgba(10, 22, 40, 0.95);
+      border: 1px solid rgba(176, 181, 185, 0.15);
       border-radius: 20px;
       text-align: center;
-      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.9);
-      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(15px);
       display: none;
     }
     .container.active {
@@ -255,18 +259,18 @@
       font-size: 13px;
     }
     .p {
-      background: var(--player-blue);
-      color: #fff;
-      box-shadow: 0 0 10px var(--player-blue);
+      background: var(--silver);
+      color: var(--deep-navy);
+      box-shadow: 0 0 20px rgba(176, 181, 185, 0.3);
     }
     .b {
-      background: var(--banker-red);
-      color: #fff;
-      box-shadow: 0 0 10px var(--banker-red);
+      background: var(--dark-burgundy);
+      color: #E8E8E8;
+      box-shadow: 0 0 20px rgba(107, 29, 43, 0.5);
     }
     .t {
-      background: #ffc107;
-      color: #000;
+      background: var(--deep-teal);
+      color: var(--silver);
     }
 
     .prediction {
@@ -277,12 +281,12 @@
       height: 44px;
     }
     .prediction .pred-p {
-      color: var(--player-blue);
-      text-shadow: 0 0 15px var(--player-blue);
+      color: var(--silver);
+      text-shadow: 0 0 30px rgba(176, 181, 185, 0.3);
     }
     .prediction .pred-b {
-      color: var(--banker-red);
-      text-shadow: 0 0 15px var(--banker-red);
+      color: #8B2A3A;
+      text-shadow: 0 0 30px rgba(107, 29, 43, 0.5);
     }
 
     .buttons {
@@ -293,20 +297,22 @@
       flex-wrap: wrap;
     }
     .buttons button {
-      background: #111;
-      color: #fff;
-      border: 1px solid #555;
+      background: rgba(10, 22, 40, 0.8);
+      color: var(--silver);
+      border: 1px solid rgba(176, 181, 185, 0.2);
       border-radius: 8px;
       padding: 10px 16px;
       font-size: 13px;
       font-family: 'Orbitron';
       cursor: pointer;
-      transition: 0.2s;
+      transition: all 0.3s ease;
     }
     .buttons button:hover:enabled {
-      background: #333;
-      border-color: var(--purple-glow);
-      transform: scale(1.04);
+      background: var(--dark-burgundy);
+      border-color: var(--silver);
+      color: #FFFFFF;
+      box-shadow: 0 0 30px rgba(107, 29, 43, 0.4);
+      transform: scale(1.05);
     }
     .buttons button:disabled {
       opacity: 0.4;
@@ -314,63 +320,65 @@
       transform: none !important;
     }
     .btn-reset {
-      border-color: #ffc107 !important;
-      color: #ffc107 !important;
+      border-color: var(--dark-burgundy) !important;
+      color: var(--dark-burgundy) !important;
     }
     .btn-reset.blink-reset {
-      animation: blinkGold 0.8s ease-in-out infinite;
-      border-color: #ffd700 !important;
-      box-shadow: 0 0 20px #ffd700;
+      animation: blinkCrimson 0.8s ease-in-out infinite;
+      border-color: #8B2A3A !important;
+      box-shadow: 0 0 30px rgba(107, 29, 43, 0.6);
     }
-    @keyframes blinkGold {
-      0% { background: #111; color: #ffc107; border-color: #ffc107; }
-      50% { background: #ffc107; color: #111; border-color: #ffd700; box-shadow: 0 0 30px #ffd700; }
-      100% { background: #111; color: #ffc107; border-color: #ffc107; }
+    @keyframes blinkCrimson {
+      0% { background: rgba(10, 22, 40, 0.8); color: var(--dark-burgundy); }
+      50% { background: var(--dark-burgundy); color: #FFFFFF; box-shadow: 0 0 40px rgba(107, 29, 43, 0.8); }
+      100% { background: rgba(10, 22, 40, 0.8); color: var(--dark-burgundy); }
     }
 
     .capital-table table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 14px;
-      background: #111;
-      border: 1px solid #333;
+      background: rgba(10, 22, 40, 0.9);
+      border: 1px solid rgba(176, 181, 185, 0.1);
       table-layout: auto;
     }
     .capital-table th,
     .capital-table td {
       padding: 6px 2px;
       font-size: 13px;
-      border: 1px solid #333;
+      border: 1px solid rgba(176, 181, 185, 0.08);
       text-align: center;
       white-space: nowrap;
       width: auto;
+      color: #B0B5B9;
     }
     .capital-table th {
-      background: #222;
+      background: rgba(10, 22, 40, 0.95);
       font-family: 'Orbitron';
       font-size: 10px;
-      color: var(--purple-glow);
+      color: var(--silver);
       padding: 6px 1px;
       letter-spacing: 0.3px;
+      border-color: rgba(176, 181, 185, 0.1);
     }
     .capital-table td:last-child {
       min-width: 30px;
     }
 
     .highlight {
-      background: #ffc107 !important;
-      color: #000 !important;
-      font-weight: bold;
-      animation: pulse 1s infinite;
+      background: rgba(107, 29, 43, 0.4) !important;
+      color: #FFFFFF !important;
+      animation: pulseCrimson 1s infinite;
     }
     .highlight-win {
-      color: #00f693 !important;
+      color: #8B2A3A !important;
       font-weight: bold;
+      text-shadow: 0 0 20px rgba(107, 29, 43, 0.6);
     }
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.6; }
-      100% { opacity: 1; }
+    @keyframes pulseCrimson {
+      0% { opacity: 0.7; }
+      50% { opacity: 1; background: rgba(107, 29, 43, 0.6); }
+      100% { opacity: 0.7; }
     }
 
     .message-box {
@@ -380,10 +388,10 @@
       font-family: 'Orbitron';
     }
     .success {
-      color: #00f693;
+      color: var(--silver);
     }
     .fail {
-      color: #f44336;
+      color: #8B2A3A;
     }
   </style>
 </head>
@@ -437,8 +445,8 @@
     let currentRow = 0;
     let currentCol = 0;
     let isGameOver = false;
-    let baseBet = 10; // default
-    let baseBetString = "10"; // preserve original format
+    let baseBet = 10;
+    let baseBetString = "10";
     const maxCols = 8;
     const maxRows = 10;
 
@@ -461,15 +469,12 @@
     }
 
     function getBetValues() {
-      // Use baseBetString to preserve exact format
       const b = parseFloat(baseBet);
       if (isNaN(b) || b <= 0) return ["1", "2", "4", "8", "16", "32", "64", "ALL IN"];
       
-      // Check if input was decimal or not based on original string
       const hasDecimal = baseBetString.includes('.');
       
       if (hasDecimal) {
-        // Keep decimal format with 2 decimal places
         return [
           b.toFixed(2),
           (b * 2).toFixed(2),
@@ -481,7 +486,6 @@
           "ALL IN"
         ];
       } else {
-        // Non-decimal format - no decimal places
         return [
           Math.round(b).toString(),
           Math.round(b * 2).toString(),
@@ -643,19 +647,16 @@
         return;
       }
       baseBet = num;
-      baseBetString = rawValue; // preserve exact input format
+      baseBetString = rawValue;
       
-      // Hide overlay, show main app
       document.getElementById('welcomeOverlay').classList.add('hidden');
       document.getElementById('mainApp').classList.add('active');
-      // Initialize with new base bet
       initBetTable();
       updateHistory();
       updatePrediction();
       setButtonsEnabled(true);
     });
 
-    // Allow Enter key on input
     document.getElementById('baseBetInput').addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
         document.getElementById('confirmBtn').click();
@@ -678,7 +679,6 @@
       }
     })();
 
-    // Initial setup (will be replaced after welcome)
     initBetTable();
     updateHistory();
     updatePrediction();
