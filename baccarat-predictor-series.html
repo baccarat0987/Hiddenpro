@@ -43,25 +43,55 @@
 
   <style>
     :root {
-      --navy-dark: #0A1628;
-      --navy-mid: #1A2A4A;
-      --navy-light: #2A4A7A;
-      --navy-glow: rgba(74, 138, 200, 0.4);
-      --platinum: #C8D8E8;
-      --crystal-white: #F0F4F8;
-      --ice-blue: #6A9AC8;
-      --player-silver: #D0DCE8;
-      --banker-navy: #1A3A6A;
+      /* Player Colors - Navy/Blue/Sky Blue */
+      --player-dark: #1A3A6A;
+      --player-mid: #2A5A9A;
+      --player-light: #5B8CC4;
+      --player-sky: #87CEEB;
+      --player-glow: rgba(42, 90, 154, 0.4);
+
+      /* Banker Colors - Red/Dark Red/Red-Pink */
+      --banker-dark: #6B1A1A;
+      --banker-mid: #A52A2A;
+      --banker-light: #CC4444;
+      --banker-pink: #E88080;
+      --banker-glow: rgba(165, 42, 42, 0.4);
+
+      /* Tie Colors - Green/Dark Green/Light Green */
+      --tie-dark: #1A4A2A;
+      --tie-mid: #2A7A3A;
+      --tie-light: #4AAA5A;
+      --tie-glow: rgba(42, 122, 58, 0.4);
+
+      /* Gray for Undo & Reset */
+      --gray-dark: #4A4A4A;
+      --gray-mid: #7A7A7A;
+      --gray-light: #AAAAAA;
+      --gray-glow: rgba(122, 122, 122, 0.3);
+
+      /* Bet Highlight - Light Yellow */
+      --highlight-yellow: #FFF8B0;
+      --highlight-glow: rgba(255, 248, 176, 0.6);
+
+      /* Theme Background - Soft/Light */
+      --bg-dark: #1A2A3A;
+      --bg-mid: #2A3A5A;
+      --bg-light: #3A5A7A;
+      --bg-soft: #4A6A8A;
+      --bg-container: rgba(26, 42, 58, 0.92);
+      --text-light: #F0F4F8;
+      --text-mid: #C8D8E8;
+      --border-light: rgba(74, 106, 138, 0.25);
     }
 
     body {
       margin: 0;
       padding: 0;
       font-family: 'Roboto', sans-serif;
-      color: var(--crystal-white);
+      color: var(--text-light);
       font-size: 17px;
       display: none;
-      background: linear-gradient(-45deg, #060D1A, #0A1628, #1A2A4A, #0A1628);
+      background: linear-gradient(-45deg, #1A2A3A, #2A3A5A, #3A5A7A, #2A3A5A);
       background-size: 400% 400%;
       animation: galaxy 20s ease infinite;
       min-height: 100vh;
@@ -105,26 +135,26 @@
       display: none;
     }
     .welcome-box {
-      background: rgba(10, 22, 40, 0.98);
-      border: 2px solid rgba(74, 138, 200, 0.3);
+      background: rgba(26, 42, 58, 0.98);
+      border: 2px solid var(--border-light);
       border-radius: 25px;
       padding: 50px 45px 40px;
       max-width: 420px;
       width: 90%;
       text-align: center;
-      box-shadow: 0 0 80px rgba(74, 138, 200, 0.15);
+      box-shadow: 0 0 80px rgba(42, 58, 90, 0.3);
     }
     .welcome-box h1 {
       font-family: 'Orbitron', sans-serif;
       font-size: 38px;
-      color: var(--platinum);
+      color: var(--text-light);
       margin: 0 0 10px 0;
-      text-shadow: 0 0 40px var(--navy-glow);
+      text-shadow: 0 0 40px var(--player-glow);
       letter-spacing: 4px;
     }
     .welcome-box .subtitle {
       font-size: 14px;
-      color: var(--ice-blue);
+      color: var(--text-mid);
       margin-bottom: 30px;
       font-family: 'Roboto', sans-serif;
       letter-spacing: 2px;
@@ -132,7 +162,7 @@
     .welcome-box label {
       display: block;
       font-size: 14px;
-      color: var(--platinum);
+      color: var(--text-light);
       text-align: left;
       margin-bottom: 8px;
       font-weight: 500;
@@ -144,20 +174,20 @@
       font-size: 20px;
       font-family: 'Orbitron', sans-serif;
       background: rgba(255, 255, 255, 0.05);
-      border: 2px solid rgba(74, 138, 200, 0.2);
+      border: 2px solid var(--border-light);
       border-radius: 12px;
-      color: var(--crystal-white);
+      color: var(--text-light);
       outline: none;
       transition: 0.3s;
       box-sizing: border-box;
       text-align: center;
     }
     .welcome-box input:focus {
-      border-color: var(--navy-light);
-      box-shadow: 0 0 30px var(--navy-glow);
+      border-color: var(--player-mid);
+      box-shadow: 0 0 30px var(--player-glow);
     }
     .welcome-box input::placeholder {
-      color: var(--ice-blue);
+      color: var(--gray-light);
       font-size: 16px;
     }
     .welcome-box .confirm-btn {
@@ -167,10 +197,10 @@
       font-family: 'Orbitron', sans-serif;
       font-size: 18px;
       font-weight: bold;
-      background: linear-gradient(135deg, var(--navy-light), var(--navy-mid));
-      border: 2px solid rgba(74, 138, 200, 0.3);
+      background: linear-gradient(135deg, var(--player-dark), var(--player-mid));
+      border: 2px solid var(--border-light);
       border-radius: 12px;
-      color: var(--crystal-white);
+      color: var(--text-light);
       cursor: pointer;
       transition: 0.3s;
       letter-spacing: 2px;
@@ -178,8 +208,8 @@
     }
     .welcome-box .confirm-btn:hover {
       transform: scale(1.03);
-      box-shadow: 0 0 40px var(--navy-glow);
-      border-color: var(--platinum);
+      box-shadow: 0 0 40px var(--player-glow);
+      border-color: var(--player-light);
     }
     .welcome-box .confirm-btn:active {
       transform: scale(0.97);
@@ -192,39 +222,39 @@
       z-index: 1000;
     }
     .exit-btn {
-      background: rgba(10, 22, 40, 0.9);
-      color: var(--platinum);
+      background: rgba(26, 42, 58, 0.9);
+      color: var(--text-light);
       padding: 8px 15px;
       border-radius: 5px;
       text-decoration: none;
       font-weight: bold;
-      border: 1px solid rgba(74, 138, 200, 0.2);
+      border: 1px solid var(--border-light);
       font-size: 12px;
       font-family: 'Orbitron';
       transition: 0.3s;
     }
     .exit-btn:hover {
-      background: var(--navy-light);
-      border-color: var(--platinum);
-      color: var(--crystal-white);
-      box-shadow: 0 0 30px var(--navy-glow);
+      background: var(--player-mid);
+      border-color: var(--text-light);
+      color: var(--text-light);
+      box-shadow: 0 0 30px var(--player-glow);
     }
 
     .header {
       text-align: center;
       padding: 20px 0 15px;
-      background: rgba(0, 0, 0, 0.4);
-      border-bottom: 2px solid rgba(74, 138, 200, 0.2);
+      background: rgba(0, 0, 0, 0.3);
+      border-bottom: 2px solid var(--border-light);
       border-radius: 15px 15px 0 0;
     }
     .header h1 {
       font-family: 'Orbitron', sans-serif;
       font-size: 28px;
-      color: var(--platinum);
+      color: var(--text-light);
       margin: 0;
       font-weight: bold;
       letter-spacing: 4px;
-      text-shadow: 0 0 30px var(--navy-glow);
+      text-shadow: 0 0 30px var(--player-glow);
     }
 
     .container {
@@ -232,11 +262,11 @@
       width: 95%;
       margin: 20px auto;
       padding: 20px 20px 25px;
-      background: rgba(10, 22, 40, 0.95);
-      border: 2px solid rgba(74, 138, 200, 0.15);
+      background: var(--bg-container);
+      border: 2px solid var(--border-light);
       border-radius: 20px;
       text-align: center;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
       backdrop-filter: blur(15px);
       display: none;
     }
@@ -262,19 +292,23 @@
       font-weight: bold;
       font-size: 13px;
     }
+    /* PLAYER - Navy/Blue/Sky Blue */
     .p {
-      background: var(--player-silver);
-      color: var(--navy-dark);
-      box-shadow: 0 0 20px rgba(200, 216, 232, 0.3);
+      background: var(--player-mid);
+      color: var(--text-light);
+      box-shadow: 0 0 20px var(--player-glow);
     }
+    /* BANKER - Red/Dark Red/Red-Pink */
     .b {
-      background: var(--banker-navy);
-      color: var(--crystal-white);
-      box-shadow: 0 0 20px var(--navy-glow);
+      background: var(--banker-mid);
+      color: var(--text-light);
+      box-shadow: 0 0 20px var(--banker-glow);
     }
+    /* TIE - Green/Dark Green/Light Green */
     .t {
-      background: var(--ice-blue);
-      color: var(--navy-dark);
+      background: var(--tie-mid);
+      color: var(--text-light);
+      box-shadow: 0 0 20px var(--tie-glow);
     }
 
     .prediction {
@@ -285,12 +319,12 @@
       height: 44px;
     }
     .prediction .pred-p {
-      color: var(--platinum);
-      text-shadow: 0 0 30px var(--navy-glow);
+      color: var(--player-sky);
+      text-shadow: 0 0 30px var(--player-glow);
     }
     .prediction .pred-b {
-      color: var(--ice-blue);
-      text-shadow: 0 0 30px var(--navy-glow);
+      color: var(--banker-light);
+      text-shadow: 0 0 30px var(--banker-glow);
     }
 
     .buttons {
@@ -300,22 +334,63 @@
       gap: 8px;
       flex-wrap: wrap;
     }
-    .buttons button {
-      background: rgba(10, 22, 40, 0.9);
-      color: var(--platinum);
-      border: 2px solid rgba(74, 138, 200, 0.2);
-      border-radius: 8px;
-      padding: 10px 16px;
-      font-size: 13px;
-      font-family: 'Orbitron';
-      cursor: pointer;
-      transition: all 0.3s ease;
+    /* PLAYER BUTTON */
+    .buttons button#btnPlayer {
+      background: var(--player-dark);
+      color: var(--text-light);
+      border: 2px solid var(--player-mid);
     }
-    .buttons button:hover:enabled {
-      background: var(--navy-light);
-      border-color: var(--platinum);
-      color: var(--crystal-white);
-      box-shadow: 0 0 30px var(--navy-glow);
+    .buttons button#btnPlayer:hover:enabled {
+      background: var(--player-light);
+      border-color: var(--player-sky);
+      box-shadow: 0 0 30px var(--player-glow);
+      transform: scale(1.05);
+    }
+    /* BANKER BUTTON */
+    .buttons button#btnBanker {
+      background: var(--banker-dark);
+      color: var(--text-light);
+      border: 2px solid var(--banker-mid);
+    }
+    .buttons button#btnBanker:hover:enabled {
+      background: var(--banker-light);
+      border-color: var(--banker-pink);
+      box-shadow: 0 0 30px var(--banker-glow);
+      transform: scale(1.05);
+    }
+    /* TIE BUTTON */
+    .buttons button#btnTie {
+      background: var(--tie-dark);
+      color: var(--text-light);
+      border: 2px solid var(--tie-mid);
+    }
+    .buttons button#btnTie:hover:enabled {
+      background: var(--tie-light);
+      border-color: var(--tie-light);
+      box-shadow: 0 0 30px var(--tie-glow);
+      transform: scale(1.05);
+    }
+    /* UNDO & RESET - GRAY */
+    .buttons button#btnUndo {
+      background: var(--gray-dark);
+      color: var(--text-light);
+      border: 2px solid var(--gray-mid);
+    }
+    .buttons button#btnUndo:hover:enabled {
+      background: var(--gray-mid);
+      border-color: var(--gray-light);
+      box-shadow: 0 0 30px var(--gray-glow);
+      transform: scale(1.05);
+    }
+    .buttons button#btnReset {
+      background: var(--gray-dark);
+      color: var(--text-light);
+      border: 2px solid var(--gray-mid);
+    }
+    .buttons button#btnReset:hover:enabled {
+      background: var(--gray-mid);
+      border-color: var(--gray-light);
+      box-shadow: 0 0 30px var(--gray-glow);
       transform: scale(1.05);
     }
     .buttons button:disabled {
@@ -323,66 +398,63 @@
       cursor: not-allowed;
       transform: none !important;
     }
-    .btn-reset {
-      border-color: var(--navy-light) !important;
-      color: var(--navy-light) !important;
-    }
     .btn-reset.blink-reset {
-      animation: blinkNavy 0.8s ease-in-out infinite;
-      border-color: var(--navy-light) !important;
-      box-shadow: 0 0 30px var(--navy-glow);
+      animation: blinkGray 0.8s ease-in-out infinite;
+      border-color: var(--gray-light) !important;
+      box-shadow: 0 0 30px var(--gray-glow);
     }
-    @keyframes blinkNavy {
-      0% { background: rgba(10, 22, 40, 0.9); color: var(--navy-light); }
-      50% { background: var(--navy-light); color: var(--crystal-white); box-shadow: 0 0 40px var(--navy-glow); }
-      100% { background: rgba(10, 22, 40, 0.9); color: var(--navy-light); }
+    @keyframes blinkGray {
+      0% { background: var(--gray-dark); color: var(--text-light); }
+      50% { background: var(--gray-mid); color: var(--text-light); box-shadow: 0 0 40px var(--gray-glow); }
+      100% { background: var(--gray-dark); color: var(--text-light); }
     }
 
     .capital-table table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 14px;
-      background: rgba(10, 22, 40, 0.9);
-      border: 2px solid rgba(74, 138, 200, 0.1);
+      background: rgba(26, 42, 58, 0.9);
+      border: 2px solid var(--border-light);
       table-layout: auto;
     }
     .capital-table th,
     .capital-table td {
       padding: 6px 2px;
       font-size: 13px;
-      border: 1px solid rgba(74, 138, 200, 0.08);
+      border: 1px solid var(--border-light);
       text-align: center;
       white-space: nowrap;
       width: auto;
-      color: var(--ice-blue);
+      color: var(--text-mid);
     }
     .capital-table th {
-      background: rgba(10, 22, 40, 0.95);
+      background: rgba(26, 42, 58, 0.95);
       font-family: 'Orbitron';
       font-size: 10px;
-      color: var(--platinum);
+      color: var(--text-light);
       padding: 6px 1px;
       letter-spacing: 0.3px;
-      border-color: rgba(74, 138, 200, 0.1);
     }
     .capital-table td:last-child {
       min-width: 30px;
     }
 
+    /* BET HIGHLIGHT - LIGHT YELLOW */
     .highlight {
-      background: rgba(74, 138, 200, 0.3) !important;
-      color: var(--crystal-white) !important;
-      animation: pulseNavy 1s infinite;
+      background: var(--highlight-yellow) !important;
+      color: var(--player-dark) !important;
+      font-weight: bold;
+      animation: pulseYellow 1s infinite;
     }
     .highlight-win {
-      color: var(--platinum) !important;
+      color: var(--highlight-yellow) !important;
       font-weight: bold;
-      text-shadow: 0 0 20px var(--navy-glow);
+      text-shadow: 0 0 20px var(--highlight-glow);
     }
-    @keyframes pulseNavy {
-      0% { opacity: 0.7; }
-      50% { opacity: 1; background: rgba(74, 138, 200, 0.5); }
-      100% { opacity: 0.7; }
+    @keyframes pulseYellow {
+      0% { opacity: 0.8; }
+      50% { opacity: 1; background: #FFE87A !important; }
+      100% { opacity: 0.8; }
     }
 
     .message-box {
@@ -392,14 +464,14 @@
       font-family: 'Orbitron';
     }
     .success {
-      color: var(--platinum);
+      color: var(--tie-light);
     }
     .fail {
-      color: var(--ice-blue);
+      color: var(--banker-light);
     }
 
     ::placeholder {
-      color: var(--ice-blue) !important;
+      color: var(--gray-light) !important;
     }
   </style>
 </head>
@@ -532,7 +604,7 @@
       if (isGameOver) return;
       if (sequence.length < 7) {
         currentPrediction = null;
-        box.innerHTML = "<span style='font-size:14px; color:var(--ice-blue);'>WAITING FOR DATA (NEED 7)</span>";
+        box.innerHTML = "<span style='font-size:14px; color:var(--gray-light);'>WAITING FOR DATA (NEED 7)</span>";
         updateBetTable();
         return;
       }
