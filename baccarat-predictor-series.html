@@ -127,7 +127,6 @@
       backdrop-filter: blur(12px);
     }
 
-    /* ----- HISTORY: only show last 10, but internal keeps full ----- */
     .sequence {
       margin:12px 0;
       min-height: 36px;
@@ -183,12 +182,27 @@
       border-color: var(--purple-glow);
       transform: scale(1.04);
     }
+    .buttons button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none !important;
+    }
     .btn-reset {
       border-color: #ffc107 !important;
       color: #ffc107 !important;
     }
+    /* Blinking highlight for RESET button when target reached */
+    .btn-reset.blink-reset {
+      animation: blinkGold 0.8s ease-in-out infinite;
+      border-color: #ffd700 !important;
+      box-shadow: 0 0 20px #ffd700;
+    }
+    @keyframes blinkGold {
+      0% { background: #111; color: #ffc107; border-color: #ffc107; }
+      50% { background: #ffc107; color: #111; border-color: #ffd700; box-shadow: 0 0 30px #ffd700; }
+      100% { background: #111; color: #ffc107; border-color: #ffc107; }
+    }
 
-    /* TABLE: tight fit */
     .capital-table table {
       width: 100%;
       border-collapse: collapse;
@@ -257,11 +271,11 @@
     <div id="predictionBox" class="prediction"></div>
 
     <div class="buttons">
-      <button onclick="recordResult('P')">PLAYER</button>
-      <button onclick="recordResult('B')">BANKER</button>
-      <button onclick="recordResult('T')">TIE</button>
-      <button onclick="undo()">UNDO</button>
-      <button onclick="resetAll()" class="btn-reset">RESET</button>
+      <button id="btnPlayer" onclick="recordResult('P')">PLAYER</button>
+      <button id="btnBanker" onclick="recordResult('B')">BANKER</button>
+      <button id="btnTie" onclick="recordResult('T')">TIE</button>
+      <button id="btnUndo" onclick="undo()">UNDO</button>
+      <button id="btnReset" onclick="resetAll()" class="btn-reset">RESET</button>
     </div>
 
     <div class="capital-table" id="betTableBox">
@@ -282,6 +296,7 @@
     let currentPrediction = null;
     let currentRow = 0;
     let currentCol = 0;
+    let isGameOver = false;  // track if target reached or limit reached
     const maxCols = 8;
     const maxRows = 10;
     const betValues = ["1", "2", "4", "8", "16", "32", "64", "ALL IN"];
@@ -303,11 +318,18 @@
         }
     }
 
-    // ----- updateHistory: show only last 10, but sequence keeps all -----
+    function setButtonsEnabled(enabled) {
+        document.getElementById('btnPlayer').disabled = !enabled;
+        document.getElementById('btnBanker').disabled = !enabled;
+        document.getElementById('btnTie').disabled = !enabled;
+        document.getElementById('btnUndo').disabled = !enabled;
+        // RESET button always enabled, but we manage blink separately
+        document.getElementById('btnReset').disabled = false;
+    }
+
     function updateHistory() {
         const box = document.getElementById('historyBox');
         box.innerHTML = '';
-        // display only the most recent 10 (or fewer if sequence shorter)
         const displaySeq = sequence.slice(-10);
         displaySeq.forEach(r => {
             const span = document.createElement('span');
@@ -319,6 +341,10 @@
 
     function updatePrediction() {
         const box = document.getElementById('predictionBox');
+        if (isGameOver) {
+            // keep last prediction visible but game frozen
+            return;
+        }
         if (sequence.length < 7) {
             currentPrediction = null;
             box.innerHTML = "<span style='font-size:14px; color:#888;'>WAITING FOR DATA (NEED 7)</span>";
@@ -357,7 +383,7 @@
         for (let r=0; r<maxRows; r++) {
             for (let c=0; c<maxCols; c++) rows[r].cells[c].classList.remove('highlight');
         }
-        if (currentPrediction && sequence.length >= 7 && rows[currentRow]) {
+        if (currentPrediction && sequence.length >= 7 && rows[currentRow] && !isGameOver) {
             rows[currentRow].cells[currentCol].classList.add('highlight');
         }
     }
@@ -371,23 +397,33 @@
     }
 
     function recordResult(res) {
+        if (isGameOver) return; // block all actions
+
         const prevPrediction = currentPrediction;
         if (prevPrediction && (res==='P'||res==='B')) {
             if (res === prevPrediction) {
                 markWin(currentRow);
                 currentRow++; currentCol=0;
                 if (currentRow >= maxRows) {
+                    // TARGET REACHED - game over
+                    isGameOver = true;
                     document.getElementById('betTableBox').style.display="none";
                     document.getElementById('finalMessage').innerHTML = "🎉 TARGET REACHED!";
                     document.getElementById('finalMessage').className = "message-box success";
+                    setButtonsEnabled(false);
+                    document.getElementById('btnReset').classList.add('blink-reset');
                     return;
                 }
             } else {
                 currentCol++;
                 if (currentCol >= maxCols) {
+                    // LIMIT REACHED - game over (failure)
+                    isGameOver = true;
                     document.getElementById('betTableBox').style.display="none";
                     document.getElementById('finalMessage').innerHTML = "❌ LIMIT REACHED";
                     document.getElementById('finalMessage').className = "message-box fail";
+                    setButtonsEnabled(false);
+                    // no blink for fail, but reset still works
                     return;
                 }
             }
@@ -398,6 +434,7 @@
     }
 
     function undo() {
+        if (isGameOver) return;
         if (sequence.length === 0) return;
         sequence.pop();
         const tempSeq = [...sequence];
@@ -406,12 +443,21 @@
     }
 
     function resetAll() {
-        sequence=[]; currentPrediction=null; currentRow=0; currentCol=0;
+        // Reset game state
+        isGameOver = false;
+        sequence = [];
+        currentPrediction = null;
+        currentRow = 0;
+        currentCol = 0;
         initBetTable();
-        document.getElementById('betTableBox').style.display="block";
-        document.getElementById('finalMessage').textContent="";
+        document.getElementById('betTableBox').style.display = "block";
+        document.getElementById('finalMessage').textContent = "";
         document.getElementById('finalMessage').className = "message-box";
-        updateHistory(); updatePrediction();
+        setButtonsEnabled(true);
+        // Remove blink from reset button
+        document.getElementById('btnReset').classList.remove('blink-reset');
+        updateHistory();
+        updatePrediction();
     }
 
     // SECURITY PROTOCOLS (unchanged)
@@ -431,6 +477,7 @@
     })();
 
     initBetTable(); updateHistory(); updatePrediction();
+    setButtonsEnabled(true);
 </script>
 </body>
 </html>
