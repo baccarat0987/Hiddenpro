@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Baccarat Pro Series | PREMIUM</title>
+  <title>Baccarat Pro Series</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
   <script>
@@ -63,7 +63,6 @@
       overflow-x: hidden;
     }
 
-    /* ensure body becomes flex when shown */
     body[style*="display: block"] {
       display: flex !important;
     }
@@ -74,7 +73,6 @@
       100% {background-position: 0% 50%;}
     }
 
-    /* EXIT BUTTON */
     .exit-nav {
       position: fixed;
       top: 15px;
@@ -99,7 +97,6 @@
       box-shadow: 0 0 10px #8a2be2;
     }
 
-    /* header compact */
     .header {
       text-align:center;
       padding: 20px 0 15px;
@@ -117,7 +114,6 @@
       text-shadow:0 0 15px var(--purple-glow);
     }
 
-    /* container: small, centered, card-like */
     .container {
       max-width: 620px;
       width: 95%;
@@ -191,36 +187,47 @@
       color: #ffc107 !important;
     }
 
+    /* ----- TABLE: TIGHT FIT FOR NUMBERS ----- */
     .capital-table table {
-      width:100%;
-      border-collapse:collapse;
+      width: 100%;
+      border-collapse: collapse;
       margin-top: 14px;
-      background:#111;
-      border:1px solid #333;
+      background: #111;
+      border: 1px solid #333;
+      table-layout: auto;  /* let columns size to content */
+    }
+    .capital-table th,
+    .capital-table td {
+      padding: 6px 2px;    /* minimal horizontal padding */
       font-size: 13px;
+      border: 1px solid #333;
+      text-align: center;
+      white-space: nowrap; /* prevent wrapping */
+      width: auto;         /* no forced width */
     }
-    .capital-table th, .capital-table td {
-      padding:8px 4px;
-      font-size:13px;
-      border:1px solid #333;
-      text-align:center;
-    }
+    /* make header compact */
     .capital-table th {
-      background:#222;
+      background: #222;
       font-family: 'Orbitron';
-      font-size: 11px;
+      font-size: 10px;
       color: var(--purple-glow);
+      padding: 6px 1px;
+      letter-spacing: 0.3px;
+    }
+    /* win column a bit tighter */
+    .capital-table td:last-child {
+      min-width: 30px;
     }
 
     .highlight {
-      background:#ffc107 !important;
-      color:#000 !important;
-      font-weight:bold;
+      background: #ffc107 !important;
+      color: #000 !important;
+      font-weight: bold;
       animation: pulse 1s infinite;
     }
     .highlight-win {
-      color:#00f693 !important;
-      font-weight:bold;
+      color: #00f693 !important;
+      font-weight: bold;
     }
     @keyframes pulse {
       0% { opacity: 1; }
@@ -236,11 +243,6 @@
     }
     .success { color:#00f693; }
     .fail { color:#f44336; }
-
-    /* small adjustment for spacing */
-    .container > *:last-child {
-      margin-bottom: 0;
-    }
   </style>
 </head>
 <body oncontextmenu="return false;">
