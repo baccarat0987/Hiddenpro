@@ -43,15 +43,15 @@
 
   <style>
     :root {
-      --deep-ice-navy: #0F1F3A;
-      --soft-navy: #1A2F4A;
-      --platinum: #E5E9ED;
+      --navy-dark: #0A1628;
+      --navy-mid: #1A2A4A;
+      --navy-light: #2A4A7A;
+      --navy-glow: rgba(74, 138, 200, 0.4);
+      --platinum: #C8D8E8;
       --crystal-white: #F0F4F8;
-      --steel-blue: #4A6A8A;
-      --bright-steel: #4A7A9A;
-      --mist-blue: #3A5A7A;
-      --silver-mist: #B8C4D0;
-      --glow-blue: rgba(74, 106, 138, 0.4);
+      --ice-blue: #6A9AC8;
+      --player-silver: #D0DCE8;
+      --banker-navy: #1A3A6A;
     }
 
     body {
@@ -61,7 +61,7 @@
       color: var(--crystal-white);
       font-size: 17px;
       display: none;
-      background: linear-gradient(-45deg, #0A1A2A, #0F1F3A, #1A2F4A, #0A1A2A);
+      background: linear-gradient(-45deg, #060D1A, #0A1628, #1A2A4A, #0A1628);
       background-size: 400% 400%;
       animation: galaxy 20s ease infinite;
       min-height: 100vh;
@@ -105,26 +105,26 @@
       display: none;
     }
     .welcome-box {
-      background: rgba(10, 20, 40, 0.98);
-      border: 1px solid rgba(74, 106, 138, 0.3);
+      background: rgba(10, 22, 40, 0.98);
+      border: 2px solid rgba(74, 138, 200, 0.3);
       border-radius: 25px;
       padding: 50px 45px 40px;
       max-width: 420px;
       width: 90%;
       text-align: center;
-      box-shadow: 0 0 80px rgba(74, 106, 138, 0.15);
+      box-shadow: 0 0 80px rgba(74, 138, 200, 0.15);
     }
     .welcome-box h1 {
       font-family: 'Orbitron', sans-serif;
       font-size: 38px;
       color: var(--platinum);
       margin: 0 0 10px 0;
-      text-shadow: 0 0 40px rgba(74, 106, 138, 0.2);
+      text-shadow: 0 0 40px var(--navy-glow);
       letter-spacing: 4px;
     }
     .welcome-box .subtitle {
       font-size: 14px;
-      color: var(--silver-mist);
+      color: var(--ice-blue);
       margin-bottom: 30px;
       font-family: 'Roboto', sans-serif;
       letter-spacing: 2px;
@@ -144,7 +144,7 @@
       font-size: 20px;
       font-family: 'Orbitron', sans-serif;
       background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(74, 106, 138, 0.2);
+      border: 2px solid rgba(74, 138, 200, 0.2);
       border-radius: 12px;
       color: var(--crystal-white);
       outline: none;
@@ -153,11 +153,11 @@
       text-align: center;
     }
     .welcome-box input:focus {
-      border-color: var(--steel-blue);
-      box-shadow: 0 0 30px var(--glow-blue);
+      border-color: var(--navy-light);
+      box-shadow: 0 0 30px var(--navy-glow);
     }
     .welcome-box input::placeholder {
-      color: var(--silver-mist);
+      color: var(--ice-blue);
       font-size: 16px;
     }
     .welcome-box .confirm-btn {
@@ -167,8 +167,8 @@
       font-family: 'Orbitron', sans-serif;
       font-size: 18px;
       font-weight: bold;
-      background: linear-gradient(135deg, var(--steel-blue), var(--bright-steel));
-      border: none;
+      background: linear-gradient(135deg, var(--navy-light), var(--navy-mid));
+      border: 2px solid rgba(74, 138, 200, 0.3);
       border-radius: 12px;
       color: var(--crystal-white);
       cursor: pointer;
@@ -178,7 +178,8 @@
     }
     .welcome-box .confirm-btn:hover {
       transform: scale(1.03);
-      box-shadow: 0 0 40px var(--glow-blue);
+      box-shadow: 0 0 40px var(--navy-glow);
+      border-color: var(--platinum);
     }
     .welcome-box .confirm-btn:active {
       transform: scale(0.97);
@@ -191,29 +192,29 @@
       z-index: 1000;
     }
     .exit-btn {
-      background: rgba(15, 31, 58, 0.9);
+      background: rgba(10, 22, 40, 0.9);
       color: var(--platinum);
       padding: 8px 15px;
       border-radius: 5px;
       text-decoration: none;
       font-weight: bold;
-      border: 1px solid rgba(74, 106, 138, 0.15);
+      border: 1px solid rgba(74, 138, 200, 0.2);
       font-size: 12px;
       font-family: 'Orbitron';
       transition: 0.3s;
     }
     .exit-btn:hover {
-      background: var(--steel-blue);
+      background: var(--navy-light);
       border-color: var(--platinum);
       color: var(--crystal-white);
-      box-shadow: 0 0 30px var(--glow-blue);
+      box-shadow: 0 0 30px var(--navy-glow);
     }
 
     .header {
       text-align: center;
       padding: 20px 0 15px;
       background: rgba(0, 0, 0, 0.4);
-      border-bottom: 1px solid rgba(74, 106, 138, 0.2);
+      border-bottom: 2px solid rgba(74, 138, 200, 0.2);
       border-radius: 15px 15px 0 0;
     }
     .header h1 {
@@ -223,7 +224,7 @@
       margin: 0;
       font-weight: bold;
       letter-spacing: 4px;
-      text-shadow: 0 0 30px var(--glow-blue);
+      text-shadow: 0 0 30px var(--navy-glow);
     }
 
     .container {
@@ -231,8 +232,8 @@
       width: 95%;
       margin: 20px auto;
       padding: 20px 20px 25px;
-      background: rgba(15, 31, 58, 0.95);
-      border: 1px solid rgba(74, 106, 138, 0.2);
+      background: rgba(10, 22, 40, 0.95);
+      border: 2px solid rgba(74, 138, 200, 0.15);
       border-radius: 20px;
       text-align: center;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
@@ -262,18 +263,18 @@
       font-size: 13px;
     }
     .p {
-      background: var(--steel-blue);
-      color: var(--crystal-white);
-      box-shadow: 0 0 20px var(--glow-blue);
+      background: var(--player-silver);
+      color: var(--navy-dark);
+      box-shadow: 0 0 20px rgba(200, 216, 232, 0.3);
     }
     .b {
-      background: var(--mist-blue);
+      background: var(--banker-navy);
       color: var(--crystal-white);
-      box-shadow: 0 0 20px rgba(58, 90, 122, 0.4);
+      box-shadow: 0 0 20px var(--navy-glow);
     }
     .t {
-      background: var(--silver-mist);
-      color: var(--deep-ice-navy);
+      background: var(--ice-blue);
+      color: var(--navy-dark);
     }
 
     .prediction {
@@ -285,11 +286,11 @@
     }
     .prediction .pred-p {
       color: var(--platinum);
-      text-shadow: 0 0 30px var(--glow-blue);
+      text-shadow: 0 0 30px var(--navy-glow);
     }
     .prediction .pred-b {
-      color: var(--steel-blue);
-      text-shadow: 0 0 30px var(--glow-blue);
+      color: var(--ice-blue);
+      text-shadow: 0 0 30px var(--navy-glow);
     }
 
     .buttons {
@@ -300,9 +301,9 @@
       flex-wrap: wrap;
     }
     .buttons button {
-      background: rgba(15, 31, 58, 0.9);
+      background: rgba(10, 22, 40, 0.9);
       color: var(--platinum);
-      border: 1px solid rgba(74, 106, 138, 0.2);
+      border: 2px solid rgba(74, 138, 200, 0.2);
       border-radius: 8px;
       padding: 10px 16px;
       font-size: 13px;
@@ -311,10 +312,10 @@
       transition: all 0.3s ease;
     }
     .buttons button:hover:enabled {
-      background: var(--steel-blue);
+      background: var(--navy-light);
       border-color: var(--platinum);
       color: var(--crystal-white);
-      box-shadow: 0 0 30px var(--glow-blue);
+      box-shadow: 0 0 30px var(--navy-glow);
       transform: scale(1.05);
     }
     .buttons button:disabled {
@@ -323,64 +324,64 @@
       transform: none !important;
     }
     .btn-reset {
-      border-color: var(--steel-blue) !important;
-      color: var(--steel-blue) !important;
+      border-color: var(--navy-light) !important;
+      color: var(--navy-light) !important;
     }
     .btn-reset.blink-reset {
-      animation: blinkBlue 0.8s ease-in-out infinite;
-      border-color: var(--steel-blue) !important;
-      box-shadow: 0 0 30px var(--glow-blue);
+      animation: blinkNavy 0.8s ease-in-out infinite;
+      border-color: var(--navy-light) !important;
+      box-shadow: 0 0 30px var(--navy-glow);
     }
-    @keyframes blinkBlue {
-      0% { background: rgba(15, 31, 58, 0.9); color: var(--steel-blue); }
-      50% { background: var(--steel-blue); color: var(--crystal-white); box-shadow: 0 0 40px var(--glow-blue); }
-      100% { background: rgba(15, 31, 58, 0.9); color: var(--steel-blue); }
+    @keyframes blinkNavy {
+      0% { background: rgba(10, 22, 40, 0.9); color: var(--navy-light); }
+      50% { background: var(--navy-light); color: var(--crystal-white); box-shadow: 0 0 40px var(--navy-glow); }
+      100% { background: rgba(10, 22, 40, 0.9); color: var(--navy-light); }
     }
 
     .capital-table table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 14px;
-      background: rgba(15, 31, 58, 0.9);
-      border: 1px solid rgba(74, 106, 138, 0.1);
+      background: rgba(10, 22, 40, 0.9);
+      border: 2px solid rgba(74, 138, 200, 0.1);
       table-layout: auto;
     }
     .capital-table th,
     .capital-table td {
       padding: 6px 2px;
       font-size: 13px;
-      border: 1px solid rgba(74, 106, 138, 0.08);
+      border: 1px solid rgba(74, 138, 200, 0.08);
       text-align: center;
       white-space: nowrap;
       width: auto;
-      color: var(--silver-mist);
+      color: var(--ice-blue);
     }
     .capital-table th {
-      background: rgba(10, 20, 40, 0.95);
+      background: rgba(10, 22, 40, 0.95);
       font-family: 'Orbitron';
       font-size: 10px;
       color: var(--platinum);
       padding: 6px 1px;
       letter-spacing: 0.3px;
-      border-color: rgba(74, 106, 138, 0.1);
+      border-color: rgba(74, 138, 200, 0.1);
     }
     .capital-table td:last-child {
       min-width: 30px;
     }
 
     .highlight {
-      background: rgba(74, 106, 138, 0.3) !important;
+      background: rgba(74, 138, 200, 0.3) !important;
       color: var(--crystal-white) !important;
-      animation: pulseBlue 1s infinite;
+      animation: pulseNavy 1s infinite;
     }
     .highlight-win {
-      color: var(--crystal-white) !important;
+      color: var(--platinum) !important;
       font-weight: bold;
-      text-shadow: 0 0 20px var(--glow-blue);
+      text-shadow: 0 0 20px var(--navy-glow);
     }
-    @keyframes pulseBlue {
+    @keyframes pulseNavy {
       0% { opacity: 0.7; }
-      50% { opacity: 1; background: rgba(74, 106, 138, 0.5); }
+      50% { opacity: 1; background: rgba(74, 138, 200, 0.5); }
       100% { opacity: 0.7; }
     }
 
@@ -394,11 +395,11 @@
       color: var(--platinum);
     }
     .fail {
-      color: var(--steel-blue);
+      color: var(--ice-blue);
     }
 
     ::placeholder {
-      color: var(--silver-mist) !important;
+      color: var(--ice-blue) !important;
     }
   </style>
 </head>
@@ -531,7 +532,7 @@
       if (isGameOver) return;
       if (sequence.length < 7) {
         currentPrediction = null;
-        box.innerHTML = "<span style='font-size:14px; color:var(--silver-mist);'>WAITING FOR DATA (NEED 7)</span>";
+        box.innerHTML = "<span style='font-size:14px; color:var(--ice-blue);'>WAITING FOR DATA (NEED 7)</span>";
         updateBetTable();
         return;
       }
