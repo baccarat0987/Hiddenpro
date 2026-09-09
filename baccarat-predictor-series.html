@@ -49,9 +49,11 @@
     }
 
     body {
-      margin:0; padding:0;
-      font-family:'Roboto',sans-serif;
-      color:#eee; font-size:17px;
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+      color: #eee;
+      font-size: 17px;
       display: none;
       background: linear-gradient(-45deg, #1a0026, #2e004f, #4b0082, #310652);
       background-size: 400% 400%;
@@ -61,6 +63,7 @@
       align-items: center;
       justify-content: center;
       overflow-x: hidden;
+      position: relative;
     }
 
     body[style*="display: block"] {
@@ -68,9 +71,111 @@
     }
 
     @keyframes galaxy {
-      0% {background-position: 0% 50%;}
-      50% {background-position: 100% 50%;}
-      100% {background-position: 0% 50%;}
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* WELCOME OVERLAY */
+    #welcomeOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(15px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      animation: fadeIn 0.5s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    #welcomeOverlay.hidden {
+      display: none;
+    }
+    .welcome-box {
+      background: rgba(20, 15, 35, 0.95);
+      border: 2px solid var(--purple-glow);
+      border-radius: 25px;
+      padding: 50px 45px 40px;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 0 60px rgba(187, 134, 252, 0.3);
+    }
+    .welcome-box h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 38px;
+      color: #fff;
+      margin: 0 0 10px 0;
+      text-shadow: 0 0 30px var(--purple-glow);
+      letter-spacing: 4px;
+    }
+    .welcome-box .subtitle {
+      font-size: 14px;
+      color: #aaa;
+      margin-bottom: 30px;
+      font-family: 'Roboto', sans-serif;
+      letter-spacing: 2px;
+    }
+    .welcome-box label {
+      display: block;
+      font-size: 14px;
+      color: #ccc;
+      text-align: left;
+      margin-bottom: 8px;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+    .welcome-box input {
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 20px;
+      font-family: 'Orbitron', sans-serif;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid #555;
+      border-radius: 12px;
+      color: #fff;
+      outline: none;
+      transition: 0.3s;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .welcome-box input:focus {
+      border-color: var(--purple-glow);
+      box-shadow: 0 0 20px rgba(187, 134, 252, 0.3);
+    }
+    .welcome-box input::placeholder {
+      color: #666;
+      font-size: 16px;
+    }
+    .welcome-box .confirm-btn {
+      margin-top: 25px;
+      width: 100%;
+      padding: 16px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      cursor: pointer;
+      transition: 0.3s;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+    .welcome-box .confirm-btn:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 30px rgba(168, 85, 247, 0.5);
+    }
+    .welcome-box .confirm-btn:active {
+      transform: scale(0.97);
     }
 
     .exit-nav {
@@ -80,13 +185,13 @@
       z-index: 1000;
     }
     .exit-btn {
-      background: rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.1);
       color: white;
       padding: 8px 15px;
       border-radius: 5px;
       text-decoration: none;
       font-weight: bold;
-      border: 1px solid rgba(255,255,255,0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       font-size: 12px;
       font-family: 'Orbitron';
       transition: 0.3s;
@@ -98,20 +203,20 @@
     }
 
     .header {
-      text-align:center;
+      text-align: center;
       padding: 20px 0 15px;
-      background:rgba(0,0,0,0.6);
-      border-bottom:1px solid rgba(255,255,255,0.1);
+      background: rgba(0, 0, 0, 0.6);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 15px 15px 0 0;
     }
     .header h1 {
-      font-family:'Orbitron',sans-serif;
-      font-size:28px;
-      color:#ffffff;
-      margin:0;
-      font-weight:bold;
-      letter-spacing:2px;
-      text-shadow:0 0 15px var(--purple-glow);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      color: #ffffff;
+      margin: 0;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-shadow: 0 0 15px var(--purple-glow);
     }
 
     .container {
@@ -120,15 +225,19 @@
       margin: 20px auto;
       padding: 20px 20px 25px;
       background: rgba(15, 15, 25, 0.92);
-      border:1px solid #444;
+      border: 1px solid #444;
       border-radius: 20px;
-      text-align:center;
-      box-shadow:0 15px 45px rgba(0,0,0,0.9);
+      text-align: center;
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.9);
       backdrop-filter: blur(12px);
+      display: none;
+    }
+    .container.active {
+      display: block;
     }
 
     .sequence {
-      margin:12px 0;
+      margin: 12px 0;
       min-height: 36px;
       display: flex;
       justify-content: center;
@@ -136,49 +245,66 @@
       gap: 4px;
     }
     .sequence span {
-      display:inline-block;
-      width:28px;
-      height:28px;
-      line-height:28px;
-      text-align:center;
-      border-radius:50%;
-      font-weight:bold;
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
+      text-align: center;
+      border-radius: 50%;
+      font-weight: bold;
       font-size: 13px;
     }
-    .p { background: var(--player-blue); color:#fff; box-shadow: 0 0 10px var(--player-blue); } 
-    .b { background: var(--banker-red); color:#fff; box-shadow: 0 0 10px var(--banker-red); }
-    .t { background:#ffc107; color:#000; }
+    .p {
+      background: var(--player-blue);
+      color: #fff;
+      box-shadow: 0 0 10px var(--player-blue);
+    }
+    .b {
+      background: var(--banker-red);
+      color: #fff;
+      box-shadow: 0 0 10px var(--banker-red);
+    }
+    .t {
+      background: #ffc107;
+      color: #000;
+    }
 
     .prediction {
-      margin:16px 0;
-      font-size:28px;
-      font-weight:900;
+      margin: 16px 0;
+      font-size: 28px;
+      font-weight: 900;
       font-family: 'Orbitron';
       height: 44px;
     }
-    .prediction .pred-p { color: var(--player-blue); text-shadow: 0 0 15px var(--player-blue); }
-    .prediction .pred-b { color: var(--banker-red); text-shadow: 0 0 15px var(--banker-red); }
+    .prediction .pred-p {
+      color: var(--player-blue);
+      text-shadow: 0 0 15px var(--player-blue);
+    }
+    .prediction .pred-b {
+      color: var(--banker-red);
+      text-shadow: 0 0 15px var(--banker-red);
+    }
 
     .buttons {
-      margin:14px 0 10px;
+      margin: 14px 0 10px;
       display: flex;
       justify-content: center;
       gap: 8px;
       flex-wrap: wrap;
     }
     .buttons button {
-      background:#111;
-      color:#fff;
-      border:1px solid #555;
-      border-radius:8px;
-      padding:10px 16px;
-      font-size:13px;
-      font-family:'Orbitron';
-      cursor:pointer;
+      background: #111;
+      color: #fff;
+      border: 1px solid #555;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-family: 'Orbitron';
+      cursor: pointer;
       transition: 0.2s;
     }
     .buttons button:hover:enabled {
-      background:#333;
+      background: #333;
       border-color: var(--purple-glow);
       transform: scale(1.04);
     }
@@ -191,7 +317,6 @@
       border-color: #ffc107 !important;
       color: #ffc107 !important;
     }
-    /* Blinking highlight for RESET button when target reached */
     .btn-reset.blink-reset {
       animation: blinkGold 0.8s ease-in-out infinite;
       border-color: #ffd700 !important;
@@ -249,22 +374,37 @@
     }
 
     .message-box {
-      margin-top:16px;
-      font-size:20px;
-      font-weight:bold;
+      margin-top: 16px;
+      font-size: 20px;
+      font-weight: bold;
       font-family: 'Orbitron';
     }
-    .success { color:#00f693; }
-    .fail { color:#f44336; }
+    .success {
+      color: #00f693;
+    }
+    .fail {
+      color: #f44336;
+    }
   </style>
 </head>
 <body oncontextmenu="return false;">
+
+  <!-- WELCOME OVERLAY -->
+  <div id="welcomeOverlay">
+    <div class="welcome-box">
+      <h1>WELCOME</h1>
+      <div class="subtitle">✦ BACCARAT PRO SERIES ✦</div>
+      <label for="baseBetInput">ENTER BASE BET</label>
+      <input type="text" id="baseBetInput" placeholder="e.g. 10, 25.50, 100" value="10">
+      <button class="confirm-btn" id="confirmBtn">▶ CONFIRM</button>
+    </div>
+  </div>
 
   <div class="exit-nav">
     <a href="index.html" class="exit-btn">EXIT TERMINAL</a>
   </div>
 
-  <div class="container">
+  <div class="container" id="mainApp">
     <div class="header"><h1>Baccarat Pro Series</h1></div>
 
     <div class="sequence" id="historyBox"></div>
@@ -291,193 +431,235 @@
     <div id="finalMessage" class="message-box"></div>
   </div>
 
-<script>
+  <script>
     let sequence = [];
     let currentPrediction = null;
     let currentRow = 0;
     let currentCol = 0;
-    let isGameOver = false;  // track if target reached or limit reached
+    let isGameOver = false;
+    let baseBet = 10; // default
     const maxCols = 8;
     const maxRows = 10;
-    const betValues = ["1", "2", "4", "8", "16", "32", "64", "ALL IN"];
 
     function initBetTable() {
-        const tbody = document.getElementById('betBody');
-        tbody.innerHTML = '';
-        for (let r=0; r<maxRows; r++) {
-            const tr = document.createElement('tr');
-            for (let c=0; c<maxCols; c++) {
-                const td = document.createElement('td');
-                td.textContent = betValues[c];
-                tr.appendChild(td);
-            }
-            const winTd = document.createElement('td');
-            winTd.textContent = '';
-            tr.appendChild(winTd);
-            tbody.appendChild(tr);
+      const tbody = document.getElementById('betBody');
+      tbody.innerHTML = '';
+      const betValues = getBetValues();
+      for (let r = 0; r < maxRows; r++) {
+        const tr = document.createElement('tr');
+        for (let c = 0; c < maxCols; c++) {
+          const td = document.createElement('td');
+          td.textContent = betValues[c];
+          tr.appendChild(td);
         }
+        const winTd = document.createElement('td');
+        winTd.textContent = '';
+        tr.appendChild(winTd);
+        tbody.appendChild(tr);
+      }
+    }
+
+    function getBetValues() {
+      const b = parseFloat(baseBet);
+      if (isNaN(b) || b <= 0) return ["1", "2", "4", "8", "16", "32", "64", "ALL IN"];
+      return [
+        b.toFixed(2),
+        (b * 2).toFixed(2),
+        (b * 4).toFixed(2),
+        (b * 8).toFixed(2),
+        (b * 16).toFixed(2),
+        (b * 32).toFixed(2),
+        (b * 64).toFixed(2),
+        "ALL IN"
+      ];
     }
 
     function setButtonsEnabled(enabled) {
-        document.getElementById('btnPlayer').disabled = !enabled;
-        document.getElementById('btnBanker').disabled = !enabled;
-        document.getElementById('btnTie').disabled = !enabled;
-        document.getElementById('btnUndo').disabled = !enabled;
-        // RESET button always enabled, but we manage blink separately
-        document.getElementById('btnReset').disabled = false;
+      document.getElementById('btnPlayer').disabled = !enabled;
+      document.getElementById('btnBanker').disabled = !enabled;
+      document.getElementById('btnTie').disabled = !enabled;
+      document.getElementById('btnUndo').disabled = !enabled;
+      document.getElementById('btnReset').disabled = false;
     }
 
     function updateHistory() {
-        const box = document.getElementById('historyBox');
-        box.innerHTML = '';
-        const displaySeq = sequence.slice(-10);
-        displaySeq.forEach(r => {
-            const span = document.createElement('span');
-            span.className = r.toLowerCase();
-            span.textContent = r;
-            box.appendChild(span);
-        });
+      const box = document.getElementById('historyBox');
+      box.innerHTML = '';
+      const displaySeq = sequence.slice(-10);
+      displaySeq.forEach(r => {
+        const span = document.createElement('span');
+        span.className = r.toLowerCase();
+        span.textContent = r;
+        box.appendChild(span);
+      });
     }
 
     function updatePrediction() {
-        const box = document.getElementById('predictionBox');
-        if (isGameOver) {
-            // keep last prediction visible but game frozen
-            return;
-        }
-        if (sequence.length < 7) {
-            currentPrediction = null;
-            box.innerHTML = "<span style='font-size:14px; color:#888;'>WAITING FOR DATA (NEED 7)</span>";
-            updateBetTable();
-            return;
-        }
-        
-        const windowSizes = [5,4,3];
-        let found = false;
-        let nextChoices = [];
-        for (let w of windowSizes) {
-            if (sequence.length >= w) {
-                const lastForm = sequence.slice(-w).join("-");
-                for (let i=0; i <= sequence.length - w - 1; i++) {
-                    if (sequence.slice(i, i+w).join("-") === lastForm) {
-                        const nextVal = sequence[i+w];
-                        if (nextVal && nextVal !== 'T') nextChoices.push(nextVal);
-                    }
-                }
-                if (nextChoices.length > 0) { found = true; break; }
-            }
-        }
-        
-        currentPrediction = found ? (nextChoices.filter(x=>x==='P').length >= nextChoices.filter(x=>x==='B').length ? 'P' : 'B') : 'B';
-        
-        if (currentPrediction === 'P') {
-            box.innerHTML = "<span class='pred-p'>PLAYER</span>";
-        } else {
-            box.innerHTML = "<span class='pred-b'>BANKER</span>";
-        }
+      const box = document.getElementById('predictionBox');
+      if (isGameOver) return;
+      if (sequence.length < 7) {
+        currentPrediction = null;
+        box.innerHTML = "<span style='font-size:14px; color:#888;'>WAITING FOR DATA (NEED 7)</span>";
         updateBetTable();
+        return;
+      }
+
+      const windowSizes = [5, 4, 3];
+      let found = false;
+      let nextChoices = [];
+      for (let w of windowSizes) {
+        if (sequence.length >= w) {
+          const lastForm = sequence.slice(-w).join("-");
+          for (let i = 0; i <= sequence.length - w - 1; i++) {
+            if (sequence.slice(i, i + w).join("-") === lastForm) {
+              const nextVal = sequence[i + w];
+              if (nextVal && nextVal !== 'T') nextChoices.push(nextVal);
+            }
+          }
+          if (nextChoices.length > 0) { found = true; break; }
+        }
+      }
+
+      currentPrediction = found ? (nextChoices.filter(x => x === 'P').length >= nextChoices.filter(x => x === 'B').length ? 'P' : 'B') : 'B';
+
+      if (currentPrediction === 'P') {
+        box.innerHTML = "<span class='pred-p'>PLAYER</span>";
+      } else {
+        box.innerHTML = "<span class='pred-b'>BANKER</span>";
+      }
+      updateBetTable();
     }
 
     function updateBetTable() {
-        const rows = document.getElementById('betBody').rows;
-        for (let r=0; r<maxRows; r++) {
-            for (let c=0; c<maxCols; c++) rows[r].cells[c].classList.remove('highlight');
-        }
-        if (currentPrediction && sequence.length >= 7 && rows[currentRow] && !isGameOver) {
-            rows[currentRow].cells[currentCol].classList.add('highlight');
-        }
+      const rows = document.getElementById('betBody').rows;
+      for (let r = 0; r < maxRows; r++) {
+        for (let c = 0; c < maxCols; c++) rows[r].cells[c].classList.remove('highlight');
+      }
+      if (currentPrediction && sequence.length >= 7 && rows[currentRow] && !isGameOver) {
+        rows[currentRow].cells[currentCol].classList.add('highlight');
+      }
     }
 
     function markWin(rowIndex) {
-        const rows = document.getElementById('betBody').rows;
-        if (rows[rowIndex]) {
-            rows[rowIndex].cells[maxCols].innerHTML = "✔";
-            rows[rowIndex].cells[maxCols].classList.add('highlight-win');
-        }
+      const rows = document.getElementById('betBody').rows;
+      if (rows[rowIndex]) {
+        rows[rowIndex].cells[maxCols].innerHTML = "✔";
+        rows[rowIndex].cells[maxCols].classList.add('highlight-win');
+      }
     }
 
     function recordResult(res) {
-        if (isGameOver) return; // block all actions
+      if (isGameOver) return;
 
-        const prevPrediction = currentPrediction;
-        if (prevPrediction && (res==='P'||res==='B')) {
-            if (res === prevPrediction) {
-                markWin(currentRow);
-                currentRow++; currentCol=0;
-                if (currentRow >= maxRows) {
-                    // TARGET REACHED - game over
-                    isGameOver = true;
-                    document.getElementById('betTableBox').style.display="none";
-                    document.getElementById('finalMessage').innerHTML = "🎉 TARGET REACHED!";
-                    document.getElementById('finalMessage').className = "message-box success";
-                    setButtonsEnabled(false);
-                    document.getElementById('btnReset').classList.add('blink-reset');
-                    return;
-                }
-            } else {
-                currentCol++;
-                if (currentCol >= maxCols) {
-                    // LIMIT REACHED - game over (failure)
-                    isGameOver = true;
-                    document.getElementById('betTableBox').style.display="none";
-                    document.getElementById('finalMessage').innerHTML = "❌ LIMIT REACHED";
-                    document.getElementById('finalMessage').className = "message-box fail";
-                    setButtonsEnabled(false);
-                    // no blink for fail, but reset still works
-                    return;
-                }
-            }
+      const prevPrediction = currentPrediction;
+      if (prevPrediction && (res === 'P' || res === 'B')) {
+        if (res === prevPrediction) {
+          markWin(currentRow);
+          currentRow++;
+          currentCol = 0;
+          if (currentRow >= maxRows) {
+            isGameOver = true;
+            document.getElementById('betTableBox').style.display = "none";
+            document.getElementById('finalMessage').innerHTML = "🎉 TARGET REACHED!";
+            document.getElementById('finalMessage').className = "message-box success";
+            setButtonsEnabled(false);
+            document.getElementById('btnReset').classList.add('blink-reset');
+            return;
+          }
+        } else {
+          currentCol++;
+          if (currentCol >= maxCols) {
+            isGameOver = true;
+            document.getElementById('betTableBox').style.display = "none";
+            document.getElementById('finalMessage').innerHTML = "❌ LIMIT REACHED";
+            document.getElementById('finalMessage').className = "message-box fail";
+            setButtonsEnabled(false);
+            return;
+          }
         }
-        sequence.push(res);
-        updateHistory();
-        updatePrediction();
+      }
+      sequence.push(res);
+      updateHistory();
+      updatePrediction();
     }
 
     function undo() {
-        if (isGameOver) return;
-        if (sequence.length === 0) return;
-        sequence.pop();
-        const tempSeq = [...sequence];
-        resetAll();
-        tempSeq.forEach(r => recordResult(r));
+      if (isGameOver) return;
+      if (sequence.length === 0) return;
+      sequence.pop();
+      const tempSeq = [...sequence];
+      resetAll();
+      tempSeq.forEach(r => recordResult(r));
     }
 
     function resetAll() {
-        // Reset game state
-        isGameOver = false;
-        sequence = [];
-        currentPrediction = null;
-        currentRow = 0;
-        currentCol = 0;
-        initBetTable();
-        document.getElementById('betTableBox').style.display = "block";
-        document.getElementById('finalMessage').textContent = "";
-        document.getElementById('finalMessage').className = "message-box";
-        setButtonsEnabled(true);
-        // Remove blink from reset button
-        document.getElementById('btnReset').classList.remove('blink-reset');
-        updateHistory();
-        updatePrediction();
+      isGameOver = false;
+      sequence = [];
+      currentPrediction = null;
+      currentRow = 0;
+      currentCol = 0;
+      initBetTable();
+      document.getElementById('betTableBox').style.display = "block";
+      document.getElementById('finalMessage').textContent = "";
+      document.getElementById('finalMessage').className = "message-box";
+      setButtonsEnabled(true);
+      document.getElementById('btnReset').classList.remove('blink-reset');
+      updateHistory();
+      updatePrediction();
     }
 
-    // SECURITY PROTOCOLS (unchanged)
+    // WELCOME LOGIC
+    document.getElementById('confirmBtn').addEventListener('click', function() {
+      const input = document.getElementById('baseBetInput');
+      const rawValue = input.value.trim();
+      if (rawValue === '') {
+        alert('Please enter a base bet amount.');
+        return;
+      }
+      const num = parseFloat(rawValue);
+      if (isNaN(num) || num <= 0) {
+        alert('Please enter a valid positive number.');
+        return;
+      }
+      baseBet = num;
+      // Hide overlay, show main app
+      document.getElementById('welcomeOverlay').classList.add('hidden');
+      document.getElementById('mainApp').classList.add('active');
+      // Initialize with new base bet
+      initBetTable();
+      updateHistory();
+      updatePrediction();
+      setButtonsEnabled(true);
+    });
+
+    // Allow Enter key on input
+    document.getElementById('baseBetInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('confirmBtn').click();
+      }
+    });
+
+    // SECURITY PROTOCOLS
     (function() {
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.onkeydown = function(e) {
-            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) || (e.ctrlKey && e.keyCode == 85)) {
-                return false;
-            }
-        };
-        setInterval(function() {
-            (function() { return false; }['constructor']('debugger')['call']());
-        }, 50);
-        if (typeof console !== "undefined") {
-            Object.keys(console).forEach(m => console[m] = function() {});
+      document.addEventListener('contextmenu', e => e.preventDefault());
+      document.onkeydown = function(e) {
+        if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) || (e.ctrlKey && e.keyCode == 85)) {
+          return false;
         }
+      };
+      setInterval(function() {
+        (function() { return false; }['constructor']('debugger')['call']());
+      }, 50);
+      if (typeof console !== "undefined") {
+        Object.keys(console).forEach(m => console[m] = function() {});
+      }
     })();
 
-    initBetTable(); updateHistory(); updatePrediction();
+    // Initial setup (will be replaced after welcome)
+    initBetTable();
+    updateHistory();
+    updatePrediction();
     setButtonsEnabled(true);
-</script>
+  </script>
 </body>
 </html>
