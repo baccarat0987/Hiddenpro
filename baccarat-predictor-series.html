@@ -438,6 +438,7 @@
     let currentCol = 0;
     let isGameOver = false;
     let baseBet = 10; // default
+    let baseBetString = "10"; // preserve original format
     const maxCols = 8;
     const maxRows = 10;
 
@@ -460,18 +461,38 @@
     }
 
     function getBetValues() {
+      // Use baseBetString to preserve exact format
       const b = parseFloat(baseBet);
       if (isNaN(b) || b <= 0) return ["1", "2", "4", "8", "16", "32", "64", "ALL IN"];
-      return [
-        b.toFixed(2),
-        (b * 2).toFixed(2),
-        (b * 4).toFixed(2),
-        (b * 8).toFixed(2),
-        (b * 16).toFixed(2),
-        (b * 32).toFixed(2),
-        (b * 64).toFixed(2),
-        "ALL IN"
-      ];
+      
+      // Check if input was decimal or not based on original string
+      const hasDecimal = baseBetString.includes('.');
+      
+      if (hasDecimal) {
+        // Keep decimal format with 2 decimal places
+        return [
+          b.toFixed(2),
+          (b * 2).toFixed(2),
+          (b * 4).toFixed(2),
+          (b * 8).toFixed(2),
+          (b * 16).toFixed(2),
+          (b * 32).toFixed(2),
+          (b * 64).toFixed(2),
+          "ALL IN"
+        ];
+      } else {
+        // Non-decimal format - no decimal places
+        return [
+          Math.round(b).toString(),
+          Math.round(b * 2).toString(),
+          Math.round(b * 4).toString(),
+          Math.round(b * 8).toString(),
+          Math.round(b * 16).toString(),
+          Math.round(b * 32).toString(),
+          Math.round(b * 64).toString(),
+          "ALL IN"
+        ];
+      }
     }
 
     function setButtonsEnabled(enabled) {
@@ -622,6 +643,8 @@
         return;
       }
       baseBet = num;
+      baseBetString = rawValue; // preserve exact input format
+      
       // Hide overlay, show main app
       document.getElementById('welcomeOverlay').classList.add('hidden');
       document.getElementById('mainApp').classList.add('active');
