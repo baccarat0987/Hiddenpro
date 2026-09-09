@@ -43,25 +43,27 @@
 
   <style>
     :root {
-      --purple-glow: #bb86fc;
-      --player-blue: #2196f3;
-      --banker-red: #f44336;
-      /* premium navy base */
-      --navy-deep: #0a192f;
-      --navy-mid: #112240;
-      --navy-light: #233554;
-      --navy-card: #0d1b2a;
+      --purple-glow: #ff6b9d;
+      --player-blue: #ff2d55;
+      --banker-red: #ff1744;
+      /* red/pink premium palette */
+      --red-dark: #1a0508;
+      --red-mid: #3d0b12;
+      --red-light: #5f1420;
+      --red-card: #2a080c;
+      --pink-glow: #ff3b6f;
+      --yellow-blink: #fff5b0;
     }
 
     body {
       margin: 0;
       padding: 0;
       font-family: 'Roboto', sans-serif;
-      color: #eee;
+      color: #f0e6ea;
       font-size: 17px;
       display: none;
-      /* premium navy gradient */
-      background: linear-gradient(145deg, #0a192f 0%, #0d1b2a 40%, #112240 80%, #1a2a4a 100%);
+      /* red/pink premium gradient */
+      background: linear-gradient(145deg, #1a0508 0%, #2d0a10 30%, #4a0f1a 60%, #6b1725 100%);
       background-attachment: fixed;
       min-height: 100vh;
       display: flex;
@@ -75,7 +77,7 @@
       display: flex !important;
     }
 
-    /* subtle animated shimmer over navy */
+    /* subtle animated shimmer over red/pink */
     body::before {
       content: '';
       position: fixed;
@@ -83,8 +85,8 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle at 20% 30%, rgba(30, 60, 120, 0.15) 0%, transparent 60%),
-                  radial-gradient(circle at 80% 70%, rgba(20, 50, 110, 0.12) 0%, transparent 50%);
+      background: radial-gradient(circle at 20% 30%, rgba(255, 60, 100, 0.10) 0%, transparent 60%),
+                  radial-gradient(circle at 80% 70%, rgba(200, 30, 70, 0.08) 0%, transparent 50%);
       pointer-events: none;
       z-index: 0;
     }
@@ -96,8 +98,8 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(10, 25, 47, 0.92);
-      backdrop-filter: blur(12px);
+      background: rgba(26, 5, 8, 0.94);
+      backdrop-filter: blur(14px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -112,14 +114,14 @@
       display: none;
     }
     .welcome-box {
-      background: rgba(17, 34, 64, 0.95);
-      border: 1px solid rgba(187, 134, 252, 0.25);
+      background: rgba(61, 11, 18, 0.95);
+      border: 1px solid rgba(255, 107, 157, 0.25);
       border-radius: 25px;
       padding: 50px 45px 40px;
       max-width: 420px;
       width: 90%;
       text-align: center;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(20, 60, 140, 0.3);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 50px rgba(255, 40, 80, 0.15);
       backdrop-filter: blur(4px);
     }
     .welcome-box h1 {
@@ -127,12 +129,12 @@
       font-size: 38px;
       color: #fff;
       margin: 0 0 10px 0;
-      text-shadow: 0 0 30px rgba(187, 134, 252, 0.3);
+      text-shadow: 0 0 30px rgba(255, 107, 157, 0.3);
       letter-spacing: 4px;
     }
     .welcome-box .subtitle {
       font-size: 14px;
-      color: #8899bb;
+      color: #e6b0c0;
       margin-bottom: 30px;
       font-family: 'Roboto', sans-serif;
       letter-spacing: 2px;
@@ -140,7 +142,7 @@
     .welcome-box label {
       display: block;
       font-size: 14px;
-      color: #b0c4de;
+      color: #f0c8d4;
       text-align: left;
       margin-bottom: 8px;
       font-weight: 500;
@@ -152,9 +154,9 @@
       font-size: 20px;
       font-family: 'Orbitron', sans-serif;
       background: rgba(255, 255, 255, 0.04);
-      border: 1px solid #2a3f5e;
+      border: 1px solid #6a2a3a;
       border-radius: 12px;
-      color: #e0e8f0;
+      color: #f0e0e4;
       outline: none;
       transition: 0.3s;
       box-sizing: border-box;
@@ -162,11 +164,11 @@
     }
     .welcome-box input:focus {
       border-color: var(--purple-glow);
-      box-shadow: 0 0 20px rgba(187, 134, 252, 0.15);
+      box-shadow: 0 0 20px rgba(255, 107, 157, 0.15);
       background: rgba(255, 255, 255, 0.06);
     }
     .welcome-box input::placeholder {
-      color: #4a6080;
+      color: #8a4a5a;
       font-size: 16px;
     }
     .welcome-box .confirm-btn {
@@ -176,8 +178,8 @@
       font-family: 'Orbitron', sans-serif;
       font-size: 18px;
       font-weight: bold;
-      background: linear-gradient(135deg, #1a3a6a, #2a5a8a);
-      border: 1px solid #3a7aaa;
+      background: linear-gradient(135deg, #6a1a2a, #a02a4a);
+      border: 1px solid #c03a5a;
       border-radius: 12px;
       color: #fff;
       cursor: pointer;
@@ -187,9 +189,9 @@
     }
     .welcome-box .confirm-btn:hover {
       transform: scale(1.02);
-      box-shadow: 0 0 30px rgba(30, 80, 180, 0.4);
-      background: linear-gradient(135deg, #1e4a7a, #2e6a9a);
-      border-color: #5a8aba;
+      box-shadow: 0 0 30px rgba(200, 40, 80, 0.4);
+      background: linear-gradient(135deg, #7a1a2a, #b02a4a);
+      border-color: #d04a6a;
     }
     .welcome-box .confirm-btn:active {
       transform: scale(0.97);
@@ -203,7 +205,7 @@
     }
     .exit-btn {
       background: rgba(255, 255, 255, 0.05);
-      color: #b0c4de;
+      color: #e6b0c0;
       padding: 8px 15px;
       border-radius: 5px;
       text-decoration: none;
@@ -215,16 +217,16 @@
       backdrop-filter: blur(4px);
     }
     .exit-btn:hover {
-      background: #1a3a6a;
-      border-color: #4a7aaa;
+      background: #6a1a2a;
+      border-color: #b03a5a;
       color: #fff;
-      box-shadow: 0 0 15px rgba(30, 80, 180, 0.3);
+      box-shadow: 0 0 15px rgba(200, 40, 80, 0.3);
     }
 
     .header {
       text-align: center;
       padding: 20px 0 15px;
-      background: rgba(10, 25, 47, 0.7);
+      background: rgba(26, 5, 8, 0.7);
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       border-radius: 15px 15px 0 0;
       backdrop-filter: blur(4px);
@@ -236,7 +238,7 @@
       margin: 0;
       font-weight: bold;
       letter-spacing: 2px;
-      text-shadow: 0 0 20px rgba(187, 134, 252, 0.2);
+      text-shadow: 0 0 20px rgba(255, 107, 157, 0.2);
     }
 
     .container {
@@ -244,11 +246,11 @@
       width: 95%;
       margin: 20px auto;
       padding: 20px 20px 25px;
-      background: rgba(13, 27, 42, 0.92);
-      border: 1px solid rgba(60, 100, 160, 0.2);
+      background: rgba(42, 8, 12, 0.92);
+      border: 1px solid rgba(160, 50, 80, 0.25);
       border-radius: 20px;
       text-align: center;
-      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.8), 0 0 60px rgba(20, 60, 140, 0.1);
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.8), 0 0 60px rgba(200, 40, 80, 0.08);
       backdrop-filter: blur(10px);
       display: none;
       position: relative;
@@ -277,18 +279,18 @@
       font-size: 13px;
     }
     .p {
-      background: var(--player-blue);
+      background: #ff2d55;
       color: #fff;
-      box-shadow: 0 0 10px var(--player-blue);
+      box-shadow: 0 0 12px #ff2d55;
     }
     .b {
-      background: var(--banker-red);
+      background: #ff1744;
       color: #fff;
-      box-shadow: 0 0 10px var(--banker-red);
+      box-shadow: 0 0 12px #ff1744;
     }
     .t {
       background: #ffc107;
-      color: #000;
+      color: #1a0508;
     }
 
     .prediction {
@@ -299,12 +301,12 @@
       height: 44px;
     }
     .prediction .pred-p {
-      color: var(--player-blue);
-      text-shadow: 0 0 15px var(--player-blue);
+      color: #ff2d55;
+      text-shadow: 0 0 18px #ff2d55;
     }
     .prediction .pred-b {
-      color: var(--banker-red);
-      text-shadow: 0 0 15px var(--banker-red);
+      color: #ff1744;
+      text-shadow: 0 0 18px #ff1744;
     }
 
     .buttons {
@@ -315,9 +317,9 @@
       flex-wrap: wrap;
     }
     .buttons button {
-      background: rgba(20, 40, 70, 0.7);
-      color: #c0d0e0;
-      border: 1px solid #2a4a6a;
+      background: rgba(60, 15, 25, 0.7);
+      color: #f0d0d8;
+      border: 1px solid #6a2a3a;
       border-radius: 8px;
       padding: 10px 16px;
       font-size: 13px;
@@ -327,10 +329,10 @@
       backdrop-filter: blur(2px);
     }
     .buttons button:hover:enabled {
-      background: #1a3a5a;
-      border-color: #5a8aba;
+      background: #6a1a2a;
+      border-color: #b03a5a;
       transform: scale(1.04);
-      box-shadow: 0 0 20px rgba(30, 80, 180, 0.15);
+      box-shadow: 0 0 20px rgba(200, 40, 80, 0.15);
     }
     .buttons button:disabled {
       opacity: 0.35;
@@ -347,17 +349,17 @@
       box-shadow: 0 0 20px #ffd700;
     }
     @keyframes blinkGold {
-      0% { background: rgba(20, 40, 70, 0.7); color: #ffc107; border-color: #ffc107; }
-      50% { background: #ffc107; color: #0a192f; border-color: #ffd700; box-shadow: 0 0 30px #ffd700; }
-      100% { background: rgba(20, 40, 70, 0.7); color: #ffc107; border-color: #ffc107; }
+      0% { background: rgba(60, 15, 25, 0.7); color: #ffc107; border-color: #ffc107; }
+      50% { background: #ffc107; color: #1a0508; border-color: #ffd700; box-shadow: 0 0 30px #ffd700; }
+      100% { background: rgba(60, 15, 25, 0.7); color: #ffc107; border-color: #ffc107; }
     }
 
     .capital-table table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 14px;
-      background: rgba(10, 25, 47, 0.6);
-      border: 1px solid #1a3050;
+      background: rgba(26, 5, 8, 0.6);
+      border: 1px solid #3d1a2a;
       table-layout: auto;
       backdrop-filter: blur(2px);
     }
@@ -365,44 +367,46 @@
     .capital-table td {
       padding: 6px 2px;
       font-size: 13px;
-      border: 1px solid #1a3050;
+      border: 1px solid #3d1a2a;
       text-align: center;
       white-space: nowrap;
       width: auto;
     }
     .capital-table th {
-      background: rgba(20, 45, 80, 0.6);
+      background: rgba(60, 15, 30, 0.6);
       font-family: 'Orbitron';
       font-size: 10px;
-      color: #8aacd0;
+      color: #f0a0b8;
       padding: 6px 1px;
       letter-spacing: 0.3px;
     }
     .capital-table td {
-      color: #c0d4e8;
+      color: #f0d8de;
     }
     .capital-table td:last-child {
       min-width: 30px;
     }
 
+    /* LIGHT YELLOW BLINKING HIGHLIGHT */
     .highlight {
-      background: #2a5a8a !important;
-      color: #fff !important;
+      background: #fff5b0 !important;
+      color: #1a0508 !important;
       font-weight: bold;
-      animation: pulse 1s infinite;
-      box-shadow: inset 0 0 20px rgba(60, 140, 255, 0.2);
+      animation: blinkYellow 0.9s ease-in-out infinite;
+      box-shadow: 0 0 25px rgba(255, 245, 176, 0.4);
+      border-radius: 2px;
     }
-    .highlight-win {
-      color: #4af0a0 !important;
-      font-weight: bold;
-      text-shadow: 0 0 20px rgba(74, 240, 160, 0.3);
-    }
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.7; }
-      100% { opacity: 1; }
+    @keyframes blinkYellow {
+      0% { background: #fff5b0; box-shadow: 0 0 20px rgba(255, 245, 176, 0.3); }
+      50% { background: #ffea70; box-shadow: 0 0 40px rgba(255, 245, 176, 0.7); }
+      100% { background: #fff5b0; box-shadow: 0 0 20px rgba(255, 245, 176, 0.3); }
     }
 
+    .highlight-win {
+      color: #6fdfb0 !important;
+      font-weight: bold;
+      text-shadow: 0 0 25px rgba(111, 223, 176, 0.3);
+    }
     .message-box {
       margin-top: 16px;
       font-size: 20px;
@@ -410,12 +414,12 @@
       font-family: 'Orbitron';
     }
     .success {
-      color: #4af0a0;
-      text-shadow: 0 0 30px rgba(74, 240, 160, 0.2);
+      color: #6fdfb0;
+      text-shadow: 0 0 30px rgba(111, 223, 176, 0.2);
     }
     .fail {
-      color: #f44336;
-      text-shadow: 0 0 30px rgba(244, 67, 54, 0.2);
+      color: #ff3b5a;
+      text-shadow: 0 0 30px rgba(255, 59, 90, 0.2);
     }
   </style>
 </head>
@@ -546,7 +550,7 @@
       if (isGameOver) return;
       if (sequence.length < 7) {
         currentPrediction = null;
-        box.innerHTML = "<span style='font-size:14px; color:#6a8aaa;'>WAITING FOR DATA (NEED 7)</span>";
+        box.innerHTML = "<span style='font-size:14px; color:#b08090;'>WAITING FOR DATA (NEED 7)</span>";
         updateBetTable();
         return;
       }
