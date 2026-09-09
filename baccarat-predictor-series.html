@@ -411,11 +411,14 @@
       background: var(--lightning-yellow) !important;
       color: #0a192f !important;
       font-weight: bold;
-      animation: lightningBlink 0.8s ease-in-out infinite !important;
       box-shadow: 0 0 25px var(--lightning-glow) !important;
       border-radius: 4px;
       border: 1px solid rgba(255, 234, 0, 0.3);
       display: table-cell !important;
+    }
+
+    .highlight.blink-active {
+      animation: lightningBlink 0.8s ease-in-out infinite !important;
     }
 
     .highlight-win {
@@ -496,6 +499,7 @@
     let baseBetString = "10";
     const maxCols = 8;
     const maxRows = 10;
+    let blinkInterval = null;
 
     function initBetTable() {
       const tbody = document.getElementById('betBody');
@@ -602,19 +606,41 @@
 
     function updateBetTable() {
       const rows = document.getElementById('betBody').rows;
+      
+      // Clear all highlights and stop any blinking
+      if (blinkInterval) {
+        clearInterval(blinkInterval);
+        blinkInterval = null;
+      }
+      
       for (let r = 0; r < maxRows; r++) {
         for (let c = 0; c < maxCols; c++) {
-          rows[r].cells[c].classList.remove('highlight');
+          const cell = rows[r].cells[c];
+          cell.classList.remove('highlight', 'blink-active');
+          cell.style.background = '';
+          cell.style.color = '';
+          cell.style.boxShadow = '';
         }
       }
+      
       if (currentPrediction && sequence.length >= 7 && rows[currentRow] && !isGameOver) {
         const cell = rows[currentRow].cells[currentCol];
         cell.classList.add('highlight');
-        // Force reflow to restart animation
-        void cell.offsetWidth;
-        cell.style.animation = 'none';
-        void cell.offsetWidth;
-        cell.style.animation = '';
+        
+        // Start blinking with interval
+        let isYellow = true;
+        blinkInterval = setInterval(() => {
+          if (isYellow) {
+            cell.style.background = '#0a192f';
+            cell.style.color = '#e8e0f0';
+            cell.style.boxShadow = 'none';
+          } else {
+            cell.style.background = 'var(--lightning-yellow)';
+            cell.style.color = '#0a192f';
+            cell.style.boxShadow = '0 0 25px var(--lightning-glow)';
+          }
+          isYellow = !isYellow;
+        }, 400);
       }
     }
 
@@ -642,6 +668,10 @@
             document.getElementById('finalMessage').className = "message-box success";
             setButtonsEnabled(false);
             document.getElementById('btnReset').classList.add('blink-reset');
+            if (blinkInterval) {
+              clearInterval(blinkInterval);
+              blinkInterval = null;
+            }
             return;
           }
         } else {
@@ -652,6 +682,10 @@
             document.getElementById('finalMessage').innerHTML = "❌ LIMIT REACHED";
             document.getElementById('finalMessage').className = "message-box fail";
             setButtonsEnabled(false);
+            if (blinkInterval) {
+              clearInterval(blinkInterval);
+              blinkInterval = null;
+            }
             return;
           }
         }
@@ -676,6 +710,12 @@
       currentPrediction = null;
       currentRow = 0;
       currentCol = 0;
+      
+      if (blinkInterval) {
+        clearInterval(blinkInterval);
+        blinkInterval = null;
+      }
+      
       initBetTable();
       document.getElementById('betTableBox').style.display = "block";
       document.getElementById('finalMessage').textContent = "";
