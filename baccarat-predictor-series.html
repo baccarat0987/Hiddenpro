@@ -608,7 +608,13 @@
         }
       }
       if (currentPrediction && sequence.length >= 7 && rows[currentRow] && !isGameOver) {
-        rows[currentRow].cells[currentCol].classList.add('highlight');
+        const cell = rows[currentRow].cells[currentCol];
+        cell.classList.add('highlight');
+        // Force reflow to restart animation
+        void cell.offsetWidth;
+        cell.style.animation = 'none';
+        void cell.offsetWidth;
+        cell.style.animation = '';
       }
     }
 
