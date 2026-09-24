@@ -105,11 +105,8 @@
             --text: #2d3748;
             --text-muted: #6b7a8f;
             --violet: #7c3aed;
-            --violet-dim: rgba(124, 58, 237, 0.25);
             --darkblue: #1e3a8a;
-            --darkblue-dim: rgba(30, 58, 138, 0.25);
             --redpink: #db2777;
-            --redpink-dim: rgba(219, 39, 119, 0.25);
             --win: #4a9a6a;
             --loss: #8a97a4;
             --player: #7c3aed;
@@ -146,13 +143,11 @@
             color: #db2777;
             padding: 8px 16px;
             border-radius: 40px;
-            text-decoration: none;
             font-weight: 700;
             font-size: 11px;
             border: 1px solid rgba(219, 39, 119, 0.5);
             backdrop-filter: blur(8px);
             transition: 0.2s;
-            font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             cursor: pointer;
             border: none;
         }
@@ -199,21 +194,18 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 30px rgba(124, 58, 237, 0.4), 0 0 60px rgba(124, 58, 237, 0.2);
         }
         .title-darkblue {
             background: linear-gradient(135deg, #1e3a8a, #1e40af);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 30px rgba(30, 58, 138, 0.4), 0 0 60px rgba(30, 58, 138, 0.2);
         }
         .title-redpink {
             background: linear-gradient(135deg, #db2777, #be185d);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 30px rgba(219, 39, 119, 0.4), 0 0 60px rgba(219, 39, 119, 0.2);
         }
 
         .ai-container {
@@ -236,7 +228,6 @@
             font-family: 'Courier New', monospace;
             letter-spacing: 0.3px;
             color: #ffffff;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
             line-height: 1.2;
         }
         @keyframes pulseGlowContainer {
@@ -244,12 +235,12 @@
             50% { box-shadow: 0 0 30px rgba(124, 58, 237, 0.7), 0 0 50px rgba(219, 39, 119, 0.4); }
         }
 
-        .header .tag {
+        .tag {
             text-align: center;
             color: var(--text-muted);
             font-size: 11px;
             letter-spacing: 2px;
-            margin-top: 2px;
+            margin-bottom: 18px;
             opacity: 0.7;
         }
 
@@ -312,7 +303,6 @@
             border-bottom: 2px solid var(--line);
             min-height: 60px;
             text-align: center;
-            transition: box-shadow 0.3s ease;
             color: var(--text);
             display: flex;
             flex-direction: column;
@@ -340,7 +330,6 @@
             background-clip: text;
             margin-left: 8px;
             font-weight: 700;
-            opacity: 0.95;
         }
 
         .change-table {
@@ -366,10 +355,6 @@
             display: block;
             margin-top: 6px;
             letter-spacing: 1px;
-            animation: none;
-            border: none;
-            padding: 0;
-            background: transparent;
         }
         .change-table .sub .highlight {
             color: #1e3a8a;
@@ -399,8 +384,6 @@
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
             transition: transform 0.12s ease, filter 0.15s ease, box-shadow 0.3s ease, opacity 0.25s ease;
-            position: relative;
-            overflow: hidden;
         }
         #playerBtn {
             background: linear-gradient(135deg, #7c3aed, #6d28d9);
@@ -450,7 +433,6 @@
             border: 1px solid var(--line-soft);
             letter-spacing: 0.5px;
             border-radius: 10px;
-            box-shadow: 0 0 12px rgba(124, 58, 237, 0.1);
             transition: box-shadow 0.3s ease;
         }
         .util-btns button:hover {
@@ -469,34 +451,10 @@
         }
 
         @keyframes resetBlink {
-            0% {
-                background: #7c3aed;
-                color: #ffffff;
-                border-color: #7c3aed;
-                box-shadow: 0 0 16px rgba(124, 58, 237, 0.75), 0 0 32px rgba(124, 58, 237, 0.35);
-                transform: scale(1);
-            }
-            33% {
-                background: #1e3a8a;
-                color: #ffffff;
-                border-color: #1e3a8a;
-                box-shadow: 0 0 16px rgba(30, 58, 138, 0.75), 0 0 32px rgba(30, 58, 138, 0.35);
-                transform: scale(1.04);
-            }
-            66% {
-                background: #db2777;
-                color: #ffffff;
-                border-color: #db2777;
-                box-shadow: 0 0 16px rgba(219, 39, 119, 0.75), 0 0 32px rgba(219, 39, 119, 0.35);
-                transform: scale(1.06);
-            }
-            100% {
-                background: #7c3aed;
-                color: #ffffff;
-                border-color: #7c3aed;
-                box-shadow: 0 0 16px rgba(124, 58, 237, 0.75), 0 0 32px rgba(124, 58, 237, 0.35);
-                transform: scale(1);
-            }
+            0% { background: #7c3aed; color: #ffffff; box-shadow: 0 0 16px rgba(124,58,237,0.75); transform: scale(1); }
+            33% { background: #1e3a8a; color: #ffffff; box-shadow: 0 0 16px rgba(30,58,138,0.75); transform: scale(1.04); }
+            66% { background: #db2777; color: #ffffff; box-shadow: 0 0 16px rgba(219,39,119,0.75); transform: scale(1.06); }
+            100% { background: #7c3aed; color: #ffffff; box-shadow: 0 0 16px rgba(124,58,237,0.75); transform: scale(1); }
         }
 
         #resetBtn:disabled,
@@ -507,9 +465,6 @@
             pointer-events: auto !important;
         }
 
-        .container { background-color: #f8fafc; }
-        .prediction { background: #f0f3f7; }
-        
         .stats-bar {
             display: flex;
             justify-content: space-around;
@@ -520,91 +475,120 @@
             border-top: 1px solid var(--line-soft);
             border-bottom: 1px solid var(--line-soft);
         }
-        .stats-bar span {
-            font-weight: 600;
-        }
-        .stats-bar .win-rate {
-            color: var(--win);
-        }
-        .stats-bar .loss-rate {
-            color: var(--loss);
-        }
-        
+        .stats-bar span { font-weight: 600; }
+        .stats-bar .win-rate { color: var(--win); }
+
         .streak-indicator {
             display: inline-block;
             font-size: 11px;
             font-weight: 700;
             padding: 2px 10px;
             border-radius: 10px;
-            margin-top: 4px;
-        }
-        .streak-indicator.win-streak {
-            background: rgba(74, 154, 106, 0.15);
-            color: var(--win);
-        }
-        .streak-indicator.loss-streak {
-            background: rgba(219, 39, 119, 0.1);
-            color: #db2777;
-        }
-        
-        .hidden {
-            display: none !important;
         }
 
-        .elo-sharp-bar {
+        /* ===== ENGINE METRICS PANEL (collapsed by default) ===== */
+        .metrics-toggle {
+            margin-top: 10px;
+            padding: 8px 14px;
+            background: #e8ecf2;
+            border: 1px solid var(--line-soft);
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: #3a4555;
+            cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #e8ecf2;
-            border-radius: 12px;
-            padding: 8px 16px;
-            margin: 6px 0 4px 0;
+            width: 100%;
+            text-align: left;
+            transition: background 0.2s;
+        }
+        .metrics-toggle:hover {
+            background: #d5dce6;
+        }
+        .metrics-toggle .arrow {
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+        .metrics-toggle.open .arrow {
+            transform: rotate(90deg);
+        }
+
+        .metrics-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease;
+            margin-top: 0;
+        }
+        .metrics-panel.open {
+            max-height: 500px;
+            margin-top: 8px;
+        }
+
+        .metrics-inner {
+            background: #f0f3f7;
             border: 1px solid var(--line-soft);
+            border-radius: 12px;
+            padding: 12px 14px;
             font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.3px;
             color: #2d3748;
         }
-        .elo-sharp-bar .metric {
-            display: flex;
-            align-items: center;
-            gap: 6px;
+
+        .metrics-section {
+            margin-bottom: 12px;
         }
-        .elo-sharp-bar .metric .label {
+        .metrics-section:last-child {
+            margin-bottom: 0;
+        }
+        .metrics-section-title {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
             color: #6b7a8f;
-            font-weight: 500;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--line-soft);
         }
-        .elo-sharp-bar .metric .value {
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
             font-family: 'Courier New', monospace;
-            font-weight: 800;
-            padding: 2px 8px;
-            border-radius: 8px;
-            background: #ffffff;
-            border: 1px solid rgba(0,0,0,0.05);
-            min-width: 48px;
-            text-align: center;
+            font-size: 11px;
         }
-        .elo-sharp-bar .metric .value.elo {
-            color: #7c3aed;
+        .metric-row .name { color: #4a5568; }
+        .metric-row .val { font-weight: 700; color: #2d3748; }
+        .metric-row .val.pos { color: #4a9a6a; }
+        .metric-row .val.neg { color: #db2777; }
+        .metric-row .val.neutral { color: #6b7a8f; }
+
+        .detector-table {
+            width: 100%;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
         }
-        .elo-sharp-bar .metric .value.sharp {
-            color: #db2777;
-        }
-        .elo-sharp-bar .metric .value.sharp.high {
-            color: #1e3a8a;
-            text-shadow: 0 0 10px rgba(30,58,138,0.3);
-        }
-        .elo-sharp-bar .metric .value.elo.high {
-            color: #6d28d9;
-            text-shadow: 0 0 10px rgba(124,58,237,0.4);
-        }
-        .elo-sharp-bar .metric .delta {
+        .detector-table th {
+            text-align: left;
+            font-weight: 700;
+            color: #6b7a8f;
             font-size: 9px;
-            font-weight: 600;
-            opacity: 0.7;
+            letter-spacing: 0.5px;
+            padding: 3px 4px;
+            border-bottom: 1px solid var(--line-soft);
         }
-        .elo-sharp-bar .metric .delta.pos { color: #4a9a6a; }
-        .elo-sharp-bar .metric .delta.neg { color: #db2777; }
+        .detector-table td {
+            padding: 3px 4px;
+            border-bottom: 1px solid var(--line-soft);
+            color: #2d3748;
+        }
+        .detector-table tr:last-child td { border-bottom: none; }
+        .detector-table .edge-pos { color: #4a9a6a; font-weight: 700; }
+        .detector-table .edge-neg { color: #db2777; font-weight: 700; }
+        .detector-table .edge-neu { color: #6b7a8f; font-weight: 700; }
     </style>
 </head>
 <body>
@@ -625,7 +609,7 @@
                     <span class="ai-text">AI</span>
                 </div>
             </div>
-            <div class="tag" style="text-align:center; color:var(--text-muted); font-size:11px; letter-spacing:2px; margin-bottom:18px; opacity:0.7;">Results are insights, not Guarantees</div>
+            <div class="tag">Results are insights, not Guarantees</div>
 
             <div class="sequence" id="historyBox">READY FOR DATA</div>
             <div class="results" id="resultsBox"></div>
@@ -635,19 +619,6 @@
                 <span>L: <strong id="lossCount">0</strong></span>
                 <span class="win-rate" id="winRateDisplay">WR: 0%</span>
                 <span id="streakDisplay">Streak: 0</span>
-            </div>
-
-            <div class="elo-sharp-bar" id="eloSharpBar">
-                <div class="metric">
-                    <span class="label">ELO</span>
-                    <span class="value elo" id="eloValue">1200</span>
-                    <span class="delta" id="eloDelta"></span>
-                </div>
-                <div class="metric">
-                    <span class="label">SHARP</span>
-                    <span class="value sharp" id="sharpValue">0.00</span>
-                    <span class="delta" id="sharpDelta"></span>
-                </div>
             </div>
 
             <div class="prediction" id="predictionBox">
@@ -662,13 +633,31 @@
                     <button onclick="resetAll()" id="resetBtn">RESET SHOE</button>
                 </div>
             </div>
+
+            <!-- ENGINE METRICS PANEL (collapsed by default) -->
+            <button class="metrics-toggle" id="metricsToggle" onclick="toggleMetrics()">
+                <span>▸ ENGINE METRICS</span>
+                <span class="arrow">▶</span>
+            </button>
+            <div class="metrics-panel" id="metricsPanel">
+                <div class="metrics-inner" id="metricsInner">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         /* =========================================================
-           SHARP + LOW-SKIP ENGINE with integrated ELO & Sharpness
-           ========================================================= */
+           HONEST ENGINE — no fake calculations
+           - ELO and Sharpness removed entirely
+           - All displayed metrics are direct counts
+           - Prediction path uses only measured inputs:
+             * per-detector rolling hit rate (reliability weighting)
+             * confidence gap (detector trust)
+             * calibration curve (confidence shrinkage)
+             * skip threshold floor at 55
+        ========================================================= */
 
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
         let results = JSON.parse(localStorage.getItem('bt_results')) || [];
@@ -677,63 +666,46 @@
         let detailedHistory = JSON.parse(localStorage.getItem('bt_detailed')) || [];
         let wins = 0, losses = 0, skips = 0;
         const MIN_HANDS = 10;
-        const MAX_RECENT = 10;
+        const SKIP_THRESHOLD_FLOOR = 55;
 
-        // ========== REAL ACCURACY TRACKING ==========
+        // Prediction history (with detector attribution)
         let predictionHistory = JSON.parse(localStorage.getItem('bt_prediction_history')) || [];
-        let patternAccuracy = { P: { correct: 0, total: 0 }, B: { correct: 0, total: 0 } };
         let overallAccuracy = { correct: 0, total: 0 };
+        let patternAccuracy = { P: { correct: 0, total: 0 }, B: { correct: 0, total: 0 } };
 
-        // ========== ELO & SHARPNESS STATE (persisted) ==========
-        let eloRating = parseFloat(localStorage.getItem('bt_elo_rating')) || 1200;
-        let sharpness = parseFloat(localStorage.getItem('bt_sharpness')) || 0.0;
-        let lastEloChange = parseFloat(localStorage.getItem('bt_last_elo_change')) || 0;
-        let lastSharpChange = parseFloat(localStorage.getItem('bt_last_sharp_change')) || 0;
+        // ===== Per-detector rolling tracker (last 100 fires each) =====
+        const DETECTOR_NAMES = ['Pattern', 'Streak', 'Zigzag', 'Frequency', 'Recent'];
+        const DETECTOR_WINDOW = 100;
+        let detectorHistory = JSON.parse(localStorage.getItem('bt_detector_history')) || {};
+        DETECTOR_NAMES.forEach(name => {
+            if (!detectorHistory[name]) detectorHistory[name] = [];
+        });
 
-        // ELO K-factor: adaptive based on total predictions
-        function getKFactor() {
-            const total = overallAccuracy.total;
-            if (total < 20) return 32;
-            if (total < 50) return 24;
-            if (total < 100) return 16;
-            return 12;
+        // ===== Calibration curve (6 bands) =====
+        const CALIBRATION_BANDS = [
+            { min: 50, max: 59, count: 0, correct: 0 },
+            { min: 60, max: 69, count: 0, correct: 0 },
+            { min: 70, max: 79, count: 0, correct: 0 },
+            { min: 80, max: 89, count: 0, correct: 0 },
+            { min: 90, max: 100, count: 0, correct: 0 },
+            { min: 0, max: 49, count: 0, correct: 0 } // below threshold, tracked for completeness
+        ];
+
+        // Rebuild calibration from stored history
+        function rebuildCalibration() {
+            CALIBRATION_BANDS.forEach(b => { b.count = 0; b.correct = 0; });
+            predictionHistory.forEach(p => {
+                const c = p.confidence;
+                const band = CALIBRATION_BANDS.find(b => c >= b.min && c <= b.max);
+                if (band) {
+                    band.count++;
+                    if (p.correct) band.correct++;
+                }
+            });
         }
+        rebuildCalibration();
 
-        // ========== ELO UPDATE ==========
-        function updateElo(wasCorrect, confidence) {
-            const K = getKFactor();
-            const opponentElo = 1200;
-            const expectedScore = 1 / (1 + Math.pow(10, (opponentElo - eloRating) / 400));
-            const actualScore = wasCorrect ? 1 : 0;
-            const confidenceFactor = confidence ? (confidence / 100) * 1.2 + 0.4 : 1.0;
-            const delta = K * confidenceFactor * (actualScore - expectedScore);
-            eloRating = Math.max(800, Math.min(2200, eloRating + delta));
-            return delta;
-        }
-
-        // ========== SHARPNESS UPDATE ==========
-        function updateSharpness(wasCorrect, confidence) {
-            if (confidence === undefined || confidence === null) return 0;
-            const confNorm = confidence / 100;
-            let delta = 0;
-            if (wasCorrect) {
-                delta = confNorm * 0.04;
-            } else {
-                delta = -confNorm * 0.06;
-            }
-            const decay = (0.5 - sharpness) * 0.005;
-            delta += decay;
-            sharpness = Math.max(0.0, Math.min(1.0, sharpness + delta));
-            return delta;
-        }
-
-        // Bootstrap sharpness from historical accuracy
-        if (predictionHistory.length > 5 && sharpness === 0.0) {
-            const acc = overallAccuracy.total > 0 ? overallAccuracy.correct / overallAccuracy.total : 0.5;
-            sharpness = Math.max(0.1, Math.min(0.9, acc * 0.8 + 0.1));
-            localStorage.setItem('bt_sharpness', sharpness.toFixed(4));
-        }
-
+        // Rebuild overall accuracy
         if (predictionHistory.length > 0) {
             predictionHistory.forEach(p => {
                 if (p.prediction === 'P') {
@@ -748,10 +720,30 @@
             });
         }
 
+        // ===== Metrics panel toggle (persisted) =====
+        const metricsOpen = localStorage.getItem('bt_metrics_open') === '1';
+        document.addEventListener('DOMContentLoaded', () => {
+            if (metricsOpen) {
+                const panel = document.getElementById('metricsPanel');
+                const toggle = document.getElementById('metricsToggle');
+                if (panel) panel.classList.add('open');
+                if (toggle) toggle.classList.add('open');
+            }
+        });
+
+        function toggleMetrics() {
+            const panel = document.getElementById('metricsPanel');
+            const toggle = document.getElementById('metricsToggle');
+            if (!panel || !toggle) return;
+            panel.classList.toggle('open');
+            toggle.classList.toggle('open');
+            localStorage.setItem('bt_metrics_open', panel.classList.contains('open') ? '1' : '0');
+        }
+
         function clampConfidence(raw) { return Math.min(96, Math.max(0, Math.round(raw))); }
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
 
-        // ========== CHANGE TABLE ==========
+        // ===== CHANGE TABLE (unchanged rule) =====
         function checkChangeTable() {
             const window9 = results.slice(-9);
             const nonSkip = window9.filter(r => r === 'W' || r === 'L');
@@ -775,34 +767,24 @@
                     lossDiff: lossDiff
                 };
             }
-            return {
-                show: false,
-                reason: '',
-                wins: winsCount,
-                losses: lossesCount,
-                winRate: Math.round(winRate * 100),
-                lossDiff: lossDiff
-            };
+            return { show: false, reason: '', wins: winsCount, losses: lossesCount, winRate: Math.round(winRate * 100), lossDiff: lossDiff };
         }
 
-        // ========== PATTERN DETECTORS ==========
+        // ========== PATTERN DETECTORS (each returns prediction + confidence + name) ==========
         function detectPatterns() {
             if (sequence.length < 4) return null;
-
             const patterns = {};
             const maxLen = Math.min(8, sequence.length - 1);
 
             for (let len = 2; len <= maxLen; len++) {
                 const pattern = sequence.slice(-len).join('');
                 const occurrences = [];
-
                 for (let i = 0; i <= sequence.length - len - 1; i++) {
                     const current = sequence.slice(i, i + len).join('');
                     if (current === pattern && i + len < sequence.length) {
                         occurrences.push(sequence[i + len]);
                     }
                 }
-
                 if (occurrences.length >= 1) {
                     const pCount = occurrences.filter(o => o === 'P').length;
                     const bCount = occurrences.length - pCount;
@@ -811,23 +793,21 @@
                         : (Math.max(pCount, bCount) / occurrences.length) * 100;
                     const prediction = pCount >= bCount ? 'P' : 'B';
                     const weight = len * occurrences.length;
-
                     if (!patterns[prediction] || patterns[prediction].weight < weight) {
                         patterns[prediction] = { confidence, weight, matches: occurrences.length };
                     }
                 }
             }
-
             if (Object.keys(patterns).length === 0) return null;
-
             let best = null, bestScore = 0;
             for (const [side, data] of Object.entries(patterns)) {
                 const score = data.confidence * (data.weight / 10);
                 if (score > bestScore) {
                     bestScore = score;
-                    best = { prediction: side, confidence: data.confidence, matches: data.matches };
+                    best = { prediction: side, confidence: data.confidence };
                 }
             }
+            if (best) best.name = 'Pattern';
             return best;
         }
 
@@ -839,25 +819,23 @@
                 if (sequence[i] === last) streakLength++;
                 else break;
             }
-
             const window = sequence.slice(-12);
             let streakData = { P: { continue: 0, break: 0 }, B: { continue: 0, break: 0 } };
             for (let i = 1; i < window.length; i++) {
                 if (window[i] === window[i - 1]) streakData[window[i - 1]].continue++;
                 else streakData[window[i - 1]].break++;
             }
-
             const side = last;
             const total = streakData[side].continue + streakData[side].break;
             if (total >= 1) {
                 const continueRate = streakData[side].continue / total;
                 if (streakLength >= 2 && continueRate > 0.52) {
                     const confidence = Math.min(80, 55 + (continueRate - 0.5) * 120 + streakLength * 2);
-                    return { prediction: side, confidence: clampConfidence(confidence), type: 'streak_continue' };
+                    return { prediction: side, confidence: clampConfidence(confidence), name: 'Streak' };
                 }
                 if (streakLength >= 2 && continueRate < 0.48) {
                     const confidence = Math.min(80, 55 + (0.5 - continueRate) * 120 + streakLength * 2);
-                    return { prediction: oppositeSide(side), confidence: clampConfidence(confidence), type: 'streak_break' };
+                    return { prediction: oppositeSide(side), confidence: clampConfidence(confidence), name: 'Streak' };
                 }
             }
             return null;
@@ -865,7 +843,6 @@
 
         function detectZigzagBias() {
             if (sequence.length < 4) return null;
-
             const rates = [];
             for (const win of [5, 7, 10, 14]) {
                 if (sequence.length < win + 1) continue;
@@ -877,44 +854,38 @@
                 rates.push(alt / (seg.length - 1));
             }
             if (rates.length === 0) return null;
-
             const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
-
             if (avgRate > 0.62) {
                 const confidence = 55 + (avgRate - 0.5) * 90;
-                return { prediction: oppositeSide(sequence[sequence.length - 1]), confidence: clampConfidence(confidence), type: 'zigzag' };
+                return { prediction: oppositeSide(sequence[sequence.length - 1]), confidence: clampConfidence(confidence), name: 'Zigzag' };
             }
             if (avgRate < 0.38) {
                 const confidence = 55 + (0.5 - avgRate) * 90;
-                return { prediction: sequence[sequence.length - 1], confidence: clampConfidence(confidence), type: 'streak' };
+                return { prediction: sequence[sequence.length - 1], confidence: clampConfidence(confidence), name: 'Zigzag' };
             }
             return null;
         }
 
         function detectFrequencyBias() {
             if (sequence.length < 6) return null;
-
             const recent = sequence.slice(-20);
             const recentP = recent.filter(s => s === 'P').length / recent.length;
             const recentB = 1 - recentP;
-
             if (recentP > 0.55) {
                 const confidence = 52 + (recentP - 0.5) * 120;
-                return { prediction: 'B', confidence: clampConfidence(confidence), type: 'overbias' };
+                return { prediction: 'B', confidence: clampConfidence(confidence), name: 'Frequency' };
             }
             if (recentB > 0.55) {
                 const confidence = 52 + (recentB - 0.5) * 120;
-                return { prediction: 'P', confidence: clampConfidence(confidence), type: 'overbias' };
+                return { prediction: 'P', confidence: clampConfidence(confidence), name: 'Frequency' };
             }
             return null;
         }
 
         function detectRecentBias() {
             if (sequence.length < 5) return null;
-
             const weights = [8, 7, 6, 5, 4];
             const recent = sequence.slice(-5);
-
             let pWeight = 0, bWeight = 0;
             for (let i = 0; i < recent.length; i++) {
                 if (recent[i] === 'P') pWeight += weights[i];
@@ -922,136 +893,146 @@
             }
             const total = pWeight + bWeight;
             if (total === 0) return null;
-
             const pRate = pWeight / total;
             const bRate = bWeight / total;
-
             if (pRate > 0.58) {
                 const confidence = 52 + (pRate - 0.5) * 130;
-                return { prediction: 'B', confidence: clampConfidence(confidence), type: 'recent_bias' };
+                return { prediction: 'B', confidence: clampConfidence(confidence), name: 'Recent' };
             }
             if (bRate > 0.58) {
                 const confidence = 52 + (bRate - 0.5) * 130;
-                return { prediction: 'P', confidence: clampConfidence(confidence), type: 'recent_bias' };
+                return { prediction: 'P', confidence: clampConfidence(confidence), name: 'Recent' };
             }
             return null;
         }
 
+        // ===== Real detector reliability (from measured hit rate + gap) =====
+        function getDetectorReliability(name) {
+            const hist = detectorHistory[name] || [];
+            if (hist.length < 15) return 1.0; // not enough data — neutral weight
+
+            const hits = hist.filter(h => h.correct).length;
+            const hitRate = hits / hist.length;
+            const edge = hitRate - 0.5;
+
+            // Confidence gap: avg conf on correct minus avg conf on wrong
+            const correctEntries = hist.filter(h => h.correct);
+            const wrongEntries = hist.filter(h => !h.correct);
+            const avgConfCorrect = correctEntries.length > 0
+                ? correctEntries.reduce((a, b) => a + b.confidence, 0) / correctEntries.length
+                : 0;
+            const avgConfWrong = wrongEntries.length > 0
+                ? wrongEntries.reduce((a, b) => a + b.confidence, 0) / wrongEntries.length
+                : 0;
+            const gap = (avgConfCorrect - avgConfWrong) / 100; // normalized
+
+            // Reliability weight: damped range [0.5, 1.5]
+            // Base from edge, secondary from gap
+            let weight = 1.0 + edge * 3.0 + gap * 1.5;
+            weight = Math.max(0.5, Math.min(1.5, weight));
+
+            return weight;
+        }
+
+        // ===== Aggregation with reliability weighting =====
         function getPatternPrediction() {
             if (sequence.length < 3) return null;
 
-            const detectors = [
+            const rawDetectors = [
                 detectPatterns(),
                 detectStreakBias(),
                 detectZigzagBias(),
                 detectFrequencyBias(),
                 detectRecentBias()
-            ].filter(p => p !== null);
+            ];
 
+            const detectors = rawDetectors.filter(p => p !== null);
             if (detectors.length === 0) return null;
 
             let pVotes = 0, bVotes = 0;
             let pConfSum = 0, bConfSum = 0;
+            const activeDetectors = [];
 
             for (const d of detectors) {
-                if (d.prediction === 'P') { pVotes++; pConfSum += d.confidence; }
-                else { bVotes++; bConfSum += d.confidence; }
+                const weight = getDetectorReliability(d.name);
+                activeDetectors.push({ name: d.name, prediction: d.prediction, confidence: d.confidence, weight });
+                if (d.prediction === 'P') { pVotes += weight; pConfSum += d.confidence * weight; }
+                else { bVotes += weight; bConfSum += d.confidence * weight; }
             }
 
-            let winner, winnerConfSum;
-
-            if (pVotes === bVotes) {
-                if (pConfSum === bConfSum) return null;
+            let winner, winnerConfSum, winnerWeight;
+            if (Math.abs(pVotes - bVotes) < 0.001) {
+                if (Math.abs(pConfSum - bConfSum) < 0.001) return null;
                 winner = pConfSum > bConfSum ? 'P' : 'B';
                 winnerConfSum = winner === 'P' ? pConfSum : bConfSum;
+                winnerWeight = winner === 'P' ? pVotes : bVotes;
             } else {
                 winner = pVotes > bVotes ? 'P' : 'B';
                 winnerConfSum = winner === 'P' ? pConfSum : bConfSum;
+                winnerWeight = winner === 'P' ? pVotes : bVotes;
             }
 
-            const winnerVotes = winner === 'P' ? pVotes : bVotes;
-            if (winnerVotes < 1) return null;
+            if (winnerWeight < 0.1) return null;
 
-            const confidence = winnerConfSum / winnerVotes;
+            const confidence = winnerConfSum / winnerWeight;
 
             return {
                 prediction: winner,
                 confidence: clampConfidence(confidence),
-                patternCount: detectors.length,
-                votes: winnerVotes
+                activeDetectors
             };
         }
 
-        // ========== REAL CONFIDENCE — now blends ELO + Sharpness ==========
-        function getRealConfidence(prediction, patternConfidence) {
-            const sideData = prediction === 'P' ? patternAccuracy.P : patternAccuracy.B;
-            const totalPredictions = sideData.total;
+        // ===== Calibration adjustment: shrink overconfident predictions =====
+        function applyCalibration(confidence) {
+            // Find the band this confidence falls into
+            const band = CALIBRATION_BANDS.find(b => confidence >= b.min && confidence <= b.max);
+            if (!band || band.count < 8) return confidence; // not enough data
 
-            // Base from prediction history
-            let baseConfidence;
-            if (totalPredictions >= 10) {
-                const realAccuracy = (sideData.correct / totalPredictions) * 100;
-                baseConfidence = clampConfidence((realAccuracy * 0.8) + (patternConfidence * 0.2));
-            } else if (totalPredictions >= 5) {
-                const realAccuracy = (sideData.correct / totalPredictions) * 100;
-                baseConfidence = clampConfidence((realAccuracy * 0.5) + (patternConfidence * 0.5));
-            } else if (totalPredictions >= 3) {
-                const realAccuracy = (sideData.correct / totalPredictions) * 100;
-                baseConfidence = clampConfidence((realAccuracy * 0.35) + (patternConfidence * 0.65));
-            } else {
-                baseConfidence = clampConfidence(Math.min(patternConfidence, 75));
-            }
+            const observedRate = (band.correct / band.count) * 100;
+            const bandMid = (band.min + band.max) / 2;
+            const overconfidence = bandMid - observedRate;
 
-            // ELO modifier: ±0 to ±8 pts based on rating vs 1200 baseline
-            //   ELO 1600 → +8, ELO 800 → -8
-            const eloMod = Math.max(-8, Math.min(8, (eloRating - 1200) / 50));
-
-            // Sharpness modifier: sharpness 0.0 → -6, sharpness 1.0 → +6
-            const sharpMod = (sharpness - 0.5) * 12;
-
-            const adjusted = baseConfidence + eloMod + sharpMod;
-            return clampConfidence(adjusted);
+            // Shrink confidence by the measured overconfidence (damped 50%)
+            const adjustment = -overconfidence * 0.5;
+            return clampConfidence(confidence + adjustment);
         }
 
-        // ========== DYNAMIC SKIP THRESHOLD — now uses ELO ==========
-        function getDynamicSkipThreshold() {
-            const total = overallAccuracy.total;
-
-            // Base threshold from accuracy
-            let baseThreshold;
-            if (total < 10) {
-                baseThreshold = 50;
-            } else {
-                const realAccuracy = (overallAccuracy.correct / total) * 100;
-                if (realAccuracy >= 70) baseThreshold = 46;
-                else if (realAccuracy >= 55) baseThreshold = 50;
-                else baseThreshold = 56;
+        // ===== Real confidence (no fake modifiers) =====
+        function getRealConfidence(prediction, patternConfidence) {
+            // Side-specific accuracy nudge (small, real)
+            const sideData = prediction === 'P' ? patternAccuracy.P : patternAccuracy.B;
+            let sideNudge = 0;
+            if (sideData.total >= 8) {
+                const sideAcc = (sideData.correct / sideData.total) * 100;
+                sideNudge = (sideAcc - 50) * 0.12; // -6 .. +6 max
             }
 
-            // ELO modifier: high ELO → lower threshold (bet more),
-            //                low ELO → higher threshold (bet less)
-            // ELO 1600 → -6, ELO 800 → +6
-            const eloMod = -Math.max(-6, Math.min(6, (eloRating - 1200) / 60));
+            const raw = patternConfidence + sideNudge;
+            const calibrated = applyCalibration(raw);
+            return clampConfidence(calibrated);
+        }
 
-            // Recent accuracy nudge
-            let recentNudge = 0;
+        // ===== Skip threshold: floor at 55 =====
+        function getDynamicSkipThreshold() {
+            let threshold = SKIP_THRESHOLD_FLOOR;
+
+            // Recent accuracy nudge (real, measurable)
             const recentPredictions = predictionHistory.slice(-20);
-            if (recentPredictions.length >= 10 && total >= 10) {
-                const realAccuracy = (overallAccuracy.correct / total) * 100;
+            if (recentPredictions.length >= 10 && overallAccuracy.total >= 10) {
+                const realAccuracy = (overallAccuracy.correct / overallAccuracy.total) * 100;
                 const recentCorrect = recentPredictions.filter(p => p.correct).length;
                 const recentAcc = (recentCorrect / recentPredictions.length) * 100;
-                if (recentAcc > realAccuracy + 5) recentNudge = -3;
-                else if (recentAcc < realAccuracy - 5) recentNudge = 3;
+                if (recentAcc > realAccuracy + 6) threshold -= 3;
+                else if (recentAcc < realAccuracy - 6) threshold += 3;
             }
 
-            const finalThreshold = baseThreshold + eloMod + recentNudge;
-            return Math.round(Math.min(85, Math.max(45, finalThreshold)));
+            return Math.round(Math.min(85, Math.max(SKIP_THRESHOLD_FLOOR, threshold)));
         }
 
-        // ========== FINAL PREDICTION ==========
+        // ===== Final prediction =====
         function finalPrediction() {
             if (sequence.length < MIN_HANDS) return null;
-
             const patternResult = getPatternPrediction();
             if (!patternResult) return null;
 
@@ -1064,7 +1045,7 @@
                 confidence: realConfidence,
                 threshold,
                 skip: !shouldBet,
-                patternCount: patternResult.patternCount
+                activeDetectors: patternResult.activeDetectors
             };
         }
 
@@ -1091,7 +1072,6 @@
                 span.textContent = r;
                 box.appendChild(span);
             });
-
             rBox.innerHTML = '';
             const filteredResults = results.filter(r => r === 'W' || r === 'L');
             const last10 = filteredResults.slice(-10);
@@ -1118,11 +1098,8 @@
             if (resetBtn) {
                 resetBtn.disabled = false;
                 resetBtn.classList.remove('disabled');
-                if (locked) {
-                    resetBtn.classList.add('blink-reset');
-                } else {
-                    resetBtn.classList.remove('blink-reset');
-                }
+                if (locked) resetBtn.classList.add('blink-reset');
+                else resetBtn.classList.remove('blink-reset');
             }
         }
 
@@ -1134,7 +1111,7 @@
                 lastPrediction = null;
                 setChangeTableLock(false);
                 updateStatsBar();
-                updateEloSharpBar();
+                updateMetricsPanel();
                 return;
             }
             
@@ -1150,7 +1127,7 @@
                 lastPrediction = null;
                 setChangeTableLock(true);
                 updateStatsBar();
-                updateEloSharpBar();
+                updateMetricsPanel();
                 return;
             }
             
@@ -1164,7 +1141,7 @@
                 lastPrediction = result.pred;
                 lastPredictionConfidence = result.confidence;
             } else if (result && result.skip) {
-                html = `<span style="font-size:clamp(14px,3vw,16px); color:#db2777;">⏭ SKIP (${result.confidence}%)</span>`;
+                html = `<span style="font-size:clamp(14px,3vw,16px); color:#db2777;">⏭ SKIP (${result.confidence}% &lt; ${result.threshold}%)</span>`;
                 lastPrediction = null;
             } else {
                 html = "<span style='font-size:clamp(14px,3vw,16px); color:#7a8595'>ANALYZING PATTERNS...</span>";
@@ -1174,7 +1151,7 @@
             box.innerHTML = html;
             setChangeTableLock(false);
             updateStatsBar();
-            updateEloSharpBar();
+            updateMetricsPanel();
         }
 
         function updateStatsBar() {
@@ -1193,45 +1170,146 @@
             const streakDisplay = document.getElementById('streakDisplay');
             if (last && streak > 0) {
                 streakDisplay.textContent = `Streak: ${streak} ${last}`;
-                streakDisplay.className = 'streak-indicator ' + (streak >= 3 ? 'win-streak' : '');
             } else {
                 streakDisplay.textContent = 'Streak: 0';
-                streakDisplay.className = 'streak-indicator';
             }
         }
 
-        // ========== ELO & SHARPNESS BAR (current → new format) ==========
-        function updateEloSharpBar() {
-            const eloEl = document.getElementById('eloValue');
-            const sharpEl = document.getElementById('sharpValue');
-            const eloDeltaEl = document.getElementById('eloDelta');
-            const sharpDeltaEl = document.getElementById('sharpDelta');
+        // ========== ENGINE METRICS PANEL (all direct counts) ==========
+        function updateMetricsPanel() {
+            const inner = document.getElementById('metricsInner');
+            if (!inner) return;
 
-            if (!eloEl || !sharpEl) return;
+            // Overall accuracy
+            const total = overallAccuracy.total;
+            const correct = overallAccuracy.correct;
+            const acc = total > 0 ? ((correct / total) * 100).toFixed(1) : '—';
 
-            // ELO display
-            eloEl.textContent = Math.round(eloRating);
-            sharpEl.textContent = sharpness.toFixed(2);
+            // Per-detector stats from rolling window
+            const detectorRows = DETECTOR_NAMES.map(name => {
+                const hist = detectorHistory[name] || [];
+                const fires = hist.length;
+                if (fires === 0) {
+                    return { name, fires: 0, hits: 0, hitPct: '—', edge: '—', edgeClass: 'edge-neu', gap: '—' };
+                }
+                const hits = hist.filter(h => h.correct).length;
+                const hitRate = (hits / fires) * 100;
+                const edge = hitRate - 50;
+                const edgeClass = edge > 2 ? 'edge-pos' : edge < -2 ? 'edge-neg' : 'edge-neu';
 
-            // Delta display — uses persisted lastEloChange / lastSharpChange
-            if (Math.abs(lastEloChange) > 0.05) {
-                eloDeltaEl.textContent = (lastEloChange > 0 ? '+' : '') + lastEloChange.toFixed(1);
-                eloDeltaEl.className = 'delta ' + (lastEloChange > 0 ? 'pos' : 'neg');
+                const correctEntries = hist.filter(h => h.correct);
+                const wrongEntries = hist.filter(h => !h.correct);
+                const avgConfC = correctEntries.length > 0
+                    ? correctEntries.reduce((a, b) => a + b.confidence, 0) / correctEntries.length
+                    : 0;
+                const avgConfW = wrongEntries.length > 0
+                    ? wrongEntries.reduce((a, b) => a + b.confidence, 0) / wrongEntries.length
+                    : 0;
+                const gap = correctEntries.length > 0 && wrongEntries.length > 0
+                    ? (avgConfC - avgConfW).toFixed(1)
+                    : '—';
+
+                return {
+                    name,
+                    fires,
+                    hits,
+                    hitPct: hitRate.toFixed(1) + '%',
+                    edge: (edge >= 0 ? '+' : '') + edge.toFixed(1) + '%',
+                    edgeClass,
+                    gap
+                };
+            }).sort((a, b) => parseFloat(b.edge) - parseFloat(a.edge));
+
+            // Calibration table
+            const calibrationRows = CALIBRATION_BANDS
+                .filter(b => b.count > 0)
+                .sort((a, b) => a.min - b.min)
+                .map(b => {
+                    const predicted = ((b.min + b.max) / 2).toFixed(0) + '%';
+                    const actual = ((b.correct / b.count) * 100).toFixed(1) + '%';
+                    const diff = ((b.correct / b.count) * 100) - ((b.min + b.max) / 2);
+                    const diffClass = Math.abs(diff) < 5 ? 'neutral' : diff > 0 ? 'pos' : 'neg';
+                    return { predicted, actual, count: b.count, diff: (diff >= 0 ? '+' : '') + diff.toFixed(1), diffClass };
+                });
+
+            let html = '';
+
+            // Section 1: Overall
+            html += `
+                <div class="metrics-section">
+                    <div class="metrics-section-title">Overall (all-time)</div>
+                    <div class="metric-row"><span class="name">Predictions logged</span><span class="val">${total}</span></div>
+                    <div class="metric-row"><span class="name">Correct</span><span class="val">${correct}</span></div>
+                    <div class="metric-row"><span class="name">Hit rate</span><span class="val">${acc}${total > 0 ? '%' : ''}</span></div>
+                </div>
+            `;
+
+            // Section 2: Detector table
+            html += `
+                <div class="metrics-section">
+                    <div class="metrics-section-title">Detector Reliability (last ${DETECTOR_WINDOW} fires)</div>
+                    <table class="detector-table">
+                        <thead>
+                            <tr>
+                                <th>DETECTOR</th>
+                                <th>HIT%</th>
+                                <th>EDGE</th>
+                                <th>FIRES</th>
+                                <th>CONF GAP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            detectorRows.forEach(r => {
+                html += `
+                    <tr>
+                        <td>${r.name}</td>
+                        <td>${r.hitPct}</td>
+                        <td class="${r.edgeClass}">${r.edge}</td>
+                        <td>${r.fires}</td>
+                        <td>${r.gap}</td>
+                    </tr>
+                `;
+            });
+            html += `</tbody></table></div>`;
+
+            // Section 3: Calibration
+            if (calibrationRows.length > 0) {
+                html += `
+                    <div class="metrics-section">
+                        <div class="metrics-section-title">Calibration (predicted vs actual)</div>
+                        <table class="detector-table">
+                            <thead>
+                                <tr>
+                                    <th>BAND</th>
+                                    <th>ACTUAL</th>
+                                    <th>DIFF</th>
+                                    <th>SAMPLES</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                calibrationRows.forEach(r => {
+                    html += `
+                        <tr>
+                            <td>${r.predicted}</td>
+                            <td>${r.actual}</td>
+                            <td class="${r.diffClass}">${r.diff}</td>
+                            <td>${r.count}</td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table></div>`;
             } else {
-                eloDeltaEl.textContent = '';
-                eloDeltaEl.className = 'delta';
+                html += `
+                    <div class="metrics-section">
+                        <div class="metrics-section-title">Calibration</div>
+                        <div class="metric-row"><span class="name">Not enough data</span><span class="val">—</span></div>
+                    </div>
+                `;
             }
 
-            if (Math.abs(lastSharpChange) > 0.0005) {
-                sharpDeltaEl.textContent = (lastSharpChange > 0 ? '+' : '') + lastSharpChange.toFixed(2);
-                sharpDeltaEl.className = 'delta ' + (lastSharpChange > 0 ? 'pos' : 'neg');
-            } else {
-                sharpDeltaEl.textContent = '';
-                sharpDeltaEl.className = 'delta';
-            }
-
-            eloEl.classList.toggle('high', eloRating > 1400);
-            sharpEl.classList.toggle('high', sharpness > 0.65);
+            inner.innerHTML = html;
         }
 
         // ========== RECORD RESULT ==========
@@ -1241,28 +1319,37 @@
             if (lastPrediction) {
                 const wasCorrect = (lastPrediction === r);
 
-                // Snapshot ELO & Sharpness BEFORE update (for undo + delta)
-                const beforeElo = eloRating;
-                const beforeSharp = sharpness;
-
-                // Update ELO & Sharpness
-                updateElo(wasCorrect, lastPredictionConfidence);
-                updateSharpness(wasCorrect, lastPredictionConfidence);
-
-                const eloChange = eloRating - beforeElo;
-                const sharpChange = sharpness - beforeSharp;
-
-                // Persist the change history (used by undo)
+                // Update prediction history
                 predictionHistory.push({
                     prediction: lastPrediction,
                     actual: r,
                     correct: wasCorrect,
                     confidence: lastPredictionConfidence,
-                    timestamp: Date.now(),
-                    eloBefore: beforeElo,
-                    eloAfter: eloRating,
-                    sharpBefore: beforeSharp,
-                    sharpAfter: sharpness
+                    timestamp: Date.now()
+                });
+
+                // Update detector rolling windows (attribute all active detectors)
+                // We re-run the detectors to know which ones fired on the hand just recorded.
+                // Note: the sequence used must be the one BEFORE this hand was appended,
+                // so we compute attribution from the current sequence + the prediction.
+                const attributionDetectors = [
+                    detectPatterns(),
+                    detectStreakBias(),
+                    detectZigzagBias(),
+                    detectFrequencyBias(),
+                    detectRecentBias()
+                ].filter(d => d !== null);
+
+                attributionDetectors.forEach(d => {
+                    const hist = detectorHistory[d.name] || [];
+                    hist.push({
+                        prediction: d.prediction,
+                        confidence: d.confidence,
+                        actual: r,
+                        correct: (d.prediction === r)
+                    });
+                    if (hist.length > DETECTOR_WINDOW) hist.shift();
+                    detectorHistory[d.name] = hist;
                 });
 
                 if (lastPrediction === 'P') {
@@ -1275,48 +1362,32 @@
                 overallAccuracy.total++;
                 if (wasCorrect) overallAccuracy.correct++;
 
-                // Set delta for display
-                lastEloChange = eloChange;
-                lastSharpChange = sharpChange;
-
-                // Persist state
                 localStorage.setItem('bt_prediction_history', JSON.stringify(predictionHistory));
-                localStorage.setItem('bt_elo_rating', eloRating.toFixed(2));
-                localStorage.setItem('bt_sharpness', sharpness.toFixed(4));
-                localStorage.setItem('bt_last_elo_change', lastEloChange.toFixed(4));
-                localStorage.setItem('bt_last_sharp_change', lastSharpChange.toFixed(4));
+                localStorage.setItem('bt_detector_history', JSON.stringify(detectorHistory));
 
                 results.push(wasCorrect ? 'W' : 'L');
                 if (wasCorrect) { wins++; detailedHistory.push({ type: 'win', wasSkip: false }); }
                 else { losses++; detailedHistory.push({ type: 'loss', wasSkip: false }); }
             } else {
-                // SKIP — no ELO/Sharpness change, but keep last delta as-is
                 results.push('');
                 skips++;
                 detailedHistory.push({ type: 'skip', wasSkip: true });
             }
 
             sequence.push(r);
+            rebuildCalibration();
             saveAndUpdate();
         }
 
-        // ========== UNDO — now rolls back ELO, Sharpness, and deltas ==========
+        // ========== UNDO ==========
         function undo() {
             if (checkChangeTable().show) return;
-
             if (sequence.length === 0) return;
 
-            // If the last sequence entry was a bet (not a skip), roll back ELO/Sharpness
+            // Roll back prediction history entry
             if (predictionHistory.length > 0) {
                 const lastPred = predictionHistory[predictionHistory.length - 1];
-                // Restore ELO & Sharpness to pre-hand values if stored
-                if (typeof lastPred.eloBefore === 'number') {
-                    eloRating = lastPred.eloBefore;
-                    sharpness = lastPred.sharpBefore;
-                    localStorage.setItem('bt_elo_rating', eloRating.toFixed(2));
-                    localStorage.setItem('bt_sharpness', sharpness.toFixed(4));
-                }
-                // Undo accuracy counters
+
                 if (lastPred.prediction === 'P') {
                     patternAccuracy.P.total--;
                     if (lastPred.correct) patternAccuracy.P.correct--;
@@ -1331,6 +1402,15 @@
                 localStorage.setItem('bt_prediction_history', JSON.stringify(predictionHistory));
             }
 
+            // Roll back detector history entries for this hand
+            // We pop the last entry from each detector that fired
+            DETECTOR_NAMES.forEach(name => {
+                const hist = detectorHistory[name] || [];
+                if (hist.length > 0) hist.pop();
+                detectorHistory[name] = hist;
+            });
+            localStorage.setItem('bt_detector_history', JSON.stringify(detectorHistory));
+
             sequence.pop();
             const lastResultData = results.pop();
             detailedHistory.pop();
@@ -1339,12 +1419,7 @@
             else if (lastResultData === 'L') losses--;
             else if (lastResultData === '') skips--;
 
-            // Clear the delta display on undo (since the change is gone)
-            lastEloChange = 0;
-            lastSharpChange = 0;
-            localStorage.setItem('bt_last_elo_change', '0');
-            localStorage.setItem('bt_last_sharp_change', '0');
-
+            rebuildCalibration();
             saveAndUpdate();
         }
 
@@ -1356,20 +1431,20 @@
                 lastPredictionConfidence = 0;
                 detailedHistory = [];
                 predictionHistory = [];
-                patternAccuracy = { P: { correct: 0, total: 0 }, B: { correct: 0, total: 0 } };
                 overallAccuracy = { correct: 0, total: 0 };
+                patternAccuracy = { P: { correct: 0, total: 0 }, B: { correct: 0, total: 0 } };
+                detectorHistory = {};
+                DETECTOR_NAMES.forEach(name => { detectorHistory[name] = []; });
                 wins = 0;
                 losses = 0;
                 skips = 0;
-                eloRating = 1200;
-                sharpness = 0.0;
-                lastEloChange = 0;
-                lastSharpChange = 0;
 
                 localStorage.removeItem('bt_sequence');
                 localStorage.removeItem('bt_results');
                 localStorage.removeItem('bt_detailed');
                 localStorage.removeItem('bt_prediction_history');
+                localStorage.removeItem('bt_detector_history');
+                // Wipe orphaned ELO/Sharpness keys from previous versions
                 localStorage.removeItem('bt_elo_rating');
                 localStorage.removeItem('bt_sharpness');
                 localStorage.removeItem('bt_last_elo_change');
@@ -1393,6 +1468,8 @@
 
         updateHistory();
         updatePredictionBox();
+        rebuildCalibration();
+        updateMetricsPanel();
     </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"45a606eccca84059b53fcc46a592a23b","r":1,"spa":2}' crossorigin="anonymous"></script>
 </body>
