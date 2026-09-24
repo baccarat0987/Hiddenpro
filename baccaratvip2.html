@@ -345,6 +345,8 @@
             font-weight: 700;
             opacity: 0.95;
         }
+
+        /* ========== CHANGE TABLE — Blinking theme color ========== */
         .change-table {
             font-size: clamp(20px, 5vw, 28px);
             font-weight: 900;
@@ -353,18 +355,44 @@
             padding: 12px 24px;
             border-radius: 20px;
             border: 3px solid #db2777;
-            animation: pulseChange 1.5s ease-in-out infinite;
             display: inline-block;
             letter-spacing: 2px;
+            animation: blinkTheme 1.2s ease-in-out infinite;
         }
-        @keyframes pulseChange {
-            0%,100% { box-shadow: 0 0 10px rgba(219, 39, 119, 0.2); transform: scale(1); }
-            50% { box-shadow: 0 0 30px rgba(219, 39, 119, 0.6); transform: scale(1.05); }
+        @keyframes blinkTheme {
+            0% {
+                color: #7c3aed;
+                border-color: #7c3aed;
+                background: rgba(124, 58, 237, 0.18);
+                box-shadow: 0 0 24px rgba(124, 58, 237, 0.75), 0 0 48px rgba(124, 58, 237, 0.35);
+                transform: scale(1);
+            }
+            33% {
+                color: #1e3a8a;
+                border-color: #1e3a8a;
+                background: rgba(30, 58, 138, 0.18);
+                box-shadow: 0 0 24px rgba(30, 58, 138, 0.75), 0 0 48px rgba(30, 58, 138, 0.35);
+                transform: scale(1.03);
+            }
+            66% {
+                color: #db2777;
+                border-color: #db2777;
+                background: rgba(219, 39, 119, 0.18);
+                box-shadow: 0 0 24px rgba(219, 39, 119, 0.75), 0 0 48px rgba(219, 39, 119, 0.35);
+                transform: scale(1.05);
+            }
+            100% {
+                color: #7c3aed;
+                border-color: #7c3aed;
+                background: rgba(124, 58, 237, 0.18);
+                box-shadow: 0 0 24px rgba(124, 58, 237, 0.75), 0 0 48px rgba(124, 58, 237, 0.35);
+                transform: scale(1);
+            }
         }
         .change-table .sub {
             font-size: clamp(11px, 2.5vw, 15px);
-            font-weight: 500;
-            color: #db2777;
+            font-weight: 600;
+            color: inherit;
             display: block;
             margin-top: 6px;
             letter-spacing: 1px;
@@ -374,13 +402,14 @@
             background: transparent;
         }
         .change-table .sub .highlight {
-            color: #1e3a8a;
-            font-weight: 700;
+            color: inherit;
+            font-weight: 800;
             text-decoration: underline;
             cursor: pointer;
+            text-shadow: 0 0 12px currentColor;
         }
         .change-table .sub .highlight:hover {
-            color: #7c3aed;
+            opacity: 0.8;
         }
 
         .buttons {
@@ -400,7 +429,7 @@
             letter-spacing: 1px;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
-            transition: transform 0.12s ease, filter 0.15s ease, box-shadow 0.3s ease;
+            transition: transform 0.12s ease, filter 0.15s ease, box-shadow 0.3s ease, opacity 0.25s ease;
             position: relative;
             overflow: hidden;
         }
@@ -424,6 +453,18 @@
         }
         .buttons button:hover { filter: brightness(1.08); transform: scale(1.02); }
         .buttons button:active { transform: scale(0.96); filter: brightness(0.93); }
+
+        /* ========== Disabled state when Change Table is active ========== */
+        .buttons button:disabled,
+        .buttons button.disabled {
+            cursor: not-allowed !important;
+            filter: grayscale(0.85) brightness(0.85) !important;
+            opacity: 0.45 !important;
+            animation: none !important;
+            box-shadow: none !important;
+            transform: none !important;
+            pointer-events: none !important;
+        }
 
         .util-btns {
             grid-column: span 2;
@@ -450,6 +491,14 @@
             color: var(--text);
             background: #d5dce6;
             box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
+        }
+        /* Keep RESET always enabled — no disabled style */
+        #resetBtn:disabled,
+        #resetBtn.disabled {
+            opacity: 1 !important;
+            filter: none !important;
+            cursor: pointer !important;
+            pointer-events: auto !important;
         }
 
         .container { background-color: #f8fafc; }
@@ -537,8 +586,8 @@
                 <button onclick="recordResult('P')" id="playerBtn">PLAYER</button>
                 <button onclick="recordResult('B')" id="bankerBtn">BANKER</button>
                 <div class="util-btns">
-                    <button onclick="undo()">UNDO LAST</button>
-                    <button onclick="resetAll()">RESET SHOE</button>
+                    <button onclick="undo()" id="undoBtn">UNDO LAST</button>
+                    <button onclick="resetAll()" id="resetBtn">RESET SHOE</button>
                 </div>
             </div>
         </div>
@@ -547,12 +596,9 @@
     <script>
         /* =========================================================
            SHARP + LOW-SKIP ENGINE
-           - Detectors fire early (more votes)
-           - Gate = 1 vote (very few skips)
-           - Low threshold tiers (48-56 range)
-           - Honest confidence: winning side average only
-           - No additive boosts, no cherry-picking, no regression
-           - Change Table rule unchanged (lossDiff >= 2)
+           + CHANGE TABLE lock: PLAYER / BANKER / UNDO disabled
+             while Change Table alert is active. RESET always works.
+           + Blinking theme color on Change Table alert.
         ========================================================= */
 
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
@@ -896,7 +942,7 @@
             return count;
         }
 
-        // ========== UI FUNCTIONS (UNCHANGED) ==========
+        // ========== UI FUNCTIONS ==========
         function updateHistory() {
             const box = document.getElementById('historyBox');
             const rBox = document.getElementById('resultsBox');
@@ -920,12 +966,34 @@
             });
         }
 
+        // ========== LOCK/UNLOCK BUTTONS ==========
+        function setChangeTableLock(locked) {
+            const playerBtn = document.getElementById('playerBtn');
+            const bankerBtn = document.getElementById('bankerBtn');
+            const undoBtn = document.getElementById('undoBtn');
+
+            [playerBtn, bankerBtn, undoBtn].forEach(btn => {
+                if (!btn) return;
+                btn.disabled = locked;
+                btn.classList.toggle('disabled', locked);
+            });
+
+            // RESET is always enabled — explicitly clear any disabled state
+            const resetBtn = document.getElementById('resetBtn');
+            if (resetBtn) {
+                resetBtn.disabled = false;
+                resetBtn.classList.remove('disabled');
+            }
+        }
+
         function updatePredictionBox() {
             const box = document.getElementById('predictionBox');
 
             if (sequence.length < MIN_HANDS) {
                 box.innerHTML = `<span style="font-size:clamp(11px,2.5vw,13px); color:#7a8595; letter-spacing:1px;">LOGGING: ${MIN_HANDS-sequence.length} MORE HANDS NEEDED</span>`;
                 lastPrediction = null;
+                setChangeTableLock(false);
+                updateStatsBar();
                 return;
             }
             
@@ -939,6 +1007,7 @@
                     </span>
                 `;
                 lastPrediction = null;
+                setChangeTableLock(true);   // Lock PLAYER, BANKER, UNDO
                 updateStatsBar();
                 return;
             }
@@ -961,6 +1030,7 @@
             }
             
             box.innerHTML = html;
+            setChangeTableLock(false);   // Unlock when not in Change Table
             updateStatsBar();
         }
 
@@ -989,6 +1059,9 @@
 
         // ========== RECORD RESULT, UNDO, RESET ==========
         function recordResult(r) {
+            // Extra guard: if Change Table is showing, ignore input
+            if (checkChangeTable().show) return;
+
             if (lastPrediction) {
                 const wasCorrect = (lastPrediction === r);
                 
@@ -1026,6 +1099,9 @@
         }
 
         function undo() {
+            // Extra guard: if Change Table is showing, ignore input
+            if (checkChangeTable().show) return;
+
             if (sequence.length === 0) return;
             
             if (predictionHistory.length > 0) {
@@ -1096,6 +1172,6 @@
         updateHistory();
         updatePredictionBox();
     </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"45a606eccca84059b53fcc46a592a23b","r":1,"spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"45a606eccca84059b53fcc46a592a23b","r":1,"spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
