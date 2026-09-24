@@ -346,7 +346,7 @@
             opacity: 0.95;
         }
 
-        /* ========== CHANGE TABLE — Blinking theme color ========== */
+        /* ========== CHANGE TABLE — static redpink (no color blink) ========== */
         .change-table {
             font-size: clamp(20px, 5vw, 28px);
             font-weight: 900;
@@ -357,42 +357,16 @@
             border: 3px solid #db2777;
             display: inline-block;
             letter-spacing: 2px;
-            animation: blinkTheme 1.2s ease-in-out infinite;
+            animation: pulseChange 1.5s ease-in-out infinite;
         }
-        @keyframes blinkTheme {
-            0% {
-                color: #7c3aed;
-                border-color: #7c3aed;
-                background: rgba(124, 58, 237, 0.18);
-                box-shadow: 0 0 24px rgba(124, 58, 237, 0.75), 0 0 48px rgba(124, 58, 237, 0.35);
-                transform: scale(1);
-            }
-            33% {
-                color: #1e3a8a;
-                border-color: #1e3a8a;
-                background: rgba(30, 58, 138, 0.18);
-                box-shadow: 0 0 24px rgba(30, 58, 138, 0.75), 0 0 48px rgba(30, 58, 138, 0.35);
-                transform: scale(1.03);
-            }
-            66% {
-                color: #db2777;
-                border-color: #db2777;
-                background: rgba(219, 39, 119, 0.18);
-                box-shadow: 0 0 24px rgba(219, 39, 119, 0.75), 0 0 48px rgba(219, 39, 119, 0.35);
-                transform: scale(1.05);
-            }
-            100% {
-                color: #7c3aed;
-                border-color: #7c3aed;
-                background: rgba(124, 58, 237, 0.18);
-                box-shadow: 0 0 24px rgba(124, 58, 237, 0.75), 0 0 48px rgba(124, 58, 237, 0.35);
-                transform: scale(1);
-            }
+        @keyframes pulseChange {
+            0%,100% { box-shadow: 0 0 10px rgba(219, 39, 119, 0.2); transform: scale(1); }
+            50% { box-shadow: 0 0 30px rgba(219, 39, 119, 0.6); transform: scale(1.05); }
         }
         .change-table .sub {
             font-size: clamp(11px, 2.5vw, 15px);
-            font-weight: 600;
-            color: inherit;
+            font-weight: 500;
+            color: #db2777;
             display: block;
             margin-top: 6px;
             letter-spacing: 1px;
@@ -402,14 +376,13 @@
             background: transparent;
         }
         .change-table .sub .highlight {
-            color: inherit;
-            font-weight: 800;
+            color: #1e3a8a;
+            font-weight: 700;
             text-decoration: underline;
             cursor: pointer;
-            text-shadow: 0 0 12px currentColor;
         }
         .change-table .sub .highlight:hover {
-            opacity: 0.8;
+            color: #7c3aed;
         }
 
         .buttons {
@@ -492,19 +465,57 @@
             background: #d5dce6;
             box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
         }
-        /* Keep RESET always enabled — no disabled style */
+
+        /* ========== RESET button — blinking theme colors ========== */
+        #resetBtn {
+            animation: resetBlink 1.2s ease-in-out infinite !important;
+            font-weight: 800 !important;
+            transition: transform 0.12s ease;
+        }
+
+        @keyframes resetBlink {
+            0% {
+                background: #7c3aed;
+                color: #ffffff;
+                border-color: #7c3aed;
+                box-shadow: 0 0 16px rgba(124, 58, 237, 0.75), 0 0 32px rgba(124, 58, 237, 0.35);
+                transform: scale(1);
+            }
+            33% {
+                background: #1e3a8a;
+                color: #ffffff;
+                border-color: #1e3a8a;
+                box-shadow: 0 0 16px rgba(30, 58, 138, 0.75), 0 0 32px rgba(30, 58, 138, 0.35);
+                transform: scale(1.04);
+            }
+            66% {
+                background: #db2777;
+                color: #ffffff;
+                border-color: #db2777;
+                box-shadow: 0 0 16px rgba(219, 39, 119, 0.75), 0 0 32px rgba(219, 39, 119, 0.35);
+                transform: scale(1.06);
+            }
+            100% {
+                background: #7c3aed;
+                color: #ffffff;
+                border-color: #7c3aed;
+                box-shadow: 0 0 16px rgba(124, 58, 237, 0.75), 0 0 32px rgba(124, 58, 237, 0.35);
+                transform: scale(1);
+            }
+        }
+
+        /* RESET is never disabled — keep blink even if disabled class is added */
         #resetBtn:disabled,
         #resetBtn.disabled {
             opacity: 1 !important;
             filter: none !important;
             cursor: pointer !important;
             pointer-events: auto !important;
+            animation: resetBlink 1.2s ease-in-out infinite !important;
         }
 
         .container { background-color: #f8fafc; }
         .prediction { background: #f0f3f7; }
-        .util-btns button { background: #e4e9f0; color: #3a4555; }
-        .util-btns button:hover { background: #d5dce6; color: #1a2535; }
         
         .stats-bar {
             display: flex;
@@ -598,7 +609,8 @@
            SHARP + LOW-SKIP ENGINE
            + CHANGE TABLE lock: PLAYER / BANKER / UNDO disabled
              while Change Table alert is active. RESET always works.
-           + Blinking theme color on Change Table alert.
+           + Change Table display: static redpink (original).
+           + RESET button: blinking theme colors.
         ========================================================= */
 
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
@@ -1007,7 +1019,7 @@
                     </span>
                 `;
                 lastPrediction = null;
-                setChangeTableLock(true);   // Lock PLAYER, BANKER, UNDO
+                setChangeTableLock(true);
                 updateStatsBar();
                 return;
             }
@@ -1030,7 +1042,7 @@
             }
             
             box.innerHTML = html;
-            setChangeTableLock(false);   // Unlock when not in Change Table
+            setChangeTableLock(false);
             updateStatsBar();
         }
 
@@ -1059,7 +1071,6 @@
 
         // ========== RECORD RESULT, UNDO, RESET ==========
         function recordResult(r) {
-            // Extra guard: if Change Table is showing, ignore input
             if (checkChangeTable().show) return;
 
             if (lastPrediction) {
@@ -1099,7 +1110,6 @@
         }
 
         function undo() {
-            // Extra guard: if Change Table is showing, ignore input
             if (checkChangeTable().show) return;
 
             if (sequence.length === 0) return;
