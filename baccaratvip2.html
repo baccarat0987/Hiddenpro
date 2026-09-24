@@ -99,7 +99,6 @@
             --bg-body: #ffffff;
             --container-bg: #f8fafc;
             --surface: #f0f3f7;
-            --surface-2: #e8ecf2;
             --line: rgba(0, 0, 0, 0.07);
             --line-soft: rgba(0, 0, 0, 0.04);
             --text: #2d3748;
@@ -226,7 +225,6 @@
             font-size: clamp(9px, 1.6vw, 12px);
             font-weight: 800;
             font-family: 'Courier New', monospace;
-            letter-spacing: 0.3px;
             color: #ffffff;
             line-height: 1.2;
         }
@@ -294,7 +292,7 @@
 
         .prediction {
             margin: 16px 0;
-            padding: 18px 14px;
+            padding: 16px 14px;
             background: var(--surface);
             border-radius: 16px;
             font-size: clamp(18px, 4vw, 22px);
@@ -302,12 +300,20 @@
             border-top: 2px solid var(--line);
             border-bottom: 2px solid var(--line);
             min-height: 60px;
-            text-align: center;
             color: var(--text);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 10px;
+        }
+        .prediction .headline {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            text-align: center;
         }
         .prediction .player {
             background: linear-gradient(135deg, #7c3aed, #6d28d9);
@@ -328,9 +334,61 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-left: 8px;
+            margin-left: 4px;
             font-weight: 700;
         }
+        .adjust-tag {
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            color: #6b7a8f;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        /* ===== ATTRIBUTION (inside prediction box) ===== */
+        .attribution {
+            width: 100%;
+            font-family: 'Courier New', monospace;
+            font-size: 10.5px;
+            color: #4a5568;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid var(--line-soft);
+            border-radius: 10px;
+            padding: 8px 10px;
+            text-align: left;
+            line-height: 1.5;
+        }
+        .attribution .attr-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 1px 0;
+        }
+        .attribution .attr-row .dname {
+            color: #4a5568;
+            min-width: 74px;
+        }
+        .attribution .attr-row .dval {
+            color: #2d3748;
+            font-weight: 700;
+        }
+        .attribution .attr-row .dval.silenced {
+            color: #8a97a4;
+            font-style: italic;
+            font-weight: 500;
+        }
+        .attribution .attr-row .vote-p { color: #7c3aed; font-weight: 700; }
+        .attribution .attr-row .vote-b { color: #db2777; font-weight: 700; }
+        .attribution .attr-divider {
+            border-top: 1px dashed var(--line);
+            margin: 5px 0;
+        }
+        .attribution .attr-summary {
+            font-size: 10px;
+            color: #6b7a8f;
+            letter-spacing: 0.2px;
+        }
+        .attribution .attr-summary .val { color: #2d3748; font-weight: 700; }
 
         .change-table {
             font-size: clamp(20px, 5vw, 28px);
@@ -478,15 +536,7 @@
         .stats-bar span { font-weight: 600; }
         .stats-bar .win-rate { color: var(--win); }
 
-        .streak-indicator {
-            display: inline-block;
-            font-size: 11px;
-            font-weight: 700;
-            padding: 2px 10px;
-            border-radius: 10px;
-        }
-
-        /* ===== ENGINE METRICS PANEL (collapsed by default) ===== */
+        /* ===== ENGINE METRICS PANEL ===== */
         .metrics-toggle {
             margin-top: 10px;
             padding: 8px 14px;
@@ -505,16 +555,9 @@
             text-align: left;
             transition: background 0.2s;
         }
-        .metrics-toggle:hover {
-            background: #d5dce6;
-        }
-        .metrics-toggle .arrow {
-            font-size: 10px;
-            transition: transform 0.2s;
-        }
-        .metrics-toggle.open .arrow {
-            transform: rotate(90deg);
-        }
+        .metrics-toggle:hover { background: #d5dce6; }
+        .metrics-toggle .arrow { font-size: 10px; transition: transform 0.2s; }
+        .metrics-toggle.open .arrow { transform: rotate(90deg); }
 
         .metrics-panel {
             max-height: 0;
@@ -523,7 +566,7 @@
             margin-top: 0;
         }
         .metrics-panel.open {
-            max-height: 500px;
+            max-height: 700px;
             margin-top: 8px;
         }
 
@@ -535,13 +578,8 @@
             font-size: 11px;
             color: #2d3748;
         }
-
-        .metrics-section {
-            margin-bottom: 12px;
-        }
-        .metrics-section:last-child {
-            margin-bottom: 0;
-        }
+        .metrics-section { margin-bottom: 12px; }
+        .metrics-section:last-child { margin-bottom: 0; }
         .metrics-section-title {
             font-size: 10px;
             font-weight: 700;
@@ -552,7 +590,6 @@
             padding-bottom: 4px;
             border-bottom: 1px solid var(--line-soft);
         }
-
         .metric-row {
             display: flex;
             justify-content: space-between;
@@ -564,7 +601,6 @@
         .metric-row .val { font-weight: 700; color: #2d3748; }
         .metric-row .val.pos { color: #4a9a6a; }
         .metric-row .val.neg { color: #db2777; }
-        .metric-row .val.neutral { color: #6b7a8f; }
 
         .detector-table {
             width: 100%;
@@ -634,29 +670,25 @@
                 </div>
             </div>
 
-            <!-- ENGINE METRICS PANEL (collapsed by default) -->
             <button class="metrics-toggle" id="metricsToggle" onclick="toggleMetrics()">
                 <span>▸ ENGINE METRICS</span>
                 <span class="arrow">▶</span>
             </button>
             <div class="metrics-panel" id="metricsPanel">
-                <div class="metrics-inner" id="metricsInner">
-                    <!-- Populated by JS -->
-                </div>
+                <div class="metrics-inner" id="metricsInner"></div>
             </div>
         </div>
     </div>
 
     <script>
         /* =========================================================
-           HONEST ENGINE — no fake calculations
-           - ELO and Sharpness removed entirely
-           - All displayed metrics are direct counts
-           - Prediction path uses only measured inputs:
-             * per-detector rolling hit rate (reliability weighting)
-             * confidence gap (detector trust)
-             * calibration curve (confidence shrinkage)
-             * skip threshold floor at 55
+           HONEST ENGINE with SINGLE-SOURCE-OF-TRUTH attribution
+           - getPredictionWithAttribution() returns prediction AND
+             the exact numbers used to compute it
+           - Attribution panel reads that object — never recomputes
+           - Detector reliability + calibration wired into prediction
+           - ELO / Sharpness removed entirely
+           - Skip threshold floor at 55
         ========================================================= */
 
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
@@ -668,12 +700,10 @@
         const MIN_HANDS = 10;
         const SKIP_THRESHOLD_FLOOR = 55;
 
-        // Prediction history (with detector attribution)
         let predictionHistory = JSON.parse(localStorage.getItem('bt_prediction_history')) || [];
         let overallAccuracy = { correct: 0, total: 0 };
         let patternAccuracy = { P: { correct: 0, total: 0 }, B: { correct: 0, total: 0 } };
 
-        // ===== Per-detector rolling tracker (last 100 fires each) =====
         const DETECTOR_NAMES = ['Pattern', 'Streak', 'Zigzag', 'Frequency', 'Recent'];
         const DETECTOR_WINDOW = 100;
         let detectorHistory = JSON.parse(localStorage.getItem('bt_detector_history')) || {};
@@ -681,17 +711,15 @@
             if (!detectorHistory[name]) detectorHistory[name] = [];
         });
 
-        // ===== Calibration curve (6 bands) =====
         const CALIBRATION_BANDS = [
-            { min: 50, max: 59, count: 0, correct: 0 },
-            { min: 60, max: 69, count: 0, correct: 0 },
-            { min: 70, max: 79, count: 0, correct: 0 },
-            { min: 80, max: 89, count: 0, correct: 0 },
-            { min: 90, max: 100, count: 0, correct: 0 },
-            { min: 0, max: 49, count: 0, correct: 0 } // below threshold, tracked for completeness
+            { min: 50, max: 59, count: 0, correct: 0, label: '50-59' },
+            { min: 60, max: 69, count: 0, correct: 0, label: '60-69' },
+            { min: 70, max: 79, count: 0, correct: 0, label: '70-79' },
+            { min: 80, max: 89, count: 0, correct: 0, label: '80-89' },
+            { min: 90, max: 100, count: 0, correct: 0, label: '90+' },
+            { min: 0, max: 49, count: 0, correct: 0, label: '<50' }
         ];
 
-        // Rebuild calibration from stored history
         function rebuildCalibration() {
             CALIBRATION_BANDS.forEach(b => { b.count = 0; b.correct = 0; });
             predictionHistory.forEach(p => {
@@ -705,7 +733,6 @@
         }
         rebuildCalibration();
 
-        // Rebuild overall accuracy
         if (predictionHistory.length > 0) {
             predictionHistory.forEach(p => {
                 if (p.prediction === 'P') {
@@ -720,7 +747,6 @@
             });
         }
 
-        // ===== Metrics panel toggle (persisted) =====
         const metricsOpen = localStorage.getItem('bt_metrics_open') === '1';
         document.addEventListener('DOMContentLoaded', () => {
             if (metricsOpen) {
@@ -743,13 +769,11 @@
         function clampConfidence(raw) { return Math.min(96, Math.max(0, Math.round(raw))); }
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
 
-        // ===== CHANGE TABLE (unchanged rule) =====
         function checkChangeTable() {
             const window9 = results.slice(-9);
             const nonSkip = window9.filter(r => r === 'W' || r === 'L');
             const skipped = window9.filter(r => r === '').length;
-
-            if (nonSkip.length < 7) return { show: false, reason: '', wins: 0, losses: 0, winRate: 0 };
+            if (nonSkip.length < 7) return { show: false };
 
             const winsCount = nonSkip.filter(r => r === 'W').length;
             const lossesCount = nonSkip.filter(r => r === 'L').length;
@@ -758,24 +782,16 @@
             const lossDiff = lossesCount - winsCount;
 
             if (lossDiff >= 2 && skipped <= 2) {
-                return {
-                    show: true,
-                    reason: 'CHANGE TABLE',
-                    wins: winsCount,
-                    losses: lossesCount,
-                    winRate: Math.round(winRate * 100),
-                    lossDiff: lossDiff
-                };
+                return { show: true, reason: 'CHANGE TABLE' };
             }
-            return { show: false, reason: '', wins: winsCount, losses: lossesCount, winRate: Math.round(winRate * 100), lossDiff: lossDiff };
+            return { show: false };
         }
 
-        // ========== PATTERN DETECTORS (each returns prediction + confidence + name) ==========
+        // ========== PATTERN DETECTORS ==========
         function detectPatterns() {
             if (sequence.length < 4) return null;
             const patterns = {};
             const maxLen = Math.min(8, sequence.length - 1);
-
             for (let len = 2; len <= maxLen; len++) {
                 const pattern = sequence.slice(-len).join('');
                 const occurrences = [];
@@ -794,7 +810,7 @@
                     const prediction = pCount >= bCount ? 'P' : 'B';
                     const weight = len * occurrences.length;
                     if (!patterns[prediction] || patterns[prediction].weight < weight) {
-                        patterns[prediction] = { confidence, weight, matches: occurrences.length };
+                        patterns[prediction] = { confidence, weight };
                     }
                 }
             }
@@ -906,16 +922,15 @@
             return null;
         }
 
-        // ===== Real detector reliability (from measured hit rate + gap) =====
+        // ===== Detector reliability (measured) =====
         function getDetectorReliability(name) {
             const hist = detectorHistory[name] || [];
-            if (hist.length < 15) return 1.0; // not enough data — neutral weight
+            if (hist.length < 15) return { weight: 1.0, hitRate: null, gap: null, fires: hist.length };
 
             const hits = hist.filter(h => h.correct).length;
             const hitRate = hits / hist.length;
             const edge = hitRate - 0.5;
 
-            // Confidence gap: avg conf on correct minus avg conf on wrong
             const correctEntries = hist.filter(h => h.correct);
             const wrongEntries = hist.filter(h => !h.correct);
             const avgConfCorrect = correctEntries.length > 0
@@ -924,19 +939,33 @@
             const avgConfWrong = wrongEntries.length > 0
                 ? wrongEntries.reduce((a, b) => a + b.confidence, 0) / wrongEntries.length
                 : 0;
-            const gap = (avgConfCorrect - avgConfWrong) / 100; // normalized
+            const gap = (avgConfCorrect - avgConfWrong) / 100;
 
-            // Reliability weight: damped range [0.5, 1.5]
-            // Base from edge, secondary from gap
             let weight = 1.0 + edge * 3.0 + gap * 1.5;
             weight = Math.max(0.5, Math.min(1.5, weight));
 
-            return weight;
+            return { weight, hitRate, gap, fires: hist.length };
         }
 
-        // ===== Aggregation with reliability weighting =====
-        function getPatternPrediction() {
-            if (sequence.length < 3) return null;
+        // ===== Calibration adjustment (measured) =====
+        function applyCalibration(confidence) {
+            const band = CALIBRATION_BANDS.find(b => confidence >= b.min && confidence <= b.max);
+            if (!band || band.count < 8) {
+                return { adjusted: confidence, delta: 0, band: null, observed: null, samples: band ? band.count : 0 };
+            }
+            const observedRate = (band.correct / band.count) * 100;
+            const bandMid = (band.min + band.max) / 2;
+            const overconfidence = bandMid - observedRate;
+            const delta = -overconfidence * 0.5;
+            const adjusted = clampConfidence(confidence + delta);
+            return { adjusted, delta, band: band.label, observed: observedRate, samples: band.count };
+        }
+
+        // ===== Single-source-of-truth prediction =====
+        function getPredictionWithAttribution() {
+            if (sequence.length < MIN_HANDS) {
+                return { ready: false };
+            }
 
             const rawDetectors = [
                 detectPatterns(),
@@ -944,25 +973,39 @@
                 detectZigzagBias(),
                 detectFrequencyBias(),
                 detectRecentBias()
-            ];
+            ].filter(d => d !== null);
 
-            const detectors = rawDetectors.filter(p => p !== null);
-            if (detectors.length === 0) return null;
+            if (rawDetectors.length === 0) {
+                return { ready: true, noSignal: true };
+            }
+
+            // Build attribution entries with reliability weights — computed ONCE
+            const detectorAttribution = rawDetectors.map(d => {
+                const rel = getDetectorReliability(d.name);
+                return {
+                    name: d.name,
+                    prediction: d.prediction,
+                    confidence: d.confidence,
+                    weight: rel.weight,
+                    hitRate: rel.hitRate,
+                    gap: rel.gap,
+                    fires: rel.fires
+                };
+            });
 
             let pVotes = 0, bVotes = 0;
             let pConfSum = 0, bConfSum = 0;
-            const activeDetectors = [];
 
-            for (const d of detectors) {
-                const weight = getDetectorReliability(d.name);
-                activeDetectors.push({ name: d.name, prediction: d.prediction, confidence: d.confidence, weight });
-                if (d.prediction === 'P') { pVotes += weight; pConfSum += d.confidence * weight; }
-                else { bVotes += weight; bConfSum += d.confidence * weight; }
-            }
+            detectorAttribution.forEach(d => {
+                if (d.prediction === 'P') { pVotes += d.weight; pConfSum += d.confidence * d.weight; }
+                else { bVotes += d.weight; bConfSum += d.confidence * d.weight; }
+            });
 
             let winner, winnerConfSum, winnerWeight;
             if (Math.abs(pVotes - bVotes) < 0.001) {
-                if (Math.abs(pConfSum - bConfSum) < 0.001) return null;
+                if (Math.abs(pConfSum - bConfSum) < 0.001) {
+                    return { ready: true, noSignal: true, detectorAttribution };
+                }
                 winner = pConfSum > bConfSum ? 'P' : 'B';
                 winnerConfSum = winner === 'P' ? pConfSum : bConfSum;
                 winnerWeight = winner === 'P' ? pVotes : bVotes;
@@ -972,52 +1015,22 @@
                 winnerWeight = winner === 'P' ? pVotes : bVotes;
             }
 
-            if (winnerWeight < 0.1) return null;
+            const rawConfidence = clampConfidence(winnerConfSum / winnerWeight);
 
-            const confidence = winnerConfSum / winnerWeight;
-
-            return {
-                prediction: winner,
-                confidence: clampConfidence(confidence),
-                activeDetectors
-            };
-        }
-
-        // ===== Calibration adjustment: shrink overconfident predictions =====
-        function applyCalibration(confidence) {
-            // Find the band this confidence falls into
-            const band = CALIBRATION_BANDS.find(b => confidence >= b.min && confidence <= b.max);
-            if (!band || band.count < 8) return confidence; // not enough data
-
-            const observedRate = (band.correct / band.count) * 100;
-            const bandMid = (band.min + band.max) / 2;
-            const overconfidence = bandMid - observedRate;
-
-            // Shrink confidence by the measured overconfidence (damped 50%)
-            const adjustment = -overconfidence * 0.5;
-            return clampConfidence(confidence + adjustment);
-        }
-
-        // ===== Real confidence (no fake modifiers) =====
-        function getRealConfidence(prediction, patternConfidence) {
-            // Side-specific accuracy nudge (small, real)
-            const sideData = prediction === 'P' ? patternAccuracy.P : patternAccuracy.B;
+            // Side-specific nudge (small, real)
+            const sideData = winner === 'P' ? patternAccuracy.P : patternAccuracy.B;
             let sideNudge = 0;
             if (sideData.total >= 8) {
                 const sideAcc = (sideData.correct / sideData.total) * 100;
-                sideNudge = (sideAcc - 50) * 0.12; // -6 .. +6 max
+                sideNudge = (sideAcc - 50) * 0.12;
             }
 
-            const raw = patternConfidence + sideNudge;
-            const calibrated = applyCalibration(raw);
-            return clampConfidence(calibrated);
-        }
+            const preCalibration = clampConfidence(rawConfidence + sideNudge);
+            const calibration = applyCalibration(preCalibration);
+            const finalConfidence = calibration.adjusted;
 
-        // ===== Skip threshold: floor at 55 =====
-        function getDynamicSkipThreshold() {
+            // Threshold
             let threshold = SKIP_THRESHOLD_FLOOR;
-
-            // Recent accuracy nudge (real, measurable)
             const recentPredictions = predictionHistory.slice(-20);
             if (recentPredictions.length >= 10 && overallAccuracy.total >= 10) {
                 const realAccuracy = (overallAccuracy.correct / overallAccuracy.total) * 100;
@@ -1026,26 +1039,24 @@
                 if (recentAcc > realAccuracy + 6) threshold -= 3;
                 else if (recentAcc < realAccuracy - 6) threshold += 3;
             }
+            threshold = Math.round(Math.min(85, Math.max(SKIP_THRESHOLD_FLOOR, threshold)));
 
-            return Math.round(Math.min(85, Math.max(SKIP_THRESHOLD_FLOOR, threshold)));
-        }
-
-        // ===== Final prediction =====
-        function finalPrediction() {
-            if (sequence.length < MIN_HANDS) return null;
-            const patternResult = getPatternPrediction();
-            if (!patternResult) return null;
-
-            const realConfidence = getRealConfidence(patternResult.prediction, patternResult.confidence);
-            const threshold = getDynamicSkipThreshold();
-            const shouldBet = realConfidence >= threshold;
+            const shouldBet = finalConfidence >= threshold;
 
             return {
-                pred: shouldBet ? patternResult.prediction : null,
-                confidence: realConfidence,
-                threshold,
+                ready: true,
+                noSignal: false,
+                pred: shouldBet ? winner : null,
+                winner: winner,
+                confidence: finalConfidence,
+                rawConfidence: rawConfidence,
+                sideNudge: sideNudge,
+                preCalibration: preCalibration,
+                calibration: calibration,
+                threshold: threshold,
                 skip: !shouldBet,
-                activeDetectors: patternResult.activeDetectors
+                detectorAttribution: detectorAttribution,
+                weightedVote: { p: pVotes, b: bVotes }
             };
         }
 
@@ -1103,6 +1114,79 @@
             }
         }
 
+        function renderAttribution(result) {
+            if (!result || !result.detectorAttribution || result.detectorAttribution.length === 0) {
+                return '';
+            }
+
+            let html = `<div class="attribution">`;
+
+            // Detector rows
+            result.detectorAttribution.forEach(d => {
+                const silenced = d.weight < 0.7;
+                const voteClass = d.prediction === 'P' ? 'vote-p' : 'vote-b';
+                const voteLabel = d.prediction === 'P' ? 'P' : 'B';
+                const weightLabel = d.weight.toFixed(2);
+                const confLabel = Math.round(d.confidence) + '%';
+                const silentLabel = silenced ? ' (low weight)' : '';
+                html += `
+                    <div class="attr-row">
+                        <span class="dname">${d.name}</span>
+                        <span class="dval ${silenced ? 'silenced' : ''}">
+                            ${confLabel} ×${weightLabel}
+                            <span class="${voteClass}">→ ${voteLabel}</span>${silentLabel}
+                        </span>
+                    </div>
+                `;
+            });
+
+            html += `<div class="attr-divider"></div>`;
+
+            // Weighted vote tally
+            const pV = result.weightedVote.p.toFixed(2);
+            const bV = result.weightedVote.b.toFixed(2);
+            const winnerLabel = result.winner === 'P' ? 'PLAYER' : 'BANKER';
+            html += `
+                <div class="attr-row">
+                    <span class="attr-summary">Weighted vote</span>
+                    <span class="attr-summary"><span class="val">P ${pV}</span> vs <span class="val">B ${bV}</span> → <span class="val">${winnerLabel}</span></span>
+                </div>
+            `;
+
+            // Calibration line
+            if (result.calibration && result.calibration.band) {
+                const delta = result.calibration.delta;
+                const sign = delta >= 0 ? '+' : '';
+                html += `
+                    <div class="attr-row">
+                        <span class="attr-summary">Calibration (${result.calibration.band}% band, n=${result.calibration.samples})</span>
+                        <span class="attr-summary">
+                            <span class="val">${Math.round(result.calibration.observed)}%</span> actual
+                            → <span class="val">${sign}${delta.toFixed(1)}</span>
+                        </span>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="attr-row">
+                        <span class="attr-summary">Calibration</span>
+                        <span class="attr-summary">not enough data</span>
+                    </div>
+                `;
+            }
+
+            // Threshold line
+            html += `
+                <div class="attr-row">
+                    <span class="attr-summary">Threshold</span>
+                    <span class="attr-summary"><span class="val">${result.threshold}%</span> → ${result.skip ? 'SKIP' : 'BET'}</span>
+                </div>
+            `;
+
+            html += `</div>`;
+            return html;
+        }
+
         function updatePredictionBox() {
             const box = document.getElementById('predictionBox');
 
@@ -1114,9 +1198,8 @@
                 updateMetricsPanel();
                 return;
             }
-            
+
             const changeTable = checkChangeTable();
-            
             if (changeTable.show) {
                 box.innerHTML = `
                     <span class="change-table">
@@ -1130,25 +1213,40 @@
                 updateMetricsPanel();
                 return;
             }
-            
-            const result = finalPrediction();
-            let html = '';
-            
-            if (result && result.pred) {
+
+            const result = getPredictionWithAttribution();
+            const attributionHtml = renderAttribution(result);
+
+            if (!result.ready || result.noSignal) {
+                box.innerHTML = `<span style='font-size:clamp(14px,3vw,16px); color:#7a8595'>ANALYZING PATTERNS...</span>`;
+                lastPrediction = null;
+                setChangeTableLock(false);
+                updateStatsBar();
+                updateMetricsPanel();
+                return;
+            }
+
+            // Headline
+            let headlineHtml = '';
+            if (result.pred) {
                 const text = result.pred === 'P' ? 'PLAYER' : 'BANKER';
                 const cls = result.pred === 'P' ? 'player' : 'banker';
-                html = `NEXT: <span class="${cls}">${text}</span> <span class="confidence">${result.confidence}%</span>`;
+                let adjustTag = '';
+                const calDelta = result.calibration && result.calibration.band ? result.calibration.delta : 0;
+                const totalAdjust = Math.abs(calDelta);
+                if (totalAdjust > 2) {
+                    const sign = calDelta >= 0 ? '+' : '';
+                    adjustTag = `<span class="adjust-tag">(cal ${sign}${calDelta.toFixed(1)})</span>`;
+                }
+                headlineHtml = `<div class="headline">NEXT: <span class="${cls}">${text}</span> <span class="confidence">${result.confidence}%</span> ${adjustTag}</div>`;
                 lastPrediction = result.pred;
                 lastPredictionConfidence = result.confidence;
-            } else if (result && result.skip) {
-                html = `<span style="font-size:clamp(14px,3vw,16px); color:#db2777;">⏭ SKIP (${result.confidence}% &lt; ${result.threshold}%)</span>`;
-                lastPrediction = null;
             } else {
-                html = "<span style='font-size:clamp(14px,3vw,16px); color:#7a8595'>ANALYZING PATTERNS...</span>";
+                headlineHtml = `<div class="headline"><span style="font-size:clamp(14px,3vw,16px); color:#db2777;">⏭ SKIP (${result.confidence}% &lt; ${result.threshold}%)</span></div>`;
                 lastPrediction = null;
             }
-            
-            box.innerHTML = html;
+
+            box.innerHTML = headlineHtml + attributionHtml;
             setChangeTableLock(false);
             updateStatsBar();
             updateMetricsPanel();
@@ -1159,12 +1257,12 @@
             document.getElementById('lossCount').textContent = losses;
             const total = wins + losses;
             const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
-            
-            const realAcc = (overallAccuracy.total > 0) ? 
+
+            const realAcc = (overallAccuracy.total > 0) ?
                 Math.round((overallAccuracy.correct / overallAccuracy.total) * 100) : 0;
-            
+
             document.getElementById('winRateDisplay').textContent = `WR: ${winRate}% | Real: ${realAcc}%`;
-            
+
             const streak = getRunLength(sequence);
             const last = sequence.length > 0 ? sequence[sequence.length - 1] : null;
             const streakDisplay = document.getElementById('streakDisplay');
@@ -1175,22 +1273,19 @@
             }
         }
 
-        // ========== ENGINE METRICS PANEL (all direct counts) ==========
         function updateMetricsPanel() {
             const inner = document.getElementById('metricsInner');
             if (!inner) return;
 
-            // Overall accuracy
             const total = overallAccuracy.total;
             const correct = overallAccuracy.correct;
             const acc = total > 0 ? ((correct / total) * 100).toFixed(1) : '—';
 
-            // Per-detector stats from rolling window
             const detectorRows = DETECTOR_NAMES.map(name => {
                 const hist = detectorHistory[name] || [];
                 const fires = hist.length;
                 if (fires === 0) {
-                    return { name, fires: 0, hits: 0, hitPct: '—', edge: '—', edgeClass: 'edge-neu', gap: '—' };
+                    return { name, fires: 0, hitPct: '—', edge: '—', edgeClass: 'edge-neu', gap: '—' };
                 }
                 const hits = hist.filter(h => h.correct).length;
                 const hitRate = (hits / fires) * 100;
@@ -1212,7 +1307,6 @@
                 return {
                     name,
                     fires,
-                    hits,
                     hitPct: hitRate.toFixed(1) + '%',
                     edge: (edge >= 0 ? '+' : '') + edge.toFixed(1) + '%',
                     edgeClass,
@@ -1220,7 +1314,6 @@
                 };
             }).sort((a, b) => parseFloat(b.edge) - parseFloat(a.edge));
 
-            // Calibration table
             const calibrationRows = CALIBRATION_BANDS
                 .filter(b => b.count > 0)
                 .sort((a, b) => a.min - b.min)
@@ -1228,13 +1321,12 @@
                     const predicted = ((b.min + b.max) / 2).toFixed(0) + '%';
                     const actual = ((b.correct / b.count) * 100).toFixed(1) + '%';
                     const diff = ((b.correct / b.count) * 100) - ((b.min + b.max) / 2);
-                    const diffClass = Math.abs(diff) < 5 ? 'neutral' : diff > 0 ? 'pos' : 'neg';
+                    const diffClass = Math.abs(diff) < 5 ? '' : diff > 0 ? 'pos' : 'neg';
                     return { predicted, actual, count: b.count, diff: (diff >= 0 ? '+' : '') + diff.toFixed(1), diffClass };
                 });
 
             let html = '';
 
-            // Section 1: Overall
             html += `
                 <div class="metrics-section">
                     <div class="metrics-section-title">Overall (all-time)</div>
@@ -1244,7 +1336,6 @@
                 </div>
             `;
 
-            // Section 2: Detector table
             html += `
                 <div class="metrics-section">
                     <div class="metrics-section-title">Detector Reliability (last ${DETECTOR_WINDOW} fires)</div>
@@ -1273,7 +1364,6 @@
             });
             html += `</tbody></table></div>`;
 
-            // Section 3: Calibration
             if (calibrationRows.length > 0) {
                 html += `
                     <div class="metrics-section">
@@ -1319,19 +1409,7 @@
             if (lastPrediction) {
                 const wasCorrect = (lastPrediction === r);
 
-                // Update prediction history
-                predictionHistory.push({
-                    prediction: lastPrediction,
-                    actual: r,
-                    correct: wasCorrect,
-                    confidence: lastPredictionConfidence,
-                    timestamp: Date.now()
-                });
-
-                // Update detector rolling windows (attribute all active detectors)
-                // We re-run the detectors to know which ones fired on the hand just recorded.
-                // Note: the sequence used must be the one BEFORE this hand was appended,
-                // so we compute attribution from the current sequence + the prediction.
+                // Recompute detectors on the PREVIOUS sequence state for attribution
                 const attributionDetectors = [
                     detectPatterns(),
                     detectStreakBias(),
@@ -1350,6 +1428,14 @@
                     });
                     if (hist.length > DETECTOR_WINDOW) hist.shift();
                     detectorHistory[d.name] = hist;
+                });
+
+                predictionHistory.push({
+                    prediction: lastPrediction,
+                    actual: r,
+                    correct: wasCorrect,
+                    confidence: lastPredictionConfidence,
+                    timestamp: Date.now()
                 });
 
                 if (lastPrediction === 'P') {
@@ -1379,12 +1465,10 @@
             saveAndUpdate();
         }
 
-        // ========== UNDO ==========
         function undo() {
             if (checkChangeTable().show) return;
             if (sequence.length === 0) return;
 
-            // Roll back prediction history entry
             if (predictionHistory.length > 0) {
                 const lastPred = predictionHistory[predictionHistory.length - 1];
 
@@ -1402,8 +1486,6 @@
                 localStorage.setItem('bt_prediction_history', JSON.stringify(predictionHistory));
             }
 
-            // Roll back detector history entries for this hand
-            // We pop the last entry from each detector that fired
             DETECTOR_NAMES.forEach(name => {
                 const hist = detectorHistory[name] || [];
                 if (hist.length > 0) hist.pop();
@@ -1444,7 +1526,6 @@
                 localStorage.removeItem('bt_detailed');
                 localStorage.removeItem('bt_prediction_history');
                 localStorage.removeItem('bt_detector_history');
-                // Wipe orphaned ELO/Sharpness keys from previous versions
                 localStorage.removeItem('bt_elo_rating');
                 localStorage.removeItem('bt_sharpness');
                 localStorage.removeItem('bt_last_elo_change');
