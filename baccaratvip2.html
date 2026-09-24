@@ -466,11 +466,12 @@
             box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
         }
 
-        /* ========== RESET button — blinking theme colors ========== */
-        #resetBtn {
+        /* ========== RESET button — blinking ONLY when Change Table is active ========== */
+        #resetBtn.blink-reset {
             animation: resetBlink 1.2s ease-in-out infinite !important;
             font-weight: 800 !important;
-            transition: transform 0.12s ease;
+            color: #ffffff !important;
+            border-color: transparent !important;
         }
 
         @keyframes resetBlink {
@@ -504,14 +505,13 @@
             }
         }
 
-        /* RESET is never disabled — keep blink even if disabled class is added */
+        /* RESET must never look visually disabled, but keeps its normal grey look when not blinking */
         #resetBtn:disabled,
         #resetBtn.disabled {
             opacity: 1 !important;
             filter: none !important;
             cursor: pointer !important;
             pointer-events: auto !important;
-            animation: resetBlink 1.2s ease-in-out infinite !important;
         }
 
         .container { background-color: #f8fafc; }
@@ -610,7 +610,8 @@
            + CHANGE TABLE lock: PLAYER / BANKER / UNDO disabled
              while Change Table alert is active. RESET always works.
            + Change Table display: static redpink (original).
-           + RESET button: blinking theme colors.
+           + RESET button: blinks ONLY while Change Table is active.
+             After RESET -> page reload -> blink class removed.
         ========================================================= */
 
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
@@ -978,11 +979,12 @@
             });
         }
 
-        // ========== LOCK/UNLOCK BUTTONS ==========
+        // ========== LOCK/UNLOCK BUTTONS + RESET BLINK TOGGLE ==========
         function setChangeTableLock(locked) {
             const playerBtn = document.getElementById('playerBtn');
             const bankerBtn = document.getElementById('bankerBtn');
             const undoBtn = document.getElementById('undoBtn');
+            const resetBtn = document.getElementById('resetBtn');
 
             [playerBtn, bankerBtn, undoBtn].forEach(btn => {
                 if (!btn) return;
@@ -990,11 +992,17 @@
                 btn.classList.toggle('disabled', locked);
             });
 
-            // RESET is always enabled — explicitly clear any disabled state
-            const resetBtn = document.getElementById('resetBtn');
             if (resetBtn) {
+                // RESET is never disabled
                 resetBtn.disabled = false;
                 resetBtn.classList.remove('disabled');
+
+                // Blink ONLY while Change Table alert is active
+                if (locked) {
+                    resetBtn.classList.add('blink-reset');
+                } else {
+                    resetBtn.classList.remove('blink-reset');
+                }
             }
         }
 
@@ -1019,7 +1027,7 @@
                     </span>
                 `;
                 lastPrediction = null;
-                setChangeTableLock(true);
+                setChangeTableLock(true);   // Lock buttons + start RESET blink
                 updateStatsBar();
                 return;
             }
@@ -1042,7 +1050,7 @@
             }
             
             box.innerHTML = html;
-            setChangeTableLock(false);
+            setChangeTableLock(false);  // Unlock buttons + stop RESET blink
             updateStatsBar();
         }
 
