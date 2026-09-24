@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Baccarat VIP Plus · AI</title>
 
-    <!-- Clean URL script -->
     <script>
         if (window.location.pathname.endsWith('.html')) {
             const cleanUrl = window.location.pathname.replace('.html', '');
@@ -13,7 +12,6 @@
         }
     </script>
 
-    <!-- Firebase Authentication & Permission Check -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
@@ -62,7 +60,6 @@
         });
     </script>
 
-    <!-- Security Blockers -->
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
 
@@ -346,7 +343,6 @@
             opacity: 0.95;
         }
 
-        /* ========== CHANGE TABLE — static redpink (no color blink) ========== */
         .change-table {
             font-size: clamp(20px, 5vw, 28px);
             font-weight: 900;
@@ -427,7 +423,6 @@
         .buttons button:hover { filter: brightness(1.08); transform: scale(1.02); }
         .buttons button:active { transform: scale(0.96); filter: brightness(0.93); }
 
-        /* ========== Disabled state when Change Table is active ========== */
         .buttons button:disabled,
         .buttons button.disabled {
             cursor: not-allowed !important;
@@ -466,7 +461,6 @@
             box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
         }
 
-        /* ========== RESET button — blinking ONLY when Change Table is active ========== */
         #resetBtn.blink-reset {
             animation: resetBlink 1.2s ease-in-out infinite !important;
             font-weight: 800 !important;
@@ -505,7 +499,6 @@
             }
         }
 
-        /* RESET must never look visually disabled, but keeps its normal grey look when not blinking */
         #resetBtn:disabled,
         #resetBtn.disabled {
             opacity: 1 !important;
@@ -557,6 +550,61 @@
         .hidden {
             display: none !important;
         }
+
+        .elo-sharp-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #e8ecf2;
+            border-radius: 12px;
+            padding: 8px 16px;
+            margin: 6px 0 4px 0;
+            border: 1px solid var(--line-soft);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            color: #2d3748;
+        }
+        .elo-sharp-bar .metric {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .elo-sharp-bar .metric .label {
+            color: #6b7a8f;
+            font-weight: 500;
+        }
+        .elo-sharp-bar .metric .value {
+            font-family: 'Courier New', monospace;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 8px;
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.05);
+            min-width: 48px;
+            text-align: center;
+        }
+        .elo-sharp-bar .metric .value.elo {
+            color: #7c3aed;
+        }
+        .elo-sharp-bar .metric .value.sharp {
+            color: #db2777;
+        }
+        .elo-sharp-bar .metric .value.sharp.high {
+            color: #1e3a8a;
+            text-shadow: 0 0 10px rgba(30,58,138,0.3);
+        }
+        .elo-sharp-bar .metric .value.elo.high {
+            color: #6d28d9;
+            text-shadow: 0 0 10px rgba(124,58,237,0.4);
+        }
+        .elo-sharp-bar .metric .delta {
+            font-size: 9px;
+            font-weight: 600;
+            opacity: 0.7;
+        }
+        .elo-sharp-bar .metric .delta.pos { color: #4a9a6a; }
+        .elo-sharp-bar .metric .delta.neg { color: #db2777; }
     </style>
 </head>
 <body>
@@ -589,6 +637,19 @@
                 <span id="streakDisplay">Streak: 0</span>
             </div>
 
+            <div class="elo-sharp-bar" id="eloSharpBar">
+                <div class="metric">
+                    <span class="label">ELO</span>
+                    <span class="value elo" id="eloValue">1200</span>
+                    <span class="delta" id="eloDelta"></span>
+                </div>
+                <div class="metric">
+                    <span class="label">SHARP</span>
+                    <span class="value sharp" id="sharpValue">0.00</span>
+                    <span class="delta" id="sharpDelta"></span>
+                </div>
+            </div>
+
             <div class="prediction" id="predictionBox">
                 <span>INITIALIZING...</span>
             </div>
@@ -606,13 +667,8 @@
 
     <script>
         /* =========================================================
-           SHARP + LOW-SKIP ENGINE
-           + CHANGE TABLE lock: PLAYER / BANKER / UNDO disabled
-             while Change Table alert is active. RESET always works.
-           + Change Table display: static redpink (original).
-           + RESET button: blinks ONLY while Change Table is active.
-             After RESET -> page reload -> blink class removed.
-        ========================================================= */
+           SHARP + LOW-SKIP ENGINE with integrated ELO & Sharpness
+           ========================================================= */
 
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
         let results = JSON.parse(localStorage.getItem('bt_results')) || [];
@@ -627,6 +683,56 @@
         let predictionHistory = JSON.parse(localStorage.getItem('bt_prediction_history')) || [];
         let patternAccuracy = { P: { correct: 0, total: 0 }, B: { correct: 0, total: 0 } };
         let overallAccuracy = { correct: 0, total: 0 };
+
+        // ========== ELO & SHARPNESS STATE (persisted) ==========
+        let eloRating = parseFloat(localStorage.getItem('bt_elo_rating')) || 1200;
+        let sharpness = parseFloat(localStorage.getItem('bt_sharpness')) || 0.0;
+        let lastEloChange = parseFloat(localStorage.getItem('bt_last_elo_change')) || 0;
+        let lastSharpChange = parseFloat(localStorage.getItem('bt_last_sharp_change')) || 0;
+
+        // ELO K-factor: adaptive based on total predictions
+        function getKFactor() {
+            const total = overallAccuracy.total;
+            if (total < 20) return 32;
+            if (total < 50) return 24;
+            if (total < 100) return 16;
+            return 12;
+        }
+
+        // ========== ELO UPDATE ==========
+        function updateElo(wasCorrect, confidence) {
+            const K = getKFactor();
+            const opponentElo = 1200;
+            const expectedScore = 1 / (1 + Math.pow(10, (opponentElo - eloRating) / 400));
+            const actualScore = wasCorrect ? 1 : 0;
+            const confidenceFactor = confidence ? (confidence / 100) * 1.2 + 0.4 : 1.0;
+            const delta = K * confidenceFactor * (actualScore - expectedScore);
+            eloRating = Math.max(800, Math.min(2200, eloRating + delta));
+            return delta;
+        }
+
+        // ========== SHARPNESS UPDATE ==========
+        function updateSharpness(wasCorrect, confidence) {
+            if (confidence === undefined || confidence === null) return 0;
+            const confNorm = confidence / 100;
+            let delta = 0;
+            if (wasCorrect) {
+                delta = confNorm * 0.04;
+            } else {
+                delta = -confNorm * 0.06;
+            }
+            const decay = (0.5 - sharpness) * 0.005;
+            delta += decay;
+            sharpness = Math.max(0.0, Math.min(1.0, sharpness + delta));
+            return delta;
+        }
+
+        // Bootstrap sharpness from historical accuracy
+        if (predictionHistory.length > 5 && sharpness === 0.0) {
+            const acc = overallAccuracy.total > 0 ? overallAccuracy.correct / overallAccuracy.total : 0.5;
+            sharpness = Math.max(0.1, Math.min(0.9, acc * 0.8 + 0.1));
+            localStorage.setItem('bt_sharpness', sharpness.toFixed(4));
+        }
 
         if (predictionHistory.length > 0) {
             predictionHistory.forEach(p => {
@@ -645,7 +751,7 @@
         function clampConfidence(raw) { return Math.min(96, Math.max(0, Math.round(raw))); }
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
 
-        // ========== CHANGE TABLE (unchanged rule) ==========
+        // ========== CHANGE TABLE ==========
         function checkChangeTable() {
             const window9 = results.slice(-9);
             const nonSkip = window9.filter(r => r === 'W' || r === 'L');
@@ -679,7 +785,7 @@
             };
         }
 
-        // ========== 1. PATTERN DETECTION (single match counts) ==========
+        // ========== PATTERN DETECTORS ==========
         function detectPatterns() {
             if (sequence.length < 4) return null;
 
@@ -725,7 +831,6 @@
             return best;
         }
 
-        // ========== 2. STREAK BIAS (fires at 2) ==========
         function detectStreakBias() {
             if (sequence.length < 2) return null;
             const last = sequence[sequence.length - 1];
@@ -758,7 +863,6 @@
             return null;
         }
 
-        // ========== 3. ZIGZAG BIAS (fires earlier) ==========
         function detectZigzagBias() {
             if (sequence.length < 4) return null;
 
@@ -787,7 +891,6 @@
             return null;
         }
 
-        // ========== 4. FREQUENCY BIAS (fires at 6, 0.55) ==========
         function detectFrequencyBias() {
             if (sequence.length < 6) return null;
 
@@ -806,7 +909,6 @@
             return null;
         }
 
-        // ========== 5. RECENT BIAS (last 5 hands, 0.58) ==========
         function detectRecentBias() {
             if (sequence.length < 5) return null;
 
@@ -835,7 +937,6 @@
             return null;
         }
 
-        // ========== 6. AGGREGATION (gate = 1 vote) ==========
         function getPatternPrediction() {
             if (sequence.length < 3) return null;
 
@@ -881,50 +982,73 @@
             };
         }
 
-        // ========== 7. REAL CONFIDENCE (cap 75 on small samples) ==========
+        // ========== REAL CONFIDENCE — now blends ELO + Sharpness ==========
         function getRealConfidence(prediction, patternConfidence) {
             const sideData = prediction === 'P' ? patternAccuracy.P : patternAccuracy.B;
             const totalPredictions = sideData.total;
 
+            // Base from prediction history
+            let baseConfidence;
             if (totalPredictions >= 10) {
                 const realAccuracy = (sideData.correct / totalPredictions) * 100;
-                return clampConfidence((realAccuracy * 0.8) + (patternConfidence * 0.2));
+                baseConfidence = clampConfidence((realAccuracy * 0.8) + (patternConfidence * 0.2));
             } else if (totalPredictions >= 5) {
                 const realAccuracy = (sideData.correct / totalPredictions) * 100;
-                return clampConfidence((realAccuracy * 0.5) + (patternConfidence * 0.5));
+                baseConfidence = clampConfidence((realAccuracy * 0.5) + (patternConfidence * 0.5));
             } else if (totalPredictions >= 3) {
                 const realAccuracy = (sideData.correct / totalPredictions) * 100;
-                return clampConfidence((realAccuracy * 0.35) + (patternConfidence * 0.65));
+                baseConfidence = clampConfidence((realAccuracy * 0.35) + (patternConfidence * 0.65));
             } else {
-                return clampConfidence(Math.min(patternConfidence, 75));
+                baseConfidence = clampConfidence(Math.min(patternConfidence, 75));
             }
+
+            // ELO modifier: ±0 to ±8 pts based on rating vs 1200 baseline
+            //   ELO 1600 → +8, ELO 800 → -8
+            const eloMod = Math.max(-8, Math.min(8, (eloRating - 1200) / 50));
+
+            // Sharpness modifier: sharpness 0.0 → -6, sharpness 1.0 → +6
+            const sharpMod = (sharpness - 0.5) * 12;
+
+            const adjusted = baseConfidence + eloMod + sharpMod;
+            return clampConfidence(adjusted);
         }
 
-        // ========== 8. LOW THRESHOLD (few skips) ==========
+        // ========== DYNAMIC SKIP THRESHOLD — now uses ELO ==========
         function getDynamicSkipThreshold() {
             const total = overallAccuracy.total;
 
-            if (total < 10) return 50;
-
-            const realAccuracy = (overallAccuracy.correct / total) * 100;
-
-            let threshold;
-            if (realAccuracy >= 70) threshold = 46;
-            else if (realAccuracy >= 55) threshold = 50;
-            else threshold = 56;
-
-            const recentPredictions = predictionHistory.slice(-20);
-            if (recentPredictions.length >= 10) {
-                const recentCorrect = recentPredictions.filter(p => p.correct).length;
-                const recentAcc = (recentCorrect / recentPredictions.length) * 100;
-                if (recentAcc > realAccuracy + 5) threshold -= 3;
-                else if (recentAcc < realAccuracy - 5) threshold += 3;
+            // Base threshold from accuracy
+            let baseThreshold;
+            if (total < 10) {
+                baseThreshold = 50;
+            } else {
+                const realAccuracy = (overallAccuracy.correct / total) * 100;
+                if (realAccuracy >= 70) baseThreshold = 46;
+                else if (realAccuracy >= 55) baseThreshold = 50;
+                else baseThreshold = 56;
             }
 
-            return Math.round(Math.min(85, Math.max(45, threshold)));
+            // ELO modifier: high ELO → lower threshold (bet more),
+            //                low ELO → higher threshold (bet less)
+            // ELO 1600 → -6, ELO 800 → +6
+            const eloMod = -Math.max(-6, Math.min(6, (eloRating - 1200) / 60));
+
+            // Recent accuracy nudge
+            let recentNudge = 0;
+            const recentPredictions = predictionHistory.slice(-20);
+            if (recentPredictions.length >= 10 && total >= 10) {
+                const realAccuracy = (overallAccuracy.correct / total) * 100;
+                const recentCorrect = recentPredictions.filter(p => p.correct).length;
+                const recentAcc = (recentCorrect / recentPredictions.length) * 100;
+                if (recentAcc > realAccuracy + 5) recentNudge = -3;
+                else if (recentAcc < realAccuracy - 5) recentNudge = 3;
+            }
+
+            const finalThreshold = baseThreshold + eloMod + recentNudge;
+            return Math.round(Math.min(85, Math.max(45, finalThreshold)));
         }
 
-        // ========== 9. FINAL PREDICTION ==========
+        // ========== FINAL PREDICTION ==========
         function finalPrediction() {
             if (sequence.length < MIN_HANDS) return null;
 
@@ -955,7 +1079,7 @@
             return count;
         }
 
-        // ========== UI FUNCTIONS ==========
+        // ========== UI ==========
         function updateHistory() {
             const box = document.getElementById('historyBox');
             const rBox = document.getElementById('resultsBox');
@@ -979,7 +1103,6 @@
             });
         }
 
-        // ========== LOCK/UNLOCK BUTTONS + RESET BLINK TOGGLE ==========
         function setChangeTableLock(locked) {
             const playerBtn = document.getElementById('playerBtn');
             const bankerBtn = document.getElementById('bankerBtn');
@@ -993,11 +1116,8 @@
             });
 
             if (resetBtn) {
-                // RESET is never disabled
                 resetBtn.disabled = false;
                 resetBtn.classList.remove('disabled');
-
-                // Blink ONLY while Change Table alert is active
                 if (locked) {
                     resetBtn.classList.add('blink-reset');
                 } else {
@@ -1014,6 +1134,7 @@
                 lastPrediction = null;
                 setChangeTableLock(false);
                 updateStatsBar();
+                updateEloSharpBar();
                 return;
             }
             
@@ -1027,8 +1148,9 @@
                     </span>
                 `;
                 lastPrediction = null;
-                setChangeTableLock(true);   // Lock buttons + start RESET blink
+                setChangeTableLock(true);
                 updateStatsBar();
+                updateEloSharpBar();
                 return;
             }
             
@@ -1050,8 +1172,9 @@
             }
             
             box.innerHTML = html;
-            setChangeTableLock(false);  // Unlock buttons + stop RESET blink
+            setChangeTableLock(false);
             updateStatsBar();
+            updateEloSharpBar();
         }
 
         function updateStatsBar() {
@@ -1077,21 +1200,71 @@
             }
         }
 
-        // ========== RECORD RESULT, UNDO, RESET ==========
+        // ========== ELO & SHARPNESS BAR (current → new format) ==========
+        function updateEloSharpBar() {
+            const eloEl = document.getElementById('eloValue');
+            const sharpEl = document.getElementById('sharpValue');
+            const eloDeltaEl = document.getElementById('eloDelta');
+            const sharpDeltaEl = document.getElementById('sharpDelta');
+
+            if (!eloEl || !sharpEl) return;
+
+            // ELO display
+            eloEl.textContent = Math.round(eloRating);
+            sharpEl.textContent = sharpness.toFixed(2);
+
+            // Delta display — uses persisted lastEloChange / lastSharpChange
+            if (Math.abs(lastEloChange) > 0.05) {
+                eloDeltaEl.textContent = (lastEloChange > 0 ? '+' : '') + lastEloChange.toFixed(1);
+                eloDeltaEl.className = 'delta ' + (lastEloChange > 0 ? 'pos' : 'neg');
+            } else {
+                eloDeltaEl.textContent = '';
+                eloDeltaEl.className = 'delta';
+            }
+
+            if (Math.abs(lastSharpChange) > 0.0005) {
+                sharpDeltaEl.textContent = (lastSharpChange > 0 ? '+' : '') + lastSharpChange.toFixed(2);
+                sharpDeltaEl.className = 'delta ' + (lastSharpChange > 0 ? 'pos' : 'neg');
+            } else {
+                sharpDeltaEl.textContent = '';
+                sharpDeltaEl.className = 'delta';
+            }
+
+            eloEl.classList.toggle('high', eloRating > 1400);
+            sharpEl.classList.toggle('high', sharpness > 0.65);
+        }
+
+        // ========== RECORD RESULT ==========
         function recordResult(r) {
             if (checkChangeTable().show) return;
 
             if (lastPrediction) {
                 const wasCorrect = (lastPrediction === r);
-                
+
+                // Snapshot ELO & Sharpness BEFORE update (for undo + delta)
+                const beforeElo = eloRating;
+                const beforeSharp = sharpness;
+
+                // Update ELO & Sharpness
+                updateElo(wasCorrect, lastPredictionConfidence);
+                updateSharpness(wasCorrect, lastPredictionConfidence);
+
+                const eloChange = eloRating - beforeElo;
+                const sharpChange = sharpness - beforeSharp;
+
+                // Persist the change history (used by undo)
                 predictionHistory.push({
                     prediction: lastPrediction,
                     actual: r,
                     correct: wasCorrect,
                     confidence: lastPredictionConfidence,
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    eloBefore: beforeElo,
+                    eloAfter: eloRating,
+                    sharpBefore: beforeSharp,
+                    sharpAfter: sharpness
                 });
-                
+
                 if (lastPrediction === 'P') {
                     patternAccuracy.P.total++;
                     if (wasCorrect) patternAccuracy.P.correct++;
@@ -1101,13 +1274,23 @@
                 }
                 overallAccuracy.total++;
                 if (wasCorrect) overallAccuracy.correct++;
-                
+
+                // Set delta for display
+                lastEloChange = eloChange;
+                lastSharpChange = sharpChange;
+
+                // Persist state
                 localStorage.setItem('bt_prediction_history', JSON.stringify(predictionHistory));
-                
+                localStorage.setItem('bt_elo_rating', eloRating.toFixed(2));
+                localStorage.setItem('bt_sharpness', sharpness.toFixed(4));
+                localStorage.setItem('bt_last_elo_change', lastEloChange.toFixed(4));
+                localStorage.setItem('bt_last_sharp_change', lastSharpChange.toFixed(4));
+
                 results.push(wasCorrect ? 'W' : 'L');
-                if (wasCorrect) { wins++; detailedHistory.push({ type: 'win', wasSkip: false }); } 
+                if (wasCorrect) { wins++; detailedHistory.push({ type: 'win', wasSkip: false }); }
                 else { losses++; detailedHistory.push({ type: 'loss', wasSkip: false }); }
             } else {
+                // SKIP — no ELO/Sharpness change, but keep last delta as-is
                 results.push('');
                 skips++;
                 detailedHistory.push({ type: 'skip', wasSkip: true });
@@ -1117,35 +1300,50 @@
             saveAndUpdate();
         }
 
+        // ========== UNDO — now rolls back ELO, Sharpness, and deltas ==========
         function undo() {
             if (checkChangeTable().show) return;
 
             if (sequence.length === 0) return;
-            
+
+            // If the last sequence entry was a bet (not a skip), roll back ELO/Sharpness
             if (predictionHistory.length > 0) {
                 const lastPred = predictionHistory[predictionHistory.length - 1];
-                if (lastPred.actual === undefined || lastPred.actual === null) {
-                    predictionHistory.pop();
-                    if (lastPred.prediction === 'P') {
-                        patternAccuracy.P.total--;
-                        if (lastPred.correct) patternAccuracy.P.correct--;
-                    } else if (lastPred.prediction === 'B') {
-                        patternAccuracy.B.total--;
-                        if (lastPred.correct) patternAccuracy.B.correct--;
-                    }
-                    overallAccuracy.total--;
-                    if (lastPred.correct) overallAccuracy.correct--;
-                    localStorage.setItem('bt_prediction_history', JSON.stringify(predictionHistory));
+                // Restore ELO & Sharpness to pre-hand values if stored
+                if (typeof lastPred.eloBefore === 'number') {
+                    eloRating = lastPred.eloBefore;
+                    sharpness = lastPred.sharpBefore;
+                    localStorage.setItem('bt_elo_rating', eloRating.toFixed(2));
+                    localStorage.setItem('bt_sharpness', sharpness.toFixed(4));
                 }
+                // Undo accuracy counters
+                if (lastPred.prediction === 'P') {
+                    patternAccuracy.P.total--;
+                    if (lastPred.correct) patternAccuracy.P.correct--;
+                } else if (lastPred.prediction === 'B') {
+                    patternAccuracy.B.total--;
+                    if (lastPred.correct) patternAccuracy.B.correct--;
+                }
+                overallAccuracy.total--;
+                if (lastPred.correct) overallAccuracy.correct--;
+
+                predictionHistory.pop();
+                localStorage.setItem('bt_prediction_history', JSON.stringify(predictionHistory));
             }
-            
+
             sequence.pop();
             const lastResultData = results.pop();
-            const lastHistory = detailedHistory.pop();
+            detailedHistory.pop();
 
             if (lastResultData === 'W') wins--;
             else if (lastResultData === 'L') losses--;
             else if (lastResultData === '') skips--;
+
+            // Clear the delta display on undo (since the change is gone)
+            lastEloChange = 0;
+            lastSharpChange = 0;
+            localStorage.setItem('bt_last_elo_change', '0');
+            localStorage.setItem('bt_last_sharp_change', '0');
 
             saveAndUpdate();
         }
@@ -1163,12 +1361,20 @@
                 wins = 0;
                 losses = 0;
                 skips = 0;
-                
+                eloRating = 1200;
+                sharpness = 0.0;
+                lastEloChange = 0;
+                lastSharpChange = 0;
+
                 localStorage.removeItem('bt_sequence');
                 localStorage.removeItem('bt_results');
                 localStorage.removeItem('bt_detailed');
                 localStorage.removeItem('bt_prediction_history');
-                
+                localStorage.removeItem('bt_elo_rating');
+                localStorage.removeItem('bt_sharpness');
+                localStorage.removeItem('bt_last_elo_change');
+                localStorage.removeItem('bt_last_sharp_change');
+
                 window.location.reload();
             }
         }
@@ -1181,12 +1387,10 @@
             updatePredictionBox();
         }
 
-        // Initial stats if we have data
         if (sequence.length > 0 || results.length > 0) {
             results.forEach(r => { if (r === 'W') wins++; else if (r === 'L') losses++; else if (r === '') skips++; });
         }
 
-        // Initial render
         updateHistory();
         updatePredictionBox();
     </script>
