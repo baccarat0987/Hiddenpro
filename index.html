@@ -1065,6 +1065,104 @@
             .checkout-btn { font-size: 12px; padding: 15px; letter-spacing: 1.5px; }
         }
 
+        /* ————— DURATION TABS (discount badge) ————— */
+        .duration-tab {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            padding: 10px 18px;
+            line-height: 1.2;
+        }
+        .tab-name {
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            opacity: 0.9;
+        }
+        .tab-price-row {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tab-price {
+            font-size: 13px;
+            font-weight: 800;
+        }
+        .tab-discount {
+            background: #ff2d2d;
+            color: #fff;
+            font-size: 9px;
+            padding: 2px 7px;
+            border-radius: 50px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 10px rgba(255, 45, 45, 0.65);
+            animation: discountPulse 1.8s ease-in-out infinite alternate;
+        }
+        @keyframes discountPulse {
+            0% { box-shadow: 0 0 6px rgba(255, 45, 45, 0.5); }
+            100% { box-shadow: 0 0 16px rgba(255, 45, 45, 0.9); }
+        }
+        .duration-tab.active .tab-discount {
+            background: #0d0a1a;
+            color: #ff2d2d;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+            animation: none;
+        }
+        .tab-lifetime {
+            font-size: 12px;
+            color: #ffb347;
+            text-shadow: 0 0 8px rgba(255, 179, 71, 0.6);
+        }
+        .duration-tab.active .tab-lifetime {
+            color: #0d0a1a;
+            text-shadow: none;
+        }
+
+        /* ————— TOTAL BOX (breakdown) ————— */
+        .total-box {
+            display: block;
+            padding: 18px 22px;
+        }
+        .total-breakdown {
+            width: 100%;
+        }
+        .tb-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            font-size: 13px;
+        }
+        .tb-label {
+            color: #b89a7a;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        .tb-value {
+            color: #f7e6d5;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .tb-discount-row .tb-label {
+            color: #00ff88;
+        }
+        .tb-value.tb-discount {
+            color: #00ff88;
+            text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+        }
+        .tb-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 179, 71, 0.5), transparent);
+            margin: 8px 0;
+        }
+        .tb-final-row {
+            padding-top: 6px;
+        }
+
         #contactAdminModal {
             position: fixed;
             inset: 0;
@@ -1311,6 +1409,7 @@
         { name: "Roulette Algorithm", file: "roulettealgorithm.html", desc: "Calculated probabilities of Neighbor bets", engineId: "engine_15" }
   ];
 
+    // ————— PRICING CONFIG —————
     const PRICES = {
         "1month":   80,
         "3months":  159,
@@ -1323,6 +1422,30 @@
         "1year":    "1 YEAR",
         "lifetime": "LIFETIME"
     };
+    // Standard reference price per 1 month (used for discount comparison)
+    const STANDARD_MONTH_PRICE = 80;
+    // How many months each plan covers (null = lifetime, no comparison)
+    const DURATION_MONTHS = {
+        "1month":   1,
+        "3months":  3,
+        "1year":    12,
+        "lifetime": null
+    };
+    // % saved vs paying STANDARD_MONTH_PRICE per month. Auto-adjusts from PRICES.
+    function getDiscountPercent(key) {
+        const months = DURATION_MONTHS[key];
+        if (!months) return null;
+        const standardTotal = STANDARD_MONTH_PRICE * months;
+        const planPrice = PRICES[key];
+        if (standardTotal <= planPrice) return 0;
+        return Math.round((1 - planPrice / standardTotal) * 100);
+    }
+    function getSavingsPerProgram(key) {
+        const months = DURATION_MONTHS[key];
+        if (!months) return 0;
+        const standardTotal = STANDARD_MONTH_PRICE * months;
+        return Math.max(0, standardTotal - PRICES[key]);
+    }
 
     const overlayEl = document.getElementById('overlay');
     const overlayContent = document.getElementById('overlayContent');
@@ -1646,30 +1769,56 @@
         selectedDuration = '1month';
         selectedPrograms = new Set();
 
-        let p = { p1: PRICES['1month'], p3_new: PRICES['3months'], p12_new: PRICES['1year'], p_life: PRICES['lifetime'] };
+        // Start with local PRICES, override from Firestore if available
+        let p = {
+            p1: PRICES['1month'],
+            p3_new: PRICES['3months'],
+            p12_new: PRICES['1year'],
+            p_life: PRICES['lifetime']
+        };
         try {
             const priceDoc = await getDoc(doc(db, "settings", "pricing"));
             if (priceDoc.exists()) {
                 const d = priceDoc.data();
-                p.p1 = d.p1 ?? p.p1;
-                p.p3_new = d.p3_new ?? p.p3_new;
-                p.p12_new = d.p12_new ?? p.p12_new;
-                p.p_life = d.p_life ?? p.p_life;
+                if (d.p1 != null)     PRICES['1month']   = Number(d.p1);
+                if (d.p3_new != null) PRICES['3months']  = Number(d.p3_new);
+                if (d.p12_new != null)PRICES['1year']    = Number(d.p12_new);
+                if (d.p_life != null) PRICES['lifetime'] = Number(d.p_life);
+                p.p1 = PRICES['1month'];
+                p.p3_new = PRICES['3months'];
+                p.p12_new = PRICES['1year'];
+                p.p_life = PRICES['lifetime'];
             }
-        } catch (e) { }
+        } catch (e) { /* use fallback */ }
 
         renderPricing(p);
         overlayEl.style.display = "flex";
     }
 
     function renderPricing(p) {
-        const durationTabs = Object.keys(DURATION_LABELS).map(key => `
-            <button class="duration-tab ${key === selectedDuration ? 'active' : ''}" data-duration="${key}">
-                ${DURATION_LABELS[key]} · $${p[keyToPriceField(key)]}
-            </button>
-        `).join('');
+        const durationTabs = Object.keys(DURATION_LABELS).map(key => {
+            const price = p[keyToPriceField(key)];
+            const discount = getDiscountPercent(key);
 
-        const programRows = softwareCatalog.map((sw, i) => `
+            let badge = '';
+            if (discount !== null && discount > 0) {
+                badge = `<span class="tab-discount">${discount}% OFF</span>`;
+            } else if (key === 'lifetime') {
+                badge = `<span class="tab-lifetime">♾️</span>`;
+            }
+
+            return `
+                <button class="duration-tab ${key === selectedDuration ? 'active' : ''}" data-duration="${key}">
+                    <span class="tab-name">${DURATION_LABELS[key]}</span>
+                    <span class="tab-price-row">
+                        <span class="tab-price">$${price}</span>
+                        ${badge}
+                    </span>
+                </button>
+            `;
+        }).join('');
+
+        const programRows = softwareCatalog.map((sw) => `
             <label class="program-row ${selectedPrograms.has(sw.engineId) ? 'checked' : ''}" data-engine-id="${sw.engineId}">
                 <input type="checkbox" ${selectedPrograms.has(sw.engineId) ? 'checked' : ''} data-engine-id="${sw.engineId}">
                 <div class="program-info">
@@ -1689,8 +1838,21 @@
             <div class="program-list">${programRows}</div>
 
             <div class="total-box">
-                <div class="total-label">TOTAL</div>
-                <div class="total-value" id="totalValue">$0</div>
+                <div class="total-breakdown">
+                    <div class="tb-row">
+                        <span class="tb-label">Standard price</span>
+                        <span class="tb-value" id="totalStandard">$0</span>
+                    </div>
+                    <div class="tb-row tb-discount-row">
+                        <span class="tb-label">You save</span>
+                        <span class="tb-value tb-discount" id="totalDiscount">$0</span>
+                    </div>
+                    <div class="tb-divider"></div>
+                    <div class="tb-row tb-final-row">
+                        <span class="total-label">TOTAL</span>
+                        <div class="total-value" id="totalValue">$0</div>
+                    </div>
+                </div>
             </div>
 
             <button class="checkout-btn" id="checkoutBtn" disabled>
@@ -1734,25 +1896,50 @@
 
     function updateTotals(p) {
         const unitPrice = p[keyToPriceField(selectedDuration)];
-        const total = unitPrice * selectedPrograms.size;
+        const count = selectedPrograms.size;
+        const total = unitPrice * count;
 
+        const months = DURATION_MONTHS[selectedDuration];
+        const standardPerProgram = months ? (STANDARD_MONTH_PRICE * months) : unitPrice;
+        const standardTotal = standardPerProgram * count;
+        const savings = months ? Math.max(0, standardTotal - total) : 0;
+
+        // Update each program's displayed price (currently the plan price)
         overlayContent.querySelectorAll('.program-price').forEach(el => {
             el.textContent = `$${unitPrice}`;
         });
 
+        // Checked visual state
         overlayContent.querySelectorAll('.program-row').forEach(row => {
             const id = row.dataset.engineId;
             if (selectedPrograms.has(id)) row.classList.add('checked');
             else row.classList.remove('checked');
         });
 
-        const totalEl = overlayContent.querySelector('#totalValue');
+        // Total box fields
+        const standardEl = overlayContent.querySelector('#totalStandard');
+        const discountEl = overlayContent.querySelector('#totalDiscount');
+        const totalEl    = overlayContent.querySelector('#totalValue');
+
+        if (standardEl) standardEl.textContent = `$${standardTotal}`;
+        if (discountEl) {
+            if (savings > 0) {
+                discountEl.textContent = `−$${savings}`;
+                discountEl.style.color = '#00ff88';
+                discountEl.style.textShadow = '0 0 8px rgba(0, 255, 136, 0.5)';
+            } else {
+                discountEl.textContent = '$0';
+                discountEl.style.color = '#b89a7a';
+                discountEl.style.textShadow = 'none';
+            }
+        }
         if (totalEl) totalEl.textContent = `$${total}`;
 
+        // Checkout button
         const checkoutBtn = overlayContent.querySelector('#checkoutBtn');
         if (checkoutBtn) {
-            checkoutBtn.disabled = selectedPrograms.size === 0;
-            checkoutBtn.innerHTML = selectedPrograms.size === 0
+            checkoutBtn.disabled = count === 0;
+            checkoutBtn.innerHTML = count === 0
                 ? `<i class="fab fa-paypal"></i> SELECT A PROGRAM`
                 : `<i class="fab fa-paypal"></i> CHECKOUT VIA PAYPAL · $${total}`;
         }
