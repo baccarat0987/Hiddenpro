@@ -806,7 +806,7 @@
             .top-bar > div:last-child { display: flex; justify-content: flex-end; gap: 12px; }
         }
 
-        /* ========= PRICING OVERLAY (REBUILT) ========= */
+        /* ========= PRICING OVERLAY ========= */
         #overlay {
             position: fixed;
             inset: 0;
@@ -851,7 +851,6 @@
             font-family: 'Orbitron', sans-serif;
         }
 
-        /* duration selector */
         .duration-tabs {
             display: flex;
             gap: 10px;
@@ -886,7 +885,6 @@
             box-shadow: 0 0 25px rgba(255, 179, 71, 0.6);
         }
 
-        /* program list */
         .program-list {
             width: 100%;
             display: flex;
@@ -918,7 +916,6 @@
             box-shadow: 0 0 22px rgba(255, 179, 71, 0.35);
         }
 
-        /* custom checkbox */
         .program-row input[type="checkbox"] {
             appearance: none;
             -webkit-appearance: none;
@@ -975,7 +972,6 @@
             flex-shrink: 0;
         }
 
-        /* total */
         .total-box {
             width: 100%;
             background: linear-gradient(135deg, rgba(45, 27, 78, 0.95), rgba(26, 14, 46, 0.95));
@@ -1007,7 +1003,6 @@
             transition: all 0.3s;
         }
 
-        /* checkout button */
         .checkout-btn {
             width: 100%;
             background: linear-gradient(135deg, #ff6b35, #ffb347);
@@ -1053,6 +1048,7 @@
             font-size: 14px;
             font-family: 'Orbitron', sans-serif;
             letter-spacing: 2px;
+            margin-top: 4px;
         }
         .close-btn:hover {
             background: linear-gradient(135deg, #ff6b35, #ffb347);
@@ -1069,7 +1065,6 @@
             .checkout-btn { font-size: 12px; padding: 15px; letter-spacing: 1.5px; }
         }
 
-        /* ————— CONTACT ADMIN MODAL ————— */
         #contactAdminModal {
             position: fixed;
             inset: 0;
@@ -1271,7 +1266,6 @@
 
 <div id="overlay">
     <div class="overlay-content" id="overlayContent"></div>
-    <button class="close-btn" onclick="closeOverlay()">CLOSE ACCESS</button>
 </div>
 
 <script>
@@ -1317,7 +1311,6 @@
         { name: "Roulette Algorithm", file: "roulettealgorithm.html", desc: "Calculated probabilities of Neighbor bets", engineId: "engine_15" }
   ];
 
-    // ————— PER-PROGRAM PRICING —————
     const PRICES = {
         "1month":   80,
         "3months":  159,
@@ -1362,7 +1355,6 @@
     }
     setInterval(updateFakeOnline, 11000 + Math.random() * 9000);
 
-    // ————— CARD STRUCTURE —————
     softwareCatalog.forEach((sw, idx) => {
         const card = document.createElement('div');
         card.classList.add('sw-card');
@@ -1646,16 +1638,14 @@
     }
     topAuthBtn.addEventListener('click', toggleAuth);
 
-    // ============ REBUILT PRICING OVERLAY ============
+    // ============ PRICING OVERLAY ============
     let selectedDuration = '1month';
     let selectedPrograms = new Set();
 
     async function openPricing() {
-        // Reset selection each open
         selectedDuration = '1month';
         selectedPrograms = new Set();
 
-        // Try to load override pricing from Firestore (optional), fallback to constants
         let p = { p1: PRICES['1month'], p3_new: PRICES['3months'], p12_new: PRICES['1year'], p_life: PRICES['lifetime'] };
         try {
             const priceDoc = await getDoc(doc(db, "settings", "pricing"));
@@ -1666,7 +1656,7 @@
                 p.p12_new = d.p12_new ?? p.p12_new;
                 p.p_life = d.p_life ?? p.p_life;
             }
-        } catch (e) { /* use fallback */ }
+        } catch (e) { }
 
         renderPricing(p);
         overlayEl.style.display = "flex";
@@ -1706,17 +1696,17 @@
             <button class="checkout-btn" id="checkoutBtn" disabled>
                 <i class="fab fa-paypal"></i> CHECKOUT VIA PAYPAL
             </button>
+
+            <button class="close-btn" id="pricingCloseBtn">CLOSE ACCESS</button>
         `;
 
-        // Duration tab clicks
         overlayContent.querySelectorAll('.duration-tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 selectedDuration = tab.dataset.duration;
-                renderPricing(p); // re-render to reflect new price everywhere
+                renderPricing(p);
             });
         });
 
-        // Program checkbox toggles
         overlayContent.querySelectorAll('.program-row').forEach(row => {
             const checkbox = row.querySelector('input[type="checkbox"]');
             checkbox.addEventListener('change', () => {
@@ -1727,9 +1717,13 @@
             });
         });
 
-        // Checkout
         const checkoutBtn = overlayContent.querySelector('#checkoutBtn');
         checkoutBtn.addEventListener('click', () => checkoutPayPal(p));
+
+        const pricingCloseBtn = overlayContent.querySelector('#pricingCloseBtn');
+        pricingCloseBtn.addEventListener('click', () => {
+            overlayEl.style.display = "none";
+        });
 
         updateTotals(p);
     }
@@ -1742,23 +1736,19 @@
         const unitPrice = p[keyToPriceField(selectedDuration)];
         const total = unitPrice * selectedPrograms.size;
 
-        // Update each program's displayed price
         overlayContent.querySelectorAll('.program-price').forEach(el => {
             el.textContent = `$${unitPrice}`;
         });
 
-        // Update checked visual state
         overlayContent.querySelectorAll('.program-row').forEach(row => {
             const id = row.dataset.engineId;
             if (selectedPrograms.has(id)) row.classList.add('checked');
             else row.classList.remove('checked');
         });
 
-        // Update total
         const totalEl = overlayContent.querySelector('#totalValue');
         if (totalEl) totalEl.textContent = `$${total}`;
 
-        // Enable/disable checkout
         const checkoutBtn = overlayContent.querySelector('#checkoutBtn');
         if (checkoutBtn) {
             checkoutBtn.disabled = selectedPrograms.size === 0;
@@ -1777,7 +1767,6 @@
         const email = auth.currentUser.email.toLowerCase();
         const encodedEmail = "ZWR6ZWxrZWl0aDBAZ21haWwuY29t";
 
-        // Build a label like "Baccarat VIP Plus, Viper AI Baccarat — 3 Months"
         const programNames = [...selectedPrograms].map(id => {
             const sw = softwareCatalog.find(s => s.engineId === id);
             return sw ? sw.name : id;
