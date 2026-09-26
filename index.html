@@ -1438,9 +1438,9 @@
                 btn.textContent = '🔐 LOGIN TO ACCESS';
             } else if (!isPremiumActive) {
                 card.dataset.state = 'free';
-                badge.textContent = '⚠️ FREE TIER';
+                badge.textContent = ' FREE TIER';
                 badge.classList.add('badge-free');
-                btn.textContent = '⚡ GO PREMIUM';
+                btn.textContent = ' GO PREMIUM';
             } else if (!currentUserAllowedSet.has(engineId)) {
                 card.dataset.state = 'no-access';
                 badge.textContent = '🚫 NO LICENSE';
@@ -1448,7 +1448,7 @@
                 btn.textContent = '📩 REQUEST ACCESS';
             } else {
                 card.dataset.state = 'premium';
-                badge.textContent = '✅ ONLINE';
+                badge.textContent = ' ONLINE';
                 badge.classList.add('badge-online');
                 btn.textContent = '▶ START ENGINE';
             }
