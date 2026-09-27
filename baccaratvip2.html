@@ -345,7 +345,6 @@
             letter-spacing: 0.3px;
         }
 
-        /* ===== ATTRIBUTION (inside prediction box) ===== */
         .attribution {
             width: 100%;
             font-family: 'Courier New', monospace;
@@ -389,40 +388,6 @@
             letter-spacing: 0.2px;
         }
         .attribution .attr-summary .val { color: #2d3748; font-weight: 700; }
-
-        .change-table {
-            font-size: clamp(20px, 5vw, 28px);
-            font-weight: 900;
-            color: #db2777;
-            background: rgba(219, 39, 119, 0.15);
-            padding: 12px 24px;
-            border-radius: 20px;
-            border: 3px solid #db2777;
-            display: inline-block;
-            letter-spacing: 2px;
-            animation: pulseChange 1.5s ease-in-out infinite;
-        }
-        @keyframes pulseChange {
-            0%,100% { box-shadow: 0 0 10px rgba(219, 39, 119, 0.2); transform: scale(1); }
-            50% { box-shadow: 0 0 30px rgba(219, 39, 119, 0.6); transform: scale(1.05); }
-        }
-        .change-table .sub {
-            font-size: clamp(11px, 2.5vw, 15px);
-            font-weight: 500;
-            color: #db2777;
-            display: block;
-            margin-top: 6px;
-            letter-spacing: 1px;
-        }
-        .change-table .sub .highlight {
-            color: #1e3a8a;
-            font-weight: 700;
-            text-decoration: underline;
-            cursor: pointer;
-        }
-        .change-table .sub .highlight:hover {
-            color: #7c3aed;
-        }
 
         .buttons {
             margin-top: 18px;
@@ -536,7 +501,6 @@
         .stats-bar span { font-weight: 600; }
         .stats-bar .win-rate { color: var(--win); }
 
-        /* ===== ENGINE METRICS PANEL ===== */
         .metrics-toggle {
             margin-top: 10px;
             padding: 8px 14px;
@@ -626,7 +590,7 @@
         .detector-table .edge-neg { color: #db2777; font-weight: 700; }
         .detector-table .edge-neu { color: #6b7a8f; font-weight: 700; }
 
-        /* ===== LIVE API OVERLAY ===== */
+        /* ===== LIVE API / WS OVERLAY ===== */
         .overlay {
             position: fixed;
             inset: 0;
@@ -644,7 +608,7 @@
 
         .overlay-card {
             width: 100%;
-            max-width: 440px;
+            max-width: 460px;
             background: #f8fafc;
             border-radius: 22px;
             padding: 26px 22px;
@@ -678,10 +642,11 @@
             margin-bottom: 6px;
             text-transform: uppercase;
         }
-        .overlay-card input {
+        .overlay-card input,
+        .overlay-card textarea {
             width: 100%;
             padding: 13px 14px;
-            font-size: 13px;
+            font-size: 12px;
             font-family: 'Courier New', monospace;
             border: 1.5px solid var(--line);
             border-radius: 12px;
@@ -693,10 +658,17 @@
             -webkit-user-select: text;
             -moz-user-select: text;
             -ms-user-select: text;
+            resize: vertical;
         }
-        .overlay-card input:focus {
+        .overlay-card input:focus,
+        .overlay-card textarea:focus {
             border-color: #7c3aed;
             box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+        }
+        .overlay-card textarea {
+            min-height: 68px;
+            line-height: 1.45;
+            word-break: break-all;
         }
         .overlay-card .status {
             margin-top: 14px;
@@ -705,6 +677,7 @@
             min-height: 16px;
             text-align: center;
             color: #6b7a8f;
+            word-break: break-word;
         }
         .overlay-card .status.ok { color: #4a9a6a; font-weight: 700; }
         .overlay-card .status.err { color: #db2777; font-weight: 700; }
@@ -762,6 +735,7 @@
             font-weight: 700;
             color: #4a9a6a;
             letter-spacing: 1px;
+            cursor: pointer;
         }
         .live-badge.show { display: inline-flex; }
         .live-dot {
@@ -783,9 +757,9 @@
         <button onclick="window.signOutUser()" class="exit-btn">✕ EXIT</button>
     </div>
 
-    <div class="live-badge" id="liveBadge">
+    <div class="live-badge" id="liveBadge" title="Click to manage live feed">
         <span class="live-dot"></span>
-        <span>LIVE API CONNECTED</span>
+        <span id="liveBadgeText">LIVE FEED CONNECTED</span>
     </div>
 
     <div class="wrap">
@@ -835,16 +809,16 @@
         </div>
     </div>
 
-    <!-- ===== LIVE API OVERLAY ===== -->
+    <!-- ===== LIVE FEED OVERLAY (WebSocket or HTTP) ===== -->
     <div class="overlay" id="apiOverlay">
         <div class="overlay-card">
-            <h2>LIVE TABLE API</h2>
-            <div class="sub">CONNECT TO AUTOMATIC RECORDING</div>
+            <h2>LIVE TABLE FEED</h2>
+            <div class="sub">PASTE WSS:// OR HTTPS:// URL</div>
 
-            <label for="apiUrlInput">API ENDPOINT URL</label>
-            <input type="text" id="apiUrlInput" placeholder="https://api.example.com/table/feed" spellcheck="false" autocomplete="off">
+            <label for="apiUrlInput">FEED URL</label>
+            <textarea id="apiUrlInput" placeholder="wss://gs10.pragmaticplaylive.net/game?JSESSIONID=...&tableId=..." spellcheck="false" autocomplete="off"></textarea>
 
-            <label for="apiKeyInput" style="margin-top:14px;">API KEY (optional)</label>
+            <label for="apiKeyInput" style="margin-top:14px;">AUTH HEADER (optional, HTTP only)</label>
             <input type="text" id="apiKeyInput" placeholder="Bearer token or key" spellcheck="false" autocomplete="off">
 
             <div class="status" id="apiStatus"></div>
@@ -866,7 +840,7 @@
            - ELO / Sharpness removed entirely
            - Skip threshold floor at 55
            - CHANGE TABLE REMOVED
-           - LIVE API OVERLAY ADDED
+           - LIVE FEED OVERLAY: supports wss:// (WebSocket) and https:// (HTTP poll)
         ========================================================= */
 
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
@@ -1082,7 +1056,6 @@
             return null;
         }
 
-        // ===== Detector reliability (measured) =====
         function getDetectorReliability(name) {
             const hist = detectorHistory[name] || [];
             if (hist.length < 15) return { weight: 1.0, hitRate: null, gap: null, fires: hist.length };
@@ -1107,7 +1080,6 @@
             return { weight, hitRate, gap, fires: hist.length };
         }
 
-        // ===== Calibration adjustment (measured) =====
         function applyCalibration(confidence) {
             const band = CALIBRATION_BANDS.find(b => confidence >= b.min && confidence <= b.max);
             if (!band || band.count < 8) {
@@ -1121,7 +1093,6 @@
             return { adjusted, delta, band: band.label, observed: observedRate, samples: band.count };
         }
 
-        // ===== Single-source-of-truth prediction =====
         function getPredictionWithAttribution() {
             if (sequence.length < MIN_HANDS) {
                 return { ready: false };
@@ -1659,10 +1630,6 @@
                 localStorage.removeItem('bt_detailed');
                 localStorage.removeItem('bt_prediction_history');
                 localStorage.removeItem('bt_detector_history');
-                localStorage.removeItem('bt_elo_rating');
-                localStorage.removeItem('bt_sharpness');
-                localStorage.removeItem('bt_last_elo_change');
-                localStorage.removeItem('bt_last_sharp_change');
 
                 window.location.reload();
             }
@@ -1686,7 +1653,7 @@
         updateMetricsPanel();
 
         /* =========================================================
-           LIVE API OVERLAY — Automatic data recording
+           LIVE FEED OVERLAY — WebSocket (wss://) or HTTP polling (https://)
            ========================================================= */
 
         const apiOverlay = document.getElementById('apiOverlay');
@@ -1696,18 +1663,22 @@
         const ovCancel = document.getElementById('ovCancel');
         const ovConfirm = document.getElementById('ovConfirm');
         const liveBadge = document.getElementById('liveBadge');
+        const liveBadgeText = document.getElementById('liveBadgeText');
 
-        let liveApiConfig = JSON.parse(localStorage.getItem('bt_live_api')) || null;
+        let liveConfig = JSON.parse(localStorage.getItem('bt_live_feed')) || null;
+        let liveSocket = null;
         let livePollTimer = null;
-        let lastSeenResult = null;
+        let liveHttpLast = null;
+        let liveReconnectTimer = null;
         let liveConnected = false;
+        let liveResultBuffer = '';
 
         function openApiOverlay() {
             apiStatus.textContent = '';
             apiStatus.className = 'status';
-            if (liveApiConfig) {
-                apiUrlInput.value = liveApiConfig.url || '';
-                apiKeyInput.value = liveApiConfig.key || '';
+            if (liveConfig) {
+                apiUrlInput.value = liveConfig.url || '';
+                apiKeyInput.value = liveConfig.key || '';
             }
             apiOverlay.classList.add('show');
         }
@@ -1721,29 +1692,68 @@
             apiStatus.className = 'status' + (type ? ' ' + type : '');
         }
 
-        function showLiveBadge(show) {
+        function showLiveBadge(show, label) {
             liveBadge.classList.toggle('show', show);
+            if (label) liveBadgeText.textContent = label;
         }
 
-        // Parse a wide variety of API response shapes into 'P' or 'B'
+        function disconnectLive() {
+            liveConnected = false;
+            if (liveSocket) {
+                try { liveSocket.close(); } catch (e) {}
+                liveSocket = null;
+            }
+            if (livePollTimer) {
+                clearInterval(livePollTimer);
+                livePollTimer = null;
+            }
+            if (liveReconnectTimer) {
+                clearTimeout(liveReconnectTimer);
+                liveReconnectTimer = null;
+            }
+            showLiveBadge(false);
+        }
+
+        // Parse any payload (string or object) for a P/B result
         function extractResult(data) {
-            if (!data) return null;
+            if (data === null || data === undefined) return null;
+
             if (typeof data === 'string') {
-                const s = data.trim().toUpperCase();
-                if (s === 'P' || s === 'PLAYER') return 'P';
-                if (s === 'B' || s === 'BANKER') return 'B';
+                const s = data.trim();
+                if (!s) return null;
+
+                // Try parsing as JSON first
+                if (s.startsWith('{') || s.startsWith('[')) {
+                    try {
+                        const parsed = JSON.parse(s);
+                        const r = extractResult(parsed);
+                        if (r) return r;
+                    } catch (e) {}
+                }
+
+                // Direct single-letter
+                if (s === 'P' || s === 'PLAYER' || s === 'Player' || s === 'player') return 'P';
+                if (s === 'B' || s === 'BANKER' || s === 'Banker' || s === 'banker') return 'B';
+
+                // Search for embedded tokens in GraphQL / streamed text
+                // e.g. "winner":"Player" or result":"B"
+                const playerMatch = /"(?:winner|result|outcome|side|value|choice)"\s*:\s*"(?:player|p)"/i.exec(s);
+                if (playerMatch) return 'P';
+                const bankerMatch = /"(?:winner|result|outcome|side|value|choice)"\s*:\s*"(?:banker|b)"/i.exec(s);
+                if (bankerMatch) return 'B';
+
                 return null;
             }
+
             if (typeof data === 'object') {
                 const candidates = [
                     data.result, data.outcome, data.winner, data.value,
                     data.last, data.current, data.latest, data.hand,
-                    data.side, data.choice
+                    data.side, data.choice, data.winningSide, data.win
                 ];
                 for (const c of candidates) {
-                    if (c === undefined || c === null) continue;
-                    const parsed = extractResult(c);
-                    if (parsed) return parsed;
+                    const r = extractResult(c);
+                    if (r) return r;
                 }
                 if (Array.isArray(data.results) && data.results.length > 0) {
                     return extractResult(data.results[data.results.length - 1]);
@@ -1754,50 +1764,97 @@
                 if (Array.isArray(data.data) && data.data.length > 0) {
                     return extractResult(data.data[data.data.length - 1]);
                 }
+                if (data.payload) return extractResult(data.payload);
+                if (data.message) return extractResult(data.message);
+                if (data.data && typeof data.data === 'object') return extractResult(data.data);
             }
             return null;
         }
 
-        async function pollLiveApi() {
-            if (!liveApiConfig || !liveConnected) return;
+        // Track last recorded result to avoid duplicates
+        let lastRecordedResult = null;
 
+        function feedIncomingResult(result) {
+            if (!result) return;
+            if (result === lastRecordedResult) return;
+            lastRecordedResult = result;
+            recordResult(result);
+            setStatus('Recorded: ' + (result === 'P' ? 'PLAYER' : 'BANKER'), 'ok');
+        }
+
+        // ===== WebSocket mode =====
+        function connectWebSocket(url) {
+            try {
+                liveSocket = new WebSocket(url);
+            } catch (e) {
+                setStatus('WebSocket error: ' + e.message, 'err');
+                liveConnected = false;
+                showLiveBadge(false);
+                return;
+            }
+
+            liveSocket.onopen = () => {
+                liveConnected = true;
+                setStatus('WebSocket connected. Listening...', 'ok');
+                showLiveBadge(true, 'LIVE WS CONNECTED');
+            };
+
+            liveSocket.onmessage = (evt) => {
+                let data = evt.data;
+                // Handle Blob payloads
+                if (data instanceof Blob) {
+                    data.text().then(txt => {
+                        const r = extractResult(txt);
+                        if (r) feedIncomingResult(r);
+                    }).catch(() => {});
+                    return;
+                }
+                const r = extractResult(data);
+                if (r) feedIncomingResult(r);
+            };
+
+            liveSocket.onerror = () => {
+                setStatus('WebSocket error.', 'err');
+            };
+
+            liveSocket.onclose = () => {
+                liveConnected = false;
+                showLiveBadge(false);
+                setStatus('WebSocket closed. Reconnecting in 5s...', 'err');
+                if (liveConfig) {
+                    liveReconnectTimer = setTimeout(() => {
+                        if (!liveConnected) connectWebSocket(liveConfig.url);
+                    }, 5000);
+                }
+            };
+        }
+
+        // ===== HTTP polling mode (kept as fallback) =====
+        async function pollHttp() {
+            if (!liveConfig || !liveConnected) return;
             try {
                 const headers = {};
-                if (liveApiConfig.key) {
-                    headers['Authorization'] = liveApiConfig.key.startsWith('Bearer ')
-                        ? liveApiConfig.key
-                        : 'Bearer ' + liveApiConfig.key;
+                if (liveConfig.key) {
+                    headers['Authorization'] = liveConfig.key.startsWith('Bearer ')
+                        ? liveConfig.key
+                        : 'Bearer ' + liveConfig.key;
                 }
-
-                const res = await fetch(liveApiConfig.url, { headers, cache: 'no-store' });
+                const res = await fetch(liveConfig.url, { headers, cache: 'no-store' });
                 if (!res.ok) throw new Error('HTTP ' + res.status);
-
-                let data;
                 const text = await res.text();
-                try { data = JSON.parse(text); } catch { data = text; }
-
-                const result = extractResult(data);
-                if (result && result !== lastSeenResult) {
-                    lastSeenResult = result;
-                    recordResult(result);
-                    setStatus('Recorded: ' + (result === 'P' ? 'PLAYER' : 'BANKER'), 'ok');
-                }
+                const r = extractResult(text);
+                if (r) feedIncomingResult(r);
             } catch (err) {
-                setStatus('API error: ' + err.message, 'err');
+                setStatus('HTTP error: ' + err.message, 'err');
             }
         }
 
-        function startLivePolling() {
+        function startHttpPolling() {
             if (livePollTimer) clearInterval(livePollTimer);
-            livePollTimer = setInterval(pollLiveApi, 3000);
-            pollLiveApi();
-        }
-
-        function stopLivePolling() {
-            if (livePollTimer) {
-                clearInterval(livePollTimer);
-                livePollTimer = null;
-            }
+            liveConnected = true;
+            livePollTimer = setInterval(pollHttp, 3000);
+            pollHttp();
+            showLiveBadge(true, 'LIVE HTTP CONNECTED');
         }
 
         ovCancel.addEventListener('click', closeApiOverlay);
@@ -1807,35 +1864,53 @@
             const key = apiKeyInput.value.trim();
 
             if (!url) {
-                setStatus('Please enter an API URL.', 'err');
-                return;
-            }
-            if (!/^https?:\/\//i.test(url)) {
-                setStatus('URL must start with http:// or https://', 'err');
+                setStatus('Please enter a feed URL.', 'err');
                 return;
             }
 
-            liveApiConfig = { url, key };
-            localStorage.setItem('bt_live_api', JSON.stringify(liveApiConfig));
+            const isWs = /^wss?:\/\//i.test(url);
+            const isHttp = /^https?:\/\//i.test(url);
 
-            liveConnected = true;
-            showLiveBadge(true);
-            setStatus('Connecting...', '');
-            startLivePolling();
+            if (!isWs && !isHttp) {
+                setStatus('URL must start with wss://, ws://, https:// or http://', 'err');
+                return;
+            }
+
+            // Tear down any existing connection
+            disconnectLive();
+
+            liveConfig = { url, key, mode: isWs ? 'ws' : 'http' };
+            localStorage.setItem('bt_live_feed', JSON.stringify(liveConfig));
+            lastRecordedResult = null;
+
+            if (isWs) {
+                setStatus('Connecting WebSocket...', '');
+                connectWebSocket(url);
+            } else {
+                setStatus('Starting HTTP polling...', '');
+                startHttpPolling();
+            }
+
             closeApiOverlay();
         });
 
-        // Open overlay automatically if no API is configured yet
-        if (!liveApiConfig) {
-            setTimeout(openApiOverlay, 600);
+        liveBadge.addEventListener('click', () => {
+            openApiOverlay();
+        });
+
+        // Auto-resume a previously saved feed
+        if (liveConfig && liveConfig.url) {
+            if (liveConfig.mode === 'ws' || /^wss?:\/\//i.test(liveConfig.url)) {
+                connectWebSocket(liveConfig.url);
+            } else if (/^https?:\/\//i.test(liveConfig.url)) {
+                startHttpPolling();
+            }
         } else {
-            liveConnected = true;
-            showLiveBadge(true);
-            startLivePolling();
+            setTimeout(openApiOverlay, 600);
         }
 
-        // Expose for potential UI trigger
         window.openApiOverlay = openApiOverlay;
+        window.disconnectLive = disconnectLive;
     </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"45a606eccca84059b53fcc46a592a23b","r":1,"spa":2}' crossorigin="anonymous"></script>
 </body>
