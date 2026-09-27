@@ -625,12 +625,167 @@
         .detector-table .edge-pos { color: #4a9a6a; font-weight: 700; }
         .detector-table .edge-neg { color: #db2777; font-weight: 700; }
         .detector-table .edge-neu { color: #6b7a8f; font-weight: 700; }
+
+        /* ===== LIVE API OVERLAY ===== */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 3000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background: rgba(20, 20, 30, 0.82);
+            backdrop-filter: blur(6px);
+            padding: 18px;
+            animation: fadeIn 0.22s ease both;
+        }
+        .overlay.show { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .overlay-card {
+            width: 100%;
+            max-width: 440px;
+            background: #f8fafc;
+            border-radius: 22px;
+            padding: 26px 22px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.15);
+            animation: riseIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        .overlay-card h2 {
+            font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
+            font-size: 20px;
+            text-align: center;
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, #7c3aed, #1e3a8a, #db2777);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .overlay-card .sub {
+            text-align: center;
+            font-size: 11px;
+            color: #6b7a8f;
+            letter-spacing: 1px;
+            margin-bottom: 18px;
+        }
+        .overlay-card label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #4a5568;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .overlay-card input {
+            width: 100%;
+            padding: 13px 14px;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            border: 1.5px solid var(--line);
+            border-radius: 12px;
+            background: #ffffff;
+            color: #2d3748;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            user-select: text;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+        }
+        .overlay-card input:focus {
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+        }
+        .overlay-card .status {
+            margin-top: 14px;
+            font-size: 11px;
+            font-family: 'Courier New', monospace;
+            min-height: 16px;
+            text-align: center;
+            color: #6b7a8f;
+        }
+        .overlay-card .status.ok { color: #4a9a6a; font-weight: 700; }
+        .overlay-card .status.err { color: #db2777; font-weight: 700; }
+
+        .overlay-actions {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .overlay-actions button {
+            padding: 14px 10px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: transform 0.12s ease, filter 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .overlay-actions button:active { transform: scale(0.96); }
+        #ovCancel {
+            background: #e4e9f0;
+            color: #3a4555;
+        }
+        #ovCancel:hover { background: #d5dce6; }
+        #ovConfirm {
+            background: linear-gradient(135deg, #7c3aed, #1e3a8a, #db2777);
+            color: #ffffff;
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.35);
+        }
+        #ovConfirm:hover { filter: brightness(1.1); }
+        #ovConfirm:disabled {
+            filter: grayscale(0.8) brightness(0.85);
+            cursor: not-allowed;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .live-badge {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(74, 154, 106, 0.5);
+            backdrop-filter: blur(8px);
+            border-radius: 40px;
+            padding: 7px 14px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #4a9a6a;
+            letter-spacing: 1px;
+        }
+        .live-badge.show { display: inline-flex; }
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #4a9a6a;
+            animation: livePulse 1.2s ease-in-out infinite;
+        }
+        @keyframes livePulse {
+            0%,100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+        }
     </style>
 </head>
 <body>
 
     <div class="exit-nav">
         <button onclick="window.signOutUser()" class="exit-btn">✕ EXIT</button>
+    </div>
+
+    <div class="live-badge" id="liveBadge">
+        <span class="live-dot"></span>
+        <span>LIVE API CONNECTED</span>
     </div>
 
     <div class="wrap">
@@ -680,6 +835,27 @@
         </div>
     </div>
 
+    <!-- ===== LIVE API OVERLAY ===== -->
+    <div class="overlay" id="apiOverlay">
+        <div class="overlay-card">
+            <h2>LIVE TABLE API</h2>
+            <div class="sub">CONNECT TO AUTOMATIC RECORDING</div>
+
+            <label for="apiUrlInput">API ENDPOINT URL</label>
+            <input type="text" id="apiUrlInput" placeholder="https://api.example.com/table/feed" spellcheck="false" autocomplete="off">
+
+            <label for="apiKeyInput" style="margin-top:14px;">API KEY (optional)</label>
+            <input type="text" id="apiKeyInput" placeholder="Bearer token or key" spellcheck="false" autocomplete="off">
+
+            <div class="status" id="apiStatus"></div>
+
+            <div class="overlay-actions">
+                <button id="ovCancel">CANCEL</button>
+                <button id="ovConfirm">CONNECT</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         /* =========================================================
            HONEST ENGINE with SINGLE-SOURCE-OF-TRUTH attribution
@@ -689,6 +865,8 @@
            - Detector reliability + calibration wired into prediction
            - ELO / Sharpness removed entirely
            - Skip threshold floor at 55
+           - CHANGE TABLE REMOVED
+           - LIVE API OVERLAY ADDED
         ========================================================= */
 
         let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
@@ -768,24 +946,6 @@
 
         function clampConfidence(raw) { return Math.min(96, Math.max(0, Math.round(raw))); }
         function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
-
-        function checkChangeTable() {
-            const window9 = results.slice(-9);
-            const nonSkip = window9.filter(r => r === 'W' || r === 'L');
-            const skipped = window9.filter(r => r === '').length;
-            if (nonSkip.length < 7) return { show: false };
-
-            const winsCount = nonSkip.filter(r => r === 'W').length;
-            const lossesCount = nonSkip.filter(r => r === 'L').length;
-            const total = winsCount + lossesCount;
-            const winRate = winsCount / total;
-            const lossDiff = lossesCount - winsCount;
-
-            if (lossDiff >= 2 && skipped <= 2) {
-                return { show: true, reason: 'CHANGE TABLE' };
-            }
-            return { show: false };
-        }
 
         // ========== PATTERN DETECTORS ==========
         function detectPatterns() {
@@ -979,7 +1139,6 @@
                 return { ready: true, noSignal: true };
             }
 
-            // Build attribution entries with reliability weights — computed ONCE
             const detectorAttribution = rawDetectors.map(d => {
                 const rel = getDetectorReliability(d.name);
                 return {
@@ -1017,7 +1176,6 @@
 
             const rawConfidence = clampConfidence(winnerConfSum / winnerWeight);
 
-            // Side-specific nudge (small, real)
             const sideData = winner === 'P' ? patternAccuracy.P : patternAccuracy.B;
             let sideNudge = 0;
             if (sideData.total >= 8) {
@@ -1029,7 +1187,6 @@
             const calibration = applyCalibration(preCalibration);
             const finalConfidence = calibration.adjusted;
 
-            // Threshold
             let threshold = SKIP_THRESHOLD_FLOOR;
             const recentPredictions = predictionHistory.slice(-20);
             if (recentPredictions.length >= 10 && overallAccuracy.total >= 10) {
@@ -1121,7 +1278,6 @@
 
             let html = `<div class="attribution">`;
 
-            // Detector rows
             result.detectorAttribution.forEach(d => {
                 const silenced = d.weight < 0.7;
                 const voteClass = d.prediction === 'P' ? 'vote-p' : 'vote-b';
@@ -1142,7 +1298,6 @@
 
             html += `<div class="attr-divider"></div>`;
 
-            // Weighted vote tally
             const pV = result.weightedVote.p.toFixed(2);
             const bV = result.weightedVote.b.toFixed(2);
             const winnerLabel = result.winner === 'P' ? 'PLAYER' : 'BANKER';
@@ -1153,7 +1308,6 @@
                 </div>
             `;
 
-            // Calibration line
             if (result.calibration && result.calibration.band) {
                 const delta = result.calibration.delta;
                 const sign = delta >= 0 ? '+' : '';
@@ -1175,7 +1329,6 @@
                 `;
             }
 
-            // Threshold line
             html += `
                 <div class="attr-row">
                     <span class="attr-summary">Threshold</span>
@@ -1199,21 +1352,6 @@
                 return;
             }
 
-            const changeTable = checkChangeTable();
-            if (changeTable.show) {
-                box.innerHTML = `
-                    <span class="change-table">
-                        ⚠️ ${changeTable.reason}
-                        <span class="sub">Please click <span class="highlight" onclick="resetAll()">RESET</span> and find another table</span>
-                    </span>
-                `;
-                lastPrediction = null;
-                setChangeTableLock(true);
-                updateStatsBar();
-                updateMetricsPanel();
-                return;
-            }
-
             const result = getPredictionWithAttribution();
             const attributionHtml = renderAttribution(result);
 
@@ -1226,7 +1364,6 @@
                 return;
             }
 
-            // Headline
             let headlineHtml = '';
             if (result.pred) {
                 const text = result.pred === 'P' ? 'PLAYER' : 'BANKER';
@@ -1404,12 +1541,9 @@
 
         // ========== RECORD RESULT ==========
         function recordResult(r) {
-            if (checkChangeTable().show) return;
-
             if (lastPrediction) {
                 const wasCorrect = (lastPrediction === r);
 
-                // Recompute detectors on the PREVIOUS sequence state for attribution
                 const attributionDetectors = [
                     detectPatterns(),
                     detectStreakBias(),
@@ -1466,7 +1600,6 @@
         }
 
         function undo() {
-            if (checkChangeTable().show) return;
             if (sequence.length === 0) return;
 
             if (predictionHistory.length > 0) {
@@ -1551,6 +1684,158 @@
         updatePredictionBox();
         rebuildCalibration();
         updateMetricsPanel();
+
+        /* =========================================================
+           LIVE API OVERLAY — Automatic data recording
+           ========================================================= */
+
+        const apiOverlay = document.getElementById('apiOverlay');
+        const apiUrlInput = document.getElementById('apiUrlInput');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const apiStatus = document.getElementById('apiStatus');
+        const ovCancel = document.getElementById('ovCancel');
+        const ovConfirm = document.getElementById('ovConfirm');
+        const liveBadge = document.getElementById('liveBadge');
+
+        let liveApiConfig = JSON.parse(localStorage.getItem('bt_live_api')) || null;
+        let livePollTimer = null;
+        let lastSeenResult = null;
+        let liveConnected = false;
+
+        function openApiOverlay() {
+            apiStatus.textContent = '';
+            apiStatus.className = 'status';
+            if (liveApiConfig) {
+                apiUrlInput.value = liveApiConfig.url || '';
+                apiKeyInput.value = liveApiConfig.key || '';
+            }
+            apiOverlay.classList.add('show');
+        }
+
+        function closeApiOverlay() {
+            apiOverlay.classList.remove('show');
+        }
+
+        function setStatus(msg, type) {
+            apiStatus.textContent = msg;
+            apiStatus.className = 'status' + (type ? ' ' + type : '');
+        }
+
+        function showLiveBadge(show) {
+            liveBadge.classList.toggle('show', show);
+        }
+
+        // Parse a wide variety of API response shapes into 'P' or 'B'
+        function extractResult(data) {
+            if (!data) return null;
+            if (typeof data === 'string') {
+                const s = data.trim().toUpperCase();
+                if (s === 'P' || s === 'PLAYER') return 'P';
+                if (s === 'B' || s === 'BANKER') return 'B';
+                return null;
+            }
+            if (typeof data === 'object') {
+                const candidates = [
+                    data.result, data.outcome, data.winner, data.value,
+                    data.last, data.current, data.latest, data.hand,
+                    data.side, data.choice
+                ];
+                for (const c of candidates) {
+                    if (c === undefined || c === null) continue;
+                    const parsed = extractResult(c);
+                    if (parsed) return parsed;
+                }
+                if (Array.isArray(data.results) && data.results.length > 0) {
+                    return extractResult(data.results[data.results.length - 1]);
+                }
+                if (Array.isArray(data.history) && data.history.length > 0) {
+                    return extractResult(data.history[data.history.length - 1]);
+                }
+                if (Array.isArray(data.data) && data.data.length > 0) {
+                    return extractResult(data.data[data.data.length - 1]);
+                }
+            }
+            return null;
+        }
+
+        async function pollLiveApi() {
+            if (!liveApiConfig || !liveConnected) return;
+
+            try {
+                const headers = {};
+                if (liveApiConfig.key) {
+                    headers['Authorization'] = liveApiConfig.key.startsWith('Bearer ')
+                        ? liveApiConfig.key
+                        : 'Bearer ' + liveApiConfig.key;
+                }
+
+                const res = await fetch(liveApiConfig.url, { headers, cache: 'no-store' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+
+                let data;
+                const text = await res.text();
+                try { data = JSON.parse(text); } catch { data = text; }
+
+                const result = extractResult(data);
+                if (result && result !== lastSeenResult) {
+                    lastSeenResult = result;
+                    recordResult(result);
+                    setStatus('Recorded: ' + (result === 'P' ? 'PLAYER' : 'BANKER'), 'ok');
+                }
+            } catch (err) {
+                setStatus('API error: ' + err.message, 'err');
+            }
+        }
+
+        function startLivePolling() {
+            if (livePollTimer) clearInterval(livePollTimer);
+            livePollTimer = setInterval(pollLiveApi, 3000);
+            pollLiveApi();
+        }
+
+        function stopLivePolling() {
+            if (livePollTimer) {
+                clearInterval(livePollTimer);
+                livePollTimer = null;
+            }
+        }
+
+        ovCancel.addEventListener('click', closeApiOverlay);
+
+        ovConfirm.addEventListener('click', () => {
+            const url = apiUrlInput.value.trim();
+            const key = apiKeyInput.value.trim();
+
+            if (!url) {
+                setStatus('Please enter an API URL.', 'err');
+                return;
+            }
+            if (!/^https?:\/\//i.test(url)) {
+                setStatus('URL must start with http:// or https://', 'err');
+                return;
+            }
+
+            liveApiConfig = { url, key };
+            localStorage.setItem('bt_live_api', JSON.stringify(liveApiConfig));
+
+            liveConnected = true;
+            showLiveBadge(true);
+            setStatus('Connecting...', '');
+            startLivePolling();
+            closeApiOverlay();
+        });
+
+        // Open overlay automatically if no API is configured yet
+        if (!liveApiConfig) {
+            setTimeout(openApiOverlay, 600);
+        } else {
+            liveConnected = true;
+            showLiveBadge(true);
+            startLivePolling();
+        }
+
+        // Expose for potential UI trigger
+        window.openApiOverlay = openApiOverlay;
     </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"45a606eccca84059b53fcc46a592a23b","r":1,"spa":2}' crossorigin="anonymous"></script>
 </body>
