@@ -1,20 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Baccarat VIP Plus · AI</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Roulette VIP PRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
+    
+    <!-- ========== ADDED 1: CLEAN URL SCRIPT ========== -->
     <script>
         if (window.location.pathname.endsWith('.html')) {
             const cleanUrl = window.location.pathname.replace('.html', '');
             window.history.replaceState(null, '', cleanUrl);
         }
     </script>
-
+    
+    <!-- ========== ADDED 2: FIREBASE AUTHENTICATION MODULE ========== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -30,15 +33,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const REQUIRED_ENGINE_ID = "engine_18";
-
-        window.signOutUser = function() {
-            signOut(auth).then(() => {
-                window.location.href = "index.html";
-            }).catch((error) => {
-                window.location.href = "index.html";
-            });
-        };
+        const REQUIRED_ENGINE_ID = "engine_15";
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
@@ -52,1866 +47,1046 @@
                            (userData.expiry === 'LIFETIME' || userData.expiry > now) &&
                            userData.allowedSoftware?.includes(REQUIRED_ENGINE_ID);
             if (!isValid) {
-                alert("Access denied: you don't have permission for Baccarat VIP Plus.");
+                alert("Access denied: you don't have permission for Roulette VIP PRO (engine_14).");
                 window.location.href = "index.html";
                 return;
             }
             document.body.style.display = "flex";
         });
     </script>
-
+    
+    <!-- ========== ADDED 3: RIGHT-CLICK & SHORTCUT BLOCKER ========== -->
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
-
         document.onkeydown = function(e) {
-            if (
-                e.keyCode === 123 || 
-                (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) ||
-                (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83)) ||
-                (e.ctrlKey && e.shiftKey && e.keyCode === 85)
-            ) {
-                e.preventDefault();
+            if (e.keyCode === 123 || 
+                (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
+                (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
                 return false;
             }
         };
-
-        setInterval(function() {
-            (function() { return false; }['constructor']('debugger')['call']());
-        }, 50);
-
-        if (typeof console !== "undefined") {
-            console.log = console.debug = console.info = console.warn = console.error = function() {};
-        }
     </script>
-
+    
+    <!-- ========== ADDED 4: EXIT BUTTON STYLES ========== -->
+    <style>
+        .exit-nav {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1000;
+        }
+        .exit-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: #9D6AF5;
+            padding: 6px 14px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 11px;
+            border: 1px solid rgba(157, 106, 245, 0.5);
+            backdrop-filter: blur(8px);
+            transition: 0.2s;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+        .exit-btn:hover {
+            background: #9D6AF5;
+            color: #030407;
+            box-shadow: 0 0 12px #9D6AF5;
+        }
+    </style>
+    
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-        }
-
-        :root {
-            --bg-body: #ffffff;
-            --container-bg: #f8fafc;
-            --surface: #f0f3f7;
-            --line: rgba(0, 0, 0, 0.07);
-            --line-soft: rgba(0, 0, 0, 0.04);
-            --text: #2d3748;
-            --text-muted: #6b7a8f;
-            --violet: #7c3aed;
-            --darkblue: #1e3a8a;
-            --redpink: #db2777;
-            --win: #4a9a6a;
-            --loss: #8a97a4;
-            --player: #7c3aed;
-            --banker: #db2777;
         }
 
         body {
-            font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            color: var(--text);
-            font-size: 16px;
-            background: var(--bg-body);
-            display: none;
-            justify-content: center;
-            align-items: center;
+            background: radial-gradient(circle at 10% 20%, #0A0E1A 0%, #03050A 100%);
+            font-family: 'Inter', 'Segoe UI', sans-serif;
             min-height: 100vh;
-            padding: 16px;
-        }
-        .wrap {
-            width: 100%;
-            max-width: 500px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
 
-        .exit-nav {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            z-index: 2000;
+        /* INTERNAL REFRESH VISUAL EFFECT */
+        .internal-refresh-active {
+            animation: internalRefreshPulse 0.28s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
         }
-        .exit-btn {
-            background: rgba(0, 0, 0, 0.7);
-            color: #db2777;
-            padding: 8px 16px;
-            border-radius: 40px;
-            font-weight: 700;
-            font-size: 11px;
-            border: 1px solid rgba(219, 39, 119, 0.5);
-            backdrop-filter: blur(8px);
-            transition: 0.2s;
-            cursor: pointer;
-            border: none;
-        }
-        .exit-btn:hover {
-            background: #db2777;
-            color: #ffffff;
-            box-shadow: 0 0 12px #db2777;
+        
+        @keyframes internalRefreshPulse {
+            0% { opacity: 1; box-shadow: 0 0 0px rgba(157, 106, 245, 0); }
+            35% { opacity: 0.95; box-shadow: 0 0 18px 3px rgba(157, 106, 245, 0.8), inset 0 0 8px rgba(201, 179, 255, 0.4); }
+            100% { opacity: 1; box-shadow: 0 0 0px rgba(157, 106, 245, 0); }
         }
 
-        .container {
-            background-color: var(--container-bg);
-            padding: 32px 22px;
+        .aequitas-app {
+            width: 620px;
+            max-width: 100%;
+            background: linear-gradient(145deg, #12172B, #0A0E1F);
             border-radius: 24px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 4px rgba(0, 0, 0, 0.02);
-            border: 1px solid var(--line);
-            animation: riseIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-
-        @keyframes riseIn {
-            from { opacity: 0; transform: translateY(8px) scale(0.99); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @media (prefers-reduced-motion:reduce) {
-            .container { animation: none; }
-        }
-
-        .header {
+            box-shadow: 0 20px 35px rgba(0,0,0,0.6), inset 0 1px 0 rgba(157, 106, 245, 0.12);
+            border: 1px solid rgba(157, 106, 245, 0.35);
+            overflow: hidden;
             position: relative;
+            z-index: 1;
+        }
+
+        .title-bar-brand {
+            background: linear-gradient(90deg, #0C1126, #080C1C);
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(157, 106, 245, 0.45);
+        }
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .minimal-ai-logo {
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 6px;
+            position: relative;
+            animation: slowRotate 8s linear infinite;
+            cursor: pointer;
+            transition: transform 0.2s;
         }
-        .header h1 {
-            font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
-            font-size: clamp(20px, 4.8vw, 26px);
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            margin: 0;
-            text-align: center;
+        .minimal-ai-logo:hover {
+            transform: scale(1.05);
+            animation: slowRotate 4s linear infinite;
         }
-        .title-violet {
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        
+        .minimal-svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
         }
-        .title-darkblue {
-            background: linear-gradient(135deg, #1e3a8a, #1e40af);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        
+        @keyframes slowRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
-        .title-redpink {
-            background: linear-gradient(135deg, #db2777, #be185d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .ai-container {
-            position: absolute;
-            right: -8px;
-            top: -8px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #7c3aed, #1e3a8a, #db2777);
-            border-radius: 6px;
-            padding: 2px 6px;
-            box-shadow: 0 0 20px rgba(124, 58, 237, 0.4), 0 0 40px rgba(219, 39, 119, 0.2);
-            animation: pulseGlowContainer 2.5s ease-in-out infinite;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-        .ai-container .ai-text {
-            font-size: clamp(9px, 1.6vw, 12px);
-            font-weight: 800;
-            font-family: 'Courier New', monospace;
-            color: #ffffff;
-            line-height: 1.2;
-        }
-        @keyframes pulseGlowContainer {
-            0%,100% { box-shadow: 0 0 20px rgba(124, 58, 237, 0.4), 0 0 40px rgba(219, 39, 119, 0.2); }
-            50% { box-shadow: 0 0 30px rgba(124, 58, 237, 0.7), 0 0 50px rgba(219, 39, 119, 0.4); }
-        }
-
-        .tag {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 11px;
-            letter-spacing: 2px;
-            margin-bottom: 18px;
-            opacity: 0.7;
-        }
-
-        .sequence {
-            margin: 12px 0;
-            min-height: 34px;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 4px;
-        }
-        .sequence span {
-            display: inline-flex;
-            width: 30px;
-            height: 30px;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 13px;
-            flex-shrink: 0;
-            border: 1px solid rgba(0, 0, 0, 0.06);
-            animation: chipIn 0.25s ease both;
-            color: #fff;
-        }
-        @keyframes chipIn {
-            from { opacity: 0; transform: scale(0.7); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .P { background: linear-gradient(135deg, #7c3aed, #6d28d9); color: #f2fcfb; }
-        .B { background: linear-gradient(135deg, #db2777, #be185d); color: #fef4f6; }
-
-        .results {
-            margin: 8px 0;
-            min-height: 22px;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 3px;
-        }
-        .W, .L {
-            display: inline-flex;
-            font-size: 9px;
-            font-weight: 700;
-            padding: 2px 7px;
-            border-radius: 5px;
-            letter-spacing: 0.5px;
-        }
-        .W { background: rgba(74, 154, 106, 0.15); color: var(--win); border: 1px solid rgba(74, 154, 106, 0.15); }
-        .L { background: rgba(138, 151, 164, 0.15); color: var(--loss); border: 1px solid rgba(138, 151, 164, 0.15); }
-
-        .prediction {
-            margin: 16px 0;
-            padding: 16px 14px;
-            background: var(--surface);
-            border-radius: 16px;
-            font-size: clamp(18px, 4vw, 22px);
-            font-weight: 700;
-            border-top: 2px solid var(--line);
-            border-bottom: 2px solid var(--line);
-            min-height: 60px;
-            color: var(--text);
+        
+        .brand-text {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
         }
-        .prediction .headline {
-            display: flex;
-            align-items: baseline;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 6px;
-            text-align: center;
-        }
-        .prediction .player {
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+        .brand-name {
+            font-weight: 800;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #C9B3FF, #9D6AF5);
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             background-clip: text;
+            color: transparent;
         }
-        .prediction .banker {
-            background: linear-gradient(135deg, #db2777, #be185d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .confidence {
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            background: linear-gradient(135deg, #7c3aed, #1e3a8a, #db2777);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-left: 4px;
-            font-weight: 700;
-        }
-        .adjust-tag {
-            font-family: 'Courier New', monospace;
-            font-size: 10px;
-            color: #6b7a8f;
+        .brand-sub {
+            font-size: 0.5rem;
             font-weight: 600;
-            letter-spacing: 0.3px;
+            color: #9D6AF5;
+            letter-spacing: 0.8px;
         }
-
-        .attribution {
-            width: 100%;
-            font-family: 'Courier New', monospace;
-            font-size: 10.5px;
-            color: #4a5568;
-            background: rgba(255, 255, 255, 0.6);
-            border: 1px solid var(--line-soft);
-            border-radius: 10px;
-            padding: 8px 10px;
-            text-align: left;
-            line-height: 1.5;
-        }
-        .attribution .attr-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 8px;
-            padding: 1px 0;
-        }
-        .attribution .attr-row .dname {
-            color: #4a5568;
-            min-width: 74px;
-        }
-        .attribution .attr-row .dval {
-            color: #2d3748;
+        .brand-badge {
+            background: rgba(157, 106, 245, 0.18);
+            border: 1px solid rgba(157, 106, 245, 0.45);
+            border-radius: 30px;
+            padding: 3px 10px;
+            font-size: 0.55rem;
             font-weight: 700;
+            color: #C9B3FF;
         }
-        .attribution .attr-row .dval.silenced {
-            color: #8a97a4;
-            font-style: italic;
-            font-weight: 500;
-        }
-        .attribution .attr-row .vote-p { color: #7c3aed; font-weight: 700; }
-        .attribution .attr-row .vote-b { color: #db2777; font-weight: 700; }
-        .attribution .attr-divider {
-            border-top: 1px dashed var(--line);
-            margin: 5px 0;
-        }
-        .attribution .attr-summary {
-            font-size: 10px;
-            color: #6b7a8f;
-            letter-spacing: 0.2px;
-        }
-        .attribution .attr-summary .val { color: #2d3748; font-weight: 700; }
 
-        .buttons {
-            margin-top: 18px;
+        .four-columns {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 125px 90px 105px 1fr;
             gap: 10px;
-        }
-        .buttons button {
-            color: #ffffff;
-            border: none;
-            border-radius: 12px;
-            padding: 16px 10px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: clamp(13px, 3vw, 16px);
-            letter-spacing: 1px;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-            transition: transform 0.12s ease, filter 0.15s ease, box-shadow 0.3s ease, opacity 0.25s ease;
-        }
-        #playerBtn {
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
-            box-shadow: 0 0 20px rgba(124, 58, 237, 0.4), 0 0 40px rgba(124, 58, 237, 0.2);
-            animation: glowPulseViolet 2.5s ease-in-out infinite;
-        }
-        #bankerBtn {
-            background: linear-gradient(135deg, #db2777, #be185d);
-            box-shadow: 0 0 20px rgba(219, 39, 119, 0.4), 0 0 40px rgba(219, 39, 119, 0.2);
-            animation: glowPulseRedpink 2.5s ease-in-out infinite 0.3s;
-        }
-        @keyframes glowPulseViolet {
-            0%,100% { box-shadow: 0 0 20px rgba(124, 58, 237, 0.3), 0 0 40px rgba(124, 58, 237, 0.1); }
-            50% { box-shadow: 0 0 30px rgba(124, 58, 237, 0.6), 0 0 60px rgba(124, 58, 237, 0.3); }
-        }
-        @keyframes glowPulseRedpink {
-            0%,100% { box-shadow: 0 0 20px rgba(219, 39, 119, 0.3), 0 0 40px rgba(219, 39, 119, 0.1); }
-            50% { box-shadow: 0 0 30px rgba(219, 39, 119, 0.6), 0 0 60px rgba(219, 39, 119, 0.3); }
-        }
-        .buttons button:hover { filter: brightness(1.08); transform: scale(1.02); }
-        .buttons button:active { transform: scale(0.96); filter: brightness(0.93); }
-
-        .buttons button:disabled,
-        .buttons button.disabled {
-            cursor: not-allowed !important;
-            filter: grayscale(0.85) brightness(0.85) !important;
-            opacity: 0.45 !important;
-            animation: none !important;
-            box-shadow: none !important;
-            transform: none !important;
-            pointer-events: none !important;
+            padding: 14px;
         }
 
-        .util-btns {
-            grid-column: span 2;
+        .numbers-col {
+            background: rgba(10, 14, 28, 0.75);
+            backdrop-filter: blur(4px);
+            border-radius: 18px;
+            padding: 10px 6px;
+            border: 1px solid rgba(157, 106, 245, 0.3);
+        }
+        .col-header {
+            font-size: 0.55rem;
+            font-weight: 800;
+            color: #B88AFF;
+            text-align: center;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        .zero-container {
             display: flex;
-            gap: 8px;
-            margin-top: 4px;
+            justify-content: center;
+            margin-bottom: 10px;
         }
-        .util-btns button {
+        .zero-btn {
+            background: linear-gradient(145deg, #2D5A3F, #1E3D2A);
+            border: none;
+            color: white;
+            font-weight: 800;
+            font-size: 0.85rem;
+            font-family: monospace;
+            cursor: pointer;
+            text-align: center;
+            width: 52px;
+            padding: 6px 0;
+            border-radius: 35px;
+            box-shadow: 0 2px 0 #0F2A1A;
+            transition: 0.03s linear;
+        }
+        .zero-btn:active { transform: translateY(2px); box-shadow: none; }
+        
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+        }
+        .num-btn {
+            background: rgba(25, 30, 50, 0.9);
+            border: 1px solid rgba(157, 106, 245, 0.4);
+            padding: 6px 0;
+            border-radius: 25px;
+            font-weight: 800;
+            font-size: 0.7rem;
+            font-family: monospace;
+            cursor: pointer;
+            text-align: center;
+            color: #F0E6FF;
+        }
+        .num-btn:active { transform: translateY(1px); background: rgba(157, 106, 245, 0.4); }
+        .btn-flash {
+            animation: flashBrand 0.12s ease-out;
+        }
+        @keyframes flashBrand {
+            0% { transform: scale(1); background: rgba(157, 106, 245, 0.3); }
+            50% { transform: scale(0.92); background: #9D6AF5; color: white; }
+            100% { transform: scale(1); background: rgba(25, 30, 50, 0.9); }
+        }
+        .red-num { background: rgba(198, 40, 40, 0.85); border-color: rgba(198, 80, 80, 0.5); color: #FFE0E0; }
+        .black-num { background: rgba(35, 35, 55, 0.95); border-color: rgba(120, 120, 160, 0.4); color: #E0D4FF; }
+        .zero-flash {
+            animation: zeroBrandFlash 0.12s ease-out;
+        }
+        @keyframes zeroBrandFlash {
+            0% { transform: scale(1); background: #2D5A3F; }
+            50% { transform: scale(0.92); background: #9D6AF5; color: white; }
+            100% { transform: scale(1); background: #2D5A3F; }
+        }
+
+        .history-col {
+            background: rgba(10, 14, 28, 0.75);
+            backdrop-filter: blur(4px);
+            border-radius: 18px;
+            padding: 10px 6px;
+            border: 1px solid rgba(157, 106, 245, 0.3);
+            display: flex;
+            flex-direction: column;
+            height: 340px;
+        }
+        .history-scroll {
             flex: 1;
-            padding: 12px 8px;
-            font-size: 11px;
-            background: #e4e9f0;
-            color: #3a4555;
-            font-weight: 600;
-            border: 1px solid var(--line-soft);
-            letter-spacing: 0.5px;
-            border-radius: 10px;
-            transition: box-shadow 0.3s ease;
-        }
-        .util-btns button:hover {
-            filter: none;
-            border-color: var(--line);
-            color: var(--text);
-            background: #d5dce6;
-            box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
-        }
-
-        #resetBtn.blink-reset {
-            animation: resetBlink 1.2s ease-in-out infinite !important;
-            font-weight: 800 !important;
-            color: #ffffff !important;
-            border-color: transparent !important;
-        }
-
-        @keyframes resetBlink {
-            0% { background: #7c3aed; color: #ffffff; box-shadow: 0 0 16px rgba(124,58,237,0.75); transform: scale(1); }
-            33% { background: #1e3a8a; color: #ffffff; box-shadow: 0 0 16px rgba(30,58,138,0.75); transform: scale(1.04); }
-            66% { background: #db2777; color: #ffffff; box-shadow: 0 0 16px rgba(219,39,119,0.75); transform: scale(1.06); }
-            100% { background: #7c3aed; color: #ffffff; box-shadow: 0 0 16px rgba(124,58,237,0.75); transform: scale(1); }
-        }
-
-        #resetBtn:disabled,
-        #resetBtn.disabled {
-            opacity: 1 !important;
-            filter: none !important;
-            cursor: pointer !important;
-            pointer-events: auto !important;
-        }
-
-        .stats-bar {
+            overflow-y: auto;
             display: flex;
-            justify-content: space-around;
-            font-size: 10px;
-            color: var(--text-muted);
-            margin: 6px 0 10px 0;
-            padding: 4px 0;
-            border-top: 1px solid var(--line-soft);
-            border-bottom: 1px solid var(--line-soft);
+            flex-direction: column;
+            gap: 5px;
+            padding-right: 2px;
         }
-        .stats-bar span { font-weight: 600; }
-        .stats-bar .win-rate { color: var(--win); }
-
-        .metrics-toggle {
-            margin-top: 10px;
-            padding: 8px 14px;
-            background: #e8ecf2;
-            border: 1px solid var(--line-soft);
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            color: #3a4555;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            text-align: left;
-            transition: background 0.2s;
+        .spin-item {
+            background: linear-gradient(135deg, rgba(157, 106, 245, 0.25), rgba(108, 63, 217, 0.2));
+            padding: 6px;
+            text-align: center;
+            border-radius: 20px;
+            font-weight: 800;
+            font-family: monospace;
+            font-size: 0.85rem;
+            border-left: 3px solid #C9B3FF;
+            color: #F5EFFF;
+            text-shadow: 0 0 2px rgba(0,0,0,0.3);
         }
-        .metrics-toggle:hover { background: #d5dce6; }
-        .metrics-toggle .arrow { font-size: 10px; transition: transform 0.2s; }
-        .metrics-toggle.open .arrow { transform: rotate(90deg); }
-
-        .metrics-panel {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.35s ease;
-            margin-top: 0;
+        .spin-item-new {
+            background: linear-gradient(135deg, #9D6AF5, #7B4FDD);
+            color: #FFFFFF;
+            border-left-color: #FFE8B6;
+            animation: highlightBrand 0.45s ease-out;
         }
-        .metrics-panel.open {
-            max-height: 700px;
+        @keyframes highlightBrand {
+            0% { background: #C9B3FF; transform: translateX(-2px); }
+            100% { background: linear-gradient(135deg, #9D6AF5, #7B4FDD); transform: translateX(0); }
+        }
+        .history-count {
+            font-size: 0.55rem;
+            text-align: center;
             margin-top: 8px;
+            color: #B88AFF;
+            font-weight: 700;
         }
 
-        .metrics-inner {
-            background: #f0f3f7;
-            border: 1px solid var(--line-soft);
-            border-radius: 12px;
-            padding: 12px 14px;
-            font-size: 11px;
-            color: #2d3748;
-        }
-        .metrics-section { margin-bottom: 12px; }
-        .metrics-section:last-child { margin-bottom: 0; }
-        .metrics-section-title {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            color: #6b7a8f;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-            padding-bottom: 4px;
-            border-bottom: 1px solid var(--line-soft);
-        }
-        .metric-row {
+        .group-col {
+            background: rgba(10, 14, 28, 0.75);
+            backdrop-filter: blur(4px);
+            border-radius: 18px;
+            padding: 10px 6px;
+            border: 1px solid rgba(157, 106, 245, 0.3);
+            height: 340px;
             display: flex;
-            justify-content: space-between;
-            padding: 3px 0;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
+            flex-direction: column;
         }
-        .metric-row .name { color: #4a5568; }
-        .metric-row .val { font-weight: 700; color: #2d3748; }
-        .metric-row .val.pos { color: #4a9a6a; }
-        .metric-row .val.neg { color: #db2777; }
-
-        .detector-table {
-            width: 100%;
-            font-family: 'Courier New', monospace;
-            font-size: 10px;
+        .group-scroll {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
-        .detector-table th {
-            text-align: left;
+        .group-item {
+            background: rgba(157, 106, 245, 0.15);
+            padding: 5px;
+            text-align: center;
+            border-radius: 18px;
+            font-size: 0.7rem;
+            font-family: monospace;
             font-weight: 700;
-            color: #6b7a8f;
-            font-size: 9px;
-            letter-spacing: 0.5px;
-            padding: 3px 4px;
-            border-bottom: 1px solid var(--line-soft);
-        }
-        .detector-table td {
-            padding: 3px 4px;
-            border-bottom: 1px solid var(--line-soft);
-            color: #2d3748;
-        }
-        .detector-table tr:last-child td { border-bottom: none; }
-        .detector-table .edge-pos { color: #4a9a6a; font-weight: 700; }
-        .detector-table .edge-neg { color: #db2777; font-weight: 700; }
-        .detector-table .edge-neu { color: #6b7a8f; font-weight: 700; }
-
-        /* ===== LIVE API / WS OVERLAY ===== */
-        .overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 3000;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            background: rgba(20, 20, 30, 0.82);
-            backdrop-filter: blur(6px);
-            padding: 18px;
-            animation: fadeIn 0.22s ease both;
-        }
-        .overlay.show { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .overlay-card {
-            width: 100%;
-            max-width: 460px;
-            background: #f8fafc;
-            border-radius: 22px;
-            padding: 26px 22px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-            border: 1px solid rgba(255,255,255,0.15);
-            animation: riseIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-        .overlay-card h2 {
-            font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
-            font-size: 20px;
-            text-align: center;
-            margin-bottom: 4px;
-            background: linear-gradient(135deg, #7c3aed, #1e3a8a, #db2777);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .overlay-card .sub {
-            text-align: center;
-            font-size: 11px;
-            color: #6b7a8f;
-            letter-spacing: 1px;
-            margin-bottom: 18px;
-        }
-        .overlay-card label {
-            display: block;
-            font-size: 11px;
-            font-weight: 700;
-            color: #4a5568;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-        }
-        .overlay-card input,
-        .overlay-card textarea {
-            width: 100%;
-            padding: 13px 14px;
-            font-size: 12px;
-            font-family: 'Courier New', monospace;
-            border: 1.5px solid var(--line);
-            border-radius: 12px;
-            background: #ffffff;
-            color: #2d3748;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            user-select: text;
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            resize: vertical;
-        }
-        .overlay-card input:focus,
-        .overlay-card textarea:focus {
-            border-color: #7c3aed;
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
-        }
-        .overlay-card textarea {
-            min-height: 68px;
-            line-height: 1.45;
-            word-break: break-all;
-        }
-        .overlay-card .status {
-            margin-top: 14px;
-            font-size: 11px;
-            font-family: 'Courier New', monospace;
-            min-height: 16px;
-            text-align: center;
-            color: #6b7a8f;
             word-break: break-word;
+            color: #E0D0FF;
+            border: 1px solid rgba(157, 106, 245, 0.3);
         }
-        .overlay-card .status.ok { color: #4a9a6a; font-weight: 700; }
-        .overlay-card .status.err { color: #db2777; font-weight: 700; }
 
-        .overlay-actions {
-            margin-top: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+        .prediction-col {
+            background: rgba(10, 14, 28, 0.75);
+            backdrop-filter: blur(4px);
+            border-radius: 18px;
+            padding: 10px;
+            border: 1px solid rgba(157, 106, 245, 0.3);
+            display: flex;
+            flex-direction: column;
             gap: 10px;
         }
-        .overlay-actions button {
-            padding: 14px 10px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 13px;
+        .pred-glass {
+            background: rgba(157, 106, 245, 0.2);
+            backdrop-filter: blur(12px);
+            border-radius: 18px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid rgba(201, 179, 255, 0.6);
+            box-shadow: 0 0 20px rgba(157, 106, 245, 0.5), inset 0 0 8px rgba(201, 179, 255, 0.3);
+            transition: all 0.1s;
+        }
+        .prediction-flash {
+            animation: predGlassPulse 0.25s ease-out;
+        }
+        @keyframes predGlassPulse {
+            0% { box-shadow: 0 0 0px rgba(157, 106, 245, 0.5); transform: scale(1); background: rgba(157, 106, 245, 0.2); }
+            50% { box-shadow: 0 0 35px rgba(157, 106, 245, 0.9); transform: scale(1.02); background: rgba(157, 106, 245, 0.45); }
+            100% { box-shadow: 0 0 20px rgba(157, 106, 245, 0.5); transform: scale(1); background: rgba(157, 106, 245, 0.2); }
+        }
+        .pred-label-small {
+            font-size: 0.55rem;
+            font-weight: 800;
+            color: #F0E6FF;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .pred-value {
+            font-size: 1rem;
+            font-weight: 900;
+            font-family: monospace;
+            background: rgba(10, 14, 26, 0.8);
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 35px;
+            margin-top: 8px;
+            color: #FFE8B6;
             letter-spacing: 1px;
+            border: 1px solid rgba(201, 179, 255, 0.5);
+        }
+        
+        .alternatives-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .alt-row {
+            background: linear-gradient(135deg, rgba(157, 106, 245, 0.2), rgba(108, 63, 217, 0.15));
+            border-radius: 25px;
+            padding: 7px 10px;
+            text-align: center;
+            font-weight: 800;
+            font-family: monospace;
+            font-size: 0.75rem;
+            border: 1px solid rgba(157, 106, 245, 0.45);
+            color: #F2E8FF;
+            text-shadow: 0 0 1px rgba(0,0,0,0.2);
+        }
+        
+        .clear-btn {
+            background: linear-gradient(145deg, #2D1F3A, #1A1225);
+            border: 1px solid rgba(157, 106, 245, 0.6);
+            width: 100%;
+            padding: 9px;
+            border-radius: 35px;
+            font-weight: 800;
+            font-size: 0.7rem;
+            color: #D9C8FF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
             cursor: pointer;
-            transition: transform 0.12s ease, filter 0.15s ease;
-            -webkit-tap-highlight-color: transparent;
+            margin-top: 4px;
+            transition: 0.05s linear;
         }
-        .overlay-actions button:active { transform: scale(0.96); }
-        #ovCancel {
-            background: #e4e9f0;
-            color: #3a4555;
+        .clear-btn:active { transform: scale(0.97); background: #2D1F3A; }
+
+        .history-scroll::-webkit-scrollbar, .group-scroll::-webkit-scrollbar {
+            width: 3px;
         }
-        #ovCancel:hover { background: #d5dce6; }
-        #ovConfirm {
-            background: linear-gradient(135deg, #7c3aed, #1e3a8a, #db2777);
-            color: #ffffff;
-            box-shadow: 0 0 20px rgba(124, 58, 237, 0.35);
+        .history-scroll::-webkit-scrollbar-track, .group-scroll::-webkit-scrollbar-track {
+            background: #1A1F30;
+            border-radius: 3px;
         }
-        #ovConfirm:hover { filter: brightness(1.1); }
-        #ovConfirm:disabled {
-            filter: grayscale(0.8) brightness(0.85);
-            cursor: not-allowed;
-            pointer-events: none;
-            opacity: 0.6;
+        .history-scroll::-webkit-scrollbar-thumb, .group-scroll::-webkit-scrollbar-thumb {
+            background: #9D6AF5;
+            border-radius: 3px;
         }
 
-        .live-badge {
+        @media (max-width: 580px) {
+            .four-columns { grid-template-columns: 1fr; gap: 10px; }
+            .aequitas-app { width: 95%; }
+            .history-col, .group-col { height: auto; min-height: 180px; }
+        }
+
+        /* WHEEL OVERLAY */
+        .wheel-overlay {
             position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 2000;
-            display: none;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 5, 12, 0.94);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: flex;
             align-items: center;
-            gap: 6px;
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(74, 154, 106, 0.5);
-            backdrop-filter: blur(8px);
-            border-radius: 40px;
-            padding: 7px 14px;
-            font-size: 10px;
-            font-weight: 700;
-            color: #4a9a6a;
-            letter-spacing: 1px;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+            animation: fadeInOverlay 0.25s ease;
+            padding: 20px;
+        }
+        @keyframes fadeInOverlay {
+            from { opacity: 0; backdrop-filter: blur(0px); }
+            to { opacity: 1; backdrop-filter: blur(12px); }
+        }
+        .wheel-container {
+            background: linear-gradient(145deg, #12172B, #0A0E1F);
+            border-radius: 48px;
+            padding: 20px 24px 24px;
+            border: 2px solid rgba(157, 106, 245, 0.8);
+            box-shadow: 0 30px 50px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,179,255,0.2), 0 0 35px rgba(157,106,245,0.5);
+            position: relative;
+            width: auto;
+            max-width: 95vw;
+            display: inline-block;
+        }
+        .close-wheel-btn {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            background: rgba(10, 14, 28, 0.9);
+            border: 1px solid rgba(157, 106, 245, 0.8);
+            color: #D9C8FF;
+            font-size: 1.3rem;
+            font-weight: bold;
             cursor: pointer;
-        }
-        .live-badge.show { display: inline-flex; }
-        .live-dot {
-            width: 7px;
-            height: 7px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            background: #4a9a6a;
-            animation: livePulse 1.2s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.15s;
+            font-family: monospace;
+            backdrop-filter: blur(4px);
+            z-index: 10;
         }
-        @keyframes livePulse {
-            0%,100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(0.8); }
+        .close-wheel-btn:hover {
+            background: #9D6AF5;
+            color: #0A0E1A;
+            transform: scale(1.07);
+            box-shadow: 0 0 12px #9D6AF5;
+        }
+        .wheel-title {
+            text-align: center;
+            font-size: clamp(0.65rem, 3vw, 0.8rem);
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #C9B3FF;
+            margin-bottom: 18px;
+            text-transform: uppercase;
+            background: rgba(157,106,245,0.2);
+            display: inline-block;
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 6px 20px;
+            border-radius: 60px;
+            backdrop-filter: blur(4px);
+        }
+        .track-container {
+            position: relative;
+            width: min(85vw, 85vh, 600px);
+            height: min(85vw, 85vh, 400px);
+            margin: 0 auto;
+        }
+        .num {
+            width: clamp(28px, 7vw, 44px);
+            height: clamp(28px, 7vw, 44px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            position: absolute;
+            border-radius: 50%;
+            font-family: 'Inter', monospace;
+            font-size: clamp(10px, 3vw, 14px);
+            font-weight: 800;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            cursor: default;
+        }
+        .num.red { background: #c62828; color: white; }
+        .num.black { background: #1a1e2a; color: #e0e0e0; border: 1px solid rgba(157,106,245,0.4); }
+        .num.green { background: #0fa23f; color: white; }
+        .num.neighbor { 
+            background: #FFD966 !important; 
+            color: #0A0E1A !important; 
+            transform: scale(1.2);
+            box-shadow: 0 0 12px rgba(255,217,102,0.8);
+            z-index: 5;
+        }
+        .num.center { 
+            background: #FF69B4 !important; 
+            color: #0A0E1A !important; 
+            transform: scale(1.3);
+            box-shadow: 0 0 18px rgba(255,105,180,0.9);
+            z-index: 6;
+            font-weight: 900;
+        }
+        .wheel-note {
+            text-align: center;
+            margin-top: 18px;
+            font-size: clamp(0.55rem, 2.5vw, 0.65rem);
+            font-weight: 600;
+            color: #B88AFF;
+            background: rgba(0,0,0,0.35);
+            padding: 6px 14px;
+            border-radius: 40px;
+            display: inline-block;
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+            letter-spacing: 0.6px;
+        }
+        
+        @media (max-width: 640px) {
+            .wheel-container { padding: 16px 18px 18px; }
+            .track-container { width: min(82vw, 82vh, 500px); height: min(82vw, 82vh, 340px); }
+        }
+        @media (max-width: 480px) {
+            .track-container { width: min(75vw, 75vh, 380px); height: min(75vw, 75vh, 260px); }
+            .num { width: clamp(24px, 6vw, 36px); height: clamp(24px, 6vw, 36px); font-size: clamp(9px, 2.5vw, 12px); }
         }
     </style>
 </head>
 <body>
 
-    <div class="exit-nav">
-        <button onclick="window.signOutUser()" class="exit-btn">✕ EXIT</button>
+<!-- ========== ADDED 5: EXIT BUTTON HTML ========== -->
+<div class="exit-nav">
+    <a href="index.html" class="exit-btn">← EXIT TERMINAL</a>
+</div>
+
+<div class="aequitas-app" id="mainAppContainer">
+    <div class="title-bar-brand">
+        <div class="brand-container">
+            <div class="minimal-ai-logo">
+                <svg class="minimal-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="20" cy="20" r="16" stroke="rgba(201, 179, 255, 0.7)" stroke-width="1.2" fill="none"/>
+                    <circle cx="20" cy="20" r="10" stroke="rgba(255, 255, 255, 0.5)" stroke-width="0.8" fill="none"/>
+                    <path d="M20 8 L23 15 L31 17 L25 23 L27 31 L20 26 L13 31 L15 23 L9 17 L17 15 L20 8Z" 
+                          fill="rgba(201, 179, 255, 0.3)" stroke="rgba(255, 255, 255, 0.7)" stroke-width="0.8" stroke-linejoin="round"/>
+                    <circle cx="20" cy="20" r="2" fill="white" fill-opacity="0.8"/>
+                </svg>
+            </div>
+            <div class="brand-text">
+                <span class="brand-name">ROULETTE PREMIUM</span>
+                <span class="brand-sub">VIP ALGORITHM</span>
+            </div>
+        </div>
+        <div class="brand-badge"> AI</div>
     </div>
 
-    <div class="live-badge" id="liveBadge" title="Click to manage live feed">
-        <span class="live-dot"></span>
-        <span id="liveBadgeText">LIVE FEED CONNECTED</span>
-    </div>
-
-    <div class="wrap">
-        <div class="container">
-            <div class="header">
-                <h1>
-                    <span class="title-violet">Baccarat</span>
-                    <span class="title-darkblue">VIP</span>
-                    <span class="title-redpink">Plus</span>
-                </h1>
-                <div class="ai-container">
-                    <span class="ai-text">AI</span>
-                </div>
+    <div class="four-columns">
+        <div class="numbers-col">
+            <div class="col-header"></div>
+            <div class="zero-container">
+                <button class="zero-btn" id="zeroButton">0</button>
             </div>
-            <div class="tag">Results are insights, not Guarantees</div>
+            <div class="number-grid" id="numbersGrid"></div>
+        </div>
 
-            <div class="sequence" id="historyBox">READY FOR DATA</div>
-            <div class="results" id="resultsBox"></div>
-            
-            <div class="stats-bar" id="statsBar">
-                <span>W: <strong id="winCount">0</strong></span>
-                <span>L: <strong id="lossCount">0</strong></span>
-                <span class="win-rate" id="winRateDisplay">WR: 0%</span>
-                <span id="streakDisplay">Streak: 0</span>
+        <div class="history-col">
+            <div class="col-header"></div>
+            <div class="history-scroll" id="spinHistoryList"></div>
+            <div class="history-count">Total: <span id="spinCount">0</span></div>
+        </div>
+
+        <div class="group-col">
+            <div class="col-header"></div>
+            <div class="group-scroll" id="groupHistoryList"></div>
+            <div class="history-count">Groups: <span id="groupCount">0</span></div>
+        </div>
+
+        <div class="prediction-col">
+            <div class="pred-glass" id="predBox">
+                <div class="pred-label-small"></div>
+                <div class="pred-value" id="mainPrediction">———</div>
             </div>
-
-            <div class="prediction" id="predictionBox">
-                <span>INITIALIZING...</span>
-            </div>
-
-            <div class="buttons">
-                <button onclick="recordResult('P')" id="playerBtn">PLAYER</button>
-                <button onclick="recordResult('B')" id="bankerBtn">BANKER</button>
-                <div class="util-btns">
-                    <button onclick="undo()" id="undoBtn">UNDO LAST</button>
-                    <button onclick="resetAll()" id="resetBtn">RESET SHOE</button>
-                </div>
-            </div>
-
-            <button class="metrics-toggle" id="metricsToggle" onclick="toggleMetrics()">
-                <span>▸ ENGINE METRICS</span>
-                <span class="arrow">▶</span>
+            <div class="alternatives-list" id="alternativesList"></div>
+            <button class="clear-btn" id="clearAllBtn">
+                🔄 RESET
             </button>
-            <div class="metrics-panel" id="metricsPanel">
-                <div class="metrics-inner" id="metricsInner"></div>
-            </div>
         </div>
     </div>
+</div>
 
-    <!-- ===== LIVE FEED OVERLAY (WebSocket or HTTP) ===== -->
-    <div class="overlay" id="apiOverlay">
-        <div class="overlay-card">
-            <h2>LIVE TABLE FEED</h2>
-            <div class="sub">PASTE WSS:// OR HTTPS:// URL</div>
+<script>
+    // ==================== GROUPS MAPPING (Each number belongs to 3-5 groups) ====================
+    const groupsPerNumber = {
+        0: ["0-10-20-30", "3-13-23-33", "6-16-26-36", "2-12-22-32", "5-15-25-35"],
+        1: ["0-10-20-30", "3-13-23-33", "6-16-26-36", "1-11-21-31", "4-14-24-34"],
+        2: ["4-14-24-34", "1-11-21-31", "7-17-27", "2-12-22-32", "5-15-25-35"],
+        3: ["0-10-20-30", "6-16-26-36", "3-13-23-33", "2-12-22-32", "5-15-25-35"],
+        4: ["4-14-24-34", "1-11-21-31", "2-12-22-32", "9-19-29", "5-15-25-35"],
+        5: ["3-13-23-33", "0-10-20-30", "4-14-24-34", "6-16-26-36", "5-15-25-35"],
+        6: ["4-14-24-34", "6-16-26-36", "7-17-27", "3-13-23-33"],
+        7: ["9-19-29", "7-17-27", "2-12-22-32", "8-18-28"],
+        8: ["0-10-20-30", "1-11-21-31", "8-18-28", "3-13-23-33"],
+        9: ["4-14-24-34", "1-11-21-31", "9-19-29", "2-12-22-32", "8-18-28"],
+        10: ["4-14-24-34", "8-18-28", "3-13-23-33", "0-10-20-30", "5-15-25-35"],
+        11: ["3-13-23-33", "1-11-21-31", "6-16-26-36", "0-10-20-30", "8-18-28"],
+        12: ["7-17-27", "8-18-28", "2-12-22-32", "3-13-23-33", "5-15-25-35"],
+        13: ["1-11-21-31", "7-17-27", "3-13-23-33", "6-16-26-36"],
+        14: ["4-14-24-34", "1-11-21-31", "9-19-29", "0-10-20-30"],
+        15: ["4-14-24-34", "9-19-29", "2-12-22-32", "0-10-20-30", "5-15-25-35"],
+        16: ["4-14-24-34", "1-11-21-31", "3-13-23-33", "6-16-26-36", "5-15-25-35"],
+        17: ["4-14-24-34", "6-16-26-36", "7-17-27", "2-12-22-32", "5-15-25-35"],
+        18: ["2-12-22-32", "7-17-27", "9-19-29", "8-18-28"],
+        19: ["4-14-24-34", "1-11-21-31", "9-19-29", "2-12-22-32", "5-15-25-35"],
+        20: ["4-14-24-34", "1-11-21-31", "0-10-20-30", "3-13-23-33"],
+        21: ["4-14-24-34", "1-11-21-31", "9-19-29", "2-12-22-32", "5-15-25-35"],
+        22: ["1-11-21-31", "8-18-28", "2-12-22-32", "9-19-29"],
+        23: ["0-10-20-30", "3-13-23-33", "8-18-28", "5-15-25-35"],
+        24: ["4-14-24-34", "3-13-23-33", "6-16-26-36", "0-10-20-30", "5-15-25-35"],
+        25: ["4-14-24-34", "1-11-21-31", "7-17-27", "2-12-22-32", "5-15-25-35"],
+        26: ["3-13-23-33", "6-16-26-36", "0-10-20-30", "2-12-22-32", "5-15-25-35"],
+        27: ["4-14-24-34", "6-16-26-36", "7-17-27", "3-13-23-33"],
+        28: ["9-19-29", "7-17-27", "8-18-28", "2-12-22-32", "5-15-25-35"],
+        29: ["8-18-28", "9-19-29", "7-17-27", "2-12-22-32"],
+        30: ["6-16-26-36", "1-11-21-31", "0-10-20-30", "8-18-28", "3-13-23-33"],
+        31: ["4-14-24-34", "1-11-21-31", "0-10-20-30", "2-12-22-32", "9-19-29"],
+        32: ["6-16-26-36", "0-10-20-30", "9-19-29", "2-12-22-32", "5-15-25-35"],
+        33: ["0-10-20-30", "1-11-21-31", "3-13-23-33", "6-16-26-36", "4-14-24-34"],
+        34: ["4-14-24-34", "7-17-27", "6-16-26-36", "5-15-25-35"],
+        35: ["6-16-26-36", "3-13-23-33", "8-18-28", "2-12-22-32", "5-15-25-35"],
+        36: ["0-10-20-30", "1-11-21-31", "7-17-27", "3-13-23-33", "6-16-26-36"]
+    };
 
-            <label for="apiUrlInput">FEED URL</label>
-            <textarea id="apiUrlInput" placeholder="wss://gs10.pragmaticplaylive.net/game?JSESSIONID=...&tableId=..." spellcheck="false" autocomplete="off"></textarea>
+    // ==================== APP STATE ====================
+    let spinHistory = [];
+    let groupHistory = [];
+    let overlayVisible = false;
 
-            <label for="apiKeyInput" style="margin-top:14px;">AUTH HEADER (optional, HTTP only)</label>
-            <input type="text" id="apiKeyInput" placeholder="Bearer token or key" spellcheck="false" autocomplete="off">
+    // --- Prediction v2 tracking state ---
+    let lastPrediction = null;
+    let lastPredictionGroups = [];
+    let hitCount = 0;
+    let missCount = 0;
 
-            <div class="status" id="apiStatus"></div>
+    // DOM Elements
+    const numbersGrid = document.getElementById('numbersGrid');
+    const zeroButton = document.getElementById('zeroButton');
+    const spinContainer = document.getElementById('spinHistoryList');
+    const groupContainer = document.getElementById('groupHistoryList');
+    const spinCountSpan = document.getElementById('spinCount');
+    const groupCountSpan = document.getElementById('groupCount');
+    const mainPredictionSpan = document.getElementById('mainPrediction');
+    const alternativesContainer = document.getElementById('alternativesList');
+    const clearBtn = document.getElementById('clearAllBtn');
+    const predBox = document.getElementById('predBox');
+    const appContainer = document.getElementById('mainAppContainer');
 
-            <div class="overlay-actions">
-                <button id="ovCancel">CANCEL</button>
-                <button id="ovConfirm">CONNECT</button>
-            </div>
-        </div>
-    </div>
+    // ==================== ENHANCED PREDICTION LOGIC (v2) ====================
+    function analiz() {
+        // ---- 0. HIT/MISS FEEDBACK (evaluates the PREVIOUS prediction) ----
+        if (lastPrediction && lastPredictionGroups.length > 0 && groupHistory.length > 0) {
+            const evalWindow = groupHistory.slice(-lastPredictionGroups.length);
+            const hit = evalWindow.some(g => g === lastPrediction);
+            if (hit) hitCount++;
+            else missCount++;
+            lastPrediction = null;
+            lastPredictionGroups = [];
+        }
 
-    <script>
-        /* =========================================================
-           HONEST ENGINE with SINGLE-SOURCE-OF-TRUTH attribution
-           - getPredictionWithAttribution() returns prediction AND
-             the exact numbers used to compute it
-           - Attribution panel reads that object — never recomputes
-           - Detector reliability + calibration wired into prediction
-           - ELO / Sharpness removed entirely
-           - Skip threshold floor at 55
-           - CHANGE TABLE REMOVED
-           - LIVE FEED OVERLAY: supports wss:// (WebSocket) and https:// (HTTP poll)
-        ========================================================= */
+        // ---- 1. EMPTY / TOO-EARLY GUARD ----
+        if (groupHistory.length < 3) {
+            mainPredictionSpan.innerText = "———";
+            alternativesContainer.innerHTML = `
+                <div class="alt-row">———</div>
+                <div class="alt-row">———</div>
+                <div class="alt-row">———</div>
+                <div class="alt-row">———</div>
+                <div class="alt-row">———</div>
+            `;
+            return;
+        }
 
-        let sequence = JSON.parse(localStorage.getItem('bt_sequence')) || [];
-        let results = JSON.parse(localStorage.getItem('bt_results')) || [];
-        let lastPrediction = null;
-        let lastPredictionConfidence = 0;
-        let detailedHistory = JSON.parse(localStorage.getItem('bt_detailed')) || [];
-        let wins = 0, losses = 0, skips = 0;
-        const MIN_HANDS = 10;
-        const SKIP_THRESHOLD_FLOOR = 55;
+        // ---- 2. NORMALIZE GROUP KEYS ----
+        const norm = (g) => g.split('-').map(Number).sort((a, b) => a - b).join('-');
+        const normalizedHistory = groupHistory.map(norm);
 
-        let predictionHistory = JSON.parse(localStorage.getItem('bt_prediction_history')) || [];
-        let overallAccuracy = { correct: 0, total: 0 };
-        let patternAccuracy = { P: { correct: 0, total: 0 }, B: { correct: 0, total: 0 } };
+        // ---- 3. WEIGHTED FREQUENCY WITH EXPONENTIAL RECENCY DECAY ----
+        const startIdx = Math.max(0, normalizedHistory.length - 20);
+        const lastGroups = normalizedHistory.slice(startIdx);
+        const DECAY = 0.85;
 
-        const DETECTOR_NAMES = ['Pattern', 'Streak', 'Zigzag', 'Frequency', 'Recent'];
-        const DETECTOR_WINDOW = 100;
-        let detectorHistory = JSON.parse(localStorage.getItem('bt_detector_history')) || {};
-        DETECTOR_NAMES.forEach(name => {
-            if (!detectorHistory[name]) detectorHistory[name] = [];
+        const freqMap = new Map();
+        lastGroups.forEach((g, idx) => {
+            const age = lastGroups.length - 1 - idx;   // 0 = newest
+            const weight = Math.pow(DECAY, age);
+            freqMap.set(g, (freqMap.get(g) || 0) + weight);
         });
 
-        const CALIBRATION_BANDS = [
-            { min: 50, max: 59, count: 0, correct: 0, label: '50-59' },
-            { min: 60, max: 69, count: 0, correct: 0, label: '60-69' },
-            { min: 70, max: 79, count: 0, correct: 0, label: '70-79' },
-            { min: 80, max: 89, count: 0, correct: 0, label: '80-89' },
-            { min: 90, max: 100, count: 0, correct: 0, label: '90+' },
-            { min: 0, max: 49, count: 0, correct: 0, label: '<50' }
-        ];
+        // ---- 4. PATTERN MATCH WITH COUNT + RECENCY DECAY ----
+        let effectivePatternBoost = 0;
+        if (normalizedHistory.length >= 4) {
+            const lastThree = normalizedHistory.slice(-3).join(',');
+            const patternHits = [];
 
-        function rebuildCalibration() {
-            CALIBRATION_BANDS.forEach(b => { b.count = 0; b.correct = 0; });
-            predictionHistory.forEach(p => {
-                const c = p.confidence;
-                const band = CALIBRATION_BANDS.find(b => c >= b.min && c <= b.max);
-                if (band) {
-                    band.count++;
-                    if (p.correct) band.correct++;
+            for (let i = 0; i <= normalizedHistory.length - 4; i++) {
+                const pattern = normalizedHistory.slice(i, i + 3).join(',');
+                if (pattern === lastThree) {
+                    const nextGroup = normalizedHistory[i + 3];
+                    const distFromEnd = normalizedHistory.length - (i + 3);
+                    patternHits.push({ nextGroup, distFromEnd });
                 }
-            });
-        }
-        rebuildCalibration();
-
-        if (predictionHistory.length > 0) {
-            predictionHistory.forEach(p => {
-                if (p.prediction === 'P') {
-                    patternAccuracy.P.total++;
-                    if (p.correct) patternAccuracy.P.correct++;
-                } else if (p.prediction === 'B') {
-                    patternAccuracy.B.total++;
-                    if (p.correct) patternAccuracy.B.correct++;
-                }
-                overallAccuracy.total++;
-                if (p.correct) overallAccuracy.correct++;
-            });
-        }
-
-        const metricsOpen = localStorage.getItem('bt_metrics_open') === '1';
-        document.addEventListener('DOMContentLoaded', () => {
-            if (metricsOpen) {
-                const panel = document.getElementById('metricsPanel');
-                const toggle = document.getElementById('metricsToggle');
-                if (panel) panel.classList.add('open');
-                if (toggle) toggle.classList.add('open');
             }
+
+            // Confidence scale from historical hit rate (1.0 until ≥3 evaluations)
+            const totalEval = hitCount + missCount;
+            const hitRateScale = totalEval >= 3 ? (0.5 + 0.5 * (hitCount / totalEval)) : 1.0;
+
+            for (const { nextGroup, distFromEnd } of patternHits) {
+                const decay = Math.pow(0.9, distFromEnd);
+                const boost = 4 * decay * hitRateScale;
+                freqMap.set(nextGroup, (freqMap.get(nextGroup) || 0) + boost);
+                effectivePatternBoost += boost;
+            }
+        }
+
+        // ---- 5. SORT BY SCORE (stable tie-break) ----
+        const sorted = Array.from(freqMap.entries()).sort((a, b) => {
+            if (b[1] !== a[1]) return b[1] - a[1];
+            return a[0].localeCompare(b[0]);
         });
 
-        function toggleMetrics() {
-            const panel = document.getElementById('metricsPanel');
-            const toggle = document.getElementById('metricsToggle');
-            if (!panel || !toggle) return;
-            panel.classList.toggle('open');
-            toggle.classList.toggle('open');
-            localStorage.setItem('bt_metrics_open', panel.classList.contains('open') ? '1' : '0');
+        // ---- 6. DEDUPLICATE ALTERNATIVES BY NUMBER OVERLAP (max 2 shared) ----
+        const selected = [];
+        const selectedNums = [];
+        for (const [grp, score] of sorted) {
+            const nums = grp.split('-').map(Number);
+            const overlap = nums.filter(n => selectedNums.includes(n)).length;
+            if (overlap >= 2) continue;
+            selected.push([grp, score]);
+            selectedNums.push(...nums);
+            if (selected.length === 5) break;
         }
 
-        function clampConfidence(raw) { return Math.min(96, Math.max(0, Math.round(raw))); }
-        function oppositeSide(side) { return side === 'P' ? 'B' : 'P'; }
-
-        // ========== PATTERN DETECTORS ==========
-        function detectPatterns() {
-            if (sequence.length < 4) return null;
-            const patterns = {};
-            const maxLen = Math.min(8, sequence.length - 1);
-            for (let len = 2; len <= maxLen; len++) {
-                const pattern = sequence.slice(-len).join('');
-                const occurrences = [];
-                for (let i = 0; i <= sequence.length - len - 1; i++) {
-                    const current = sequence.slice(i, i + len).join('');
-                    if (current === pattern && i + len < sequence.length) {
-                        occurrences.push(sequence[i + len]);
-                    }
-                }
-                if (occurrences.length >= 1) {
-                    const pCount = occurrences.filter(o => o === 'P').length;
-                    const bCount = occurrences.length - pCount;
-                    const confidence = occurrences.length === 1
-                        ? 55
-                        : (Math.max(pCount, bCount) / occurrences.length) * 100;
-                    const prediction = pCount >= bCount ? 'P' : 'B';
-                    const weight = len * occurrences.length;
-                    if (!patterns[prediction] || patterns[prediction].weight < weight) {
-                        patterns[prediction] = { confidence, weight };
-                    }
-                }
-            }
-            if (Object.keys(patterns).length === 0) return null;
-            let best = null, bestScore = 0;
-            for (const [side, data] of Object.entries(patterns)) {
-                const score = data.confidence * (data.weight / 10);
-                if (score > bestScore) {
-                    bestScore = score;
-                    best = { prediction: side, confidence: data.confidence };
-                }
-            }
-            if (best) best.name = 'Pattern';
-            return best;
-        }
-
-        function detectStreakBias() {
-            if (sequence.length < 2) return null;
-            const last = sequence[sequence.length - 1];
-            let streakLength = 1;
-            for (let i = sequence.length - 2; i >= 0; i--) {
-                if (sequence[i] === last) streakLength++;
-                else break;
-            }
-            const window = sequence.slice(-12);
-            let streakData = { P: { continue: 0, break: 0 }, B: { continue: 0, break: 0 } };
-            for (let i = 1; i < window.length; i++) {
-                if (window[i] === window[i - 1]) streakData[window[i - 1]].continue++;
-                else streakData[window[i - 1]].break++;
-            }
-            const side = last;
-            const total = streakData[side].continue + streakData[side].break;
-            if (total >= 1) {
-                const continueRate = streakData[side].continue / total;
-                if (streakLength >= 2 && continueRate > 0.52) {
-                    const confidence = Math.min(80, 55 + (continueRate - 0.5) * 120 + streakLength * 2);
-                    return { prediction: side, confidence: clampConfidence(confidence), name: 'Streak' };
-                }
-                if (streakLength >= 2 && continueRate < 0.48) {
-                    const confidence = Math.min(80, 55 + (0.5 - continueRate) * 120 + streakLength * 2);
-                    return { prediction: oppositeSide(side), confidence: clampConfidence(confidence), name: 'Streak' };
-                }
-            }
-            return null;
-        }
-
-        function detectZigzagBias() {
-            if (sequence.length < 4) return null;
-            const rates = [];
-            for (const win of [5, 7, 10, 14]) {
-                if (sequence.length < win + 1) continue;
-                const seg = sequence.slice(-win - 1);
-                let alt = 0;
-                for (let i = 0; i < seg.length - 1; i++) {
-                    if (seg[i] !== seg[i + 1]) alt++;
-                }
-                rates.push(alt / (seg.length - 1));
-            }
-            if (rates.length === 0) return null;
-            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
-            if (avgRate > 0.62) {
-                const confidence = 55 + (avgRate - 0.5) * 90;
-                return { prediction: oppositeSide(sequence[sequence.length - 1]), confidence: clampConfidence(confidence), name: 'Zigzag' };
-            }
-            if (avgRate < 0.38) {
-                const confidence = 55 + (0.5 - avgRate) * 90;
-                return { prediction: sequence[sequence.length - 1], confidence: clampConfidence(confidence), name: 'Zigzag' };
-            }
-            return null;
-        }
-
-        function detectFrequencyBias() {
-            if (sequence.length < 6) return null;
-            const recent = sequence.slice(-20);
-            const recentP = recent.filter(s => s === 'P').length / recent.length;
-            const recentB = 1 - recentP;
-            if (recentP > 0.55) {
-                const confidence = 52 + (recentP - 0.5) * 120;
-                return { prediction: 'B', confidence: clampConfidence(confidence), name: 'Frequency' };
-            }
-            if (recentB > 0.55) {
-                const confidence = 52 + (recentB - 0.5) * 120;
-                return { prediction: 'P', confidence: clampConfidence(confidence), name: 'Frequency' };
-            }
-            return null;
-        }
-
-        function detectRecentBias() {
-            if (sequence.length < 5) return null;
-            const weights = [8, 7, 6, 5, 4];
-            const recent = sequence.slice(-5);
-            let pWeight = 0, bWeight = 0;
-            for (let i = 0; i < recent.length; i++) {
-                if (recent[i] === 'P') pWeight += weights[i];
-                else bWeight += weights[i];
-            }
-            const total = pWeight + bWeight;
-            if (total === 0) return null;
-            const pRate = pWeight / total;
-            const bRate = bWeight / total;
-            if (pRate > 0.58) {
-                const confidence = 52 + (pRate - 0.5) * 130;
-                return { prediction: 'B', confidence: clampConfidence(confidence), name: 'Recent' };
-            }
-            if (bRate > 0.58) {
-                const confidence = 52 + (bRate - 0.5) * 130;
-                return { prediction: 'P', confidence: clampConfidence(confidence), name: 'Recent' };
-            }
-            return null;
-        }
-
-        function getDetectorReliability(name) {
-            const hist = detectorHistory[name] || [];
-            if (hist.length < 15) return { weight: 1.0, hitRate: null, gap: null, fires: hist.length };
-
-            const hits = hist.filter(h => h.correct).length;
-            const hitRate = hits / hist.length;
-            const edge = hitRate - 0.5;
-
-            const correctEntries = hist.filter(h => h.correct);
-            const wrongEntries = hist.filter(h => !h.correct);
-            const avgConfCorrect = correctEntries.length > 0
-                ? correctEntries.reduce((a, b) => a + b.confidence, 0) / correctEntries.length
-                : 0;
-            const avgConfWrong = wrongEntries.length > 0
-                ? wrongEntries.reduce((a, b) => a + b.confidence, 0) / wrongEntries.length
-                : 0;
-            const gap = (avgConfCorrect - avgConfWrong) / 100;
-
-            let weight = 1.0 + edge * 3.0 + gap * 1.5;
-            weight = Math.max(0.5, Math.min(1.5, weight));
-
-            return { weight, hitRate, gap, fires: hist.length };
-        }
-
-        function applyCalibration(confidence) {
-            const band = CALIBRATION_BANDS.find(b => confidence >= b.min && confidence <= b.max);
-            if (!band || band.count < 8) {
-                return { adjusted: confidence, delta: 0, band: null, observed: null, samples: band ? band.count : 0 };
-            }
-            const observedRate = (band.correct / band.count) * 100;
-            const bandMid = (band.min + band.max) / 2;
-            const overconfidence = bandMid - observedRate;
-            const delta = -overconfidence * 0.5;
-            const adjusted = clampConfidence(confidence + delta);
-            return { adjusted, delta, band: band.label, observed: observedRate, samples: band.count };
-        }
-
-        function getPredictionWithAttribution() {
-            if (sequence.length < MIN_HANDS) {
-                return { ready: false };
-            }
-
-            const rawDetectors = [
-                detectPatterns(),
-                detectStreakBias(),
-                detectZigzagBias(),
-                detectFrequencyBias(),
-                detectRecentBias()
-            ].filter(d => d !== null);
-
-            if (rawDetectors.length === 0) {
-                return { ready: true, noSignal: true };
-            }
-
-            const detectorAttribution = rawDetectors.map(d => {
-                const rel = getDetectorReliability(d.name);
-                return {
-                    name: d.name,
-                    prediction: d.prediction,
-                    confidence: d.confidence,
-                    weight: rel.weight,
-                    hitRate: rel.hitRate,
-                    gap: rel.gap,
-                    fires: rel.fires
-                };
-            });
-
-            let pVotes = 0, bVotes = 0;
-            let pConfSum = 0, bConfSum = 0;
-
-            detectorAttribution.forEach(d => {
-                if (d.prediction === 'P') { pVotes += d.weight; pConfSum += d.confidence * d.weight; }
-                else { bVotes += d.weight; bConfSum += d.confidence * d.weight; }
-            });
-
-            let winner, winnerConfSum, winnerWeight;
-            if (Math.abs(pVotes - bVotes) < 0.001) {
-                if (Math.abs(pConfSum - bConfSum) < 0.001) {
-                    return { ready: true, noSignal: true, detectorAttribution };
-                }
-                winner = pConfSum > bConfSum ? 'P' : 'B';
-                winnerConfSum = winner === 'P' ? pConfSum : bConfSum;
-                winnerWeight = winner === 'P' ? pVotes : bVotes;
+        // ---- 7. CONFIDENCE GATE FOR MAIN PREDICTION ----
+        if (selected.length === 0) {
+            mainPredictionSpan.innerText = "———";
+        } else {
+            const avgScore = selected.reduce((s, [, v]) => s + v, 0) / selected.length;
+            const topScore = selected[0][1];
+            if (topScore >= avgScore * 1.5) {
+                mainPredictionSpan.innerText = selected[0][0];
+                lastPrediction = selected[0][0];
+                lastPredictionGroups = [selected[0][0]];
             } else {
-                winner = pVotes > bVotes ? 'P' : 'B';
-                winnerConfSum = winner === 'P' ? pConfSum : bConfSum;
-                winnerWeight = winner === 'P' ? pVotes : bVotes;
-            }
-
-            const rawConfidence = clampConfidence(winnerConfSum / winnerWeight);
-
-            const sideData = winner === 'P' ? patternAccuracy.P : patternAccuracy.B;
-            let sideNudge = 0;
-            if (sideData.total >= 8) {
-                const sideAcc = (sideData.correct / sideData.total) * 100;
-                sideNudge = (sideAcc - 50) * 0.12;
-            }
-
-            const preCalibration = clampConfidence(rawConfidence + sideNudge);
-            const calibration = applyCalibration(preCalibration);
-            const finalConfidence = calibration.adjusted;
-
-            let threshold = SKIP_THRESHOLD_FLOOR;
-            const recentPredictions = predictionHistory.slice(-20);
-            if (recentPredictions.length >= 10 && overallAccuracy.total >= 10) {
-                const realAccuracy = (overallAccuracy.correct / overallAccuracy.total) * 100;
-                const recentCorrect = recentPredictions.filter(p => p.correct).length;
-                const recentAcc = (recentCorrect / recentPredictions.length) * 100;
-                if (recentAcc > realAccuracy + 6) threshold -= 3;
-                else if (recentAcc < realAccuracy - 6) threshold += 3;
-            }
-            threshold = Math.round(Math.min(85, Math.max(SKIP_THRESHOLD_FLOOR, threshold)));
-
-            const shouldBet = finalConfidence >= threshold;
-
-            return {
-                ready: true,
-                noSignal: false,
-                pred: shouldBet ? winner : null,
-                winner: winner,
-                confidence: finalConfidence,
-                rawConfidence: rawConfidence,
-                sideNudge: sideNudge,
-                preCalibration: preCalibration,
-                calibration: calibration,
-                threshold: threshold,
-                skip: !shouldBet,
-                detectorAttribution: detectorAttribution,
-                weightedVote: { p: pVotes, b: bVotes }
-            };
-        }
-
-        function getRunLength(arr) {
-            if (arr.length === 0) return 0;
-            const last = arr[arr.length - 1];
-            let count = 1;
-            for (let i = arr.length - 2; i >= 0; i--) {
-                if (arr[i] === last) count++;
-                else break;
-            }
-            return count;
-        }
-
-        // ========== UI ==========
-        function updateHistory() {
-            const box = document.getElementById('historyBox');
-            const rBox = document.getElementById('resultsBox');
-            if (sequence.length === 0) { box.innerHTML = "READY FOR DATA"; rBox.innerHTML = ""; return; }
-            box.innerHTML = '';
-            sequence.slice(-10).forEach(r => {
-                const span = document.createElement('span');
-                span.className = r;
-                span.textContent = r;
-                box.appendChild(span);
-            });
-            rBox.innerHTML = '';
-            const filteredResults = results.filter(r => r === 'W' || r === 'L');
-            const last10 = filteredResults.slice(-10);
-            last10.forEach(wl => {
-                const span = document.createElement('span');
-                span.className = wl;
-                span.textContent = wl;
-                rBox.appendChild(span);
-            });
-        }
-
-        function setChangeTableLock(locked) {
-            const playerBtn = document.getElementById('playerBtn');
-            const bankerBtn = document.getElementById('bankerBtn');
-            const undoBtn = document.getElementById('undoBtn');
-            const resetBtn = document.getElementById('resetBtn');
-
-            [playerBtn, bankerBtn, undoBtn].forEach(btn => {
-                if (!btn) return;
-                btn.disabled = locked;
-                btn.classList.toggle('disabled', locked);
-            });
-
-            if (resetBtn) {
-                resetBtn.disabled = false;
-                resetBtn.classList.remove('disabled');
-                if (locked) resetBtn.classList.add('blink-reset');
-                else resetBtn.classList.remove('blink-reset');
+                mainPredictionSpan.innerText = "———";
             }
         }
 
-        function renderAttribution(result) {
-            if (!result || !result.detectorAttribution || result.detectorAttribution.length === 0) {
-                return '';
-            }
-
-            let html = `<div class="attribution">`;
-
-            result.detectorAttribution.forEach(d => {
-                const silenced = d.weight < 0.7;
-                const voteClass = d.prediction === 'P' ? 'vote-p' : 'vote-b';
-                const voteLabel = d.prediction === 'P' ? 'P' : 'B';
-                const weightLabel = d.weight.toFixed(2);
-                const confLabel = Math.round(d.confidence) + '%';
-                const silentLabel = silenced ? ' (low weight)' : '';
-                html += `
-                    <div class="attr-row">
-                        <span class="dname">${d.name}</span>
-                        <span class="dval ${silenced ? 'silenced' : ''}">
-                            ${confLabel} ×${weightLabel}
-                            <span class="${voteClass}">→ ${voteLabel}</span>${silentLabel}
-                        </span>
-                    </div>
-                `;
-            });
-
-            html += `<div class="attr-divider"></div>`;
-
-            const pV = result.weightedVote.p.toFixed(2);
-            const bV = result.weightedVote.b.toFixed(2);
-            const winnerLabel = result.winner === 'P' ? 'PLAYER' : 'BANKER';
-            html += `
-                <div class="attr-row">
-                    <span class="attr-summary">Weighted vote</span>
-                    <span class="attr-summary"><span class="val">P ${pV}</span> vs <span class="val">B ${bV}</span> → <span class="val">${winnerLabel}</span></span>
-                </div>
-            `;
-
-            if (result.calibration && result.calibration.band) {
-                const delta = result.calibration.delta;
-                const sign = delta >= 0 ? '+' : '';
-                html += `
-                    <div class="attr-row">
-                        <span class="attr-summary">Calibration (${result.calibration.band}% band, n=${result.calibration.samples})</span>
-                        <span class="attr-summary">
-                            <span class="val">${Math.round(result.calibration.observed)}%</span> actual
-                            → <span class="val">${sign}${delta.toFixed(1)}</span>
-                        </span>
-                    </div>
-                `;
-            } else {
-                html += `
-                    <div class="attr-row">
-                        <span class="attr-summary">Calibration</span>
-                        <span class="attr-summary">not enough data</span>
-                    </div>
-                `;
-            }
-
-            html += `
-                <div class="attr-row">
-                    <span class="attr-summary">Threshold</span>
-                    <span class="attr-summary"><span class="val">${result.threshold}%</span> → ${result.skip ? 'SKIP' : 'BET'}</span>
-                </div>
-            `;
-
-            html += `</div>`;
-            return html;
+        // ---- 8. RENDER ALTERNATIVES ----
+        alternativesContainer.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+            const groupValue = (i < selected.length) ? selected[i][0] : '———';
+            const row = document.createElement('div');
+            row.className = 'alt-row';
+            row.innerText = groupValue;
+            alternativesContainer.appendChild(row);
         }
+    }
 
-        function updatePredictionBox() {
-            const box = document.getElementById('predictionBox');
-
-            if (sequence.length < MIN_HANDS) {
-                box.innerHTML = `<span style="font-size:clamp(11px,2.5vw,13px); color:#7a8595; letter-spacing:1px;">LOGGING: ${MIN_HANDS-sequence.length} MORE HANDS NEEDED</span>`;
-                lastPrediction = null;
-                setChangeTableLock(false);
-                updateStatsBar();
-                updateMetricsPanel();
-                return;
-            }
-
-            const result = getPredictionWithAttribution();
-            const attributionHtml = renderAttribution(result);
-
-            if (!result.ready || result.noSignal) {
-                box.innerHTML = `<span style='font-size:clamp(14px,3vw,16px); color:#7a8595'>ANALYZING PATTERNS...</span>`;
-                lastPrediction = null;
-                setChangeTableLock(false);
-                updateStatsBar();
-                updateMetricsPanel();
-                return;
-            }
-
-            let headlineHtml = '';
-            if (result.pred) {
-                const text = result.pred === 'P' ? 'PLAYER' : 'BANKER';
-                const cls = result.pred === 'P' ? 'player' : 'banker';
-                let adjustTag = '';
-                const calDelta = result.calibration && result.calibration.band ? result.calibration.delta : 0;
-                const totalAdjust = Math.abs(calDelta);
-                if (totalAdjust > 2) {
-                    const sign = calDelta >= 0 ? '+' : '';
-                    adjustTag = `<span class="adjust-tag">(cal ${sign}${calDelta.toFixed(1)})</span>`;
+    // ==================== WHEEL OVERLAY ====================
+    const wheelNumbers = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+    
+    function showWheelOverlay() {
+        if (overlayVisible) return;
+        if (spinHistory.length < 5) return;
+        const mainPredRaw = mainPredictionSpan.innerText;
+        if (!mainPredRaw || mainPredRaw === '———') return;
+        
+        const numbersInGroup = mainPredRaw.split('-').map(Number).filter(n => !isNaN(n) && n >= 0 && n <= 36);
+        if (numbersInGroup.length === 0) return;
+        
+        const centerIndices = [];
+        const neighborIndicesSet = new Set();
+        numbersInGroup.forEach(num => {
+            const idx = wheelNumbers.indexOf(num);
+            if (idx !== -1) {
+                centerIndices.push(idx);
+                for (let offset = -2; offset <= 2; offset++) {
+                    if (offset === 0) continue;
+                    const neighborIdx = (idx + offset + wheelNumbers.length) % wheelNumbers.length;
+                    neighborIndicesSet.add(neighborIdx);
                 }
-                headlineHtml = `<div class="headline">NEXT: <span class="${cls}">${text}</span> <span class="confidence">${result.confidence}%</span> ${adjustTag}</div>`;
-                lastPrediction = result.pred;
-                lastPredictionConfidence = result.confidence;
-            } else {
-                headlineHtml = `<div class="headline"><span style="font-size:clamp(14px,3vw,16px); color:#db2777;">⏭ SKIP (${result.confidence}% &lt; ${result.threshold}%)</span></div>`;
-                lastPrediction = null;
             }
-
-            box.innerHTML = headlineHtml + attributionHtml;
-            setChangeTableLock(false);
-            updateStatsBar();
-            updateMetricsPanel();
-        }
-
-        function updateStatsBar() {
-            document.getElementById('winCount').textContent = wins;
-            document.getElementById('lossCount').textContent = losses;
-            const total = wins + losses;
-            const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
-
-            const realAcc = (overallAccuracy.total > 0) ?
-                Math.round((overallAccuracy.correct / overallAccuracy.total) * 100) : 0;
-
-            document.getElementById('winRateDisplay').textContent = `WR: ${winRate}% | Real: ${realAcc}%`;
-
-            const streak = getRunLength(sequence);
-            const last = sequence.length > 0 ? sequence[sequence.length - 1] : null;
-            const streakDisplay = document.getElementById('streakDisplay');
-            if (last && streak > 0) {
-                streakDisplay.textContent = `Streak: ${streak} ${last}`;
-            } else {
-                streakDisplay.textContent = 'Streak: 0';
-            }
-        }
-
-        function updateMetricsPanel() {
-            const inner = document.getElementById('metricsInner');
-            if (!inner) return;
-
-            const total = overallAccuracy.total;
-            const correct = overallAccuracy.correct;
-            const acc = total > 0 ? ((correct / total) * 100).toFixed(1) : '—';
-
-            const detectorRows = DETECTOR_NAMES.map(name => {
-                const hist = detectorHistory[name] || [];
-                const fires = hist.length;
-                if (fires === 0) {
-                    return { name, fires: 0, hitPct: '—', edge: '—', edgeClass: 'edge-neu', gap: '—' };
-                }
-                const hits = hist.filter(h => h.correct).length;
-                const hitRate = (hits / fires) * 100;
-                const edge = hitRate - 50;
-                const edgeClass = edge > 2 ? 'edge-pos' : edge < -2 ? 'edge-neg' : 'edge-neu';
-
-                const correctEntries = hist.filter(h => h.correct);
-                const wrongEntries = hist.filter(h => !h.correct);
-                const avgConfC = correctEntries.length > 0
-                    ? correctEntries.reduce((a, b) => a + b.confidence, 0) / correctEntries.length
-                    : 0;
-                const avgConfW = wrongEntries.length > 0
-                    ? wrongEntries.reduce((a, b) => a + b.confidence, 0) / wrongEntries.length
-                    : 0;
-                const gap = correctEntries.length > 0 && wrongEntries.length > 0
-                    ? (avgConfC - avgConfW).toFixed(1)
-                    : '—';
-
-                return {
-                    name,
-                    fires,
-                    hitPct: hitRate.toFixed(1) + '%',
-                    edge: (edge >= 0 ? '+' : '') + edge.toFixed(1) + '%',
-                    edgeClass,
-                    gap
-                };
-            }).sort((a, b) => parseFloat(b.edge) - parseFloat(a.edge));
-
-            const calibrationRows = CALIBRATION_BANDS
-                .filter(b => b.count > 0)
-                .sort((a, b) => a.min - b.min)
-                .map(b => {
-                    const predicted = ((b.min + b.max) / 2).toFixed(0) + '%';
-                    const actual = ((b.correct / b.count) * 100).toFixed(1) + '%';
-                    const diff = ((b.correct / b.count) * 100) - ((b.min + b.max) / 2);
-                    const diffClass = Math.abs(diff) < 5 ? '' : diff > 0 ? 'pos' : 'neg';
-                    return { predicted, actual, count: b.count, diff: (diff >= 0 ? '+' : '') + diff.toFixed(1), diffClass };
-                });
-
-            let html = '';
-
-            html += `
-                <div class="metrics-section">
-                    <div class="metrics-section-title">Overall (all-time)</div>
-                    <div class="metric-row"><span class="name">Predictions logged</span><span class="val">${total}</span></div>
-                    <div class="metric-row"><span class="name">Correct</span><span class="val">${correct}</span></div>
-                    <div class="metric-row"><span class="name">Hit rate</span><span class="val">${acc}${total > 0 ? '%' : ''}</span></div>
-                </div>
-            `;
-
-            html += `
-                <div class="metrics-section">
-                    <div class="metrics-section-title">Detector Reliability (last ${DETECTOR_WINDOW} fires)</div>
-                    <table class="detector-table">
-                        <thead>
-                            <tr>
-                                <th>DETECTOR</th>
-                                <th>HIT%</th>
-                                <th>EDGE</th>
-                                <th>FIRES</th>
-                                <th>CONF GAP</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            detectorRows.forEach(r => {
-                html += `
-                    <tr>
-                        <td>${r.name}</td>
-                        <td>${r.hitPct}</td>
-                        <td class="${r.edgeClass}">${r.edge}</td>
-                        <td>${r.fires}</td>
-                        <td>${r.gap}</td>
-                    </tr>
-                `;
-            });
-            html += `</tbody></table></div>`;
-
-            if (calibrationRows.length > 0) {
-                html += `
-                    <div class="metrics-section">
-                        <div class="metrics-section-title">Calibration (predicted vs actual)</div>
-                        <table class="detector-table">
-                            <thead>
-                                <tr>
-                                    <th>BAND</th>
-                                    <th>ACTUAL</th>
-                                    <th>DIFF</th>
-                                    <th>SAMPLES</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                `;
-                calibrationRows.forEach(r => {
-                    html += `
-                        <tr>
-                            <td>${r.predicted}</td>
-                            <td>${r.actual}</td>
-                            <td class="${r.diffClass}">${r.diff}</td>
-                            <td>${r.count}</td>
-                        </tr>
-                    `;
-                });
-                html += `</tbody></table></div>`;
-            } else {
-                html += `
-                    <div class="metrics-section">
-                        <div class="metrics-section-title">Calibration</div>
-                        <div class="metric-row"><span class="name">Not enough data</span><span class="val">—</span></div>
-                    </div>
-                `;
-            }
-
-            inner.innerHTML = html;
-        }
-
-        // ========== RECORD RESULT ==========
-        function recordResult(r) {
-            if (lastPrediction) {
-                const wasCorrect = (lastPrediction === r);
-
-                const attributionDetectors = [
-                    detectPatterns(),
-                    detectStreakBias(),
-                    detectZigzagBias(),
-                    detectFrequencyBias(),
-                    detectRecentBias()
-                ].filter(d => d !== null);
-
-                attributionDetectors.forEach(d => {
-                    const hist = detectorHistory[d.name] || [];
-                    hist.push({
-                        prediction: d.prediction,
-                        confidence: d.confidence,
-                        actual: r,
-                        correct: (d.prediction === r)
-                    });
-                    if (hist.length > DETECTOR_WINDOW) hist.shift();
-                    detectorHistory[d.name] = hist;
-                });
-
-                predictionHistory.push({
-                    prediction: lastPrediction,
-                    actual: r,
-                    correct: wasCorrect,
-                    confidence: lastPredictionConfidence,
-                    timestamp: Date.now()
-                });
-
-                if (lastPrediction === 'P') {
-                    patternAccuracy.P.total++;
-                    if (wasCorrect) patternAccuracy.P.correct++;
-                } else if (lastPrediction === 'B') {
-                    patternAccuracy.B.total++;
-                    if (wasCorrect) patternAccuracy.B.correct++;
-                }
-                overallAccuracy.total++;
-                if (wasCorrect) overallAccuracy.correct++;
-
-                localStorage.setItem('bt_prediction_history', JSON.stringify(predictionHistory));
-                localStorage.setItem('bt_detector_history', JSON.stringify(detectorHistory));
-
-                results.push(wasCorrect ? 'W' : 'L');
-                if (wasCorrect) { wins++; detailedHistory.push({ type: 'win', wasSkip: false }); }
-                else { losses++; detailedHistory.push({ type: 'loss', wasSkip: false }); }
-            } else {
-                results.push('');
-                skips++;
-                detailedHistory.push({ type: 'skip', wasSkip: true });
-            }
-
-            sequence.push(r);
-            rebuildCalibration();
-            saveAndUpdate();
-        }
-
-        function undo() {
-            if (sequence.length === 0) return;
-
-            if (predictionHistory.length > 0) {
-                const lastPred = predictionHistory[predictionHistory.length - 1];
-
-                if (lastPred.prediction === 'P') {
-                    patternAccuracy.P.total--;
-                    if (lastPred.correct) patternAccuracy.P.correct--;
-                } else if (lastPred.prediction === 'B') {
-                    patternAccuracy.B.total--;
-                    if (lastPred.correct) patternAccuracy.B.correct--;
-                }
-                overallAccuracy.total--;
-                if (lastPred.correct) overallAccuracy.correct--;
-
-                predictionHistory.pop();
-                localStorage.setItem('bt_prediction_history', JSON.stringify(predictionHistory));
-            }
-
-            DETECTOR_NAMES.forEach(name => {
-                const hist = detectorHistory[name] || [];
-                if (hist.length > 0) hist.pop();
-                detectorHistory[name] = hist;
-            });
-            localStorage.setItem('bt_detector_history', JSON.stringify(detectorHistory));
-
-            sequence.pop();
-            const lastResultData = results.pop();
-            detailedHistory.pop();
-
-            if (lastResultData === 'W') wins--;
-            else if (lastResultData === 'L') losses--;
-            else if (lastResultData === '') skips--;
-
-            rebuildCalibration();
-            saveAndUpdate();
-        }
-
-        function resetAll() {
-            if (confirm("Reset all data?")) {
-                sequence = [];
-                results = [];
-                lastPrediction = null;
-                lastPredictionConfidence = 0;
-                detailedHistory = [];
-                predictionHistory = [];
-                overallAccuracy = { correct: 0, total: 0 };
-                patternAccuracy = { P: { correct: 0, total: 0 }, B: { correct: 0, total: 0 } };
-                detectorHistory = {};
-                DETECTOR_NAMES.forEach(name => { detectorHistory[name] = []; });
-                wins = 0;
-                losses = 0;
-                skips = 0;
-
-                localStorage.removeItem('bt_sequence');
-                localStorage.removeItem('bt_results');
-                localStorage.removeItem('bt_detailed');
-                localStorage.removeItem('bt_prediction_history');
-                localStorage.removeItem('bt_detector_history');
-
-                window.location.reload();
-            }
-        }
-
-        function saveAndUpdate() {
-            localStorage.setItem('bt_sequence', JSON.stringify(sequence));
-            localStorage.setItem('bt_results', JSON.stringify(results));
-            localStorage.setItem('bt_detailed', JSON.stringify(detailedHistory));
-            updateHistory();
-            updatePredictionBox();
-        }
-
-        if (sequence.length > 0 || results.length > 0) {
-            results.forEach(r => { if (r === 'W') wins++; else if (r === 'L') losses++; else if (r === '') skips++; });
-        }
-
-        updateHistory();
-        updatePredictionBox();
-        rebuildCalibration();
-        updateMetricsPanel();
-
-        /* =========================================================
-           LIVE FEED OVERLAY — WebSocket (wss://) or HTTP polling (https://)
-           ========================================================= */
-
-        const apiOverlay = document.getElementById('apiOverlay');
-        const apiUrlInput = document.getElementById('apiUrlInput');
-        const apiKeyInput = document.getElementById('apiKeyInput');
-        const apiStatus = document.getElementById('apiStatus');
-        const ovCancel = document.getElementById('ovCancel');
-        const ovConfirm = document.getElementById('ovConfirm');
-        const liveBadge = document.getElementById('liveBadge');
-        const liveBadgeText = document.getElementById('liveBadgeText');
-
-        let liveConfig = JSON.parse(localStorage.getItem('bt_live_feed')) || null;
-        let liveSocket = null;
-        let livePollTimer = null;
-        let liveHttpLast = null;
-        let liveReconnectTimer = null;
-        let liveConnected = false;
-        let liveResultBuffer = '';
-
-        function openApiOverlay() {
-            apiStatus.textContent = '';
-            apiStatus.className = 'status';
-            if (liveConfig) {
-                apiUrlInput.value = liveConfig.url || '';
-                apiKeyInput.value = liveConfig.key || '';
-            }
-            apiOverlay.classList.add('show');
-        }
-
-        function closeApiOverlay() {
-            apiOverlay.classList.remove('show');
-        }
-
-        function setStatus(msg, type) {
-            apiStatus.textContent = msg;
-            apiStatus.className = 'status' + (type ? ' ' + type : '');
-        }
-
-        function showLiveBadge(show, label) {
-            liveBadge.classList.toggle('show', show);
-            if (label) liveBadgeText.textContent = label;
-        }
-
-        function disconnectLive() {
-            liveConnected = false;
-            if (liveSocket) {
-                try { liveSocket.close(); } catch (e) {}
-                liveSocket = null;
-            }
-            if (livePollTimer) {
-                clearInterval(livePollTimer);
-                livePollTimer = null;
-            }
-            if (liveReconnectTimer) {
-                clearTimeout(liveReconnectTimer);
-                liveReconnectTimer = null;
-            }
-            showLiveBadge(false);
-        }
-
-        // Parse any payload (string or object) for a P/B result
-        function extractResult(data) {
-            if (data === null || data === undefined) return null;
-
-            if (typeof data === 'string') {
-                const s = data.trim();
-                if (!s) return null;
-
-                // Try parsing as JSON first
-                if (s.startsWith('{') || s.startsWith('[')) {
-                    try {
-                        const parsed = JSON.parse(s);
-                        const r = extractResult(parsed);
-                        if (r) return r;
-                    } catch (e) {}
-                }
-
-                // Direct single-letter
-                if (s === 'P' || s === 'PLAYER' || s === 'Player' || s === 'player') return 'P';
-                if (s === 'B' || s === 'BANKER' || s === 'Banker' || s === 'banker') return 'B';
-
-                // Search for embedded tokens in GraphQL / streamed text
-                // e.g. "winner":"Player" or result":"B"
-                const playerMatch = /"(?:winner|result|outcome|side|value|choice)"\s*:\s*"(?:player|p)"/i.exec(s);
-                if (playerMatch) return 'P';
-                const bankerMatch = /"(?:winner|result|outcome|side|value|choice)"\s*:\s*"(?:banker|b)"/i.exec(s);
-                if (bankerMatch) return 'B';
-
-                return null;
-            }
-
-            if (typeof data === 'object') {
-                const candidates = [
-                    data.result, data.outcome, data.winner, data.value,
-                    data.last, data.current, data.latest, data.hand,
-                    data.side, data.choice, data.winningSide, data.win
-                ];
-                for (const c of candidates) {
-                    const r = extractResult(c);
-                    if (r) return r;
-                }
-                if (Array.isArray(data.results) && data.results.length > 0) {
-                    return extractResult(data.results[data.results.length - 1]);
-                }
-                if (Array.isArray(data.history) && data.history.length > 0) {
-                    return extractResult(data.history[data.history.length - 1]);
-                }
-                if (Array.isArray(data.data) && data.data.length > 0) {
-                    return extractResult(data.data[data.data.length - 1]);
-                }
-                if (data.payload) return extractResult(data.payload);
-                if (data.message) return extractResult(data.message);
-                if (data.data && typeof data.data === 'object') return extractResult(data.data);
-            }
-            return null;
-        }
-
-        // Track last recorded result to avoid duplicates
-        let lastRecordedResult = null;
-
-        function feedIncomingResult(result) {
-            if (!result) return;
-            if (result === lastRecordedResult) return;
-            lastRecordedResult = result;
-            recordResult(result);
-            setStatus('Recorded: ' + (result === 'P' ? 'PLAYER' : 'BANKER'), 'ok');
-        }
-
-        // ===== WebSocket mode =====
-        function connectWebSocket(url) {
-            try {
-                liveSocket = new WebSocket(url);
-            } catch (e) {
-                setStatus('WebSocket error: ' + e.message, 'err');
-                liveConnected = false;
-                showLiveBadge(false);
-                return;
-            }
-
-            liveSocket.onopen = () => {
-                liveConnected = true;
-                setStatus('WebSocket connected. Listening...', 'ok');
-                showLiveBadge(true, 'LIVE WS CONNECTED');
-            };
-
-            liveSocket.onmessage = (evt) => {
-                let data = evt.data;
-                // Handle Blob payloads
-                if (data instanceof Blob) {
-                    data.text().then(txt => {
-                        const r = extractResult(txt);
-                        if (r) feedIncomingResult(r);
-                    }).catch(() => {});
-                    return;
-                }
-                const r = extractResult(data);
-                if (r) feedIncomingResult(r);
-            };
-
-            liveSocket.onerror = () => {
-                setStatus('WebSocket error.', 'err');
-            };
-
-            liveSocket.onclose = () => {
-                liveConnected = false;
-                showLiveBadge(false);
-                setStatus('WebSocket closed. Reconnecting in 5s...', 'err');
-                if (liveConfig) {
-                    liveReconnectTimer = setTimeout(() => {
-                        if (!liveConnected) connectWebSocket(liveConfig.url);
-                    }, 5000);
-                }
-            };
-        }
-
-        // ===== HTTP polling mode (kept as fallback) =====
-        async function pollHttp() {
-            if (!liveConfig || !liveConnected) return;
-            try {
-                const headers = {};
-                if (liveConfig.key) {
-                    headers['Authorization'] = liveConfig.key.startsWith('Bearer ')
-                        ? liveConfig.key
-                        : 'Bearer ' + liveConfig.key;
-                }
-                const res = await fetch(liveConfig.url, { headers, cache: 'no-store' });
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                const text = await res.text();
-                const r = extractResult(text);
-                if (r) feedIncomingResult(r);
-            } catch (err) {
-                setStatus('HTTP error: ' + err.message, 'err');
-            }
-        }
-
-        function startHttpPolling() {
-            if (livePollTimer) clearInterval(livePollTimer);
-            liveConnected = true;
-            livePollTimer = setInterval(pollHttp, 3000);
-            pollHttp();
-            showLiveBadge(true, 'LIVE HTTP CONNECTED');
-        }
-
-        ovCancel.addEventListener('click', closeApiOverlay);
-
-        ovConfirm.addEventListener('click', () => {
-            const url = apiUrlInput.value.trim();
-            const key = apiKeyInput.value.trim();
-
-            if (!url) {
-                setStatus('Please enter a feed URL.', 'err');
-                return;
-            }
-
-            const isWs = /^wss?:\/\//i.test(url);
-            const isHttp = /^https?:\/\//i.test(url);
-
-            if (!isWs && !isHttp) {
-                setStatus('URL must start with wss://, ws://, https:// or http://', 'err');
-                return;
-            }
-
-            // Tear down any existing connection
-            disconnectLive();
-
-            liveConfig = { url, key, mode: isWs ? 'ws' : 'http' };
-            localStorage.setItem('bt_live_feed', JSON.stringify(liveConfig));
-            lastRecordedResult = null;
-
-            if (isWs) {
-                setStatus('Connecting WebSocket...', '');
-                connectWebSocket(url);
-            } else {
-                setStatus('Starting HTTP polling...', '');
-                startHttpPolling();
-            }
-
-            closeApiOverlay();
         });
-
-        liveBadge.addEventListener('click', () => {
-            openApiOverlay();
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'wheel-overlay';
+        const containerDiv = document.createElement('div');
+        containerDiv.className = 'wheel-container';
+        const closeBtn = document.createElement('div');
+        closeBtn.className = 'close-wheel-btn';
+        closeBtn.innerHTML = '✕';
+        closeBtn.addEventListener('click', () => { overlay.remove(); overlayVisible = false; });
+        const title = document.createElement('div');
+        title.className = 'wheel-title';
+        title.innerText = `PREDICTION: ${mainPredRaw}  |  +2 NEIGHBORS `;
+        const trackDiv = document.createElement('div');
+        trackDiv.className = 'track-container';
+        
+        const numbersDivs = [];
+        const redSet = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+        
+        function positionNumbers() {
+            const rect = trackDiv.getBoundingClientRect();
+            const containerWidth = rect.width;
+            const containerHeight = rect.height;
+            const centerX = containerWidth / 2;
+            const centerY = containerHeight / 2;
+            const radiusX = containerWidth * 0.42;
+            const radiusY = containerHeight * 0.42;
+            
+            wheelNumbers.forEach((num, i) => {
+                const angle = (i / wheelNumbers.length) * 2 * Math.PI + Math.PI;
+                const x = centerX + radiusX * Math.cos(angle) - (numbersDivs[i]?.offsetWidth / 2 || 22);
+                const y = centerY + radiusY * Math.sin(angle) - (numbersDivs[i]?.offsetHeight / 2 || 22);
+                if (numbersDivs[i]) {
+                    numbersDivs[i].style.left = `${x}px`;
+                    numbersDivs[i].style.top = `${y}px`;
+                }
+            });
+        }
+        
+        wheelNumbers.forEach((num, i) => {
+            const div = document.createElement('div');
+            div.classList.add('num');
+            div.textContent = num;
+            if (num === 0) div.classList.add('green');
+            else if (redSet.has(num)) div.classList.add('red');
+            else div.classList.add('black');
+            trackDiv.appendChild(div);
+            numbersDivs.push(div);
         });
+        
+        centerIndices.forEach(idx => numbersDivs[idx]?.classList.add('center'));
+        neighborIndicesSet.forEach(idx => {
+            if (!centerIndices.includes(idx)) numbersDivs[idx]?.classList.add('neighbor');
+        });
+        
+        const note = document.createElement('div');
+        note.className = 'wheel-note';
+        note.innerHTML = '💗 <strong style="color:#FF69B4">PINK</strong> = Main Predicted Numbers &nbsp;&nbsp; 💛 <strong style="color:#FFD966">Yellow</strong> = +2 Neighbors on Wheel';
+        
+        containerDiv.appendChild(closeBtn);
+        containerDiv.appendChild(title);
+        containerDiv.appendChild(trackDiv);
+        containerDiv.appendChild(note);
+        overlay.appendChild(containerDiv);
+        document.body.appendChild(overlay);
+        overlayVisible = true;
+        
+        const resizeObserver = new ResizeObserver(() => positionNumbers());
+        resizeObserver.observe(trackDiv);
+        setTimeout(positionNumbers, 10);
+        
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                resizeObserver.disconnect();
+                overlay.remove();
+                overlayVisible = false;
+            }
+        });
+        closeBtn.addEventListener('click', () => {
+            resizeObserver.disconnect();
+            overlay.remove();
+            overlayVisible = false;
+        });
+    }
 
-        // Auto-resume a previously saved feed
-        if (liveConfig && liveConfig.url) {
-            if (liveConfig.mode === 'ws' || /^wss?:\/\//i.test(liveConfig.url)) {
-                connectWebSocket(liveConfig.url);
-            } else if (/^https?:\/\//i.test(liveConfig.url)) {
-                startHttpPolling();
+    // ==================== UI REFRESH ====================
+    function scrollToTop(container) {
+        if (container) container.scrollTop = 0;
+    }
+
+    function refreshUI() {
+        spinContainer.innerHTML = '';
+        [...spinHistory].reverse().forEach(spin => {
+            const item = document.createElement('div');
+            item.className = 'spin-item';
+            item.innerText = spin;
+            spinContainer.appendChild(item);
+        });
+        spinCountSpan.innerText = spinHistory.length;
+        scrollToTop(spinContainer);
+        
+        groupContainer.innerHTML = '';
+        groupHistory.forEach(grp => {
+            const gItem = document.createElement('div');
+            gItem.className = 'group-item';
+            gItem.innerText = grp;
+            groupContainer.appendChild(gItem);
+        });
+        groupCountSpan.innerText = groupHistory.length;
+        if (groupContainer) groupContainer.scrollTop = groupContainer.scrollHeight;
+        
+        analiz();
+        showWheelOverlay();
+    }
+
+    // ==================== ADD SPIN ====================
+    function addSpin(number) {
+        spinHistory.push(number);
+        
+        const groups = groupsPerNumber[number];
+        if (groups && groups.length) {
+            for (let g of groups) {
+                groupHistory.push(g);
             }
         } else {
-            setTimeout(openApiOverlay, 600);
+            groupHistory.push(`ERR-${number}`);
         }
+        
+        refreshUI();
+        
+        const spinItems = spinContainer.querySelectorAll('.spin-item');
+        if (spinItems.length > 0) {
+            spinItems[0].classList.add('spin-item-new');
+            setTimeout(() => spinItems[0].classList.remove('spin-item-new'), 450);
+        }
+        
+        predBox.classList.add('prediction-flash');
+        setTimeout(() => predBox.classList.remove('prediction-flash'), 250);
+    }
 
-        window.openApiOverlay = openApiOverlay;
-        window.disconnectLive = disconnectLive;
-    </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"45a606eccca84059b53fcc46a592a23b","r":1,"spa":2}' crossorigin="anonymous"></script>
+    // ==================== RESET FUNCTIONS ====================
+    function hardResetFullReload() {
+        window.location.reload();
+    }
+
+    // ==================== BUILD NUMBER PAD ====================
+    function buildNumberPad() {
+        numbersGrid.innerHTML = '';
+        const redNumbers = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+        
+        for (let i = 1; i <= 36; i++) {
+            const btn = document.createElement('button');
+            btn.innerText = i;
+            btn.className = 'num-btn';
+            if (redNumbers.has(i)) {
+                btn.classList.add('red-num');
+            } else {
+                btn.classList.add('black-num');
+            }
+            btn.addEventListener('click', (function(val) { 
+                return () => {
+                    btn.classList.add('btn-flash');
+                    setTimeout(() => btn.classList.remove('btn-flash'), 120);
+                    addSpin(val);
+                };
+            })(i));
+            numbersGrid.appendChild(btn);
+        }
+    }
+
+    // ==================== INTERNAL REFRESH ====================
+    function triggerInternalRefresh() {
+        if (!appContainer) return;
+        appContainer.classList.remove('internal-refresh-active');
+        void appContainer.offsetWidth;
+        appContainer.classList.add('internal-refresh-active');
+        setTimeout(() => {
+            if (appContainer) appContainer.classList.remove('internal-refresh-active');
+        }, 280);
+    }
+
+    function setupInternalRefresh() {
+        document.body.addEventListener('click', (e) => {
+            const resetBtn = document.getElementById('clearAllBtn');
+            if (resetBtn && (e.target === resetBtn || resetBtn.contains(e.target))) {
+                return;
+            }
+            triggerInternalRefresh();
+        });
+    }
+
+    // ==================== EVENT LISTENERS ====================
+    zeroButton.addEventListener('click', () => {
+        zeroButton.classList.add('zero-flash');
+        setTimeout(() => zeroButton.classList.remove('zero-flash'), 120);
+        addSpin(0);
+    });
+
+    clearBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        hardResetFullReload();
+    });
+
+    // ==================== INITIALIZATION ====================
+    buildNumberPad();
+    
+    spinHistory = [];
+    groupHistory = [];
+    refreshUI();
+    mainPredictionSpan.innerText = "———";
+    
+    setupInternalRefresh();
+</script>
 </body>
 </html>
