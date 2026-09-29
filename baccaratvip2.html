@@ -113,7 +113,6 @@
             padding: 20px;
         }
 
-        /* INTERNAL REFRESH VISUAL EFFECT */
         .internal-refresh-active {
             animation: internalRefreshPulse 0.28s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
         }
@@ -470,7 +469,7 @@
             .history-col, .group-col { height: auto; min-height: 180px; }
         }
 
-        /* ==================== PROVIDER PICKER OVERLAY ==================== */
+        /* ==================== PROVIDER PICKER (TEXT-ONLY) ==================== */
         .provider-picker-overlay {
             position: fixed;
             top: 0;
@@ -486,7 +485,7 @@
             justify-content: center;
             padding: 24px;
             animation: fadeInOverlay 0.35s ease;
-            gap: 22px;
+            gap: 28px;
             overflow-y: auto;
         }
         @keyframes fadeInOverlay {
@@ -494,114 +493,62 @@
             to { opacity: 1; backdrop-filter: blur(12px); }
         }
         .provider-picker-title {
-            font-size: clamp(0.75rem, 3.5vw, 1rem);
+            font-size: clamp(0.85rem, 4vw, 1.15rem);
             font-weight: 800;
-            letter-spacing: 4px;
+            letter-spacing: 5px;
             color: #C9B3FF;
             text-transform: uppercase;
             text-align: center;
             background: rgba(157,106,245,0.2);
-            padding: 8px 28px;
+            padding: 10px 32px;
             border-radius: 60px;
             border: 1px solid rgba(157,106,245,0.5);
             backdrop-filter: blur(4px);
         }
         .provider-picker-sub {
-            font-size: 0.55rem;
+            font-size: 0.6rem;
             font-weight: 600;
-            letter-spacing: 2px;
+            letter-spacing: 2.5px;
             color: #8A7ACC;
             text-align: center;
-            margin-top: -12px;
+            margin-top: -14px;
             text-transform: uppercase;
         }
-        .provider-cards-row {
-            display: flex;
-            gap: 22px;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-        }
-        .provider-card {
-            width: min(340px, 88vw);
-            background: linear-gradient(145deg, #12172B, #0A0E1F);
-            border: 2px solid rgba(157, 106, 245, 0.55);
-            border-radius: 24px;
-            padding: 18px 18px 20px;
-            cursor: pointer;
-            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        .provider-buttons-stack {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 14px 28px rgba(0,0,0,0.55);
+            gap: 18px;
+            width: min(380px, 88vw);
         }
-        .provider-card:hover {
-            transform: translateY(-4px) scale(1.015);
-            border-color: #C9B3FF;
-            box-shadow: 0 18px 42px rgba(157,106,245,0.55), 0 0 0 1px rgba(201,179,255,0.4);
-        }
-        .provider-card:active {
-            transform: translateY(-1px) scale(0.995);
-        }
-        .provider-card-name {
-            font-size: 1.05rem;
+        .provider-btn {
+            width: 100%;
+            padding: 22px 28px;
+            border-radius: 20px;
+            background: linear-gradient(145deg, #12172B, #0A0E1F);
+            border: 2px solid rgba(157, 106, 245, 0.55);
+            color: #E8DBFF;
+            font-family: 'Inter', sans-serif;
             font-weight: 900;
-            letter-spacing: 3px;
-            background: linear-gradient(135deg, #C9B3FF, #9D6AF5);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            font-size: clamp(0.95rem, 3.6vw, 1.15rem);
+            letter-spacing: 4px;
             text-transform: uppercase;
-        }
-        .provider-card-sub {
-            font-size: 0.55rem;
-            font-weight: 600;
-            letter-spacing: 1.5px;
-            color: #8A7ACC;
-            text-transform: uppercase;
-            margin-top: -6px;
-        }
-        .provider-wheel-preview {
-            width: 100%;
-            height: 140px;
-            border-radius: 14px;
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 6px;
-        }
-        .preview-evolution {
-            background: radial-gradient(ellipse at center, #6B1A1A 0%, #3A0C0C 70%, #250808 100%);
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.75);
-        }
-        .preview-pragmatic {
-            background: radial-gradient(ellipse at center, #223258 0%, #131E38 70%, #0A1120 100%);
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.75);
-        }
-        .provider-btn-pick {
-            width: 100%;
-            padding: 10px;
-            border-radius: 35px;
-            font-weight: 800;
-            font-size: 0.7rem;
-            letter-spacing: 2px;
-            border: 1px solid rgba(157, 106, 245, 0.7);
-            background: linear-gradient(145deg, #2D1F3A, #1A1225);
-            color: #D9C8FF;
             cursor: pointer;
-            text-transform: uppercase;
-            transition: 0.1s linear;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.55);
+            text-align: center;
         }
-        .provider-card:hover .provider-btn-pick {
-            background: linear-gradient(145deg, #9D6AF5, #7B4FDD);
-            color: #0A0E1A;
+        .provider-btn:hover {
+            transform: translateY(-3px) scale(1.015);
             border-color: #C9B3FF;
+            background: linear-gradient(145deg, #1E2544, #10162E);
+            box-shadow: 0 16px 38px rgba(157,106,245,0.6), 0 0 0 1px rgba(201,179,255,0.5);
+            color: #FFFFFF;
+        }
+        .provider-btn:active {
+            transform: translateY(-1px) scale(0.99);
         }
 
-        /* ==================== WHEEL OVERLAY (STADIUM TRACK) ==================== */
+        /* ==================== PREDICTION WHEEL OVERLAY ==================== */
         .wheel-overlay {
             position: fixed;
             top: 0;
@@ -616,7 +563,7 @@
             justify-content: center;
             font-family: 'Inter', sans-serif;
             animation: fadeInOverlay 0.25s ease;
-            padding: 14px;
+            padding: 12px;
             overflow: hidden;
         }
         .wheel-container {
@@ -663,7 +610,7 @@
             font-weight: 800;
             letter-spacing: 1.6px;
             color: #C9B3FF;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             text-transform: uppercase;
             background: rgba(157,106,245,0.2);
             display: inline-block;
@@ -676,98 +623,65 @@
             white-space: nowrap;
         }
 
-        /* The stadium wrapper: sized dynamically via JS. The inner is scaled to fit. */
-        .stadium-wrap {
+        /* Racetrack wrapper — sizes dynamically via JS scale */
+        .racetrack-wrap {
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
             overflow: hidden;
         }
-        /* Design-space container: fixed 1200x420, scaled via CSS transform */
-        .stadium-stage {
-            position: relative;
-            width: 1200px;
-            height: 420px;
-            transform-origin: center center;
-        }
-        /* Felt stadium background */
-        .stadium-bg {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 1140px;
-            height: 360px;
-            border-radius: 180px;
-            overflow: hidden;
-        }
-        .stadium-bg.evo {
-            background: radial-gradient(ellipse at center, #5E1A1A 0%, #3A0C0C 70%, #1E0505 100%);
-            box-shadow:
-                inset 0 0 90px rgba(0,0,0,0.85),
-                0 0 0 4px #7A5528,
-                0 0 0 6px #3A2410,
-                0 0 40px rgba(0,0,0,0.7);
-        }
-        .stadium-bg.prag {
-            background: radial-gradient(ellipse at center, #223258 0%, #131E38 70%, #070D1C 100%);
-            box-shadow:
-                inset 0 0 90px rgba(0,0,0,0.85),
-                0 0 0 4px #3A5A88,
-                0 0 0 6px #16223A,
-                0 0 40px rgba(0,0,0,0.7);
-        }
-        /* Inner empty oval window */
-        .stadium-inner {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 900px;
-            height: 170px;
-            border-radius: 90px;
-            background: rgba(0,0,0,0.55);
-            box-shadow: inset 0 0 60px rgba(0,0,0,0.9);
-            z-index: 1;
+        .racetrack-svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 60vh;
+            filter: drop-shadow(0 12px 28px rgba(0,0,0,0.9));
         }
 
-        /* Number tiles */
-        .oval-tile {
-            position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Inter', monospace;
+        /* --- SVG tile styles (matches reference) --- */
+        .tile-path {
+            stroke: #b39b82;
+            stroke-width: 1.1px;
+            transition: filter 0.12s ease, stroke 0.12s ease, fill 0.12s ease;
+        }
+        .tile-text {
+            fill: #ebdcd0;
+            font-weight: 700;
+            font-size: 25px;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+            font-family: 'Inter', system-ui, sans-serif;
+            letter-spacing: -0.02em;
+        }
+        .racetrack-outline {
+            fill: none;
+            stroke: #c2ac97;
+            stroke-width: 1.5px;
+            pointer-events: none;
+        }
+        /* Highlight classes applied on top of the base fill */
+        .tile-path.hl-center {
+            fill: #FF69B4 !important;
+            stroke: #FFFFFF !important;
+            stroke-width: 2px !important;
+            filter: drop-shadow(0 0 10px rgba(255,105,180,0.95));
+        }
+        .tile-path.hl-neighbor {
+            fill: #FFD966 !important;
+            stroke: #FFF2C0 !important;
+            stroke-width: 1.8px !important;
+            filter: drop-shadow(0 0 8px rgba(255,217,102,0.9));
+        }
+        .tile-text.hl-dark {
+            fill: #0A0E1A;
             font-weight: 900;
-            color: #FFFFFF;
-            text-shadow: 0 1px 1px rgba(0,0,0,0.7);
-            border-radius: 3px;
-            z-index: 3;
-            transition: box-shadow 0.15s ease;
-            transform-origin: center center;
-        }
-        .oval-tile.red    { background: #B71C1C; border: 1px solid #7A0F0F; }
-        .oval-tile.black  { background: #0E0E10; border: 1px solid #2A2A2E; }
-        .oval-tile.green  { background: #0E8F3A; border: 1px solid #075A25; }
-        .oval-tile.center {
-            background: #FF69B4 !important;
-            color: #0A0E1A !important;
-            box-shadow: 0 0 22px rgba(255,105,180,0.95), 0 0 4px rgba(255,105,180,1);
-            z-index: 6;
-            border-color: #FFFFFF !important;
-        }
-        .oval-tile.neighbor {
-            background: #FFD966 !important;
-            color: #0A0E1A !important;
-            box-shadow: 0 0 16px rgba(255,217,102,0.9);
-            z-index: 5;
-            border-color: #FFF2C0 !important;
         }
 
         .wheel-note {
             text-align: center;
-            margin-top: 12px;
+            margin-top: 10px;
             font-size: clamp(0.5rem, 2.1vw, 0.6rem);
             font-weight: 600;
             color: #B88AFF;
@@ -845,7 +759,7 @@
 </div>
 
 <script>
-    // ==================== GROUPS MAPPING (Each number belongs to 3-5 groups) ====================
+    // ==================== GROUPS MAPPING ====================
     const groupsPerNumber = {
         0: ["0-10-20-30", "3-13-23-33", "6-16-26-36", "2-12-22-32", "5-15-25-35"],
         1: ["0-10-20-30", "3-13-23-33", "6-16-26-36", "1-11-21-31", "4-14-24-34"],
@@ -897,8 +811,8 @@
     let hitCount = 0;
     let missCount = 0;
 
-    // --- Chosen provider for wheel layout (set by picker overlay) ---
-    let chosenProvider = null; // "evolution" | "pragmatic"
+    // --- Chosen provider (only "evolution" used for now) ---
+    let chosenProvider = null;
 
     // DOM Elements
     const numbersGrid = document.getElementById('numbersGrid');
@@ -913,9 +827,8 @@
     const predBox = document.getElementById('predBox');
     const appContainer = document.getElementById('mainAppContainer');
 
-    // ==================== ENHANCED PREDICTION LOGIC (v2, original show-behavior) ====================
+    // ==================== ENHANCED PREDICTION LOGIC (v2) ====================
     function analiz() {
-        // ---- 0. HIT/MISS FEEDBACK ----
         if (lastPrediction && lastPredictionGroups.length > 0 && groupHistory.length > 0) {
             const evalWindow = groupHistory.slice(-lastPredictionGroups.length);
             const hit = evalWindow.some(g => g === lastPrediction);
@@ -925,7 +838,6 @@
             lastPredictionGroups = [];
         }
 
-        // ---- 1. EMPTY GUARD ----
         if (groupHistory.length === 0) {
             mainPredictionSpan.innerText = "———";
             alternativesContainer.innerHTML = `
@@ -938,11 +850,9 @@
             return;
         }
 
-        // ---- 2. NORMALIZE GROUP KEYS ----
         const norm = (g) => g.split('-').map(Number).sort((a, b) => a - b).join('-');
         const normalizedHistory = groupHistory.map(norm);
 
-        // ---- 3. WEIGHTED FREQUENCY WITH EXPONENTIAL RECENCY DECAY ----
         const startIdx = Math.max(0, normalizedHistory.length - 20);
         const lastGroups = normalizedHistory.slice(startIdx);
         const DECAY = 0.85;
@@ -954,7 +864,6 @@
             freqMap.set(g, (freqMap.get(g) || 0) + weight);
         });
 
-        // ---- 4. PATTERN MATCH WITH COUNT + RECENCY DECAY ----
         if (normalizedHistory.length >= 4) {
             const lastThree = normalizedHistory.slice(-3).join(',');
             const patternHits = [];
@@ -978,13 +887,11 @@
             }
         }
 
-        // ---- 5. SORT BY SCORE (stable tie-break) ----
         const sorted = Array.from(freqMap.entries()).sort((a, b) => {
             if (b[1] !== a[1]) return b[1] - a[1];
             return a[0].localeCompare(b[0]);
         });
 
-        // ---- 6. DEDUPLICATE ALTERNATIVES BY NUMBER OVERLAP ----
         const selected = [];
         const selectedNums = [];
         for (const [grp, score] of sorted) {
@@ -996,7 +903,6 @@
             if (selected.length === 5) break;
         }
 
-        // ---- 7. MAIN PREDICTION (always show top) ----
         if (selected.length === 0) {
             mainPredictionSpan.innerText = "———";
         } else {
@@ -1005,7 +911,6 @@
             lastPredictionGroups = [selected[0][0]];
         }
 
-        // ---- 8. RENDER ALTERNATIVES ----
         alternativesContainer.innerHTML = '';
         for (let i = 0; i < 5; i++) {
             const groupValue = (i < selected.length) ? selected[i][0] : '———';
@@ -1016,31 +921,11 @@
         }
     }
 
-    // ==================== WHEEL SEQUENCE ====================
+    // ==================== PHYSICAL WHEEL ORDER ====================
+    // Standard single-zero European wheel (clockwise).
     const wheelNumbers = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
-    const redSet = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
 
-    // Provider-specific track orderings — the visual sequence around the stadium.
-    // Both list numbers in the order they appear going clockwise around the stadium,
-    // starting right after 0.
-    //
-    // Evolution image reading (clockwise from 0 at right edge, below middle):
-    //   0 → 3 → 26 → 35 → 12 → 28 → 7 → 29 → 18 → 22 → 9 → 31 → 14 → 20 → 1 → 33 → 16 → 24
-    //   → 5 → 10 → 23 → 8 → 30 → 11 → 36 → 13 → 27 → 6 → 34 → 17 → 25 → 2 → 21 → 4 → 19 → 15 → 32 → back
-    const trackOrderEvolution = [
-        0, 3, 26, 35, 12, 28, 7, 29, 18, 22, 9, 31, 14, 20, 1, 33, 16, 24,
-        5, 10, 23, 8, 30, 11, 36, 13, 27, 6, 34, 17, 25, 2, 21, 4, 19, 15, 32
-    ];
-    //
-    // Pragmatic image reading (clockwise from 0 at left edge, above middle):
-    //   0 → 3 → 26 → 35 → 12 → 28 → 7 → 29 → 18 → 22 → 9 → 31 → 14 → 20 → 1 → 33 → 16 → 24
-    //   → 5 → 10 → 23 → 8 → 30 → 11 → 36 → 13 → 27 → 6 → 34 → 17 → 25 → 2 → 21 → 4 → 19 → 15 → 32 → back
-    const trackOrderPragmatic = [
-        0, 3, 26, 35, 12, 28, 7, 29, 18, 22, 9, 31, 14, 20, 1, 33, 16, 24,
-        5, 10, 23, 8, 30, 11, 36, 13, 27, 6, 34, 17, 25, 2, 21, 4, 19, 15, 32
-    ];
-
-    // ==================== PROVIDER PICKER OVERLAY ====================
+    // ==================== PROVIDER PICKER (TEXT ONLY) ====================
     function showProviderPicker() {
         const overlay = document.createElement('div');
         overlay.className = 'provider-picker-overlay';
@@ -1048,245 +933,40 @@
 
         const title = document.createElement('div');
         title.className = 'provider-picker-title';
-        title.innerText = '◈ SELECT WHEEL LAYOUT ◈';
+        title.innerText = '◈ SELECT WHEEL ◈';
 
         const sub = document.createElement('div');
         sub.className = 'provider-picker-sub';
-        sub.innerText = 'Choose provider skin for prediction overlay';
+        sub.innerText = 'Choose provider layout';
 
-        const row = document.createElement('div');
-        row.className = 'provider-cards-row';
+        const stack = document.createElement('div');
+        stack.className = 'provider-buttons-stack';
 
-        // --- Evolution card ---
-        const evoCard = document.createElement('div');
-        evoCard.className = 'provider-card';
-        evoCard.innerHTML = `
-            <div class="provider-card-name">EVOLUTION</div>
-            <div class="provider-card-sub">Red Felt · Gold Rim</div>
-            <div class="provider-wheel-preview preview-evolution" id="evoPreview"></div>
-            <button class="provider-btn-pick">SELECT EVOLUTION</button>
-        `;
-        evoCard.addEventListener('click', () => {
+        const evoBtn = document.createElement('button');
+        evoBtn.className = 'provider-btn';
+        evoBtn.innerText = 'EVOLUTION';
+        evoBtn.addEventListener('click', () => {
             chosenProvider = 'evolution';
             closePickerAndStart();
         });
 
-        // --- Pragmatic card ---
-        const pragCard = document.createElement('div');
-        pragCard.className = 'provider-card';
-        pragCard.innerHTML = `
-            <div class="provider-card-name">PRAGMATIC</div>
-            <div class="provider-card-sub">Navy Blue · Steel Rim</div>
-            <div class="provider-wheel-preview preview-pragmatic" id="pragPreview"></div>
-            <button class="provider-btn-pick">SELECT PRAGMATIC</button>
-        `;
-        pragCard.addEventListener('click', () => {
+        const pragBtn = document.createElement('button');
+        pragBtn.className = 'provider-btn';
+        pragBtn.innerText = 'PRAGMATIC';
+        pragBtn.addEventListener('click', () => {
+            // Pragmatic layout not wired yet — for now use Evolution so the
+            // prediction wheel still works, but remember the choice.
             chosenProvider = 'pragmatic';
             closePickerAndStart();
         });
 
-        row.appendChild(evoCard);
-        row.appendChild(pragCard);
+        stack.appendChild(evoBtn);
+        stack.appendChild(pragBtn);
 
         overlay.appendChild(title);
         overlay.appendChild(sub);
-        overlay.appendChild(row);
+        overlay.appendChild(stack);
         document.body.appendChild(overlay);
-
-        // Mini preview rendering
-        setTimeout(() => {
-            renderMiniPreview(document.getElementById('evoPreview'), 'evolution');
-            renderMiniPreview(document.getElementById('pragPreview'), 'pragmatic');
-        }, 30);
-    }
-
-    // Small stadium preview for the picker cards
-    function renderMiniPreview(container, provider) {
-        if (!container) return;
-        const wrapW = container.clientWidth;
-        const wrapH = container.clientHeight;
-
-        // Design space for the mini preview
-        const DS_W = 400;
-        const DS_H = 160;
-        const stage = document.createElement('div');
-        stage.style.position = 'relative';
-        stage.style.width = DS_W + 'px';
-        stage.style.height = DS_H + 'px';
-        stage.style.transformOrigin = 'center center';
-
-        const scale = Math.min(wrapW / DS_W, wrapH / DS_H);
-        stage.style.transform = `scale(${scale})`;
-        container.style.display = 'flex';
-        container.style.alignItems = 'center';
-        container.style.justifyContent = 'center';
-        container.appendChild(stage);
-
-        // Background
-        const bg = document.createElement('div');
-        bg.style.position = 'absolute';
-        bg.style.top = '50%';
-        bg.style.left = '50%';
-        bg.style.transform = 'translate(-50%,-50%)';
-        bg.style.width = '370px';
-        bg.style.height = '120px';
-        bg.style.borderRadius = '60px';
-        if (provider === 'evolution') {
-            bg.style.background = 'radial-gradient(ellipse at center, #5E1A1A 0%, #3A0C0C 70%, #1E0505 100%)';
-            bg.style.boxShadow = 'inset 0 0 40px rgba(0,0,0,0.85), 0 0 0 2px #7A5528';
-        } else {
-            bg.style.background = 'radial-gradient(ellipse at center, #223258 0%, #131E38 70%, #070D1C 100%)';
-            bg.style.boxShadow = 'inset 0 0 40px rgba(0,0,0,0.85), 0 0 0 2px #3A5A88';
-        }
-        stage.appendChild(bg);
-
-        // Inner window
-        const inner = document.createElement('div');
-        inner.style.position = 'absolute';
-        inner.style.top = '50%';
-        inner.style.left = '50%';
-        inner.style.transform = 'translate(-50%,-50%)';
-        inner.style.width = '290px';
-        inner.style.height = '58px';
-        inner.style.borderRadius = '30px';
-        inner.style.background = 'rgba(0,0,0,0.55)';
-        inner.style.zIndex = '1';
-        stage.appendChild(inner);
-
-        // Tiles
-        const order = provider === 'evolution' ? trackOrderEvolution : trackOrderPragmatic;
-        const positions = computeStadiumPositions(370, 120, order.length);
-        const tileW = 14;
-        const tileH = 22;
-        const fontSize = 9;
-
-        // For evolution, the sequence runs clockwise starting near right edge.
-        // For pragmatic, the sequence runs clockwise starting near left edge.
-        // Both layouts: same starting point index (position 0) but different offset.
-        for (let i = 0; i < order.length; i++) {
-            let posIndex = i;
-            if (provider === 'evolution') {
-                // Evolution: 0 at right edge below middle → shift so index 0 lands at right edge slightly below
-                posIndex = (i + Math.round(order.length * 0.08)) % order.length;
-            } else {
-                // Pragmatic: 0 at left edge above middle
-                posIndex = (i + Math.round(order.length * 0.58)) % order.length;
-            }
-            const p = positions[posIndex];
-            const num = order[i];
-
-            const t = document.createElement('div');
-            t.textContent = num;
-            t.style.position = 'absolute';
-            t.style.left = (p.x - tileW / 2) + 'px';
-            t.style.top = (p.y - tileH / 2) + 'px';
-            t.style.width = tileW + 'px';
-            t.style.height = tileH + 'px';
-            t.style.display = 'flex';
-            t.style.alignItems = 'center';
-            t.style.justifyContent = 'center';
-            t.style.fontSize = fontSize + 'px';
-            t.style.fontWeight = '900';
-            t.style.fontFamily = 'monospace';
-            t.style.color = '#fff';
-            t.style.borderRadius = '2px';
-            t.style.transform = `rotate(${p.angle}rad)`;
-            t.style.zIndex = '3';
-            if (num === 0) t.style.background = '#0E8F3A';
-            else if (redSet.has(num)) t.style.background = '#B71C1C';
-            else t.style.background = '#0E0E10';
-            stage.appendChild(t);
-        }
-    }
-
-    // ---- Stadium geometry helper ----
-    // Given a stadium width W, height H, and N tiles:
-    // Returns an array of {x, y, angle} for tile centers along the perimeter,
-    // walking clockwise starting from the top-left of the top straight section.
-    function computeStadiumPositions(W, H, N) {
-        // The tiles sit on a ring centered on the stadium perimeter.
-        // Ring is offset outward from the inner oval by a fixed margin.
-        const rectW = W - H;      // width of the straight section
-        const rectH = 0;          // pure stadium: straight sections are horizontal only
-        const radius = H / 2;     // end cap radius
-
-        // Perimeter = 2*straight + pi*H
-        const straightLen = rectW;
-        const capLen = Math.PI * radius;
-        const totalPerim = 2 * straightLen + 2 * capLen;
-
-        const step = totalPerim / N;
-        const positions = [];
-
-        // Starting point: top-left corner of the top straight, moving right (clockwise).
-        // We'll walk the perimeter and produce {x,y} in local coords (origin top-left).
-
-        // Center line of the ring is at:
-        //   top straight: y = radius (outer ring, top edge)
-        //   bottom straight: y = H - radius (outer ring, bottom edge)
-        // Actually, the ring is on the OUTER edge of the stadium:
-        //   top tiles centered on y = radius, offset so their outer edge is at y=0.
-        // We'll use center-of-stadium coordinates for smooth math.
-
-        const cx = W / 2;
-        const cy = H / 2;
-        const rx = W / 2 - radius * 0.15; // slight inward from outer edge
-        const ry = H / 2 - radius * 0.15;
-
-        // --- Simpler approach: parametrize by walking segments ---
-        // Segment order (clockwise starting at top-left corner of top straight):
-        //  1. Top straight: from (x=radius, y=0) to (x=W-radius, y=0)
-        //  2. Right cap: arc from angle -90° to +90° (going clockwise visually)
-        //  3. Bottom straight: from (x=W-radius, y=H) to (x=radius, y=H)
-        //  4. Left cap: arc from angle +90° to +270°
-
-        // We want tiles centered on a ring that sits on the OUTER edge, i.e., 
-        // tile center is at radius offset inward from the outer edge.
-        // Tile "center ring" radius = radius (end cap) minus half tile diagonal? 
-        // For 1:1 look, keep tiles on the outer edge; their centers on the ring.
-        const tileCenterOffset = 0; // 0 = exactly on outer edge
-
-        // Coordinates for the center ring:
-        //  Top straight: y = tileCenterOffset
-        //  Right cap center: (W - radius, radius)
-        //  Bottom straight: y = H - tileCenterOffset
-        //  Left cap center: (radius, radius)
-
-        // Perimeter walk
-        let t = 0;
-        for (let i = 0; i < N; i++) {
-            const dist = i * step + step / 2; // midpoint of each tile's slot
-            let x, y, angle;
-
-            if (dist < straightLen) {
-                // Top straight, moving right
-                x = radius + dist;
-                y = tileCenterOffset;
-                angle = 0;
-            } else if (dist < straightLen + capLen) {
-                // Right cap, sweeping from -90° to +90° (clockwise visual)
-                const capT = (dist - straightLen) / capLen;
-                const theta = -Math.PI / 2 + capT * Math.PI; // -90° → +90°
-                x = (W - radius) + radius * Math.cos(theta);
-                y = radius + radius * Math.sin(theta);
-                angle = theta + Math.PI / 2; // tile radial
-            } else if (dist < 2 * straightLen + capLen) {
-                // Bottom straight, moving left
-                const s = dist - (straightLen + capLen);
-                x = (W - radius) - s;
-                y = H - tileCenterOffset;
-                angle = 0;
-            } else {
-                // Left cap, sweeping from +90° to +270°
-                const capT = (dist - (2 * straightLen + capLen)) / capLen;
-                const theta = Math.PI / 2 + capT * Math.PI;
-                x = radius + radius * Math.cos(theta);
-                y = radius + radius * Math.sin(theta);
-                angle = theta + Math.PI / 2;
-            }
-            positions.push({ x, y, angle });
-        }
-        return positions;
     }
 
     function closePickerAndStart() {
@@ -1295,7 +975,73 @@
         showWheelOverlay();
     }
 
-    // ==================== WHEEL OVERLAY (STADIUM TRACK) ====================
+    // ==================== PREDICTION WHEEL (RACETRACK — EVOLUTION GEOMETRY) ====================
+    // Layout data taken 1:1 from the reference racetrack replica:
+    //   Top straight (13) | Right arc (5) | Bottom straight (13) | Left arc (6) = 37 tiles
+    const TOP_STRAIGHT = [
+        { num: 16, type: 'red' },
+        { num: 33, type: 'black' },
+        { num: 1,  type: 'red' },
+        { num: 20, type: 'black' },
+        { num: 14, type: 'red' },
+        { num: 31, type: 'black' },
+        { num: 9,  type: 'red' },
+        { num: 22, type: 'black' },
+        { num: 18, type: 'red' },
+        { num: 29, type: 'black' },
+        { num: 7,  type: 'red' },
+        { num: 28, type: 'black' },
+        { num: 12, type: 'red' }
+    ];
+    const BOTTOM_STRAIGHT = [
+        { num: 11, type: 'black' },
+        { num: 36, type: 'red' },
+        { num: 13, type: 'black' },
+        { num: 27, type: 'red' },
+        { num: 6,  type: 'black' },
+        { num: 34, type: 'red' },
+        { num: 17, type: 'black' },
+        { num: 25, type: 'red' },
+        { num: 2,  type: 'black' },
+        { num: 21, type: 'red' },
+        { num: 4,  type: 'black' },
+        { num: 19, type: 'red' },
+        { num: 15, type: 'black' }
+    ];
+    const RIGHT_ARC = [
+        { num: 35, type: 'black' },
+        { num: 3,  type: 'red' },
+        { num: 26, type: 'black' },
+        { num: 0,  type: 'green' },
+        { num: 32, type: 'red' }
+    ];
+    const LEFT_ARC = [
+        { num: 24, type: 'black' },
+        { num: 5,  type: 'red' },
+        { num: 10, type: 'black' },
+        { num: 23, type: 'red' },
+        { num: 8,  type: 'black' },
+        { num: 30, type: 'red' }
+    ];
+
+    const COLOR_RED   = '#7d1316';
+    const COLOR_BLACK = '#120d0e';
+    const COLOR_GREEN = '#0d4a3a';
+    const COLOR_EVO_BG = 'radial-gradient(ellipse at center, #4A1010 0%, #2A0808 70%, #150404 100%)';
+
+    function tileFill(type) {
+        if (type === 'red') return COLOR_RED;
+        if (type === 'black') return COLOR_BLACK;
+        if (type === 'green') return COLOR_GREEN;
+        return COLOR_BLACK;
+    }
+
+    function svgEl(tag, attrs) {
+        const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+        for (const k in attrs) el.setAttribute(k, attrs[k]);
+        return el;
+    }
+
     function showWheelOverlay() {
         if (!chosenProvider) return;
         if (overlayVisible) return;
@@ -1306,21 +1052,20 @@
         const numbersInGroup = mainPredRaw.split('-').map(Number).filter(n => !isNaN(n) && n >= 0 && n <= 36);
         if (numbersInGroup.length === 0) return;
 
-        // Compute highlight indices using PHYSICAL wheel neighbors (not visual positions)
-        const centerIndices = [];
-        const neighborIndicesSet = new Set();
+        // Highlight sets: predicted numbers + their ±2 physical neighbors
+        const centerNums = new Set(numbersInGroup);
+        const neighborNums = new Set();
         numbersInGroup.forEach(num => {
             const idx = wheelNumbers.indexOf(num);
-            if (idx !== -1) {
-                centerIndices.push(num);
-                for (let offset = -2; offset <= 2; offset++) {
-                    if (offset === 0) continue;
-                    const neighborIdx = (idx + offset + wheelNumbers.length) % wheelNumbers.length;
-                    neighborIndicesSet.add(wheelNumbers[neighborIdx]);
-                }
+            if (idx === -1) return;
+            for (let offset = -2; offset <= 2; offset++) {
+                if (offset === 0) continue;
+                const neighborIdx = (idx + offset + wheelNumbers.length) % wheelNumbers.length;
+                neighborNums.add(wheelNumbers[neighborIdx]);
             }
         });
 
+        // Build overlay DOM
         const overlay = document.createElement('div');
         overlay.className = 'wheel-overlay';
 
@@ -1340,117 +1085,139 @@
         const providerLabel = chosenProvider === 'evolution' ? 'EVOLUTION' : 'PRAGMATIC';
         title.innerText = `${providerLabel} • PREDICTION: ${mainPredRaw}`;
 
-        // Stadium wrapper (dynamic size based on viewport)
+        // ----- Build the SVG racetrack -----
         const wrap = document.createElement('div');
-        wrap.className = 'stadium-wrap';
+        wrap.className = 'racetrack-wrap';
 
-        const stage = document.createElement('div');
-        stage.className = 'stadium-stage';
+        const svg = svgEl('svg', {
+            viewBox: '0 0 960 280',
+            preserveAspectRatio: 'xMidYMid meet',
+            class: 'racetrack-svg'
+        });
 
-        // Felt background (design space)
-        const bg = document.createElement('div');
-        bg.className = 'stadium-bg ' + (chosenProvider === 'evolution' ? 'evo' : 'prag');
-        stage.appendChild(bg);
+        // Geometry constants (from reference)
+        const R_out = 125;
+        const R_in = 68;
+        const centerLeft = 145;
+        const centerRight = 815;
+        const yCenter = 140;
+        const rMid = (R_out + R_in) / 2;
+        const straightWidth = centerRight - centerLeft; // 670
+        const cellW = straightWidth / 13;
 
-        // Inner window
-        const inner = document.createElement('div');
-        inner.className = 'stadium-inner';
-        stage.appendChild(inner);
+        // Felt background (fills the outer racetrack shape)
+        const outerPathBg = `M ${centerLeft} ${yCenter - R_out} L ${centerRight} ${yCenter - R_out} A ${R_out} ${R_out} 0 0 1 ${centerRight} ${yCenter + R_out} L ${centerLeft} ${yCenter + R_out} A ${R_out} ${R_out} 0 0 1 ${centerLeft} ${yCenter - R_out} Z`;
+        const bg = svgEl('path', {
+            d: outerPathBg,
+            fill: '#3A0C0C'
+        });
+        svg.appendChild(bg);
 
-        // Design space dimensions (match CSS .stadium-stage)
-        const DS_W = 1200;
-        const DS_H = 420;
-
-        // Stadium geometry inside the design space
-        const bgW = 1140;
-        const bgH = 360;
-        const bgLeft = (DS_W - bgW) / 2;
-        const bgTop = (DS_H - bgH) / 2;
-
-        // Tile geometry
-        const order = chosenProvider === 'evolution' ? trackOrderEvolution : trackOrderPragmatic;
-        const N = order.length;
-
-        // Compute positions along the stadium perimeter.
-        // Local coordinates of the bg stadium (origin top-left of the bg).
-        const localPositions = computeStadiumPositions(bgW, bgH, N);
-
-        // Tile dimensions (design space)
-        const tileW = 32;
-        const tileH = 50;
-        const fontSize = 20;
-
-        // Offset each local position into design-space coordinates
-        // (add bgLeft / bgTop).
-        // Then adjust the visual direction so 0 lands at the correct place.
-
-        // We need to shift the array so that "0" (which is at index 0 in `order`)
-        // lands at the correct visual position for the chosen provider:
-        //   Evolution: right end, slightly below middle → roughly 8% past top-right corner
-        //   Pragmatic: left end, slightly above middle → roughly 58% past top-left corner
-        // (Percentages measured clockwise along the perimeter from top-left.)
-
-        // Compute the tile positions array, then rotate the tile-mapping so that
-        // order[i] is placed at positions[rotatedIndex(i)].
-
-        const positions = localPositions.map(p => ({
-            x: p.x + bgLeft,
-            y: p.y + bgTop,
-            angle: p.angle
-        }));
-
-        // The perimeter walk starts at top-left, going clockwise.
-        // Find the index on the ring that corresponds to the provider's 0 tile.
-        // Evolution: 0 is on the RIGHT cap, just below the horizontal midline.
-        //   On the right cap, theta runs -90° (top) → +90° (bottom).
-        //   "Below middle" ≈ theta = +30°, i.e., capT ≈ (30 + 90) / 180 = 0.67 of cap.
-        //   Distance along perimeter: straightLen + capLen * 0.67
-        // Pragmatic: 0 is on the LEFT cap, just above the horizontal midline.
-        //   On the left cap, theta runs +90° → +270°.
-        //   "Above middle" ≈ theta = 240° (equivalently -120°), i.e., capT ≈ (240 - 90) / 180 = 0.83 of cap.
-        //   Distance along perimeter: 2*straightLen + capLen + capLen * 0.83
-
-        const straightLen = bgW - bgH;
-        const capLen = Math.PI * (bgH / 2);
-        const totalPerim = 2 * straightLen + 2 * capLen;
-        const step = totalPerim / N;
-
-        let zeroDistFromStart;
-        if (chosenProvider === 'evolution') {
-            zeroDistFromStart = straightLen + capLen * 0.67;
-        } else {
-            zeroDistFromStart = 2 * straightLen + capLen + capLen * 0.83;
-        }
-        const zeroIndex = Math.round(zeroDistFromStart / step) % N;
-
-        // Now assign order[i] to positions[(zeroIndex + i) % N]
-        for (let i = 0; i < N; i++) {
-            const posIndex = (zeroIndex + i) % N;
-            const p = positions[posIndex];
-            const num = order[i];
-
-            const tile = document.createElement('div');
-            tile.className = 'oval-tile';
-            tile.textContent = num;
-            if (num === 0) tile.classList.add('green');
-            else if (redSet.has(num)) tile.classList.add('red');
-            else tile.classList.add('black');
-
-            // Highlight logic
-            if (centerIndices.includes(num)) tile.classList.add('center');
-            else if (neighborIndicesSet.has(num)) tile.classList.add('neighbor');
-
-            tile.style.width = tileW + 'px';
-            tile.style.height = tileH + 'px';
-            tile.style.left = (p.x - tileW / 2) + 'px';
-            tile.style.top = (p.y - tileH / 2) + 'px';
-            tile.style.fontSize = fontSize + 'px';
-            tile.style.transform = `rotate(${p.angle}rad)`;
-
-            stage.appendChild(tile);
+        // Helper to build a tile with optional highlight
+        function buildTile(num, type, pathD, tx, ty) {
+            const g = svgEl('g', {});
+            const path = svgEl('path', {
+                d: pathD,
+                fill: tileFill(type),
+                class: 'tile-path'
+            });
+            // Highlight override
+            if (centerNums.has(num)) {
+                path.classList.add('hl-center');
+            } else if (neighborNums.has(num)) {
+                path.classList.add('hl-neighbor');
+            }
+            const text = svgEl('text', {
+                x: tx,
+                y: ty,
+                class: 'tile-text'
+            });
+            if (centerNums.has(num) || neighborNums.has(num)) {
+                text.classList.add('hl-dark');
+            }
+            text.textContent = num;
+            g.appendChild(path);
+            g.appendChild(text);
+            svg.appendChild(g);
         }
 
-        wrap.appendChild(stage);
+        // --- Top straight (13) ---
+        TOP_STRAIGHT.forEach((item, i) => {
+            const x1 = centerLeft + i * cellW;
+            const x2 = x1 + cellW;
+            const yOut = yCenter - R_out;
+            const yIn = yCenter - R_in;
+            const pathD = `M ${x1} ${yOut} L ${x2} ${yOut} L ${x2} ${yIn} L ${x1} ${yIn} Z`;
+            buildTile(item.num, item.type, pathD, (x1 + x2) / 2, (yOut + yIn) / 2);
+        });
+
+        // --- Bottom straight (13) ---
+        BOTTOM_STRAIGHT.forEach((item, i) => {
+            const x1 = centerLeft + i * cellW;
+            const x2 = x1 + cellW;
+            const yIn = yCenter + R_in;
+            const yOut = yCenter + R_out;
+            const pathD = `M ${x1} ${yIn} L ${x2} ${yIn} L ${x2} ${yOut} L ${x1} ${yOut} Z`;
+            buildTile(item.num, item.type, pathD, (x1 + x2) / 2, (yOut + yIn) / 2);
+        });
+
+        // --- Right arc (5 tiles across 180°) ---
+        const rightStep = Math.PI / 5;
+        RIGHT_ARC.forEach((item, i) => {
+            const a1 = -Math.PI / 2 + i * rightStep;
+            const a2 = -Math.PI / 2 + (i + 1) * rightStep;
+
+            const x1_out = centerRight + R_out * Math.cos(a1);
+            const y1_out = yCenter + R_out * Math.sin(a1);
+            const x2_out = centerRight + R_out * Math.cos(a2);
+            const y2_out = yCenter + R_out * Math.sin(a2);
+
+            const x1_in = centerRight + R_in * Math.cos(a1);
+            const y1_in = yCenter + R_in * Math.sin(a1);
+            const x2_in = centerRight + R_in * Math.cos(a2);
+            const y2_in = yCenter + R_in * Math.sin(a2);
+
+            const pathD = `M ${x1_out} ${y1_out} A ${R_out} ${R_out} 0 0 1 ${x2_out} ${y2_out} L ${x2_in} ${y2_in} A ${R_in} ${R_in} 0 0 0 ${x1_in} ${y1_in} Z`;
+
+            const midA = (a1 + a2) / 2;
+            const tx = centerRight + rMid * Math.cos(midA);
+            const ty = yCenter + rMid * Math.sin(midA);
+
+            buildTile(item.num, item.type, pathD, tx, ty);
+        });
+
+        // --- Left arc (6 tiles across 180°) ---
+        const leftStep = Math.PI / 6;
+        LEFT_ARC.forEach((item, i) => {
+            const a1 = -Math.PI / 2 + i * leftStep;
+            const a2 = -Math.PI / 2 + (i + 1) * leftStep;
+
+            const x1_out = centerLeft - R_out * Math.sin(a1 + Math.PI / 2);
+            const y1_out = yCenter - R_out * Math.cos(a1 + Math.PI / 2);
+            const x2_out = centerLeft - R_out * Math.sin(a2 + Math.PI / 2);
+            const y2_out = yCenter - R_out * Math.cos(a2 + Math.PI / 2);
+
+            const x1_in = centerLeft - R_in * Math.sin(a1 + Math.PI / 2);
+            const y1_in = yCenter - R_in * Math.cos(a1 + Math.PI / 2);
+            const x2_in = centerLeft - R_in * Math.sin(a2 + Math.PI / 2);
+            const y2_in = yCenter - R_in * Math.cos(a2 + Math.PI / 2);
+
+            const pathD = `M ${x1_out} ${y1_out} A ${R_out} ${R_out} 0 0 0 ${x2_out} ${y2_out} L ${x2_in} ${y2_in} A ${R_in} ${R_in} 0 0 1 ${x1_in} ${y1_in} Z`;
+
+            const midA = (a1 + a2) / 2;
+            const tx = centerLeft - rMid * Math.sin(midA + Math.PI / 2);
+            const ty = yCenter - rMid * Math.cos(midA + Math.PI / 2);
+
+            buildTile(item.num, item.type, pathD, tx, ty);
+        });
+
+        // --- Continuous outline paths (drawn last so they sit on top) ---
+        const outerPath = `M ${centerLeft} ${yCenter - R_out} L ${centerRight} ${yCenter - R_out} A ${R_out} ${R_out} 0 0 1 ${centerRight} ${yCenter + R_out} L ${centerLeft} ${yCenter + R_out} A ${R_out} ${R_out} 0 0 1 ${centerLeft} ${yCenter - R_out} Z`;
+        const innerPath = `M ${centerLeft} ${yCenter - R_in} L ${centerRight} ${yCenter - R_in} A ${R_in} ${R_in} 0 0 1 ${centerRight} ${yCenter + R_in} L ${centerLeft} ${yCenter + R_in} A ${R_in} ${R_in} 0 0 1 ${centerLeft} ${yCenter - R_in} Z`;
+        svg.appendChild(svgEl('path', { d: outerPath, class: 'racetrack-outline' }));
+        svg.appendChild(svgEl('path', { d: innerPath, class: 'racetrack-outline' }));
+
+        wrap.appendChild(svg);
 
         const note = document.createElement('div');
         note.className = 'wheel-note';
@@ -1464,48 +1231,11 @@
         document.body.appendChild(overlay);
         overlayVisible = true;
 
-        // ---- Auto-scale the design stage to fit viewport ----
-        function applyScale() {
-            const vw = window.innerWidth;
-            const vh = window.innerHeight;
-            // Reserve room for container padding, title, note, close button.
-            const availW = Math.min(vw - 60, 1400);
-            const availH = Math.max(200, vh - 200);
-
-            const scaleW = availW / DS_W;
-            const scaleH = availH / DS_H;
-            let scale = Math.min(scaleW, scaleH);
-
-            // Cap max up-scaling so 4K screens don't get an absurdly huge wheel.
-            scale = Math.min(scale, 1.25);
-            // Floor min scale so it never gets unreadably tiny.
-            scale = Math.max(scale, 0.28);
-
-            stage.style.transform = `scale(${scale})`;
-
-            // Shrink the wrapper to the scaled size so layout doesn't leave empty space
-            const scaledW = DS_W * scale;
-            const scaledH = DS_H * scale;
-            wrap.style.width = scaledW + 'px';
-            wrap.style.height = scaledH + 'px';
-        }
-
-        applyScale();
-
-        const onResize = () => applyScale();
-        window.addEventListener('resize', onResize);
-
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) {
-                window.removeEventListener('resize', onResize);
                 overlay.remove();
                 overlayVisible = false;
             }
-        });
-        closeBtn.addEventListener('click', () => {
-            window.removeEventListener('resize', onResize);
-            overlay.remove();
-            overlayVisible = false;
         });
     }
 
@@ -1524,7 +1254,7 @@
         });
         spinCountSpan.innerText = spinHistory.length;
         scrollToTop(spinContainer);
-        
+
         groupContainer.innerHTML = '';
         groupHistory.forEach(grp => {
             const gItem = document.createElement('div');
@@ -1534,7 +1264,7 @@
         });
         groupCountSpan.innerText = groupHistory.length;
         if (groupContainer) groupContainer.scrollTop = groupContainer.scrollHeight;
-        
+
         analiz();
         showWheelOverlay();
     }
@@ -1542,29 +1272,27 @@
     // ==================== ADD SPIN ====================
     function addSpin(number) {
         spinHistory.push(number);
-        
+
         const groups = groupsPerNumber[number];
         if (groups && groups.length) {
-            for (let g of groups) {
-                groupHistory.push(g);
-            }
+            for (let g of groups) groupHistory.push(g);
         } else {
             groupHistory.push(`ERR-${number}`);
         }
-        
+
         refreshUI();
-        
+
         const spinItems = spinContainer.querySelectorAll('.spin-item');
         if (spinItems.length > 0) {
             spinItems[0].classList.add('spin-item-new');
             setTimeout(() => spinItems[0].classList.remove('spin-item-new'), 450);
         }
-        
+
         predBox.classList.add('prediction-flash');
         setTimeout(() => predBox.classList.remove('prediction-flash'), 250);
     }
 
-    // ==================== RESET FUNCTIONS ====================
+    // ==================== RESET ====================
     function hardResetFullReload() {
         window.location.reload();
     }
@@ -1573,17 +1301,14 @@
     function buildNumberPad() {
         numbersGrid.innerHTML = '';
         const redNumbers = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
-        
+
         for (let i = 1; i <= 36; i++) {
             const btn = document.createElement('button');
             btn.innerText = i;
             btn.className = 'num-btn';
-            if (redNumbers.has(i)) {
-                btn.classList.add('red-num');
-            } else {
-                btn.classList.add('black-num');
-            }
-            btn.addEventListener('click', (function(val) { 
+            if (redNumbers.has(i)) btn.classList.add('red-num');
+            else btn.classList.add('black-num');
+            btn.addEventListener('click', (function(val) {
                 return () => {
                     btn.classList.add('btn-flash');
                     setTimeout(() => btn.classList.remove('btn-flash'), 120);
@@ -1608,9 +1333,7 @@
     function setupInternalRefresh() {
         document.body.addEventListener('click', (e) => {
             const resetBtn = document.getElementById('clearAllBtn');
-            if (resetBtn && (e.target === resetBtn || resetBtn.contains(e.target))) {
-                return;
-            }
+            if (resetBtn && (e.target === resetBtn || resetBtn.contains(e.target))) return;
             triggerInternalRefresh();
         });
     }
@@ -1629,15 +1352,15 @@
 
     // ==================== INITIALIZATION ====================
     buildNumberPad();
-    
+
     spinHistory = [];
     groupHistory = [];
     refreshUI();
     mainPredictionSpan.innerText = "———";
-    
+
     setupInternalRefresh();
 
-    // Show provider picker on every load (Option 1)
+    // Show the provider picker on every page load
     setTimeout(() => {
         showProviderPicker();
     }, 120);
