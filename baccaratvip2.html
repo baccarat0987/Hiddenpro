@@ -566,7 +566,6 @@
             padding: 20px;
             overflow: hidden;
         }
-        /* Matches .aequitas-app width/shape — hugs content vertically */
         .wheel-container {
             background: linear-gradient(145deg, #12172B, #0A0E1F);
             border-radius: 24px;
@@ -647,13 +646,13 @@
             filter: drop-shadow(0 12px 28px rgba(0,0,0,0.9));
         }
 
-        /* --- SVG tile styles (reference) --- */
-        .tile-path {
+        /* --- Evolution tile styles --- */
+        .tile-path.evo {
             stroke: #b39b82;
             stroke-width: 1.1px;
             transition: filter 0.12s ease, stroke 0.12s ease, fill 0.12s ease;
         }
-        .tile-text {
+        .tile-text.evo {
             fill: #ebdcd0;
             font-weight: 700;
             font-size: 25px;
@@ -663,12 +662,37 @@
             font-family: 'Inter', system-ui, sans-serif;
             letter-spacing: -0.02em;
         }
-        .racetrack-outline {
+        .racetrack-outline.evo {
             fill: none;
             stroke: #c2ac97;
             stroke-width: 1.5px;
             pointer-events: none;
         }
+
+        /* --- Pragmatic tile styles --- */
+        .tile-path.prag {
+            stroke: #a2b0c4;
+            stroke-width: 1.2px;
+            transition: filter 0.12s ease, stroke 0.12s ease, fill 0.12s ease;
+        }
+        .tile-text.prag {
+            fill: #ffffff;
+            font-weight: 800;
+            font-size: 26px;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+            font-family: 'Inter', system-ui, sans-serif;
+            letter-spacing: -0.02em;
+        }
+        .racetrack-outline.prag {
+            fill: none;
+            stroke: #b5c4d8;
+            stroke-width: 1.8px;
+            pointer-events: none;
+        }
+
+        /* --- Highlight overrides (shared) --- */
         .tile-path.hl-center {
             fill: #FF69B4 !important;
             stroke: #FFFFFF !important;
@@ -979,62 +1003,74 @@
         showWheelOverlay();
     }
 
-    // ==================== PREDICTION WHEEL (RACETRACK — EVOLUTION GEOMETRY) ====================
-    const TOP_STRAIGHT = [
-        { num: 16, type: 'red' },
-        { num: 33, type: 'black' },
-        { num: 1,  type: 'red' },
-        { num: 20, type: 'black' },
-        { num: 14, type: 'red' },
-        { num: 31, type: 'black' },
-        { num: 9,  type: 'red' },
-        { num: 22, type: 'black' },
-        { num: 18, type: 'red' },
-        { num: 29, type: 'black' },
-        { num: 7,  type: 'red' },
-        { num: 28, type: 'black' },
+    // ==================== WHEEL LAYOUT DATA ====================
+    // --- Evolution layout ---
+    const EVO_TOP = [
+        { num: 16, type: 'red' },   { num: 33, type: 'black' }, { num: 1,  type: 'red' },
+        { num: 20, type: 'black' }, { num: 14, type: 'red' },   { num: 31, type: 'black' },
+        { num: 9,  type: 'red' },   { num: 22, type: 'black' }, { num: 18, type: 'red' },
+        { num: 29, type: 'black' }, { num: 7,  type: 'red' },   { num: 28, type: 'black' },
         { num: 12, type: 'red' }
     ];
-    const BOTTOM_STRAIGHT = [
-        { num: 11, type: 'black' },
-        { num: 36, type: 'red' },
-        { num: 13, type: 'black' },
-        { num: 27, type: 'red' },
-        { num: 6,  type: 'black' },
-        { num: 34, type: 'red' },
-        { num: 17, type: 'black' },
-        { num: 25, type: 'red' },
-        { num: 2,  type: 'black' },
-        { num: 21, type: 'red' },
-        { num: 4,  type: 'black' },
-        { num: 19, type: 'red' },
+    const EVO_BOTTOM = [
+        { num: 11, type: 'black' }, { num: 36, type: 'red' },   { num: 13, type: 'black' },
+        { num: 27, type: 'red' },   { num: 6,  type: 'black' }, { num: 34, type: 'red' },
+        { num: 17, type: 'black' }, { num: 25, type: 'red' },   { num: 2,  type: 'black' },
+        { num: 21, type: 'red' },   { num: 4,  type: 'black' }, { num: 19, type: 'red' },
         { num: 15, type: 'black' }
     ];
-    const RIGHT_ARC = [
-        { num: 35, type: 'black' },
-        { num: 3,  type: 'red' },
-        { num: 26, type: 'black' },
-        { num: 0,  type: 'green' },
-        { num: 32, type: 'red' }
+    const EVO_RIGHT_ARC = [
+        { num: 35, type: 'black' }, { num: 3,  type: 'red' }, { num: 26, type: 'black' },
+        { num: 0,  type: 'green' }, { num: 32, type: 'red' }
     ];
-    const LEFT_ARC = [
-        { num: 24, type: 'black' },
-        { num: 5,  type: 'red' },
-        { num: 10, type: 'black' },
-        { num: 23, type: 'red' },
-        { num: 8,  type: 'black' },
-        { num: 30, type: 'red' }
+    const EVO_LEFT_ARC = [
+        { num: 24, type: 'black' }, { num: 5,  type: 'red' },   { num: 10, type: 'black' },
+        { num: 23, type: 'red' },   { num: 8,  type: 'black' }, { num: 30, type: 'red' }
     ];
 
-    const COLOR_RED   = '#7d1316';
-    const COLOR_BLACK = '#120d0e';
-    const COLOR_GREEN = '#0d4a3a';
+    // --- Pragmatic layout ---
+    const PRAG_TOP = [
+        { num: 15, type: 'black' }, { num: 19, type: 'red' },   { num: 4,  type: 'black' },
+        { num: 21, type: 'red' },   { num: 2,  type: 'black' }, { num: 25, type: 'red' },
+        { num: 17, type: 'black' }, { num: 34, type: 'red' },   { num: 6,  type: 'black' },
+        { num: 27, type: 'red' },   { num: 13, type: 'black' }, { num: 36, type: 'red' },
+        { num: 11, type: 'black' }
+    ];
+    const PRAG_BOTTOM = [
+        { num: 12, type: 'red' },   { num: 28, type: 'black' }, { num: 7,  type: 'red' },
+        { num: 29, type: 'black' }, { num: 18, type: 'red' },   { num: 22, type: 'black' },
+        { num: 9,  type: 'red' },   { num: 31, type: 'black' }, { num: 14, type: 'red' },
+        { num: 20, type: 'black' }, { num: 1,  type: 'red' },   { num: 33, type: 'black' },
+        { num: 16, type: 'red' }
+    ];
+    const PRAG_LEFT_ARC = [
+        { num: 32, type: 'red' },   { num: 0,  type: 'green' }, { num: 26, type: 'black' },
+        { num: 3,  type: 'red' },   { num: 35, type: 'black' }
+    ];
+    const PRAG_RIGHT_ARC = [
+        { num: 30, type: 'red' },   { num: 8,  type: 'black' }, { num: 23, type: 'red' },
+        { num: 10, type: 'black' }, { num: 5,  type: 'red' },   { num: 24, type: 'black' }
+    ];
 
-    function tileFill(type) {
-        if (type === 'red') return COLOR_RED;
-        if (type === 'black') return COLOR_BLACK;
-        if (type === 'green') return COLOR_GREEN;
-        return COLOR_BLACK;
+    // --- Provider palettes ---
+    const PALETTES = {
+        evolution: {
+            red: '#7d1316', black: '#120d0e', green: '#0d4a3a',
+            bg: '#3A0C0C',
+            tileClass: 'evo', textClass: 'evo', outlineClass: 'evo'
+        },
+        pragmatic: {
+            red: '#a61217', black: '#14171d', green: '#107a3e',
+            bg: '#0c1220',
+            tileClass: 'prag', textClass: 'prag', outlineClass: 'prag'
+        }
+    };
+
+    function tileFill(type, palette) {
+        if (type === 'red') return palette.red;
+        if (type === 'black') return palette.black;
+        if (type === 'green') return palette.green;
+        return palette.black;
     }
 
     function svgEl(tag, attrs) {
@@ -1043,6 +1079,7 @@
         return el;
     }
 
+    // ==================== PREDICTION WHEEL OVERLAY ====================
     function showWheelOverlay() {
         if (!chosenProvider) return;
         if (overlayVisible) return;
@@ -1102,16 +1139,24 @@
         const straightWidth = centerRight - centerLeft;
         const cellW = straightWidth / 13;
 
+        // Choose layout + palette based on provider
+        const isEvo = chosenProvider === 'evolution';
+        const palette = isEvo ? PALETTES.evolution : PALETTES.pragmatic;
+        const TOP = isEvo ? EVO_TOP : PRAG_TOP;
+        const BOTTOM = isEvo ? EVO_BOTTOM : PRAG_BOTTOM;
+        const LEFT_ARC = isEvo ? EVO_LEFT_ARC : PRAG_LEFT_ARC;
+        const RIGHT_ARC = isEvo ? EVO_RIGHT_ARC : PRAG_RIGHT_ARC;
+
+        // Background felt fill (outer racetrack)
         const outerPathBg = `M ${centerLeft} ${yCenter - R_out} L ${centerRight} ${yCenter - R_out} A ${R_out} ${R_out} 0 0 1 ${centerRight} ${yCenter + R_out} L ${centerLeft} ${yCenter + R_out} A ${R_out} ${R_out} 0 0 1 ${centerLeft} ${yCenter - R_out} Z`;
-        const bg = svgEl('path', { d: outerPathBg, fill: '#3A0C0C' });
-        svg.appendChild(bg);
+        svg.appendChild(svgEl('path', { d: outerPathBg, fill: palette.bg }));
 
         function buildTile(num, type, pathD, tx, ty) {
             const g = svgEl('g', {});
             const path = svgEl('path', {
                 d: pathD,
-                fill: tileFill(type),
-                class: 'tile-path'
+                fill: tileFill(type, palette),
+                class: 'tile-path ' + palette.tileClass
             });
             if (centerNums.has(num)) path.classList.add('hl-center');
             else if (neighborNums.has(num)) path.classList.add('hl-neighbor');
@@ -1119,7 +1164,7 @@
             const text = svgEl('text', {
                 x: tx,
                 y: ty,
-                class: 'tile-text'
+                class: 'tile-text ' + palette.textClass
             });
             if (centerNums.has(num) || neighborNums.has(num)) text.classList.add('hl-dark');
             text.textContent = num;
@@ -1128,7 +1173,8 @@
             svg.appendChild(g);
         }
 
-        TOP_STRAIGHT.forEach((item, i) => {
+        // --- Top straight (13) ---
+        TOP.forEach((item, i) => {
             const x1 = centerLeft + i * cellW;
             const x2 = x1 + cellW;
             const yOut = yCenter - R_out;
@@ -1137,7 +1183,8 @@
             buildTile(item.num, item.type, pathD, (x1 + x2) / 2, (yOut + yIn) / 2);
         });
 
-        BOTTOM_STRAIGHT.forEach((item, i) => {
+        // --- Bottom straight (13) ---
+        BOTTOM.forEach((item, i) => {
             const x1 = centerLeft + i * cellW;
             const x2 = x1 + cellW;
             const yIn = yCenter + R_in;
@@ -1146,7 +1193,8 @@
             buildTile(item.num, item.type, pathD, (x1 + x2) / 2, (yOut + yIn) / 2);
         });
 
-        const rightStep = Math.PI / 5;
+        // --- Right arc: step depends on count ---
+        const rightStep = Math.PI / RIGHT_ARC.length;
         RIGHT_ARC.forEach((item, i) => {
             const a1 = -Math.PI / 2 + i * rightStep;
             const a2 = -Math.PI / 2 + (i + 1) * rightStep;
@@ -1170,7 +1218,8 @@
             buildTile(item.num, item.type, pathD, tx, ty);
         });
 
-        const leftStep = Math.PI / 6;
+        // --- Left arc: step depends on count ---
+        const leftStep = Math.PI / LEFT_ARC.length;
         LEFT_ARC.forEach((item, i) => {
             const a1 = -Math.PI / 2 + i * leftStep;
             const a2 = -Math.PI / 2 + (i + 1) * leftStep;
@@ -1194,10 +1243,11 @@
             buildTile(item.num, item.type, pathD, tx, ty);
         });
 
+        // --- Continuous outline paths ---
         const outerPath = `M ${centerLeft} ${yCenter - R_out} L ${centerRight} ${yCenter - R_out} A ${R_out} ${R_out} 0 0 1 ${centerRight} ${yCenter + R_out} L ${centerLeft} ${yCenter + R_out} A ${R_out} ${R_out} 0 0 1 ${centerLeft} ${yCenter - R_out} Z`;
         const innerPath = `M ${centerLeft} ${yCenter - R_in} L ${centerRight} ${yCenter - R_in} A ${R_in} ${R_in} 0 0 1 ${centerRight} ${yCenter + R_in} L ${centerLeft} ${yCenter + R_in} A ${R_in} ${R_in} 0 0 1 ${centerLeft} ${yCenter - R_in} Z`;
-        svg.appendChild(svgEl('path', { d: outerPath, class: 'racetrack-outline' }));
-        svg.appendChild(svgEl('path', { d: innerPath, class: 'racetrack-outline' }));
+        svg.appendChild(svgEl('path', { d: outerPath, class: 'racetrack-outline ' + palette.outlineClass }));
+        svg.appendChild(svgEl('path', { d: innerPath, class: 'racetrack-outline ' + palette.outlineClass }));
 
         wrap.appendChild(svg);
 
