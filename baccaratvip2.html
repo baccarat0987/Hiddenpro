@@ -563,32 +563,36 @@
             justify-content: center;
             font-family: 'Inter', sans-serif;
             animation: fadeInOverlay 0.25s ease;
-            padding: 12px;
+            padding: 20px;
             overflow: hidden;
         }
+        /* Matches .aequitas-app size exactly */
         .wheel-container {
             background: linear-gradient(145deg, #12172B, #0A0E1F);
-            border-radius: 28px;
-            padding: 16px 18px 16px;
-            border: 2px solid rgba(157, 106, 245, 0.8);
-            box-shadow: 0 30px 50px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,179,255,0.2), 0 0 35px rgba(157,106,245,0.5);
+            border-radius: 24px;
+            padding: 14px;
+            border: 1px solid rgba(157, 106, 245, 0.35);
+            box-shadow: 0 20px 35px rgba(0,0,0,0.6), inset 0 1px 0 rgba(157, 106, 245, 0.12);
             position: relative;
-            width: auto;
-            max-width: 98vw;
-            display: inline-block;
+            width: 620px;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-sizing: border-box;
         }
         .close-wheel-btn {
             position: absolute;
-            top: 10px;
-            right: 12px;
+            top: 8px;
+            right: 10px;
             background: rgba(10, 14, 28, 0.9);
             border: 1px solid rgba(157, 106, 245, 0.8);
             color: #D9C8FF;
             font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -610,7 +614,8 @@
             font-weight: 800;
             letter-spacing: 1.6px;
             color: #C9B3FF;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            margin-top: 4px;
             text-transform: uppercase;
             background: rgba(157,106,245,0.2);
             display: inline-block;
@@ -621,25 +626,29 @@
             left: 50%;
             transform: translateX(-50%);
             white-space: nowrap;
+            max-width: calc(100% - 60px);
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        /* Racetrack wrapper — sizes dynamically via JS scale */
         .racetrack-wrap {
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
             overflow: hidden;
+            flex: 1;
+            padding: 4px 0;
         }
         .racetrack-svg {
             display: block;
             width: 100%;
             height: auto;
-            max-height: 60vh;
+            max-height: 58vh;
             filter: drop-shadow(0 12px 28px rgba(0,0,0,0.9));
         }
 
-        /* --- SVG tile styles (matches reference) --- */
+        /* --- SVG tile styles (reference) --- */
         .tile-path {
             stroke: #b39b82;
             stroke-width: 1.1px;
@@ -661,7 +670,6 @@
             stroke-width: 1.5px;
             pointer-events: none;
         }
-        /* Highlight classes applied on top of the base fill */
         .tile-path.hl-center {
             fill: #FF69B4 !important;
             stroke: #FFFFFF !important;
@@ -681,7 +689,7 @@
 
         .wheel-note {
             text-align: center;
-            margin-top: 10px;
+            margin-top: 8px;
             font-size: clamp(0.5rem, 2.1vw, 0.6rem);
             font-weight: 600;
             color: #B88AFF;
@@ -694,6 +702,9 @@
             left: 50%;
             transform: translateX(-50%);
             white-space: nowrap;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
     </style>
 </head>
@@ -805,16 +816,13 @@
     let groupHistory = [];
     let overlayVisible = false;
 
-    // --- Prediction v2 tracking state ---
     let lastPrediction = null;
     let lastPredictionGroups = [];
     let hitCount = 0;
     let missCount = 0;
 
-    // --- Chosen provider (only "evolution" used for now) ---
     let chosenProvider = null;
 
-    // DOM Elements
     const numbersGrid = document.getElementById('numbersGrid');
     const zeroButton = document.getElementById('zeroButton');
     const spinContainer = document.getElementById('spinHistoryList');
@@ -922,7 +930,6 @@
     }
 
     // ==================== PHYSICAL WHEEL ORDER ====================
-    // Standard single-zero European wheel (clockwise).
     const wheelNumbers = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
 
     // ==================== PROVIDER PICKER (TEXT ONLY) ====================
@@ -954,8 +961,6 @@
         pragBtn.className = 'provider-btn';
         pragBtn.innerText = 'PRAGMATIC';
         pragBtn.addEventListener('click', () => {
-            // Pragmatic layout not wired yet — for now use Evolution so the
-            // prediction wheel still works, but remember the choice.
             chosenProvider = 'pragmatic';
             closePickerAndStart();
         });
@@ -976,8 +981,6 @@
     }
 
     // ==================== PREDICTION WHEEL (RACETRACK — EVOLUTION GEOMETRY) ====================
-    // Layout data taken 1:1 from the reference racetrack replica:
-    //   Top straight (13) | Right arc (5) | Bottom straight (13) | Left arc (6) = 37 tiles
     const TOP_STRAIGHT = [
         { num: 16, type: 'red' },
         { num: 33, type: 'black' },
@@ -1027,7 +1030,6 @@
     const COLOR_RED   = '#7d1316';
     const COLOR_BLACK = '#120d0e';
     const COLOR_GREEN = '#0d4a3a';
-    const COLOR_EVO_BG = 'radial-gradient(ellipse at center, #4A1010 0%, #2A0808 70%, #150404 100%)';
 
     function tileFill(type) {
         if (type === 'red') return COLOR_RED;
@@ -1052,7 +1054,6 @@
         const numbersInGroup = mainPredRaw.split('-').map(Number).filter(n => !isNaN(n) && n >= 0 && n <= 36);
         if (numbersInGroup.length === 0) return;
 
-        // Highlight sets: predicted numbers + their ±2 physical neighbors
         const centerNums = new Set(numbersInGroup);
         const neighborNums = new Set();
         numbersInGroup.forEach(num => {
@@ -1065,12 +1066,17 @@
             }
         });
 
-        // Build overlay DOM
         const overlay = document.createElement('div');
         overlay.className = 'wheel-overlay';
 
         const containerDiv = document.createElement('div');
         containerDiv.className = 'wheel-container';
+
+        // Match main app container dimensions exactly
+        const appRect = appContainer.getBoundingClientRect();
+        if (appRect.height > 0) {
+            containerDiv.style.minHeight = appRect.height + 'px';
+        }
 
         const closeBtn = document.createElement('div');
         closeBtn.className = 'close-wheel-btn';
@@ -1085,7 +1091,6 @@
         const providerLabel = chosenProvider === 'evolution' ? 'EVOLUTION' : 'PRAGMATIC';
         title.innerText = `${providerLabel} • PREDICTION: ${mainPredRaw}`;
 
-        // ----- Build the SVG racetrack -----
         const wrap = document.createElement('div');
         wrap.className = 'racetrack-wrap';
 
@@ -1095,25 +1100,19 @@
             class: 'racetrack-svg'
         });
 
-        // Geometry constants (from reference)
         const R_out = 125;
         const R_in = 68;
         const centerLeft = 145;
         const centerRight = 815;
         const yCenter = 140;
         const rMid = (R_out + R_in) / 2;
-        const straightWidth = centerRight - centerLeft; // 670
+        const straightWidth = centerRight - centerLeft;
         const cellW = straightWidth / 13;
 
-        // Felt background (fills the outer racetrack shape)
         const outerPathBg = `M ${centerLeft} ${yCenter - R_out} L ${centerRight} ${yCenter - R_out} A ${R_out} ${R_out} 0 0 1 ${centerRight} ${yCenter + R_out} L ${centerLeft} ${yCenter + R_out} A ${R_out} ${R_out} 0 0 1 ${centerLeft} ${yCenter - R_out} Z`;
-        const bg = svgEl('path', {
-            d: outerPathBg,
-            fill: '#3A0C0C'
-        });
+        const bg = svgEl('path', { d: outerPathBg, fill: '#3A0C0C' });
         svg.appendChild(bg);
 
-        // Helper to build a tile with optional highlight
         function buildTile(num, type, pathD, tx, ty) {
             const g = svgEl('g', {});
             const path = svgEl('path', {
@@ -1121,27 +1120,21 @@
                 fill: tileFill(type),
                 class: 'tile-path'
             });
-            // Highlight override
-            if (centerNums.has(num)) {
-                path.classList.add('hl-center');
-            } else if (neighborNums.has(num)) {
-                path.classList.add('hl-neighbor');
-            }
+            if (centerNums.has(num)) path.classList.add('hl-center');
+            else if (neighborNums.has(num)) path.classList.add('hl-neighbor');
+
             const text = svgEl('text', {
                 x: tx,
                 y: ty,
                 class: 'tile-text'
             });
-            if (centerNums.has(num) || neighborNums.has(num)) {
-                text.classList.add('hl-dark');
-            }
+            if (centerNums.has(num) || neighborNums.has(num)) text.classList.add('hl-dark');
             text.textContent = num;
             g.appendChild(path);
             g.appendChild(text);
             svg.appendChild(g);
         }
 
-        // --- Top straight (13) ---
         TOP_STRAIGHT.forEach((item, i) => {
             const x1 = centerLeft + i * cellW;
             const x2 = x1 + cellW;
@@ -1151,7 +1144,6 @@
             buildTile(item.num, item.type, pathD, (x1 + x2) / 2, (yOut + yIn) / 2);
         });
 
-        // --- Bottom straight (13) ---
         BOTTOM_STRAIGHT.forEach((item, i) => {
             const x1 = centerLeft + i * cellW;
             const x2 = x1 + cellW;
@@ -1161,7 +1153,6 @@
             buildTile(item.num, item.type, pathD, (x1 + x2) / 2, (yOut + yIn) / 2);
         });
 
-        // --- Right arc (5 tiles across 180°) ---
         const rightStep = Math.PI / 5;
         RIGHT_ARC.forEach((item, i) => {
             const a1 = -Math.PI / 2 + i * rightStep;
@@ -1186,7 +1177,6 @@
             buildTile(item.num, item.type, pathD, tx, ty);
         });
 
-        // --- Left arc (6 tiles across 180°) ---
         const leftStep = Math.PI / 6;
         LEFT_ARC.forEach((item, i) => {
             const a1 = -Math.PI / 2 + i * leftStep;
@@ -1211,7 +1201,6 @@
             buildTile(item.num, item.type, pathD, tx, ty);
         });
 
-        // --- Continuous outline paths (drawn last so they sit on top) ---
         const outerPath = `M ${centerLeft} ${yCenter - R_out} L ${centerRight} ${yCenter - R_out} A ${R_out} ${R_out} 0 0 1 ${centerRight} ${yCenter + R_out} L ${centerLeft} ${yCenter + R_out} A ${R_out} ${R_out} 0 0 1 ${centerLeft} ${yCenter - R_out} Z`;
         const innerPath = `M ${centerLeft} ${yCenter - R_in} L ${centerRight} ${yCenter - R_in} A ${R_in} ${R_in} 0 0 1 ${centerRight} ${yCenter + R_in} L ${centerLeft} ${yCenter + R_in} A ${R_in} ${R_in} 0 0 1 ${centerLeft} ${yCenter - R_in} Z`;
         svg.appendChild(svgEl('path', { d: outerPath, class: 'racetrack-outline' }));
@@ -1360,7 +1349,6 @@
 
     setupInternalRefresh();
 
-    // Show the provider picker on every page load
     setTimeout(() => {
         showProviderPicker();
     }, 120);
