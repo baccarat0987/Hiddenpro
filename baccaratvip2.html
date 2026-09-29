@@ -470,7 +470,131 @@
             .history-col, .group-col { height: auto; min-height: 180px; }
         }
 
-        /* WHEEL OVERLAY */
+        /* ==================== PROVIDER PICKER OVERLAY ==================== */
+        .provider-picker-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 5, 12, 0.96);
+            backdrop-filter: blur(14px);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            animation: fadeInOverlay 0.35s ease;
+            gap: 26px;
+        }
+        .provider-picker-title {
+            font-size: clamp(0.75rem, 3.5vw, 1rem);
+            font-weight: 800;
+            letter-spacing: 4px;
+            color: #C9B3FF;
+            text-transform: uppercase;
+            text-align: center;
+            background: rgba(157,106,245,0.2);
+            padding: 8px 28px;
+            border-radius: 60px;
+            border: 1px solid rgba(157,106,245,0.5);
+            backdrop-filter: blur(4px);
+        }
+        .provider-picker-sub {
+            font-size: 0.55rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: #8A7ACC;
+            text-align: center;
+            margin-top: -14px;
+            text-transform: uppercase;
+        }
+        .provider-cards-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        .provider-card {
+            width: min(300px, 85vw);
+            background: linear-gradient(145deg, #12172B, #0A0E1F);
+            border: 2px solid rgba(157, 106, 245, 0.55);
+            border-radius: 26px;
+            padding: 20px 18px 22px;
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 14px 28px rgba(0,0,0,0.55);
+        }
+        .provider-card:hover {
+            transform: translateY(-4px) scale(1.015);
+            border-color: #C9B3FF;
+            box-shadow: 0 18px 42px rgba(157,106,245,0.55), 0 0 0 1px rgba(201,179,255,0.4);
+        }
+        .provider-card:active {
+            transform: translateY(-1px) scale(0.995);
+        }
+        .provider-card-name {
+            font-size: 1.05rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, #C9B3FF, #9D6AF5);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-transform: uppercase;
+        }
+        .provider-card-sub {
+            font-size: 0.55rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            color: #8A7ACC;
+            text-transform: uppercase;
+            margin-top: -8px;
+        }
+        .provider-wheel-preview {
+            width: 100%;
+            height: 120px;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+        }
+        .preview-evolution {
+            background: radial-gradient(ellipse at center, #5A1A1A 0%, #3A0E0E 100%);
+        }
+        .preview-pragmatic {
+            background: radial-gradient(ellipse at center, #1B2340 0%, #0F1628 100%);
+        }
+        .provider-btn-pick {
+            width: 100%;
+            padding: 10px;
+            border-radius: 35px;
+            font-weight: 800;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            border: 1px solid rgba(157, 106, 245, 0.7);
+            background: linear-gradient(145deg, #2D1F3A, #1A1225);
+            color: #D9C8FF;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.1s linear;
+        }
+        .provider-card:hover .provider-btn-pick {
+            background: linear-gradient(145deg, #9D6AF5, #7B4FDD);
+            color: #0A0E1A;
+            border-color: #C9B3FF;
+        }
+
+        /* ==================== WHEEL OVERLAY (OVAL) ==================== */
         .wheel-overlay {
             position: fixed;
             top: 0;
@@ -493,27 +617,27 @@
         }
         .wheel-container {
             background: linear-gradient(145deg, #12172B, #0A0E1F);
-            border-radius: 48px;
-            padding: 20px 24px 24px;
+            border-radius: 36px;
+            padding: 22px 22px 20px;
             border: 2px solid rgba(157, 106, 245, 0.8);
             box-shadow: 0 30px 50px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,179,255,0.2), 0 0 35px rgba(157,106,245,0.5);
             position: relative;
             width: auto;
-            max-width: 95vw;
+            max-width: 96vw;
             display: inline-block;
         }
         .close-wheel-btn {
             position: absolute;
-            top: 14px;
-            right: 18px;
+            top: 12px;
+            right: 16px;
             background: rgba(10, 14, 28, 0.9);
             border: 1px solid rgba(157, 106, 245, 0.8);
             color: #D9C8FF;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: bold;
             cursor: pointer;
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -531,84 +655,107 @@
         }
         .wheel-title {
             text-align: center;
-            font-size: clamp(0.65rem, 3vw, 0.8rem);
+            font-size: clamp(0.6rem, 2.6vw, 0.78rem);
             font-weight: 800;
-            letter-spacing: 2px;
+            letter-spacing: 1.8px;
             color: #C9B3FF;
-            margin-bottom: 18px;
+            margin-bottom: 14px;
             text-transform: uppercase;
             background: rgba(157,106,245,0.2);
             display: inline-block;
-            width: auto;
-            margin-left: auto;
-            margin-right: auto;
             padding: 6px 20px;
             border-radius: 60px;
             backdrop-filter: blur(4px);
-        }
-        .track-container {
             position: relative;
-            width: min(85vw, 85vh, 600px);
-            height: min(85vw, 85vh, 400px);
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+        /* Oval track container */
+        .track-oval {
+            position: relative;
+            width: min(88vw, 620px);
+            height: min(44vw, 310px);
             margin: 0 auto;
+            border-radius: 999px;
         }
-        .num {
-            width: clamp(28px, 7vw, 44px);
-            height: clamp(28px, 7vw, 44px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
+        /* Evolution felt background */
+        .track-oval.evo {
+            background: radial-gradient(ellipse at center, #6B1A1A 0%, #3A0C0C 70%, #250808 100%);
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.7), 0 0 0 2px rgba(80, 30, 30, 0.6);
+        }
+        /* Pragmatic navy background */
+        .track-oval.prag {
+            background: radial-gradient(ellipse at center, #1F2A4A 0%, #111A30 70%, #0A1120 100%);
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.7), 0 0 0 2px rgba(40, 60, 100, 0.6);
+        }
+        /* Inner empty window */
+        .track-oval-inner {
             position: absolute;
-            border-radius: 50%;
-            font-family: 'Inter', monospace;
-            font-size: clamp(10px, 3vw, 14px);
-            font-weight: 800;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            cursor: default;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 68%;
+            height: 42%;
+            border-radius: 999px;
+            background: rgba(0,0,0,0.35);
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.85);
         }
-        .num.red { background: #c62828; color: white; }
-        .num.black { background: #1a1e2a; color: #e0e0e0; border: 1px solid rgba(157,106,245,0.4); }
-        .num.green { background: #0fa23f; color: white; }
-        .num.neighbor { 
-            background: #FFD966 !important; 
-            color: #0A0E1A !important; 
-            transform: scale(1.2);
-            box-shadow: 0 0 12px rgba(255,217,102,0.8);
-            z-index: 5;
-        }
-        .num.center { 
-            background: #FF69B4 !important; 
-            color: #0A0E1A !important; 
-            transform: scale(1.3);
-            box-shadow: 0 0 18px rgba(255,105,180,0.9);
-            z-index: 6;
+        /* Number tile base */
+        .oval-num {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: 900;
+            font-family: 'Inter', monospace;
+            border-radius: 4px;
+            color: #FFFFFF;
+            text-shadow: 0 0 2px rgba(0,0,0,0.6);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            z-index: 3;
+        }
+        .oval-num.red   { background: #C62828; }
+        .oval-num.black { background: #111114; border: 1px solid rgba(255,255,255,0.08); }
+        .oval-num.green { background: #0E8F3A; }
+        .oval-num.center {
+            background: #FF69B4 !important;
+            color: #0A0E1A !important;
+            transform: scale(1.15);
+            box-shadow: 0 0 14px rgba(255,105,180,0.9);
+            z-index: 6;
+        }
+        .oval-num.neighbor {
+            background: #FFD966 !important;
+            color: #0A0E1A !important;
+            transform: scale(1.08);
+            box-shadow: 0 0 10px rgba(255,217,102,0.85);
+            z-index: 5;
         }
         .wheel-note {
             text-align: center;
-            margin-top: 18px;
-            font-size: clamp(0.55rem, 2.5vw, 0.65rem);
+            margin-top: 16px;
+            font-size: clamp(0.52rem, 2.3vw, 0.62rem);
             font-weight: 600;
             color: #B88AFF;
             background: rgba(0,0,0,0.35);
             padding: 6px 14px;
             border-radius: 40px;
             display: inline-block;
-            width: auto;
-            margin-left: auto;
-            margin-right: auto;
-            letter-spacing: 0.6px;
+            letter-spacing: 0.5px;
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
         }
-        
+
         @media (max-width: 640px) {
-            .wheel-container { padding: 16px 18px 18px; }
-            .track-container { width: min(82vw, 82vh, 500px); height: min(82vw, 82vh, 340px); }
+            .wheel-container { padding: 16px 14px 16px; border-radius: 26px; }
+            .track-oval { width: min(92vw, 500px); height: min(48vw, 250px); }
         }
-        @media (max-width: 480px) {
-            .track-container { width: min(75vw, 75vh, 380px); height: min(75vw, 75vh, 260px); }
-            .num { width: clamp(24px, 6vw, 36px); height: clamp(24px, 6vw, 36px); font-size: clamp(9px, 2.5vw, 12px); }
+        @media (max-width: 420px) {
+            .track-oval { width: min(94vw, 400px); height: min(52vw, 210px); }
         }
     </style>
 </head>
@@ -726,6 +873,9 @@
     let hitCount = 0;
     let missCount = 0;
 
+    // --- Chosen provider for wheel layout (set by picker overlay) ---
+    let chosenProvider = null; // "evolution" | "pragmatic"
+
     // DOM Elements
     const numbersGrid = document.getElementById('numbersGrid');
     const zeroButton = document.getElementById('zeroButton');
@@ -842,18 +992,137 @@
         }
     }
 
-    // ==================== WHEEL OVERLAY ====================
+    // ==================== WHEEL SEQUENCE ====================
+    // Standard European wheel sequence (identical for both Evolution and Pragmatic).
+    // Clockwise starting from 0.
     const wheelNumbers = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
-    
+    const redSet = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+
+    // ==================== PROVIDER PICKER OVERLAY ====================
+    function showProviderPicker() {
+        const overlay = document.createElement('div');
+        overlay.className = 'provider-picker-overlay';
+        overlay.id = 'providerPickerOverlay';
+
+        const title = document.createElement('div');
+        title.className = 'provider-picker-title';
+        title.innerText = '◈ SELECT WHEEL LAYOUT ◈';
+
+        const sub = document.createElement('div');
+        sub.className = 'provider-picker-sub';
+        sub.innerText = 'Choose provider skin for prediction overlay';
+
+        const row = document.createElement('div');
+        row.className = 'provider-cards-row';
+
+        // --- Evolution card ---
+        const evoCard = document.createElement('div');
+        evoCard.className = 'provider-card';
+        evoCard.innerHTML = `
+            <div class="provider-card-name">EVOLUTION</div>
+            <div class="provider-card-sub">Red Felt Oval Layout</div>
+            <div class="provider-wheel-preview preview-evolution" id="evoPreview"></div>
+            <button class="provider-btn-pick">SELECT EVOLUTION</button>
+        `;
+        evoCard.addEventListener('click', () => {
+            chosenProvider = 'evolution';
+            closePickerAndStart();
+        });
+
+        // --- Pragmatic card ---
+        const pragCard = document.createElement('div');
+        pragCard.className = 'provider-card';
+        pragCard.innerHTML = `
+            <div class="provider-card-name">PRAGMATIC</div>
+            <div class="provider-card-sub">Navy Oval Layout</div>
+            <div class="provider-wheel-preview preview-pragmatic" id="pragPreview"></div>
+            <button class="provider-btn-pick">SELECT PRAGMATIC</button>
+        `;
+        pragCard.addEventListener('click', () => {
+            chosenProvider = 'pragmatic';
+            closePickerAndStart();
+        });
+
+        row.appendChild(evoCard);
+        row.appendChild(pragCard);
+
+        overlay.appendChild(title);
+        overlay.appendChild(sub);
+        overlay.appendChild(row);
+        document.body.appendChild(overlay);
+
+        // Mini preview rendering (draw each card's oval in miniature)
+        setTimeout(() => {
+            renderMiniPreview(document.getElementById('evoPreview'), 'evolution');
+            renderMiniPreview(document.getElementById('pragPreview'), 'pragmatic');
+        }, 20);
+    }
+
+    // Small oval preview for the picker cards
+    function renderMiniPreview(container, provider) {
+        if (!container) return;
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        const radiusX = w * 0.42;
+        const radiusY = h * 0.42;
+        const cx = w / 2;
+        const cy = h / 2;
+        const total = wheelNumbers.length;
+        const tileW = Math.max(6, Math.round(w / 45));
+        const tileH = Math.max(5, Math.round(h / 22));
+
+        const inner = document.createElement('div');
+        inner.style.position = 'absolute';
+        inner.style.top = '50%';
+        inner.style.left = '50%';
+        inner.style.transform = 'translate(-50%,-50%)';
+        inner.style.width = '65%';
+        inner.style.height = '40%';
+        inner.style.borderRadius = '999px';
+        inner.style.background = 'rgba(0,0,0,0.4)';
+        container.appendChild(inner);
+
+        for (let i = 0; i < total; i++) {
+            const num = wheelNumbers[i];
+            const tile = document.createElement('div');
+            // Layout direction depends on provider
+            const angle = provider === 'evolution'
+                ? (i / total) * Math.PI * 2 + Math.PI
+                : -(i / total) * Math.PI * 2 + Math.PI;
+            const x = cx + radiusX * Math.cos(angle) - tileW / 2;
+            const y = cy + radiusY * Math.sin(angle) - tileH / 2;
+            tile.style.position = 'absolute';
+            tile.style.left = x + 'px';
+            tile.style.top = y + 'px';
+            tile.style.width = tileW + 'px';
+            tile.style.height = tileH + 'px';
+            tile.style.borderRadius = '1px';
+            if (num === 0) tile.style.background = '#0E8F3A';
+            else if (redSet.has(num)) tile.style.background = '#C62828';
+            else tile.style.background = '#111114';
+            container.appendChild(tile);
+        }
+    }
+
+    function closePickerAndStart() {
+        const picker = document.getElementById('providerPickerOverlay');
+        if (picker) picker.remove();
+        // Kick off the app overlay if a prediction exists
+        showWheelOverlay();
+    }
+
+    // ==================== WHEEL OVERLAY (OVAL — Evolution / Pragmatic) ====================
     function showWheelOverlay() {
+        // Must have a provider chosen and enough history
+        if (!chosenProvider) return;
         if (overlayVisible) return;
         if (spinHistory.length < 5) return;
         const mainPredRaw = mainPredictionSpan.innerText;
         if (!mainPredRaw || mainPredRaw === '———') return;
-        
+
         const numbersInGroup = mainPredRaw.split('-').map(Number).filter(n => !isNaN(n) && n >= 0 && n <= 36);
         if (numbersInGroup.length === 0) return;
-        
+
         const centerIndices = [];
         const neighborIndicesSet = new Set();
         numbersInGroup.forEach(num => {
@@ -867,64 +1136,103 @@
                 }
             }
         });
-        
+
         const overlay = document.createElement('div');
         overlay.className = 'wheel-overlay';
+
         const containerDiv = document.createElement('div');
         containerDiv.className = 'wheel-container';
+
         const closeBtn = document.createElement('div');
         closeBtn.className = 'close-wheel-btn';
         closeBtn.innerHTML = '✕';
-        closeBtn.addEventListener('click', () => { overlay.remove(); overlayVisible = false; });
+        closeBtn.addEventListener('click', () => {
+            overlay.remove();
+            overlayVisible = false;
+        });
+
         const title = document.createElement('div');
         title.className = 'wheel-title';
-        title.innerText = `PREDICTION: ${mainPredRaw}  |  +2 NEIGHBORS `;
+        const providerLabel = chosenProvider === 'evolution' ? 'EVOLUTION' : 'PRAGMATIC';
+        title.innerText = `${providerLabel} • PREDICTION: ${mainPredRaw}`;
+
         const trackDiv = document.createElement('div');
-        trackDiv.className = 'track-container';
-        
+        trackDiv.className = 'track-oval ' + (chosenProvider === 'evolution' ? 'evo' : 'prag');
+
+        // Inner empty window
+        const inner = document.createElement('div');
+        inner.className = 'track-oval-inner';
+        trackDiv.appendChild(inner);
+
         const numbersDivs = [];
-        const redSet = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
-        
-        function positionNumbers() {
+
+        // Compute tile size based on container size
+        function computeTileSize() {
             const rect = trackDiv.getBoundingClientRect();
-            const containerWidth = rect.width;
-            const containerHeight = rect.height;
-            const centerX = containerWidth / 2;
-            const centerY = containerHeight / 2;
-            const radiusX = containerWidth * 0.42;
-            const radiusY = containerHeight * 0.42;
-            
-            wheelNumbers.forEach((num, i) => {
-                const angle = (i / wheelNumbers.length) * 2 * Math.PI + Math.PI;
-                const x = centerX + radiusX * Math.cos(angle) - (numbersDivs[i]?.offsetWidth / 2 || 22);
-                const y = centerY + radiusY * Math.sin(angle) - (numbersDivs[i]?.offsetHeight / 2 || 22);
-                if (numbersDivs[i]) {
-                    numbersDivs[i].style.left = `${x}px`;
-                    numbersDivs[i].style.top = `${y}px`;
-                }
-            });
+            const w = rect.width;
+            const h = rect.height;
+            // Tile width ~= perimeter / count with a small gap
+            // Approximate perimeter of oval: pi * (a+b) where a,b are semi-axes
+            const a = w * 0.42;
+            const b = h * 0.42;
+            const perim = Math.PI * (a + b) * 1.02; // Ramanujan-lite approx for oval
+            const tileW = Math.max(14, Math.floor(perim / wheelNumbers.length) - 1);
+            const tileH = Math.max(22, Math.round(tileW * 1.65));
+            const fontSize = Math.max(9, Math.round(tileW * 0.62));
+            return { tileW, tileH, fontSize, w, h };
         }
-        
+
+        function positionAll() {
+            const { tileW, tileH, fontSize, w, h } = computeTileSize();
+            const cx = w / 2;
+            const cy = h / 2;
+            const radiusX = w * 0.42;
+            const radiusY = h * 0.42;
+
+            for (let i = 0; i < wheelNumbers.length; i++) {
+                const tile = numbersDivs[i];
+                if (!tile) continue;
+
+                let angle;
+                if (chosenProvider === 'evolution') {
+                    // 0 on right edge, clockwise
+                    angle = (i / wheelNumbers.length) * Math.PI * 2 + Math.PI;
+                } else {
+                    // Pragmatic: 0 on left edge, counter-clockwise
+                    angle = -(i / wheelNumbers.length) * Math.PI * 2 + Math.PI;
+                }
+
+                const x = cx + radiusX * Math.cos(angle) - tileW / 2;
+                const y = cy + radiusY * Math.sin(angle) - tileH / 2;
+
+                tile.style.width = tileW + 'px';
+                tile.style.height = tileH + 'px';
+                tile.style.left = x + 'px';
+                tile.style.top = y + 'px';
+                tile.style.fontSize = fontSize + 'px';
+            }
+        }
+
         wheelNumbers.forEach((num, i) => {
-            const div = document.createElement('div');
-            div.classList.add('num');
-            div.textContent = num;
-            if (num === 0) div.classList.add('green');
-            else if (redSet.has(num)) div.classList.add('red');
-            else div.classList.add('black');
-            trackDiv.appendChild(div);
-            numbersDivs.push(div);
+            const tile = document.createElement('div');
+            tile.classList.add('oval-num');
+            tile.textContent = num;
+            if (num === 0) tile.classList.add('green');
+            else if (redSet.has(num)) tile.classList.add('red');
+            else tile.classList.add('black');
+            trackDiv.appendChild(tile);
+            numbersDivs.push(tile);
         });
-        
+
         centerIndices.forEach(idx => numbersDivs[idx]?.classList.add('center'));
         neighborIndicesSet.forEach(idx => {
             if (!centerIndices.includes(idx)) numbersDivs[idx]?.classList.add('neighbor');
         });
-        
+
         const note = document.createElement('div');
         note.className = 'wheel-note';
-        note.innerHTML = '💗 <strong style="color:#FF69B4">PINK</strong> = Main Predicted Numbers &nbsp;&nbsp; 💛 <strong style="color:#FFD966">Yellow</strong> = +2 Neighbors on Wheel';
-        
+        note.innerHTML = '💗 <strong style="color:#FF69B4">PINK</strong> = Main Predicted &nbsp; 💛 <strong style="color:#FFD966">Yellow</strong> = +2 Neighbors';
+
         containerDiv.appendChild(closeBtn);
         containerDiv.appendChild(title);
         containerDiv.appendChild(trackDiv);
@@ -932,11 +1240,11 @@
         overlay.appendChild(containerDiv);
         document.body.appendChild(overlay);
         overlayVisible = true;
-        
-        const resizeObserver = new ResizeObserver(() => positionNumbers());
+
+        const resizeObserver = new ResizeObserver(() => positionAll());
         resizeObserver.observe(trackDiv);
-        setTimeout(positionNumbers, 10);
-        
+        setTimeout(positionAll, 20);
+
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) {
                 resizeObserver.disconnect();
@@ -1078,6 +1386,12 @@
     mainPredictionSpan.innerText = "———";
     
     setupInternalRefresh();
+
+    // Show the provider picker after a short delay to ensure fonts/DOM are ready.
+    // The main app UI is visible behind the overlay but the overlay covers the screen.
+    setTimeout(() => {
+        showProviderPicker();
+    }, 120);
 </script>
 </body>
 </html>
