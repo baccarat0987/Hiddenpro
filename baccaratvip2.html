@@ -739,9 +739,9 @@
     const predBox = document.getElementById('predBox');
     const appContainer = document.getElementById('mainAppContainer');
 
-    // ==================== ENHANCED PREDICTION LOGIC (v2) ====================
+    // ==================== ENHANCED PREDICTION LOGIC (v2, original show-behavior) ====================
     function analiz() {
-        // ---- 0. HIT/MISS FEEDBACK (evaluates the PREVIOUS prediction) ----
+        // ---- 0. HIT/MISS FEEDBACK ----
         if (lastPrediction && lastPredictionGroups.length > 0 && groupHistory.length > 0) {
             const evalWindow = groupHistory.slice(-lastPredictionGroups.length);
             const hit = evalWindow.some(g => g === lastPrediction);
@@ -751,8 +751,8 @@
             lastPredictionGroups = [];
         }
 
-        // ---- 1. EMPTY / TOO-EARLY GUARD ----
-        if (groupHistory.length < 3) {
+        // ---- 1. EMPTY GUARD (matches original: block only if truly empty) ----
+        if (groupHistory.length === 0) {
             mainPredictionSpan.innerText = "———";
             alternativesContainer.innerHTML = `
                 <div class="alt-row">———</div>
@@ -775,13 +775,12 @@
 
         const freqMap = new Map();
         lastGroups.forEach((g, idx) => {
-            const age = lastGroups.length - 1 - idx;   // 0 = newest
+            const age = lastGroups.length - 1 - idx;
             const weight = Math.pow(DECAY, age);
             freqMap.set(g, (freqMap.get(g) || 0) + weight);
         });
 
         // ---- 4. PATTERN MATCH WITH COUNT + RECENCY DECAY ----
-        let effectivePatternBoost = 0;
         if (normalizedHistory.length >= 4) {
             const lastThree = normalizedHistory.slice(-3).join(',');
             const patternHits = [];
@@ -795,7 +794,6 @@
                 }
             }
 
-            // Confidence scale from historical hit rate (1.0 until ≥3 evaluations)
             const totalEval = hitCount + missCount;
             const hitRateScale = totalEval >= 3 ? (0.5 + 0.5 * (hitCount / totalEval)) : 1.0;
 
@@ -803,7 +801,6 @@
                 const decay = Math.pow(0.9, distFromEnd);
                 const boost = 4 * decay * hitRateScale;
                 freqMap.set(nextGroup, (freqMap.get(nextGroup) || 0) + boost);
-                effectivePatternBoost += boost;
             }
         }
 
@@ -825,19 +822,13 @@
             if (selected.length === 5) break;
         }
 
-        // ---- 7. CONFIDENCE GATE FOR MAIN PREDICTION ----
+        // ---- 7. MAIN PREDICTION (always show top — original behavior) ----
         if (selected.length === 0) {
             mainPredictionSpan.innerText = "———";
         } else {
-            const avgScore = selected.reduce((s, [, v]) => s + v, 0) / selected.length;
-            const topScore = selected[0][1];
-            if (topScore >= avgScore * 1.5) {
-                mainPredictionSpan.innerText = selected[0][0];
-                lastPrediction = selected[0][0];
-                lastPredictionGroups = [selected[0][0]];
-            } else {
-                mainPredictionSpan.innerText = "———";
-            }
+            mainPredictionSpan.innerText = selected[0][0];
+            lastPrediction = selected[0][0];
+            lastPredictionGroups = [selected[0][0]];
         }
 
         // ---- 8. RENDER ALTERNATIVES ----
