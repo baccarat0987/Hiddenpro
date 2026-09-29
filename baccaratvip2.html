@@ -1118,8 +1118,8 @@
 
         const title = document.createElement('div');
         title.className = 'wheel-title';
-        const providerLabel = chosenProvider === 'evolution' ? 'EVOLUTION' : 'PRAGMATIC';
-        title.innerText = `${providerLabel} • PREDICTION: ${mainPredRaw}`;
+        const providerLabel = chosenProvider === 'evolution' ? '' : '';
+        title.innerText = `${providerLabel} SUGGESTION: ${mainPredRaw}`;
 
         const wrap = document.createElement('div');
         wrap.className = 'racetrack-wrap';
@@ -1253,7 +1253,7 @@
 
         const note = document.createElement('div');
         note.className = 'wheel-note';
-        note.innerHTML = '💗 <strong style="color:#FF69B4">PINK</strong> = Predicted &nbsp; 💛 <strong style="color:#FFD966">Yellow</strong> = ±2 Physical Neighbors';
+        note.innerHTML = '💗 <strong style="color:#FF69B4">PINK</strong> = Center &nbsp; 💛 <strong style="color:#FFD966">Yellow</strong> = ±2 Physical Neighbors';
 
         containerDiv.appendChild(closeBtn);
         containerDiv.appendChild(title);
