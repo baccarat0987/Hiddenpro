@@ -566,7 +566,7 @@
             padding: 20px;
             overflow: hidden;
         }
-        /* Matches .aequitas-app size exactly */
+        /* Matches .aequitas-app width/shape — hugs content vertically */
         .wheel-container {
             background: linear-gradient(145deg, #12172B, #0A0E1F);
             border-radius: 24px;
@@ -578,7 +578,7 @@
             max-width: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            align-items: stretch;
             box-sizing: border-box;
         }
         .close-wheel-btn {
@@ -637,14 +637,13 @@
             justify-content: center;
             width: 100%;
             overflow: hidden;
-            flex: 1;
-            padding: 4px 0;
+            padding: 6px 0;
         }
         .racetrack-svg {
             display: block;
             width: 100%;
             height: auto;
-            max-height: 58vh;
+            max-height: 60vh;
             filter: drop-shadow(0 12px 28px rgba(0,0,0,0.9));
         }
 
@@ -1071,12 +1070,6 @@
 
         const containerDiv = document.createElement('div');
         containerDiv.className = 'wheel-container';
-
-        // Match main app container dimensions exactly
-        const appRect = appContainer.getBoundingClientRect();
-        if (appRect.height > 0) {
-            containerDiv.style.minHeight = appRect.height + 'px';
-        }
 
         const closeBtn = document.createElement('div');
         closeBtn.className = 'close-wheel-btn';
