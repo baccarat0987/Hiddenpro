@@ -72,9 +72,11 @@
             font-family: 'Segoe UI', Tahoma, sans-serif;
             display: none; /* Security Guard */
             min-height: 100vh;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            position: relative;
         }
 
         .exit-nav { position: fixed; top: 15px; right: 15px; z-index: 1000; }
@@ -92,20 +94,16 @@
         }
         .exit-btn:hover { background: var(--gold); color: #000; }
 
-        .container { 
+        /* ===== OUTSIDE TITLE (FIXED AT TOP CENTER) ===== */
+        .title-outer {
+            position: fixed;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 900;
             width: 100%;
-            max-width: 420px; 
-            margin: 0 auto; 
-            padding: 20px 12px; 
-            transform: scale(1.2);
-            transform-origin: center center;
-        }
-
-        /* ===== GLASS TITLE ===== */
-        .title-wrap {
-            position: relative;
-            margin-bottom: 3px;
-            padding: 10px 14px;
+            max-width: 420px;
+            padding: 8px 16px;
             border-radius: 14px;
             text-align: center;
 
@@ -127,8 +125,7 @@
                 0 0 25px rgba(255, 64, 129, 0.12);
         }
 
-        /* Glass top shine */
-        .title-wrap::before {
+        .title-outer::before {
             content: "";
             position: absolute;
             top: 0; left: 0; right: 0;
@@ -140,6 +137,7 @@
             pointer-events: none;
         }
 
+        /* Animated gradient text */
         h1 {
             position: relative;
             margin: 0;
@@ -147,20 +145,27 @@
             letter-spacing: 2px;
             font-weight: 900;
 
-            /* Gradient text */
             background: linear-gradient(90deg,
                 var(--player-cyan) 0%,
-                var(--player-blue) 35%,
-                var(--banker-red) 65%,
-                var(--banker-pink) 100%);
+                var(--player-blue) 20%,
+                var(--banker-red) 50%,
+                var(--banker-pink) 70%,
+                var(--player-cyan) 100%);
+            background-size: 300% 100%;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             color: transparent;
 
-            /* Soft glow behind the text */
+            animation: gradientFlow 4s linear infinite;
+
             filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.45))
                     drop-shadow(0 0 10px rgba(255, 64, 129, 0.35));
+        }
+
+        @keyframes gradientFlow {
+            0%   { background-position:   0% 50%; }
+            100% { background-position: 300% 50%; }
         }
 
         .tagline { 
@@ -170,6 +175,18 @@
             color: #666; 
             text-transform: uppercase; 
             letter-spacing: 1px; 
+        }
+
+        /* ===== MAIN CONTAINER (CENTERED) ===== */
+        .container { 
+            width: 100%;
+            max-width: 420px; 
+            margin: 0 auto; 
+            padding: 20px 12px; 
+            transform: scale(2.0);
+            transform-origin: center center;
+            /* Push down so it doesn't sit under the fixed title */
+            margin-top: 40px;
         }
 
         .prediction {
@@ -238,7 +255,6 @@
             box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
         }
 
-        /* PLAYER column accent */
         .score-column.player-col {
             border-color: var(--player-blue);
             box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 12px rgba(21, 101, 192, 0.3);
@@ -246,7 +262,6 @@
         .score-column.player-col h3 { color: var(--player-cyan); }
         .score-column.player-col h3 span { color: var(--player-cyan); }
 
-        /* BANKER column accent */
         .score-column.banker-col {
             border-color: var(--banker-red);
             box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 12px rgba(255, 23, 68, 0.3);
@@ -257,7 +272,6 @@
         .score-column h3 { margin: 0 0 10px 0; font-size: 0.7em; display: flex; justify-content: space-between; align-items: center; opacity: 0.9; }
         .score-column h3 span { font-size: 1.2em; font-weight: 900; }
 
-        /* Keypad layout */
         .keypad {
             display: flex;
             flex-direction: column;
@@ -289,7 +303,6 @@
             width: 100%;
         }
 
-        /* PLAYER button hover & selected */
         .player-col .score-btn:hover { 
             background: #1a237e; 
             border-color: var(--player-cyan); 
@@ -302,7 +315,6 @@
             box-shadow: 0 0 12px rgba(0, 229, 255, 0.6); 
         }
 
-        /* BANKER button hover & selected */
         .banker-col .score-btn:hover { 
             background: #4a0020; 
             border-color: var(--banker-pink); 
@@ -315,7 +327,6 @@
             box-shadow: 0 0 12px rgba(255, 23, 68, 0.6); 
         }
 
-        /* Zero button style */
         .zero-btn {
             background: #1e1e1e;
             border-color: #555;
@@ -333,7 +344,6 @@
             border-color: #fff;
         }
 
-        /* SUBMIT button - gradient with Player + Banker colors */
         .submit-btn {
             width: 100%; 
             background: linear-gradient(90deg, var(--player-blue) 0%, var(--player-cyan) 35%, var(--banker-red) 65%, var(--banker-pink) 100%);
@@ -359,7 +369,6 @@
         .stats-box { background: #111; padding: 10px; border-radius: 8px; border: 1px solid #222; text-align: center; height: 80px; overflow-y: auto; }
         .stats-box h2 { font-size: 0.6em; color: #444; text-transform: uppercase; margin-bottom: 6px; border-bottom: 1px solid #222; padding-bottom: 3px; letter-spacing: 1px; }
 
-        /* W/L badges — themed to Player (cyan/blue) and Banker (red/pink) */
         .win-icon { 
             background: linear-gradient(135deg, var(--player-blue), var(--player-cyan));
             color: #fff; 
@@ -390,9 +399,10 @@
 
         @media (max-width: 400px) {
             .score-grid { grid-template-columns: 1fr; }
-            .container { transform: scale(1.4); padding: 15px 10px; }
+            .container { transform: scale(1.4); padding: 15px 10px; margin-top: 50px; }
             .player-text, .banker-text { font-size: 1.3em; }
-            h1 { font-size: 1.1em; }
+            h1 { font-size: 1em; }
+            .title-outer { padding: 6px 12px; }
         }
     </style>
 </head>
@@ -402,12 +412,12 @@
         <a href="index.html" class="exit-btn">EXIT</a>
     </div>
 
-    <div class="container">
-        <div class="title-wrap">
-            <h1>AI CARD COUNTING</h1>
-        </div>
-        <div class="tagline">Neural Logic Engine v4.2</div>
+    <!-- ===== TITLE OUTSIDE CONTAINER (FIXED AT TOP) ===== -->
+    <div class="title-outer">
+        <h1>AI CARD COUNTING</h1>
+    </div>
 
+    <div class="container">
         <div class="prediction" id="predictionMain">
             <div class="calculating-overlay" id="overlay">ANALYZING...</div>
             <p id="predText" style="color: #444; font-size: 0.7em; font-weight: bold;">[ STANDBY ]</p>
@@ -495,7 +505,6 @@
         const roundHistoryDiv = document.getElementById("roundHistory");
         let pastRounds = [];
 
-        // Initialize scores at 0
         playerScoreDisplay.textContent = '0';
         bankerScoreDisplay.textContent = '0';
 
@@ -523,7 +532,6 @@
             return {side: chosenSide, points};
         }
 
-        // Helper: Keep only latest 7 children
         function trimHistory(container) {
             while (container.children.length > 7) {
                 container.removeChild(container.firstChild);
@@ -558,7 +566,6 @@
                     trimHistory(historyDiv);
                 }
 
-                // After submit, show dash in score displays
                 playerScoreDisplay.textContent = '-';
                 bankerScoreDisplay.textContent = '-';
                 document.querySelectorAll('.score-btn').forEach(b=>b.classList.remove('selected'));
