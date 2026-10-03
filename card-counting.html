@@ -93,7 +93,7 @@
             max-width: 420px; 
             margin: 0 auto; 
             padding: 20px 12px; 
-            transform: scale(1.3);
+            transform: scale(1.2);
             transform-origin: center center;
         }
         
@@ -315,6 +315,8 @@
         const bankerScoreDisplay = document.getElementById("bankerScoreDisplay");
         const predText = document.getElementById("predText");
         const overlay = document.getElementById("overlay");
+        const historyDiv = document.getElementById("history");
+        const roundHistoryDiv = document.getElementById("roundHistory");
         let pastRounds = [];
 
         // Initialize scores at 0
@@ -345,6 +347,13 @@
             return {side: chosenSide, points};
         }
 
+        // Helper: Keep only latest 7 children
+        function trimHistory(container) {
+            while (container.children.length > 7) {
+                container.removeChild(container.firstChild);
+            }
+        }
+
         document.getElementById("submitRoundBtn").addEventListener("click", () => {
             const p = parseInt(playerScoreDisplay.textContent)||0;
             const b = parseInt(bankerScoreDisplay.textContent)||0;
@@ -360,7 +369,8 @@
                 const span = document.createElement('span');
                 span.className = 'round-outcome ' + outcome;
                 span.textContent = outcome;
-                document.getElementById("roundHistory").appendChild(span);
+                roundHistoryDiv.appendChild(span);
+                trimHistory(roundHistoryDiv);
 
                 if(pastRounds.length > 1 && outcome !== 'T'){
                     const prev = pastRounds[pastRounds.length-2];
@@ -368,7 +378,8 @@
                     const wl = document.createElement('span');
                     wl.textContent = (predSide === outcome) ? 'W' : 'L';
                     wl.className = (wl.textContent === 'W') ? 'win-icon' : 'lose-icon';
-                    document.getElementById("history").appendChild(wl);
+                    historyDiv.appendChild(wl);
+                    trimHistory(historyDiv);
                 }
 
                 // After submit, show dash in score displays
@@ -385,10 +396,8 @@
         document.getElementById("deleteBtn").addEventListener("click", () => {
             if(pastRounds.length === 0) return;
             pastRounds.pop();
-            const rh = document.getElementById("roundHistory");
-            if(rh.lastChild) rh.removeChild(rh.lastChild);
-            const hi = document.getElementById("history");
-            if(hi.lastChild) hi.removeChild(hi.lastChild);
+            if(roundHistoryDiv.lastChild) roundHistoryDiv.removeChild(roundHistoryDiv.lastChild);
+            if(historyDiv.lastChild) historyDiv.removeChild(historyDiv.lastChild);
         });
     });
 
