@@ -77,20 +77,28 @@
             overflow: hidden;
         }
 
-        .exit-nav { position: fixed; top: 15px; right: 15px; z-index: 1000; }
+        /* ===== EXIT APPS BUTTON ===== */
+        .exit-nav { position: fixed; top: 18px; right: 18px; z-index: 1000; }
         .exit-btn { 
             background: rgba(255, 215, 0, 0.1); 
             color: var(--gold); 
-            padding: 6px 12px; 
-            border-radius: 5px; 
+            padding: 11px 22px; 
+            border-radius: 7px; 
             text-decoration: none; 
             font-weight: bold; 
             border: 1px solid var(--gold); 
-            font-size: 10px; 
+            font-size: 14px; 
+            letter-spacing: 1.5px;
             transition: 0.3s; 
             text-transform: uppercase;
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.25);
         }
-        .exit-btn:hover { background: var(--gold); color: #000; }
+        .exit-btn:hover { 
+            background: var(--gold); 
+            color: #000; 
+            box-shadow: 0 0 22px rgba(255, 215, 0, 0.7);
+            transform: scale(1.05);
+        }
 
         .container { 
             width: 100%;
@@ -101,7 +109,7 @@
             transform-origin: center center;
         }
         
-        /* ===== ANIMATED GRADIENT TITLE (No container/box) ===== */
+        /* ===== ANIMATED GRADIENT TITLE ===== */
         h1 { 
             text-align: center; 
             margin-bottom: 3px; 
@@ -154,13 +162,116 @@
             justify-content: center;
             position: relative;
             box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            overflow: hidden;
         }
 
+        /* ===== NEW ANIMATED LOADER OVERLAY ===== */
         .calculating-overlay {
-            position: absolute; inset: 0; background: rgba(0, 0, 0, 0.95);
-            display: none; align-items: center; justify-content: center;
-            font-size: 0.8em; color: var(--gold); border-radius: 10px; z-index: 10;
-            font-weight: bold; letter-spacing: 2px;
+            position: absolute; inset: 0; 
+            background: rgba(0, 0, 0, 0.96);
+            display: none; 
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center;
+            border-radius: 10px; 
+            z-index: 10;
+            padding: 10px 20px;
+            gap: 8px;
+        }
+
+        .calculating-overlay.active {
+            display: flex;
+        }
+
+        /* Row 1: label + cycling numbers */
+        .loader-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .loader-label {
+            font-size: 0.7em;
+            font-weight: bold;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg,
+                var(--player-cyan),
+                var(--player-blue),
+                var(--banker-red),
+                var(--banker-pink),
+                var(--player-cyan));
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            animation: gradientFlow 2s linear infinite;
+        }
+
+        .loader-counter {
+            font-size: 0.9em;
+            font-weight: 900;
+            color: var(--player-cyan);
+            text-shadow: 0 0 8px rgba(0, 229, 255, 0.7);
+            min-width: 42px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            transition: color 0.2s, text-shadow 0.2s;
+        }
+
+        /* Row 2: progress bar */
+        .loader-bar-track {
+            width: 85%;
+            height: 7px;
+            background: #1a1a1a;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid #2a2a2a;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.7);
+        }
+
+        .loader-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg,
+                var(--player-blue),
+                var(--player-cyan),
+                var(--banker-red),
+                var(--banker-pink));
+            background-size: 200% 100%;
+            border-radius: 4px;
+            animation: barFlow 1.5s linear infinite;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.6), 0 0 12px rgba(255, 23, 68, 0.5);
+            transition: width 0.1s linear;
+        }
+
+        @keyframes barFlow {
+            0%   { background-position:   0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        /* Row 3: mini status dots */
+        .loader-dots {
+            display: flex;
+            gap: 5px;
+        }
+        .loader-dots span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: dotPulse 1.2s ease-in-out infinite;
+        }
+        .loader-dots span:nth-child(1) { background: var(--player-cyan); animation-delay: 0s; }
+        .loader-dots span:nth-child(2) { background: var(--player-blue); animation-delay: 0.2s; }
+        .loader-dots span:nth-child(3) { background: var(--banker-red); animation-delay: 0.4s; }
+        .loader-dots span:nth-child(4) { background: var(--banker-pink); animation-delay: 0.6s; }
+
+        @keyframes dotPulse {
+            0%, 100% { opacity: 0.3; transform: scale(0.7); }
+            50%      { opacity: 1;   transform: scale(1.2); }
         }
 
         .player-text { 
@@ -353,13 +464,14 @@
             .score-grid { grid-template-columns: 1fr; }
             .container { transform: scale(1); padding: 15px 10px; }
             .player-text, .banker-text { font-size: 1.3em; }
+            .exit-btn { font-size: 12px; padding: 9px 16px; }
         }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
     <div class="exit-nav">
-        <a href="index.html" class="exit-btn">EXIT</a>
+        <a href="index.html" class="exit-btn">EXIT APPS</a>
     </div>
 
     <div class="container">
@@ -367,7 +479,18 @@
         <div class="tagline">Neural Logic Engine v4.2</div>
 
         <div class="prediction" id="predictionMain">
-            <div class="calculating-overlay" id="overlay">ANALYZING...</div>
+            <div class="calculating-overlay" id="overlay">
+                <div class="loader-row">
+                    <span class="loader-label">ANALYZING</span>
+                    <span class="loader-counter" id="loaderCounter">000</span>
+                </div>
+                <div class="loader-bar-track">
+                    <div class="loader-bar-fill" id="loaderBar"></div>
+                </div>
+                <div class="loader-dots">
+                    <span></span><span></span><span></span><span></span>
+                </div>
+            </div>
             <p id="predText" style="color: #444; font-size: 0.7em; font-weight: bold;">[ STANDBY ]</p>
         </div>
 
@@ -449,6 +572,8 @@
         const bankerScoreDisplay = document.getElementById("bankerScoreDisplay");
         const predText = document.getElementById("predText");
         const overlay = document.getElementById("overlay");
+        const loaderCounter = document.getElementById("loaderCounter");
+        const loaderBar = document.getElementById("loaderBar");
         const historyDiv = document.getElementById("history");
         const roundHistoryDiv = document.getElementById("roundHistory");
         let pastRounds = [];
@@ -486,14 +611,68 @@
             }
         }
 
+        // ===== Animated loader sequence =====
+        let loaderInterval = null;
+
+        function startLoader(duration = 700) {
+            overlay.classList.add("active");
+            let elapsed = 0;
+            const intervalStep = 30;
+            let count = 0;
+            loaderBar.style.width = "0%";
+
+            loaderInterval = setInterval(() => {
+                elapsed += intervalStep;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Bar fill
+                loaderBar.style.width = (progress * 100) + "%";
+
+                // Counter numbers (cycling 0-999)
+                count = (count + Math.floor(Math.random() * 40) + 5) % 1000;
+                loaderCounter.textContent = String(count).padStart(3, "0");
+
+                // Color shifts with progress
+                if (progress < 0.33) {
+                    loaderCounter.style.color = "var(--player-cyan)";
+                    loaderCounter.style.textShadow = "0 0 8px rgba(0, 229, 255, 0.7)";
+                } else if (progress < 0.66) {
+                    loaderCounter.style.color = "var(--player-blue)";
+                    loaderCounter.style.textShadow = "0 0 8px rgba(21, 101, 192, 0.8)";
+                } else {
+                    loaderCounter.style.color = "var(--banker-pink)";
+                    loaderCounter.style.textShadow = "0 0 8px rgba(255, 64, 129, 0.8)";
+                }
+
+                if (progress >= 1) {
+                    clearInterval(loaderInterval);
+                    loaderInterval = null;
+                    // Final flash to red then done
+                    loaderCounter.textContent = "999";
+                    loaderCounter.style.color = "var(--banker-red)";
+                    loaderCounter.style.textShadow = "0 0 10px rgba(255, 23, 68, 0.9)";
+                }
+            }, intervalStep);
+        }
+
+        function stopLoader() {
+            if (loaderInterval) clearInterval(loaderInterval);
+            loaderInterval = null;
+            overlay.classList.remove("active");
+            loaderBar.style.width = "0%";
+            loaderCounter.textContent = "000";
+            loaderCounter.style.color = "var(--player-cyan)";
+            loaderCounter.style.textShadow = "0 0 8px rgba(0, 229, 255, 0.7)";
+        }
+
         document.getElementById("submitRoundBtn").addEventListener("click", () => {
             const p = parseInt(playerScoreDisplay.textContent)||0;
             const b = parseInt(bankerScoreDisplay.textContent)||0;
             if(p===0 && b===0) return;
 
-            overlay.style.display = "flex";
+            startLoader(700);
             setTimeout(() => {
-                overlay.style.display = "none";
+                stopLoader();
                 const prediction = generatePrediction();
                 pastRounds.push({p, b, prediction});
                 
