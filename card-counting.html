@@ -47,8 +47,12 @@
     <style>
         :root {
             --gold: #ffd700;
-            --player-blue: #3498db;
-            --banker-red: #e74c3c;
+            --player-cyan: #00e5ff;
+            --player-blue: #1565c0;
+            --player-navy: #0d1b4c;
+            --banker-red: #ff1744;
+            --banker-pink: #ff4081;
+            --banker-deep: #8b0030;
             --bg-dark: #0d0d0d;
         }
 
@@ -122,9 +126,29 @@
             font-weight: bold; letter-spacing: 2px;
         }
 
-        .player-text { color: var(--player-blue); font-weight: 800; font-size: 1.6em; text-shadow: 0 0 15px rgba(52, 152, 219, 0.4); }
-        .banker-text { color: var(--banker-red); font-weight: 800; font-size: 1.6em; text-shadow: 0 0 15px rgba(231, 76, 60, 0.4); }
-        .pred-side { display: inline-block; padding: 3px 8px; margin-left: 8px; border-radius: 4px; background: #000; border: 1px solid var(--gold); color: var(--gold); font-size: 0.65em; font-weight: bold; }
+        .player-text { 
+            color: var(--player-cyan); 
+            font-weight: 800; 
+            font-size: 1.6em; 
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.5); 
+        }
+        .banker-text { 
+            color: var(--banker-red); 
+            font-weight: 800; 
+            font-size: 1.6em; 
+            text-shadow: 0 0 15px rgba(255, 23, 68, 0.5); 
+        }
+        .pred-side { 
+            display: inline-block; 
+            padding: 3px 8px; 
+            margin-left: 8px; 
+            border-radius: 4px; 
+            background: #000; 
+            border: 1px solid var(--gold); 
+            color: var(--gold); 
+            font-size: 0.65em; 
+            font-weight: bold; 
+        }
 
         .control-buttons { display: flex; gap: 8px; margin-bottom: 12px; }
         .action-btn { flex: 1; background: #222; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: 0.2s; }
@@ -146,8 +170,24 @@
             box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
         }
 
-        .score-column h3 { margin: 0 0 10px 0; font-size: 0.7em; color: var(--gold); display: flex; justify-content: space-between; align-items: center; opacity: 0.8; }
-        .score-column h3 span { color: #fff; font-size: 1.2em; font-weight: 900; }
+        /* PLAYER column accent */
+        .score-column.player-col {
+            border-color: var(--player-blue);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 12px rgba(21, 101, 192, 0.3);
+        }
+        .score-column.player-col h3 { color: var(--player-cyan); }
+        .score-column.player-col h3 span { color: var(--player-cyan); }
+
+        /* BANKER column accent */
+        .score-column.banker-col {
+            border-color: var(--banker-red);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 12px rgba(255, 23, 68, 0.3);
+        }
+        .score-column.banker-col h3 { color: var(--banker-pink); }
+        .score-column.banker-col h3 span { color: var(--banker-pink); }
+
+        .score-column h3 { margin: 0 0 10px 0; font-size: 0.7em; display: flex; justify-content: space-between; align-items: center; opacity: 0.9; }
+        .score-column h3 span { font-size: 1.2em; font-weight: 900; }
 
         /* Keypad layout */
         .keypad {
@@ -181,26 +221,70 @@
             width: 100%;
         }
 
-        .score-btn:hover { background: #333; border-color: #555; }
-        .score-btn.selected { background: var(--gold); color: #000; border-color: #fff; box-shadow: 0 0 10px rgba(255,215,0,0.3); }
+        /* PLAYER button hover & selected */
+        .player-col .score-btn:hover { 
+            background: #1a237e; 
+            border-color: var(--player-cyan); 
+            color: var(--player-cyan);
+        }
+        .player-col .score-btn.selected { 
+            background: var(--player-cyan); 
+            color: #000; 
+            border-color: #fff; 
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.6); 
+        }
 
+        /* BANKER button hover & selected */
+        .banker-col .score-btn:hover { 
+            background: #4a0020; 
+            border-color: var(--banker-pink); 
+            color: var(--banker-pink);
+        }
+        .banker-col .score-btn.selected { 
+            background: var(--banker-red); 
+            color: #fff; 
+            border-color: #fff; 
+            box-shadow: 0 0 12px rgba(255, 23, 68, 0.6); 
+        }
+
+        /* Zero button style */
         .zero-btn {
             background: #1e1e1e;
             border-color: #555;
             color: #aaa;
             font-size: 13px;
         }
-        .zero-btn.selected {
-            background: #888;
+        .player-col .zero-btn.selected {
+            background: var(--player-cyan);
             color: #000;
             border-color: #fff;
         }
+        .banker-col .zero-btn.selected {
+            background: var(--banker-red);
+            color: #fff;
+            border-color: #fff;
+        }
 
+        /* SUBMIT button - gradient with Player + Banker colors */
         .submit-btn {
-            width: 100%; background: var(--gold); color: #000; border: none;
-            padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 900;
-            cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-            text-transform: uppercase; letter-spacing: 1px;
+            width: 100%; 
+            background: linear-gradient(90deg, var(--player-blue) 0%, var(--player-cyan) 35%, var(--banker-red) 65%, var(--banker-pink) 100%);
+            color: #fff; 
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 14px; 
+            border-radius: 8px; 
+            font-size: 15px; 
+            font-weight: 900;
+            cursor: pointer; 
+            box-shadow: 0 5px 20px rgba(0, 229, 255, 0.25), 0 5px 20px rgba(255, 23, 68, 0.25);
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+            transition: 0.3s;
+        }
+        .submit-btn:hover {
+            box-shadow: 0 5px 25px rgba(0, 229, 255, 0.5), 0 5px 25px rgba(255, 23, 68, 0.5);
+            filter: brightness(1.1);
         }
 
         .stats-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
@@ -244,7 +328,7 @@
 
         <form id="scoreForm">
             <div class="score-grid">
-                <div class="score-column">
+                <div class="score-column player-col">
                     <h3>PLAYER <span id="playerScoreDisplay">0</span></h3>
                     <div class="keypad">
                         <div class="keypad-row single">
@@ -268,7 +352,7 @@
                     </div>
                 </div>
 
-                <div class="score-column">
+                <div class="score-column banker-col">
                     <h3>BANKER <span id="bankerScoreDisplay">0</span></h3>
                     <div class="keypad">
                         <div class="keypad-row single">
