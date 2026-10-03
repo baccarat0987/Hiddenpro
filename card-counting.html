@@ -554,26 +554,37 @@
             filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.4));
         }
 
-        .advice-reason {
-            font-size: 0.8em;
-            color: #ccc;
-            margin-bottom: 18px;
-            line-height: 1.7;
-            padding: 0 5px;
-            font-weight: 500;
-        }
-        .advice-reason strong {
+        .advice-stats {
+            font-size: 0.95em;
             color: #fff;
+            margin-bottom: 14px;
+            line-height: 1.6;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
-        .advice-reason .bad {
+        .advice-stats .bad {
             color: var(--banker-red);
-            font-weight: 800;
-            text-shadow: 0 0 6px rgba(255, 23, 68, 0.5);
+            font-weight: 900;
+            text-shadow: 0 0 8px rgba(255, 23, 68, 0.6);
         }
-        .advice-reason .good {
+        .advice-stats .good {
             color: var(--player-cyan);
-            font-weight: 800;
-            text-shadow: 0 0 6px rgba(0, 229, 255, 0.5);
+            font-weight: 900;
+            text-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
+        }
+
+        .advice-description {
+            font-size: 0.72em;
+            color: #999;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            padding: 0 5px;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            font-style: italic;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 10px 5px;
         }
 
         .dismiss-btn {
@@ -748,12 +759,15 @@
         </div>
     </div>
 
-    <!-- ===== TABLE CHANGE OVERLAY (now full screen, no icon) ===== -->
+    <!-- ===== TABLE CHANGE OVERLAY (full screen, no icon) ===== -->
     <div class="table-change-overlay" id="tableChangeOverlay">
         <div class="advice-box">
             <div class="advice-title">CHANGE TABLE</div>
-            <div class="advice-reason" id="adviceReason"></div>
-            <button type="button" class="dismiss-btn" id="dismissOverlayBtn">CONTINUE</button>
+            <div class="advice-stats" id="adviceStats"></div>
+            <div class="advice-description" id="adviceDescription">
+                Current pattern indicates more losses than wins. For optimal performance, it is recommended to switch tables and reset your session.
+            </div>
+            <button type="button" class="dismiss-btn" id="dismissOverlayBtn">RESET ALL</button>
         </div>
     </div>
 
@@ -769,7 +783,8 @@
         const historyDiv = document.getElementById("history");
         const roundHistoryDiv = document.getElementById("roundHistory");
         const tableChangeOverlay = document.getElementById("tableChangeOverlay");
-        const adviceReason = document.getElementById("adviceReason");
+        const adviceStats = document.getElementById("adviceStats");
+        const adviceDescription = document.getElementById("adviceDescription");
         const dismissOverlayBtn = document.getElementById("dismissOverlayBtn");
         const resetBtn = document.getElementById("resetBtn");
 
@@ -783,6 +798,23 @@
         // Initialize display with dash (no selection yet)
         playerScoreDisplay.textContent = '-';
         bankerScoreDisplay.textContent = '-';
+
+        // ===== RESET FUNCTION (shared by RESET button and RESET ALL in overlay) =====
+        function resetAllData() {
+            pastRounds = [];
+            outcomeSequence = [];
+            historyDiv.innerHTML = '';
+            roundHistoryDiv.innerHTML = '';
+            tableChangeOverlay.classList.remove('active');
+            document.body.classList.remove('overlay-active');
+            playerScoreDisplay.textContent = '-';
+            bankerScoreDisplay.textContent = '-';
+            playerSelected = false;
+            bankerSelected = false;
+            document.querySelectorAll('.score-btn').forEach(b => b.classList.remove('selected'));
+            predText.innerHTML = '[ STANDBY ]';
+            predText.style.color = '#444';
+        }
 
         // ===== TABLE CHANGE LOGIC =====
         function analyzeWinLossPatterns() {
@@ -803,7 +835,7 @@
 
             // Rule 1: First 5 results — more losing than winning (needs exactly 5 results)
             if (first5.length === 5 && first5Losses > first5Wins) {
-                reasons.push(`Result 1-5: <span class="bad">${first5Losses}L</span> vs <span class="good">${first5Wins}W</span>`);
+                reasons.push(`Result: <span class="bad">${first5Losses}L</span> vs <span class="good">${first5Wins}W</span>`);
             }
 
             // Rule 2: Last 7 results — more losing than winning (needs exactly 7 results)
@@ -818,7 +850,8 @@
 
             // If ANY pattern shows more losses than wins, recommend change
             if (reasons.length > 0) {
-                adviceReason.innerHTML = reasons.join('<br>');
+                adviceStats.innerHTML = reasons.join('<br>');
+                adviceDescription.textContent = 'Current pattern indicates more losses than wins. For optimal performance, it is recommended to switch tables and reset your session.';
                 tableChangeOverlay.classList.add('active');
                 document.body.classList.add('overlay-active');
             } else {
@@ -827,10 +860,9 @@
             }
         }
 
-        // Dismiss overlay manually
+        // RESET ALL button in overlay — fully resets the session
         dismissOverlayBtn.addEventListener('click', () => {
-            tableChangeOverlay.classList.remove('active');
-            document.body.classList.remove('overlay-active');
+            resetAllData();
         });
 
         // ===== GAME LOGIC =====
@@ -984,19 +1016,7 @@
 
         resetBtn.addEventListener("click", () => {
             if(confirm("Wipe all engine data for this session?")) {
-                pastRounds = [];
-                outcomeSequence = [];
-                historyDiv.innerHTML = '';
-                roundHistoryDiv.innerHTML = '';
-                tableChangeOverlay.classList.remove('active');
-                document.body.classList.remove('overlay-active');
-                playerScoreDisplay.textContent = '-';
-                bankerScoreDisplay.textContent = '-';
-                playerSelected = false;
-                bankerSelected = false;
-                document.querySelectorAll('.score-btn').forEach(b=>b.classList.remove('selected'));
-                predText.innerHTML = '[ STANDBY ]';
-                predText.style.color = '#444';
+                resetAllData();
             }
         });
 
