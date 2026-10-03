@@ -77,28 +77,57 @@
             overflow: hidden;
         }
 
-        /* ===== EXIT APPS BUTTON ===== */
+        /* ===== EXIT APPS BUTTON (themed to app palette) ===== */
         .exit-nav { position: fixed; top: 18px; right: 18px; z-index: 1000; }
         .exit-btn { 
-            background: rgba(255, 215, 0, 0.1); 
-            color: var(--gold); 
-            padding: 11px 22px; 
-            border-radius: 7px; 
+            background: linear-gradient(135deg,
+                rgba(0, 229, 255, 0.15) 0%,
+                rgba(21, 101, 192, 0.15) 50%,
+                rgba(255, 64, 129, 0.15) 100%);
+            color: #fff; 
+            padding: 12px 24px; 
+            border-radius: 8px; 
             text-decoration: none; 
-            font-weight: bold; 
-            border: 1px solid var(--gold); 
-            font-size: 14px; 
+            font-weight: 900; 
+            border: 1px solid rgba(0, 229, 255, 0.6);
+            font-size: 15px; 
             letter-spacing: 1.5px;
             transition: 0.3s; 
             text-transform: uppercase;
-            box-shadow: 0 0 12px rgba(255, 215, 0, 0.25);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow:
+                0 0 15px rgba(0, 229, 255, 0.35),
+                0 0 25px rgba(255, 64, 129, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+            position: relative;
+            overflow: hidden;
+        }
+        .exit-btn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg,
+                var(--player-cyan) 0%,
+                var(--player-blue) 35%,
+                var(--banker-red) 65%,
+                var(--banker-pink) 100%);
+            opacity: 0;
+            transition: 0.3s;
+            z-index: -1;
         }
         .exit-btn:hover { 
-            background: var(--gold); 
-            color: #000; 
-            box-shadow: 0 0 22px rgba(255, 215, 0, 0.7);
-            transform: scale(1.05);
+            color: #fff;
+            border-color: #fff;
+            box-shadow:
+                0 0 25px rgba(0, 229, 255, 0.8),
+                0 0 35px rgba(255, 64, 129, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            transform: scale(1.06);
+            text-shadow: 0 0 8px rgba(255,255,255,0.9);
         }
+        .exit-btn:hover::before { opacity: 1; }
 
         .container { 
             width: 100%;
@@ -165,7 +194,7 @@
             overflow: hidden;
         }
 
-        /* ===== NEW ANIMATED LOADER OVERLAY ===== */
+        /* ===== ANIMATED LOADER OVERLAY ===== */
         .calculating-overlay {
             position: absolute; inset: 0; 
             background: rgba(0, 0, 0, 0.96);
@@ -183,7 +212,6 @@
             display: flex;
         }
 
-        /* Row 1: label + cycling numbers */
         .loader-row {
             display: flex;
             align-items: center;
@@ -221,7 +249,6 @@
             transition: color 0.2s, text-shadow 0.2s;
         }
 
-        /* Row 2: progress bar */
         .loader-bar-track {
             width: 85%;
             height: 7px;
@@ -253,7 +280,6 @@
             100% { background-position: 200% 50%; }
         }
 
-        /* Row 3: mini status dots */
         .loader-dots {
             display: flex;
             gap: 5px;
@@ -464,7 +490,7 @@
             .score-grid { grid-template-columns: 1fr; }
             .container { transform: scale(1); padding: 15px 10px; }
             .player-text, .banker-text { font-size: 1.3em; }
-            .exit-btn { font-size: 12px; padding: 9px 16px; }
+            .exit-btn { font-size: 13px; padding: 10px 18px; }
         }
     </style>
 </head>
@@ -502,7 +528,7 @@
         <form id="scoreForm">
             <div class="score-grid">
                 <div class="score-column player-col">
-                    <h3>PLAYER <span id="playerScoreDisplay">0</span></h3>
+                    <h3>PLAYER <span id="playerScoreDisplay">-</span></h3>
                     <div class="keypad">
                         <div class="keypad-row single">
                             <button type="button" class="score-btn zero-btn" data-side="player" data-value="0">0</button>
@@ -526,7 +552,7 @@
                 </div>
 
                 <div class="score-column banker-col">
-                    <h3>BANKER <span id="bankerScoreDisplay">0</span></h3>
+                    <h3>BANKER <span id="bankerScoreDisplay">-</span></h3>
                     <div class="keypad">
                         <div class="keypad-row single">
                             <button type="button" class="score-btn zero-btn" data-side="banker" data-value="0">0</button>
@@ -578,17 +604,24 @@
         const roundHistoryDiv = document.getElementById("roundHistory");
         let pastRounds = [];
 
-        playerScoreDisplay.textContent = '0';
-        bankerScoreDisplay.textContent = '0';
+        // Track whether user has selected a value on each side
+        let playerSelected = false;
+        let bankerSelected = false;
+
+        // Initialize display with dash (no selection yet)
+        playerScoreDisplay.textContent = '-';
+        bankerScoreDisplay.textContent = '-';
 
         buttons.forEach(btn => {
             btn.addEventListener("click", function() {
                 const side = this.dataset.side;
                 if(side === "player") {
                     playerScoreDisplay.textContent = this.dataset.value;
+                    playerSelected = true;
                     document.querySelectorAll("button[data-side='player']").forEach(b=>b.classList.remove("selected"));
                 } else {
                     bankerScoreDisplay.textContent = this.dataset.value;
+                    bankerSelected = true;
                     document.querySelectorAll("button[data-side='banker']").forEach(b=>b.classList.remove("selected"));
                 }
                 this.classList.add("selected");
@@ -625,14 +658,11 @@
                 elapsed += intervalStep;
                 const progress = Math.min(elapsed / duration, 1);
 
-                // Bar fill
                 loaderBar.style.width = (progress * 100) + "%";
 
-                // Counter numbers (cycling 0-999)
                 count = (count + Math.floor(Math.random() * 40) + 5) % 1000;
                 loaderCounter.textContent = String(count).padStart(3, "0");
 
-                // Color shifts with progress
                 if (progress < 0.33) {
                     loaderCounter.style.color = "var(--player-cyan)";
                     loaderCounter.style.textShadow = "0 0 8px rgba(0, 229, 255, 0.7)";
@@ -647,7 +677,6 @@
                 if (progress >= 1) {
                     clearInterval(loaderInterval);
                     loaderInterval = null;
-                    // Final flash to red then done
                     loaderCounter.textContent = "999";
                     loaderCounter.style.color = "var(--banker-red)";
                     loaderCounter.style.textShadow = "0 0 10px rgba(255, 23, 68, 0.9)";
@@ -666,9 +695,32 @@
         }
 
         document.getElementById("submitRoundBtn").addEventListener("click", () => {
-            const p = parseInt(playerScoreDisplay.textContent)||0;
-            const b = parseInt(bankerScoreDisplay.textContent)||0;
-            if(p===0 && b===0) return;
+            // FIX: Only require that BOTH sides have been selected.
+            // 0 vs 0 is now valid as long as both 0 buttons were clicked.
+            if (!playerSelected || !bankerSelected) {
+                // Optional: subtle visual feedback
+                if (!playerSelected) {
+                    const col = document.querySelector(".player-col");
+                    col.style.transition = "0.2s";
+                    col.style.boxShadow = "inset 0 0 10px rgba(0,0,0,0.5), 0 0 20px rgba(255, 23, 68, 0.8)";
+                    setTimeout(() => {
+                        col.style.boxShadow = "inset 0 0 10px rgba(0,0,0,0.5), 0 0 12px rgba(21, 101, 192, 0.3)";
+                    }, 400);
+                }
+                if (!bankerSelected) {
+                    const col = document.querySelector(".banker-col");
+                    col.style.transition = "0.2s";
+                    col.style.boxShadow = "inset 0 0 10px rgba(0,0,0,0.5), 0 0 20px rgba(255, 23, 68, 0.8)";
+                    setTimeout(() => {
+                        col.style.boxShadow = "inset 0 0 10px rgba(0,0,0,0.5), 0 0 12px rgba(255, 23, 68, 0.3)";
+                    }, 400);
+                }
+                return;
+            }
+
+            const p = parseInt(playerScoreDisplay.textContent);
+            const b = parseInt(bankerScoreDisplay.textContent);
+            if (isNaN(p) || isNaN(b)) return;
 
             startLoader(700);
             setTimeout(() => {
@@ -693,8 +745,11 @@
                     trimHistory(historyDiv);
                 }
 
+                // Reset displays and selection flags after submit
                 playerScoreDisplay.textContent = '-';
                 bankerScoreDisplay.textContent = '-';
+                playerSelected = false;
+                bankerSelected = false;
                 document.querySelectorAll('.score-btn').forEach(b=>b.classList.remove('selected'));
             }, 700);
         });
