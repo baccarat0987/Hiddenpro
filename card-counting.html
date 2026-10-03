@@ -799,23 +799,6 @@
         playerScoreDisplay.textContent = '-';
         bankerScoreDisplay.textContent = '-';
 
-        // ===== RESET FUNCTION (shared by RESET button and RESET ALL in overlay) =====
-        function resetAllData() {
-            pastRounds = [];
-            outcomeSequence = [];
-            historyDiv.innerHTML = '';
-            roundHistoryDiv.innerHTML = '';
-            tableChangeOverlay.classList.remove('active');
-            document.body.classList.remove('overlay-active');
-            playerScoreDisplay.textContent = '-';
-            bankerScoreDisplay.textContent = '-';
-            playerSelected = false;
-            bankerSelected = false;
-            document.querySelectorAll('.score-btn').forEach(b => b.classList.remove('selected'));
-            predText.innerHTML = '[ STANDBY ]';
-            predText.style.color = '#444';
-        }
-
         // ===== TABLE CHANGE LOGIC =====
         function analyzeWinLossPatterns() {
             const first5 = outcomeSequence.slice(0, 5);
@@ -840,7 +823,7 @@
 
             // Rule 2: Last 7 results — more losing than winning (needs exactly 7 results)
             if (last7.length === 7 && last7Losses > last7Wins) {
-                reasons.push(`Last 7: <span class="bad">${last7Losses}L</span> vs <span class="good">${last7Wins}W</span>`);
+                reasons.push(`RESULT: <span class="bad">${last7Losses}L</span> vs <span class="good">${last7Wins}W</span>`);
             }
 
             // Rule 3: Last 10 results — more losing than winning (needs exactly 10 results)
@@ -860,9 +843,9 @@
             }
         }
 
-        // RESET ALL button in overlay — fully resets the session
+        // RESET ALL button in overlay — performs a full browser refresh (like Ctrl+R)
         dismissOverlayBtn.addEventListener('click', () => {
-            resetAllData();
+            window.location.reload();
         });
 
         // ===== GAME LOGIC =====
@@ -1016,7 +999,7 @@
 
         resetBtn.addEventListener("click", () => {
             if(confirm("Wipe all engine data for this session?")) {
-                resetAllData();
+                window.location.reload();
             }
         });
 
