@@ -202,7 +202,8 @@
             </div>
         </div>
 
-        <div id="waitmsg" class="msg" style="color: #aaa;">Waiting for result... (0/6)</div>
+        <!-- ✅ CHANGED: 0/6 → 0/7 -->
+        <div id="waitmsg" class="msg" style="color: #aaa;">Waiting for result... (0/7)</div>
         <div id="bankroll-msg" class="msg"></div>
 
         <div class="btn-row">
@@ -281,9 +282,10 @@
     // ============================================================
     // ✅ UI UPDATES
     // ============================================================
+    // ✅ CHANGED: 6 → 7
     function updateWaitMessage() {
-        if (history.length < 6) {
-            waitmsg.textContent = `Waiting for result... (${history.length}/6)`;
+        if (history.length < 7) {
+            waitmsg.textContent = `Waiting for result... (${history.length}/7)`;
         }
     }
 
@@ -450,10 +452,11 @@
     // ✅ MAIN HANDLE CLICK
     // ============================================================
     function handleClick(result){
-        if(history.length<6){
+        // ✅ CHANGED: 6 → 7
+        if(history.length<7){
             addHistory(result);
             updateWaitMessage();
-            if(history.length===6)makePrediction();
+            if(history.length===7)makePrediction();
             return;
         }
         if(result==="Tie"){addHistory(result);return;}
