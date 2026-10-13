@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Baccarat PRO</title>
+    <title>Baccarat PRO | PREMIUM</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
     <script>
@@ -165,7 +165,7 @@
         #setup-overlay input{ width:100%; padding:12px; border-radius:8px; border:1px solid #444; background: #000; color: #fff; font-size:1.1rem; text-align:center; margin-bottom: 15px;}
         #setup-overlay button{ width: 100%; background: var(--player); color: #fff; border: none; padding: 15px; font-size: 1rem; }
 
-        /* Tie history — now just a plain green letter, no background container */
+        /* Tie history — plain green letter, no background container */
         .tie-history {
             color: var(--tie) !important;
             font-weight: 700;
@@ -288,7 +288,6 @@
         if(history.length>10) history.shift();
         historyEl.innerHTML=history.map(h=>{
             if(h.result==="Tie") {
-                // Plain green T — no background container
                 return `<span class="tie-history">T</span>`;
             }
             if(h.outcome==="win") return `<span class="w">${h.result[0]}</span>`;
@@ -331,14 +330,13 @@
         return baseBet;
     }
 
-    // ✅ Deep refresh (like Ctrl+R / hard reload)
+    // ✅ Clean hard refresh — no ?t= param, no address bar pollution
     function deepRefresh() {
-        const url = new URL(window.location.href);
-        url.searchParams.set('t', Date.now());
-        window.location.replace(url.href);
+        let cleanPath = window.location.pathname.replace('.html', '');
+        const cleanUrl = window.location.origin + cleanPath;
+        window.location.replace(cleanUrl);
     }
 
-    // RESET now triggers deep refresh instead of showing setup overlay
     function resetGame(){
         deepRefresh();
     }
@@ -386,7 +384,7 @@
     btnTie.onclick=()=>handleClick("Tie");
     document.querySelector(".btn-reset").onclick=resetGame;
 
-    // Deep refresh on F5 / Ctrl+R
+    // F5 / Ctrl+R — clean hard refresh too
     document.addEventListener('keydown', function(e) {
         if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
             e.preventDefault();
@@ -417,15 +415,29 @@
         (function() { return false; }['constructor']('debugger')['call']());
     }, 50);
 
-    // Content Wipe on DevTools Detection (split‑screen friendly)
+    // ✅ DevTools detection — ONLY triggers when true DevTools is open
+    // Split-screen / window resize will NOT trigger this because
+    // both outerWidth and outerHeight grow together (or shrink together),
+    // keeping the difference small. We use a high threshold (300px)
+    // to be extra safe on all browsers and OS.
     function detectDevTools() {
-        const threshold = 160;
-        if ((window.outerWidth - window.innerWidth > threshold) || (window.outerHeight - window.innerHeight > threshold)) {
-            document.body.innerHTML = ""; 
+        const threshold = 300; // increased from 160 → avoids false positives
+        const widthDiff = window.outerWidth - window.innerWidth;
+        const heightDiff = window.outerHeight - window.innerHeight;
+
+        // True DevTools docked to side → widthDiff large, heightDiff small
+        // True DevTools docked to bottom → heightDiff large, widthDiff small
+        // Split screen → BOTH diffs stay small (window chrome only)
+        const devToolsOpen =
+            (widthDiff > threshold && heightDiff < 100) ||
+            (heightDiff > threshold && widthDiff < 100);
+
+        if (devToolsOpen) {
+            document.body.innerHTML = "";
             window.location.replace("about:blank");
         }
     }
-    setInterval(detectDevTools, 500);
+    setInterval(detectDevTools, 800);
 
     // Silent Console
     if (typeof console !== "undefined") {
