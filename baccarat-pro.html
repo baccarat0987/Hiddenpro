@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Baccarat PRO | PREMIUM</title>
+    <title>Baccarat PRO</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
     <script>
@@ -251,9 +251,8 @@
     const inputBet=document.getElementById("input-bet");
     const startBtn=document.getElementById("start-btn");
 
-    // Helper: format money so decimals show nicely (0.10 stays 0.10, 100 stays 100)
+    // ✅ Format money — integers as-is, decimals always 2 places
     function fmtMoney(n) {
-        // Round to 2 decimals max, strip trailing zero but keep at least 2 digits for decimals
         const num = Math.round(n * 100) / 100;
         if (Number.isInteger(num)) return num.toString();
         return num.toFixed(2);
@@ -265,31 +264,43 @@
         }
     }
 
-    startBtn.onclick=()=>{
-        // Parse as float so decimals like 0.10 are accepted
+    // ✅ FIXED: startBtn handler — sets currentBet = baseBet BEFORE updating UI
+    startBtn.onclick = () => {
         const parsedBankroll = parseFloat(inputBankroll.value);
         const parsedBet = parseFloat(inputBet.value);
 
         bankroll = (!isNaN(parsedBankroll) && parsedBankroll > 0) ? parsedBankroll : 1000;
-        baseBet = currentBet = (!isNaN(parsedBet) && parsedBet > 0) ? parsedBet : 100;
+        baseBet = (!isNaN(parsedBet) && parsedBet > 0) ? parsedBet : 100;
 
-        targetProfit=bankroll*targetProfitMultiplier;
+        targetProfit = bankroll * targetProfitMultiplier;
+
         resetState();
-        overlay.style.display="none";
+        overlay.style.display = "none";
+
+        // Double‑safety: force display update after overlay hidden
+        updateBankroll();
+        updateNextBet();
     };
 
-    function resetState(){
-        cumulativeLoss=0;winCount=0;lossStreak=0;
-        history=[];aiPrediction=null;
-        historyEl.innerHTML="";
+    // ✅ FIXED: resetState — sets currentBet = baseBet FIRST, then updates UI (no duplicates)
+    function resetState() {
+        cumulativeLoss = 0;
+        winCount = 0;
+        lossStreak = 0;
+        history = [];
+        aiPrediction = null;
+        historyEl.innerHTML = "";
         predictionBox.classList.add("hidden");
         waitmsg.classList.remove("hidden");
-        bankrollMsg.textContent="";
-        betButtons.forEach(b=>b.disabled=false);
-        updateBankroll();updateNextBet();
-        updateWaitMessage();
+        bankrollMsg.textContent = "";
+        betButtons.forEach(b => b.disabled = false);
+
+        // ⬇️ IMPORTANT: assign BEFORE rendering
         currentBet = baseBet;
+
+        updateBankroll();
         updateNextBet();
+        updateWaitMessage();
     }
 
     function updateBankroll(){
@@ -340,9 +351,7 @@
 
     function calculateNextBet(){
         if(lossStreak>0){
-            // Keep decimal precision — don't round up aggressively
             let aggressive=(cumulativeLoss+baseBet)*1.5;
-            // Round to 2 decimals
             aggressive = Math.round(aggressive * 100) / 100;
             return Math.min(aggressive, bankroll);
         }
