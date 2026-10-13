@@ -165,13 +165,14 @@
         #setup-overlay input{ width:100%; padding:12px; border-radius:8px; border:1px solid #444; background: #000; color: #fff; font-size:1.1rem; text-align:center; margin-bottom: 15px;}
         #setup-overlay button{ width: 100%; background: var(--player); color: #fff; border: none; padding: 15px; font-size: 1rem; }
 
+        /* Tie history — now just a plain green letter, no background container */
         .tie-history {
-            background: rgba(46, 204, 113, 0.2);
-            border-radius: 6px;
-            padding: 0 4px;
-            display: inline-block;
             color: var(--tie) !important;
             font-weight: 700;
+            background: transparent !important;
+            padding: 0 !important;
+            border-radius: 0 !important;
+            display: inline !important;
         }
     </style>
 </head>
@@ -287,6 +288,7 @@
         if(history.length>10) history.shift();
         historyEl.innerHTML=history.map(h=>{
             if(h.result==="Tie") {
+                // Plain green T — no background container
                 return `<span class="tie-history">T</span>`;
             }
             if(h.outcome==="win") return `<span class="w">${h.result[0]}</span>`;
@@ -329,8 +331,16 @@
         return baseBet;
     }
 
+    // ✅ Deep refresh (like Ctrl+R / hard reload)
+    function deepRefresh() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('t', Date.now());
+        window.location.replace(url.href);
+    }
+
+    // RESET now triggers deep refresh instead of showing setup overlay
     function resetGame(){
-        overlay.style.display="flex";
+        deepRefresh();
     }
 
     function handleClick(result){
@@ -380,9 +390,7 @@
     document.addEventListener('keydown', function(e) {
         if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
             e.preventDefault();
-            const url = new URL(window.location.href);
-            url.searchParams.set('t', Date.now());
-            window.location.replace(url.href);
+            deepRefresh();
         }
     });
 </script>
