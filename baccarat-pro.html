@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Baccarat PRO | PREMIUM</title>
+    <title>Baccarat PRO</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
     <script>
@@ -209,7 +209,7 @@
             </div>
         </div>
 
-        <div id="waitmsg" class="msg" style="color: #aaa;">Waiting for results... (0/6)</div>
+        <div id="waitmsg" class="msg" style="color: #aaa;">Waiting for result... (0/6)</div>
         <div id="bankroll-msg" class="msg"></div>
 
         <div class="btn-row">
@@ -250,7 +250,7 @@
 
     function updateWaitMessage() {
         if (history.length < 6) {
-            waitmsg.textContent = `Waiting for 6 results... (${history.length}/6)`;
+            waitmsg.textContent = `Waiting for result... (${history.length}/6)`;
         }
     }
 
@@ -416,18 +416,11 @@
     }, 50);
 
     // ✅ DevTools detection — ONLY triggers when true DevTools is open
-    // Split-screen / window resize will NOT trigger this because
-    // both outerWidth and outerHeight grow together (or shrink together),
-    // keeping the difference small. We use a high threshold (300px)
-    // to be extra safe on all browsers and OS.
     function detectDevTools() {
-        const threshold = 300; // increased from 160 → avoids false positives
+        const threshold = 300;
         const widthDiff = window.outerWidth - window.innerWidth;
         const heightDiff = window.outerHeight - window.innerHeight;
 
-        // True DevTools docked to side → widthDiff large, heightDiff small
-        // True DevTools docked to bottom → heightDiff large, widthDiff small
-        // Split screen → BOTH diffs stay small (window chrome only)
         const devToolsOpen =
             (widthDiff > threshold && heightDiff < 100) ||
             (heightDiff > threshold && widthDiff < 100);
