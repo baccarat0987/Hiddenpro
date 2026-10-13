@@ -189,9 +189,9 @@
         <div>
             <h2>SETUP SESSION</h2>
             <p style="color:#666; font-size: 0.8rem; margin-bottom: 10px;">BANKROLL</p>
-            <input type="number" id="input-bankroll" value="1000">
+            <input type="number" id="input-bankroll" value="1000" step="any">
             <p style="color:#666; font-size: 0.8rem; margin-bottom: 10px;">BASE BET</p>
-            <input type="number" id="input-bet" value="100">
+            <input type="number" id="input-bet" value="100" step="any" min="0.01">
             <button id="start-btn">CONFIRM</button>
         </div>
     </div>
@@ -251,6 +251,14 @@
     const inputBet=document.getElementById("input-bet");
     const startBtn=document.getElementById("start-btn");
 
+    // Helper: format money so decimals show nicely (0.10 stays 0.10, 100 stays 100)
+    function fmtMoney(n) {
+        // Round to 2 decimals max, strip trailing zero but keep at least 2 digits for decimals
+        const num = Math.round(n * 100) / 100;
+        if (Number.isInteger(num)) return num.toString();
+        return num.toFixed(2);
+    }
+
     function updateWaitMessage() {
         if (history.length < 6) {
             waitmsg.textContent = `Waiting for result... (${history.length}/6)`;
@@ -258,8 +266,13 @@
     }
 
     startBtn.onclick=()=>{
-        bankroll=parseInt(inputBankroll.value)||1000;
-        baseBet=currentBet=parseInt(inputBet.value)||100;
+        // Parse as float so decimals like 0.10 are accepted
+        const parsedBankroll = parseFloat(inputBankroll.value);
+        const parsedBet = parseFloat(inputBet.value);
+
+        bankroll = (!isNaN(parsedBankroll) && parsedBankroll > 0) ? parsedBankroll : 1000;
+        baseBet = currentBet = (!isNaN(parsedBet) && parsedBet > 0) ? parsedBet : 100;
+
         targetProfit=bankroll*targetProfitMultiplier;
         resetState();
         overlay.style.display="none";
@@ -280,10 +293,10 @@
     }
 
     function updateBankroll(){
-        bankrollEl.innerHTML=`<span class="label">Bank:</span> $${bankroll}`;
+        bankrollEl.innerHTML=`<span class="label">Bank:</span> $${fmtMoney(bankroll)}`;
     }
     function updateNextBet(){
-        nextBetEl.innerHTML=`<span class="label">Bet:</span> $${currentBet}`;
+        nextBetEl.innerHTML=`<span class="label">Bet:</span> $${fmtMoney(currentBet)}`;
     }
 
     function addHistory(result,outcome="neutral"){
@@ -327,8 +340,11 @@
 
     function calculateNextBet(){
         if(lossStreak>0){
+            // Keep decimal precision — don't round up aggressively
             let aggressive=(cumulativeLoss+baseBet)*1.5;
-            return Math.min(Math.ceil(aggressive), bankroll);
+            // Round to 2 decimals
+            aggressive = Math.round(aggressive * 100) / 100;
+            return Math.min(aggressive, bankroll);
         }
         return baseBet;
     }
