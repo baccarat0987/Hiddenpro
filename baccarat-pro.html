@@ -1,4 +1,599 @@
-<script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Baccarat PRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
-document.write(unescape('%3C%21DOCTYPE%20html%3E%0D%0A%3Chtml%20lang%3D%22en%22%3E%0D%0A%3Chead%3E%0D%0A%20%20%20%20%3Cmeta%20charset%3D%22UTF-8%22%3E%0D%0A%20%20%20%20%3Cmeta%20name%3D%22viewport%22%20content%3D%22width%3Ddevice-width%2C%20initial-scale%3D1.0%2C%20user-scalable%3Dyes%22%3E%0D%0A%20%20%20%20%3Cmeta%20http-equiv%3D%22Cache-Control%22%20content%3D%22no-cache%2C%20no-store%2C%20must-revalidate%22%3E%0D%0A%20%20%20%20%3Cmeta%20http-equiv%3D%22Pragma%22%20content%3D%22no-cache%22%3E%0D%0A%20%20%20%20%3Cmeta%20http-equiv%3D%22Expires%22%20content%3D%220%22%3E%0D%0A%20%20%20%20%3Ctitle%3EBaccarat%20PRO%3C/title%3E%0D%0A%20%20%20%20%3Clink%20href%3D%22https%3A//fonts.googleapis.com/css2%3Ffamily%3DInter%3Awght@400%3B600%26display%3Dswap%22%20rel%3D%22stylesheet%22%3E%0D%0A%0D%0A%20%20%20%20%3Cscript%3E%0D%0A%20%20%20%20%20%20%20%20if%20%28window.location.pathname.endsWith%28%27.html%27%29%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20const%20cleanUrl%20%3D%20window.location.pathname.replace%28%27.html%27%2C%20%27%27%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20window.history.replaceState%28null%2C%20%27%27%2C%20cleanUrl%29%3B%0D%0A%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%3C/script%3E%0D%0A%0D%0A%20%20%20%20%3C%21--%20Firebase%20Auth%20+%20Per%u2011User%20Permission%20Guard%20%28engine_6%29%20--%3E%0D%0A%20%20%20%20%3Cscript%20type%3D%22module%22%3E%0D%0A%20%20%20%20%20%20%20%20import%20%7B%20initializeApp%20%7D%20from%20%22https%3A//www.gstatic.com/firebasejs/12.11.0/firebase-app.js%22%3B%0D%0A%20%20%20%20%20%20%20%20import%20%7B%20getAuth%2C%20onAuthStateChanged%2C%20signOut%20%7D%20from%20%22https%3A//www.gstatic.com/firebasejs/12.11.0/firebase-auth.js%22%3B%0D%0A%20%20%20%20%20%20%20%20import%20%7B%20getFirestore%2C%20doc%2C%20getDoc%20%7D%20from%20%22https%3A//www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js%22%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20const%20firebaseConfig%20%3D%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20apiKey%3A%20%22AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc%22%2C%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20authDomain%3A%20%22my-software-portal.firebaseapp.com%22%2C%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20projectId%3A%20%22my-software-portal%22%2C%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20appId%3A%20%221%3A1072405993700%3Aweb%3Ab66ca016c8de667d46f4f1%22%0D%0A%20%20%20%20%20%20%20%20%7D%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20const%20app%20%3D%20initializeApp%28firebaseConfig%29%3B%0D%0A%20%20%20%20%20%20%20%20const%20auth%20%3D%20getAuth%28app%29%3B%0D%0A%20%20%20%20%20%20%20%20const%20db%20%3D%20getFirestore%28app%29%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20//%20%u2705%20Baccarat%20PRO%20engine%20ID%0D%0A%20%20%20%20%20%20%20%20const%20REQUIRED_ENGINE_ID%20%3D%20%22engine_6%22%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20//%20Global%20sign%u2011out%20function%20%28used%20by%20the%20exit%20button%29%0D%0A%20%20%20%20%20%20%20%20window.signOutUser%20%3D%20function%28%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20signOut%28auth%29.then%28%28%29%20%3D%3E%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20window.location.href%20%3D%20%22index.html%22%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%29.catch%28%28%29%20%3D%3E%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20window.location.href%20%3D%20%22index.html%22%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%29%3B%0D%0A%20%20%20%20%20%20%20%20%7D%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20onAuthStateChanged%28auth%2C%20async%20%28user%29%20%3D%3E%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20%28%21user%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20window.location.href%20%3D%20%22index.html%22%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20return%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20try%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20const%20userDoc%20%3D%20await%20getDoc%28doc%28db%2C%20%22users%22%2C%20user.email.toLowerCase%28%29%29%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20const%20now%20%3D%20Date.now%28%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20const%20userData%20%3D%20userDoc.data%28%29%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20const%20isValid%20%3D%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20userDoc.exists%28%29%20%26%26%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%28userData.expiry%20%3D%3D%3D%20%27LIFETIME%27%20%7C%7C%20userData.expiry%20%3E%20now%29%20%26%26%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20userData.allowedSoftware%3F.includes%28REQUIRED_ENGINE_ID%29%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20if%20%28%21isValid%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20alert%28%22Access%20denied%3A%20you%20don%27t%20have%20permission%20for%20Baccarat%20PRO.%22%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20window.location.href%20%3D%20%22index.html%22%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20return%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20document.body.style.display%20%3D%20%22flex%22%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%20catch%20%28err%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20alert%28%22Access%20denied%3A%20unable%20to%20verify%20permissions.%22%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20window.location.href%20%3D%20%22index.html%22%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%20%20%20%20%7D%29%3B%0D%0A%20%20%20%20%3C/script%3E%0D%0A%0D%0A%20%20%20%20%3Cstyle%3E%0D%0A%20%20%20%20%20%20%20%20%3Aroot%7B%20%20--player%3A%234169E1%3B%20%20--banker%3A%23800080%3B%20%20--tie%3A%232ecc71%3B%20%20--sub%3A%23FFFFFF%3B%20%20--glass%3Argba%2820%2C20%2C20%2C0.9%29%3B%20%20--ink%3A%23FFFFFF%3B%7D%0D%0A%0D%0A%20%20%20%20%20%20%20%20*%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20margin%3A%200%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20padding%3A%200%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20box-sizing%3A%20border-box%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20user-select%3A%20none%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20-webkit-user-select%3A%20none%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20-moz-user-select%3A%20none%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20-ms-user-select%3A%20none%3B%0D%0A%20%20%20%20%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20%20%20%20%20body%7B%20%20%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20background%3Aradial-gradient%28circle%20at%2050%25%2050%25%2C%23111111%200%25%2C%23000000%20100%25%29%3B%20%20%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20font-family%3A%27Inter%27%2C%20sans-serif%3B%20%20%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20color%3Avar%28--ink%29%3B%20%20%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20display%3A%20none%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20min-height%3A%20100vh%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20padding%3A%2020px%2012px%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20justify-content%3A%20center%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20align-items%3A%20center%3B%0D%0A%20%20%20%20%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20%20%20%20%20.exit-nav%20%7B%20position%3A%20fixed%3B%20top%3A%2020px%3B%20right%3A%2020px%3B%20z-index%3A%202000%3B%20%7D%0D%0A%20%20%20%20%20%20%20%20.exit-btn%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20background%3A%20rgba%28255%2C255%2C255%2C0.1%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20color%3A%20white%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20padding%3A%2010px%2020px%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20border-radius%3A%206px%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20text-decoration%3A%20none%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20font-weight%3A%20600%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20border%3A%201px%20solid%20%23444%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20font-size%3A%2012px%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20transition%3A%200.3s%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20cursor%3A%20pointer%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20font-family%3A%20%27Inter%27%2C%20sans-serif%3B%0D%0A%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%20%20%20%20.exit-btn%3Ahover%20%7B%20background%3A%20var%28--player%29%3B%20border-color%3A%20%23fff%3B%20%7D%0D%0A%0D%0A%20%20%20%20%20%20%20%20.card%7B%20%20%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20max-width%3A500px%3B%20%20%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20width%3A%20100%25%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20margin%3A0%20auto%3B%20%20%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20background%3A%20var%28--glass%29%3B%20%20%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20border%3A1px%20solid%20rgba%28255%2C255%2C255%2C0.1%29%3B%20%20border-radius%3A24px%3B%20%20%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20padding%3A40px%3B%20backdrop-filter%3Ablur%2815px%29%3B%20%20%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20box-shadow%3A0%2025px%2050px%20rgba%280%2C0%2C0%2C0.5%29%3B%0D%0A%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%20%20%20%20h1%7B%20%20text-align%3Acenter%3B%20%20font-size%3A1.8rem%3B%20%20font-weight%3A600%3B%20%20margin-bottom%3A20px%3B%20%20letter-spacing%3A1px%3B%20%20background%3Alinear-gradient%2890deg%2Cvar%28--player%29%2Cvar%28--banker%29%2Cvar%28--tie%29%2Cvar%28--sub%29%29%3B%20%20-webkit-background-clip%3Atext%3B%20%20color%3Atransparent%3B%7D%0D%0A%20%20%20%20%20%20%20%20%0D%0A%20%20%20%20%20%20%20%20.stats%7B%20%20display%3Aflex%3B%20%20justify-content%3Aspace-between%3B%20%20font-size%3A0.95rem%3B%20%20margin-bottom%3A15px%3B%20border-bottom%3A%201px%20solid%20%23333%3B%20padding-bottom%3A%2015px%3B%20gap%3A%208px%3B%20flex-wrap%3A%20wrap%3B%7D%0D%0A%20%20%20%20%20%20%20%20.label%20%7B%20color%3A%20%23888%3B%20margin-right%3A%205px%3B%20%7D%0D%0A%0D%0A%20%20%20%20%20%20%20%20.predict%7Btext-align%3Acenter%3Bmargin-bottom%3A24px%3B%7D%0D%0A%20%20%20%20%20%20%20%20.pred-label%7B%20%20font-size%3A2.2rem%3B%20%20font-weight%3A700%3B%20%20padding%3A10px%2030px%3B%20%20border-radius%3A14px%3B%20%20display%3A%20inline-block%3B%20transition%3A%200.5s%3B%7D%0D%0A%20%20%20%20%20%20%20%20.pred-label.player%7Bcolor%3Avar%28--player%29%3B%20text-shadow%3A%200%200%2015px%20var%28--player%29%3B%7D%0D%0A%20%20%20%20%20%20%20%20.pred-label.banker%7Bcolor%3Avar%28--banker%29%3B%20text-shadow%3A%200%200%2015px%20var%28--banker%29%3B%7D%0D%0A%20%20%20%20%20%20%20%20%0D%0A%20%20%20%20%20%20%20%20.conf-wrap%7Bmargin-top%3A20px%3B%20width%3A100%25%3B%20max-width%3A280px%3B%20margin-inline%3Aauto%3B%7D%0D%0A%20%20%20%20%20%20%20%20.conf-bar%7Bheight%3A6px%3B%20border-radius%3A10px%3B%20background%3Argba%28255%2C255%2C255%2C0.05%29%3B%20overflow%3Ahidden%3B%7D%0D%0A%20%20%20%20%20%20%20%20.conf-fill%7Bheight%3A100%25%3B%20width%3A0%3B%20background%3Alinear-gradient%2890deg%2Cvar%28--player%29%2Cvar%28--banker%29%29%3B%20transition%3A%20width%200.5s%3B%7D%0D%0A%20%20%20%20%20%20%20%20.conf-val%7Btext-align%3Acenter%3B%20font-size%3A.85rem%3B%20margin-top%3A8px%3B%20color%3A%23aaa%3B%20font-weight%3A%20600%3B%7D%0D%0A%0D%0A%20%20%20%20%20%20%20%20.btn-row%7Bdisplay%3Aflex%3B%20gap%3A12px%3B%20margin-bottom%3A30px%3B%20flex-wrap%3Awrap%3B%7D%0D%0A%20%20%20%20%20%20%20%20button%7B%20%20flex%3A1%3B%20min-width%3A100px%3B%20padding%3A15px%200%3B%20%20border-radius%3A12px%3B%20border%3A1px%20solid%20rgba%28255%2C255%2C255%2C0.1%29%3B%20%20font-weight%3A700%3B%20font-size%3A.9rem%3B%20%20background%3Argba%28255%2C255%2C255%2C0.05%29%3B%20color%3A%23fff%3B%20cursor%3Apointer%3B%20transition%3A0.2s%3B%7D%0D%0A%20%20%20%20%20%20%20%20button%3Ahover%3Aenabled%7Bbackground%3Argba%28255%2C255%2C255%2C0.15%29%3B%20transform%3A%20translateY%28-2px%29%3B%7D%0D%0A%20%20%20%20%20%20%20%20button%3Adisabled%7Bopacity%3A0.2%3B%20cursor%3Anot-allowed%3B%7D%0D%0A%20%20%20%20%20%20%20%20%0D%0A%20%20%20%20%20%20%20%20.btn-player%7B%20border-color%3A%20var%28--player%29%20%21important%3B%20%7D%0D%0A%20%20%20%20%20%20%20%20.btn-banker%7B%20border-color%3A%20var%28--banker%29%20%21important%3B%20%7D%0D%0A%20%20%20%20%20%20%20%20.btn-tie%7B%20border-color%3A%20var%28--tie%29%20%21important%3B%20color%3A%20var%28--tie%29%3B%20%7D%0D%0A%20%20%20%20%20%20%20%20.btn-reset%7B%20border-color%3A%20%23ff4b4b%20%21important%3B%20color%3A%20%23ff4b4b%3B%20%7D%0D%0A%0D%0A%20%20%20%20%20%20%20%20.first-six%7B%20font-size%3A1.4rem%3B%20text-align%3Acenter%3B%20margin-top%3A15px%3B%20letter-spacing%3A.5rem%3B%20background%3A%20%23000%3B%20padding%3A%2010px%3B%20border-radius%3A%2010px%3B%20min-height%3A%2050px%3B%7D%0D%0A%20%20%20%20%20%20%20%20.msg%7Btext-align%3Acenter%3B%20margin-bottom%3A15px%3B%20font-weight%3A%20600%3B%7D%0D%0A%20%20%20%20%20%20%20%20%23bankroll-msg%20%7B%20color%3A%20var%28--tie%29%3B%20font-size%3A%201.1rem%3B%20%7D%0D%0A%20%20%20%20%20%20%20%20.w%7Bcolor%3Avar%28--player%29%3B%7D%20.l%7Bcolor%3Avar%28--banker%29%3B%7D%20.t%7Bcolor%3Avar%28--tie%29%3B%7D%20.dash%7Bcolor%3A%23444%3B%7D%0D%0A%20%20%20%20%20%20%20%20.hidden%7Bdisplay%3Anone%3B%7D%0D%0A%0D%0A%20%20%20%20%20%20%20%20%23setup-overlay%7B%20%20position%3Afixed%3B%20inset%3A0%3B%20%20background%3Argba%280%2C0%2C0%2C0.9%29%3B%20%20display%3Aflex%3B%20justify-content%3Acenter%3B%20align-items%3Acenter%3B%20%20z-index%3A3000%3B%7D%0D%0A%20%20%20%20%20%20%20%20%23setup-overlay%20div%7B%20%20background%3A%231a1a1a%3B%20padding%3A40px%3B%20border-radius%3A20px%3B%20border%3A%201px%20solid%20%23333%3B%20text-align%3Acenter%3B%20width%3A%20350px%3B%7D%0D%0A%20%20%20%20%20%20%20%20%23setup-overlay%20h2%20%7B%20margin-bottom%3A%2020px%3B%20font-size%3A%201.2rem%3B%20color%3A%20var%28--player%29%3B%20%7D%0D%0A%20%20%20%20%20%20%20%20%23setup-overlay%20input%7B%20width%3A100%25%3B%20padding%3A12px%3B%20border-radius%3A8px%3B%20border%3A1px%20solid%20%23444%3B%20background%3A%20%23000%3B%20color%3A%20%23fff%3B%20font-size%3A1.1rem%3B%20text-align%3Acenter%3B%20margin-bottom%3A%2015px%3B%7D%0D%0A%20%20%20%20%20%20%20%20%23setup-overlay%20button%7B%20width%3A%20100%25%3B%20background%3A%20var%28--player%29%3B%20color%3A%20%23fff%3B%20border%3A%20none%3B%20padding%3A%2015px%3B%20font-size%3A%201rem%3B%20%7D%0D%0A%0D%0A%20%20%20%20%20%20%20%20.tie-history%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20color%3A%20var%28--tie%29%20%21important%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20font-weight%3A%20700%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20background%3A%20transparent%20%21important%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20padding%3A%200%20%21important%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20border-radius%3A%200%20%21important%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20display%3A%20inline%20%21important%3B%0D%0A%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%3C/style%3E%0D%0A%3C/head%3E%0D%0A%3Cbody%3E%0D%0A%0D%0A%20%20%20%20%3Cdiv%20class%3D%22exit-nav%22%3E%0D%0A%20%20%20%20%20%20%20%20%3Cbutton%20onclick%3D%22window.signOutUser%28%29%22%20class%3D%22exit-btn%22%3E%u2715%20EXIT%3C/button%3E%0D%0A%20%20%20%20%3C/div%3E%0D%0A%0D%0A%20%20%20%20%3Cdiv%20id%3D%22setup-overlay%22%3E%0D%0A%20%20%20%20%20%20%20%20%3Cdiv%3E%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Ch2%3ESETUP%20SESSION%3C/h2%3E%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cp%20style%3D%22color%3A%23666%3B%20font-size%3A%200.8rem%3B%20margin-bottom%3A%2010px%3B%22%3EBANKROLL%3C/p%3E%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cinput%20type%3D%22number%22%20id%3D%22input-bankroll%22%20value%3D%221000%22%20step%3D%22any%22%3E%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cp%20style%3D%22color%3A%23666%3B%20font-size%3A%200.8rem%3B%20margin-bottom%3A%2010px%3B%22%3EBASE%20BET%3C/p%3E%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cinput%20type%3D%22number%22%20id%3D%22input-bet%22%20value%3D%22100%22%20step%3D%22any%22%20min%3D%220.01%22%3E%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cbutton%20id%3D%22start-btn%22%3ECONFIRM%3C/button%3E%0D%0A%20%20%20%20%20%20%20%20%3C/div%3E%0D%0A%20%20%20%20%3C/div%3E%0D%0A%0D%0A%20%20%20%20%3Cdiv%20class%3D%22card%22%3E%0D%0A%20%20%20%20%20%20%20%20%3Ch1%3EBaccarat%20PRO%3C/h1%3E%0D%0A%0D%0A%20%20%20%20%20%20%20%20%3Cdiv%20class%3D%22stats%22%3E%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cspan%20id%3D%22bankroll%22%3E%3Cspan%20class%3D%22label%22%3EBank%3A%3C/span%3E%20%241000%3C/span%3E%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cspan%20id%3D%22next-bet%22%3E%3Cspan%20class%3D%22label%22%3EBet%3A%3C/span%3E%20%24100%3C/span%3E%0D%0A%20%20%20%20%20%20%20%20%3C/div%3E%0D%0A%0D%0A%20%20%20%20%20%20%20%20%3Cdiv%20class%3D%22predict%20hidden%22%20id%3D%22prediction-box%22%3E%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cspan%20id%3D%22prediction%22%20class%3D%22pred-label%20player%22%3EPlayer%3C/span%3E%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cdiv%20class%3D%22conf-wrap%22%3E%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3Cdiv%20class%3D%22conf-bar%22%3E%3Cdiv%20id%3D%22bar%22%20class%3D%22conf-fill%22%3E%3C/div%3E%3C/div%3E%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3Cdiv%20id%3D%22val%22%20class%3D%22conf-val%22%3E0%25%3C/div%3E%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%3C/div%3E%0D%0A%20%20%20%20%20%20%20%20%3C/div%3E%0D%0A%0D%0A%20%20%20%20%20%20%20%20%3Cdiv%20id%3D%22waitmsg%22%20class%3D%22msg%22%20style%3D%22color%3A%20%23aaa%3B%22%3EWaiting%20for%20result...%20%280/6%29%3C/div%3E%0D%0A%20%20%20%20%20%20%20%20%3Cdiv%20id%3D%22bankroll-msg%22%20class%3D%22msg%22%3E%3C/div%3E%0D%0A%0D%0A%20%20%20%20%20%20%20%20%3Cdiv%20class%3D%22btn-row%22%3E%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cbutton%20type%3D%22button%22%20class%3D%22btn-player%22%3EP%3C/button%3E%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cbutton%20type%3D%22button%22%20class%3D%22btn-tie%22%3ET%3C/button%3E%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cbutton%20type%3D%22button%22%20class%3D%22btn-banker%22%3EB%3C/button%3E%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cbutton%20type%3D%22button%22%20class%3D%22btn-reset%22%3ERESET%3C/button%3E%0D%0A%20%20%20%20%20%20%20%20%3C/div%3E%0D%0A%0D%0A%20%20%20%20%20%20%20%20%3Cdiv%20id%3D%22history%22%20class%3D%22first-six%22%3E%3C/div%3E%0D%0A%20%20%20%20%3C/div%3E%0D%0A%0D%0A%3Cscript%3E%0D%0A%20%20%20%20let%20bankroll%3D1000%2C%20baseBet%3D100%2C%20currentBet%3D100%3B%0D%0A%20%20%20%20let%20cumulativeLoss%3D0%2C%20winCount%3D0%2C%20lossStreak%3D0%3B%0D%0A%20%20%20%20let%20maxLoss%3D9999%2C%20targetProfitMultiplier%3D1.8%3B%0D%0A%20%20%20%20let%20targetProfit%3D0%2C%20history%3D%5B%5D%2C%20aiPrediction%3Dnull%3B%0D%0A%0D%0A%20%20%20%20//%20%u2705%20Recovery%20tracking%20%u2014%20understands%20outstanding%20debt%20across%20partial%20wins%0D%0A%20%20%20%20let%20peakBankroll%20%3D%201000%3B%0D%0A%20%20%20%20let%20recoveryTarget%20%3D%201000%3B%0D%0A%0D%0A%20%20%20%20//%20%u2705%20Payout%20multipliers%0D%0A%20%20%20%20const%20PLAYER_PAYOUT%20%3D%201.00%3B%20%20%20//%20Player%20wins%20pay%201%3A1%0D%0A%20%20%20%20const%20BANKER_PAYOUT%20%3D%200.95%3B%20%20%20//%20Banker%20wins%20pay%200.95%3A1%20%285%25%20commission%29%0D%0A%0D%0A%20%20%20%20const%20bankrollEl%3Ddocument.getElementById%28%22bankroll%22%29%3B%0D%0A%20%20%20%20const%20nextBetEl%3Ddocument.getElementById%28%22next-bet%22%29%3B%0D%0A%20%20%20%20const%20historyEl%3Ddocument.getElementById%28%22history%22%29%3B%0D%0A%20%20%20%20const%20predictionBox%3Ddocument.getElementById%28%22prediction-box%22%29%3B%0D%0A%20%20%20%20const%20predictionLabel%3Ddocument.getElementById%28%22prediction%22%29%3B%0D%0A%20%20%20%20const%20bar%3Ddocument.getElementById%28%22bar%22%29%3B%0D%0A%20%20%20%20const%20val%3Ddocument.getElementById%28%22val%22%29%3B%0D%0A%20%20%20%20const%20waitmsg%3Ddocument.getElementById%28%22waitmsg%22%29%3B%0D%0A%20%20%20%20const%20bankrollMsg%3Ddocument.getElementById%28%22bankroll-msg%22%29%3B%0D%0A%0D%0A%20%20%20%20const%20btnPlayer%3Ddocument.querySelector%28%22.btn-player%22%29%3B%0D%0A%20%20%20%20const%20btnBanker%3Ddocument.querySelector%28%22.btn-banker%22%29%3B%0D%0A%20%20%20%20const%20btnTie%3Ddocument.querySelector%28%22.btn-tie%22%29%3B%0D%0A%20%20%20%20const%20betButtons%3D%5BbtnPlayer%2CbtnBanker%2CbtnTie%5D%3B%0D%0A%0D%0A%20%20%20%20const%20overlay%3Ddocument.getElementById%28%22setup-overlay%22%29%3B%0D%0A%20%20%20%20const%20inputBankroll%3Ddocument.getElementById%28%22input-bankroll%22%29%3B%0D%0A%20%20%20%20const%20inputBet%3Ddocument.getElementById%28%22input-bet%22%29%3B%0D%0A%20%20%20%20const%20startBtn%3Ddocument.getElementById%28%22start-btn%22%29%3B%0D%0A%0D%0A%20%20%20%20//%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%0D%0A%20%20%20%20//%20%u2705%20MONEY%20FORMATTING%0D%0A%20%20%20%20//%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%0D%0A%20%20%20%20function%20fmtMoney%28n%29%20%7B%0D%0A%20%20%20%20%20%20%20%20const%20num%20%3D%20Math.round%28n%20*%20100%29%20/%20100%3B%0D%0A%20%20%20%20%20%20%20%20if%20%28Number.isInteger%28num%29%29%20return%20num.toString%28%29%3B%0D%0A%20%20%20%20%20%20%20%20return%20num.toFixed%282%29%3B%0D%0A%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20//%20%u2705%20Count%20how%20many%20decimal%20places%20a%20number%20has%0D%0A%20%20%20%20function%20getDecimals%28n%29%20%7B%0D%0A%20%20%20%20%20%20%20%20if%20%28Number.isInteger%28n%29%29%20return%200%3B%0D%0A%20%20%20%20%20%20%20%20const%20s%20%3D%20n.toString%28%29%3B%0D%0A%20%20%20%20%20%20%20%20if%20%28s.includes%28%27e-%27%29%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20const%20match%20%3D%20s.match%28/e-%28%5Cd+%29/%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20return%20match%20%3F%20parseInt%28match%5B1%5D%29%20%3A%202%3B%0D%0A%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%20%20%20%20const%20dot%20%3D%20s.indexOf%28%27.%27%29%3B%0D%0A%20%20%20%20%20%20%20%20return%20dot%20%3D%3D%3D%20-1%20%3F%200%20%3A%20s.length%20-%20dot%20-%201%3B%0D%0A%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20//%20%u2705%20Round%20a%20number%20to%20N%20decimals%20without%20float%20errors%0D%0A%20%20%20%20function%20roundTo%28decimals%29%20%7B%0D%0A%20%20%20%20%20%20%20%20return%20%28num%29%20%3D%3E%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20const%20factor%20%3D%20Math.pow%2810%2C%20decimals%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20return%20Math.round%28num%20*%20factor%29%20/%20factor%3B%0D%0A%20%20%20%20%20%20%20%20%7D%3B%0D%0A%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20//%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%0D%0A%20%20%20%20//%20%u2705%20UI%20UPDATES%0D%0A%20%20%20%20//%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%0D%0A%20%20%20%20function%20updateWaitMessage%28%29%20%7B%0D%0A%20%20%20%20%20%20%20%20if%20%28history.length%20%3C%206%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20waitmsg.textContent%20%3D%20%60Waiting%20for%20result...%20%28%24%7Bhistory.length%7D/6%29%60%3B%0D%0A%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20startBtn.onclick%20%3D%20%28%29%20%3D%3E%20%7B%0D%0A%20%20%20%20%20%20%20%20const%20parsedBankroll%20%3D%20parseFloat%28inputBankroll.value%29%3B%0D%0A%20%20%20%20%20%20%20%20const%20parsedBet%20%3D%20parseFloat%28inputBet.value%29%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20bankroll%20%3D%20%28%21isNaN%28parsedBankroll%29%20%26%26%20parsedBankroll%20%3E%200%29%20%3F%20parsedBankroll%20%3A%201000%3B%0D%0A%20%20%20%20%20%20%20%20baseBet%20%3D%20%28%21isNaN%28parsedBet%29%20%26%26%20parsedBet%20%3E%200%29%20%3F%20parsedBet%20%3A%20100%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20targetProfit%20%3D%20bankroll%20*%20targetProfitMultiplier%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20resetState%28%29%3B%0D%0A%20%20%20%20%20%20%20%20overlay.style.display%20%3D%20%22none%22%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20updateBankroll%28%29%3B%0D%0A%20%20%20%20%20%20%20%20updateNextBet%28%29%3B%0D%0A%20%20%20%20%7D%3B%0D%0A%0D%0A%20%20%20%20function%20resetState%28%29%20%7B%0D%0A%20%20%20%20%20%20%20%20cumulativeLoss%20%3D%200%3B%0D%0A%20%20%20%20%20%20%20%20winCount%20%3D%200%3B%0D%0A%20%20%20%20%20%20%20%20lossStreak%20%3D%200%3B%0D%0A%20%20%20%20%20%20%20%20history%20%3D%20%5B%5D%3B%0D%0A%20%20%20%20%20%20%20%20aiPrediction%20%3D%20null%3B%0D%0A%20%20%20%20%20%20%20%20historyEl.innerHTML%20%3D%20%22%22%3B%0D%0A%20%20%20%20%20%20%20%20predictionBox.classList.add%28%22hidden%22%29%3B%0D%0A%20%20%20%20%20%20%20%20waitmsg.classList.remove%28%22hidden%22%29%3B%0D%0A%20%20%20%20%20%20%20%20bankrollMsg.textContent%20%3D%20%22%22%3B%0D%0A%20%20%20%20%20%20%20%20betButtons.forEach%28b%20%3D%3E%20b.disabled%20%3D%20false%29%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20currentBet%20%3D%20baseBet%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20peakBankroll%20%3D%20bankroll%3B%0D%0A%20%20%20%20%20%20%20%20recoveryTarget%20%3D%20bankroll%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20updateBankroll%28%29%3B%0D%0A%20%20%20%20%20%20%20%20updateNextBet%28%29%3B%0D%0A%20%20%20%20%20%20%20%20updateWaitMessage%28%29%3B%0D%0A%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20function%20updateBankroll%28%29%7B%0D%0A%20%20%20%20%20%20%20%20bankrollEl.innerHTML%3D%60%3Cspan%20class%3D%22label%22%3EBank%3A%3C/span%3E%20%24%24%7BfmtMoney%28bankroll%29%7D%60%3B%0D%0A%20%20%20%20%7D%0D%0A%20%20%20%20function%20updateNextBet%28%29%7B%0D%0A%20%20%20%20%20%20%20%20nextBetEl.innerHTML%3D%60%3Cspan%20class%3D%22label%22%3EBet%3A%3C/span%3E%20%24%24%7BfmtMoney%28currentBet%29%7D%60%3B%0D%0A%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20function%20addHistory%28result%2Coutcome%3D%22neutral%22%29%7B%0D%0A%20%20%20%20%20%20%20%20history.push%28%7Bresult%2Coutcome%7D%29%3B%0D%0A%20%20%20%20%20%20%20%20if%28history.length%3E10%29%20history.shift%28%29%3B%0D%0A%20%20%20%20%20%20%20%20historyEl.innerHTML%3Dhistory.map%28h%3D%3E%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20if%28h.result%3D%3D%3D%22Tie%22%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20return%20%60%3Cspan%20class%3D%22tie-history%22%3ET%3C/span%3E%60%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20if%28h.outcome%3D%3D%3D%22win%22%29%20return%20%60%3Cspan%20class%3D%22w%22%3E%24%7Bh.result%5B0%5D%7D%3C/span%3E%60%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20if%28h.outcome%3D%3D%3D%22loss%22%29%20return%20%60%3Cspan%20class%3D%22l%22%3E%24%7Bh.result%5B0%5D%7D%3C/span%3E%60%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20return%20%60%3Cspan%20class%3D%22dash%22%3E%24%7Bh.result%5B0%5D%7D%3C/span%3E%60%3B%0D%0A%20%20%20%20%20%20%20%20%7D%29.join%28%22%22%29%3B%0D%0A%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20function%20animateConfidence%28num%29%7B%0D%0A%20%20%20%20%20%20%20%20let%20c%3D0%2Cinc%3Dnum/20%3B%0D%0A%20%20%20%20%20%20%20%20%28function%20run%28%29%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20c+%3Dinc%3Bif%28c%3Enum%29c%3Dnum%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20bar.style.width%3Dc+%22%25%22%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20val.textContent%3Dc.toFixed%281%29+%22%25%22%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20if%28c%3Cnum%29requestAnimationFrame%28run%29%3B%0D%0A%20%20%20%20%20%20%20%20%7D%29%28%29%3B%0D%0A%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20function%20makePrediction%28%29%7B%0D%0A%20%20%20%20%20%20%20%20let%20p%3D0%2Cb%3D0%2Cdecay%3D.95%3B%0D%0A%20%20%20%20%20%20%20%20history.forEach%28%28h%2Ci%29%3D%3E%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20let%20f%3DMath.pow%28decay%2Chistory.length-i-1%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20if%28h.result%3D%3D%3D%22Player%22%29p+%3Df%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20if%28h.result%3D%3D%3D%22Banker%22%29b+%3Df%3B%0D%0A%20%20%20%20%20%20%20%20%7D%29%3B%0D%0A%20%20%20%20%20%20%20%20if%28%21p%26%26%21b%29return%3B%0D%0A%20%20%20%20%20%20%20%20aiPrediction%3DMath.random%28%29%3Cp/%28p+b%29%3F%22Player%22%3A%22Banker%22%3B%0D%0A%20%20%20%20%20%20%20%20predictionLabel.textContent%3DaiPrediction.toUpperCase%28%29%3B%0D%0A%20%20%20%20%20%20%20%20predictionLabel.className%3D%22pred-label%20%22+aiPrediction.toLowerCase%28%29%3B%0D%0A%20%20%20%20%20%20%20%20predictionBox.classList.remove%28%22hidden%22%29%3B%0D%0A%20%20%20%20%20%20%20%20waitmsg.classList.add%28%22hidden%22%29%3B%0D%0A%20%20%20%20%20%20%20%20animateConfidence%28%28aiPrediction%3D%3D%3D%22Player%22%3Fp%3Ab%29/%28p+b%29*100%29%3B%0D%0A%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20//%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%0D%0A%20%20%20%20//%20%u2705%20RECOVERY%20BET%20%u2014%20snaps%20to%20nearest%20multiple%20of%20baseBet%0D%0A%20%20%20%20//%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%0D%0A%20%20%20%20function%20calculateNextBet%28%29%7B%0D%0A%20%20%20%20%20%20%20%20if%20%28cumulativeLoss%20%3E%200%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20let%20aggressive%20%3D%20%28cumulativeLoss%20+%20baseBet%29%20*%201.5%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20const%20snapped%20%3D%20Math.round%28aggressive%20/%20baseBet%29%20*%20baseBet%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20const%20decimals%20%3D%20getDecimals%28baseBet%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20const%20finalBet%20%3D%20roundTo%28decimals%29%28snapped%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20return%20Math.min%28finalBet%2C%20bankroll%29%3B%0D%0A%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%20%20%20%20return%20baseBet%3B%0D%0A%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20//%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%0D%0A%20%20%20%20//%20%u2705%20CLEAN%20DEEP%20REFRESH%0D%0A%20%20%20%20//%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%0D%0A%20%20%20%20function%20forceFullRefresh%28%29%20%7B%0D%0A%20%20%20%20%20%20%20%20const%20url%20%3D%20new%20URL%28window.location.href%29%3B%0D%0A%20%20%20%20%20%20%20%20url.searchParams.set%28%27t%27%2C%20Date.now%28%29%29%3B%0D%0A%20%20%20%20%20%20%20%20window.location.replace%28url.href%29%3B%0D%0A%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20function%20resetGame%28%29%7B%0D%0A%20%20%20%20%20%20%20%20forceFullRefresh%28%29%3B%0D%0A%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20//%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%0D%0A%20%20%20%20//%20%u2705%20MAIN%20HANDLE%20CLICK%0D%0A%20%20%20%20//%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%0D%0A%20%20%20%20function%20handleClick%28result%29%7B%0D%0A%20%20%20%20%20%20%20%20if%28history.length%3C6%29%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20addHistory%28result%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20updateWaitMessage%28%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20if%28history.length%3D%3D%3D6%29makePrediction%28%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20return%3B%0D%0A%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%20%20%20%20if%28result%3D%3D%3D%22Tie%22%29%7BaddHistory%28result%29%3Breturn%3B%7D%0D%0A%0D%0A%20%20%20%20%20%20%20%20if%28result%3D%3D%3DaiPrediction%29%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20//%20%u2705%20REALISTIC%20PAYOUT%3A%20Banker%20pays%200.95%2C%20Player%20pays%201.00%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20const%20payoutMultiplier%20%3D%20%28aiPrediction%20%3D%3D%3D%20%22Banker%22%29%20%3F%20BANKER_PAYOUT%20%3A%20PLAYER_PAYOUT%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20const%20profit%20%3D%20roundTo%282%29%28currentBet%20*%20payoutMultiplier%29%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20bankroll%20+%3D%20profit%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20winCount++%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20addHistory%28result%2C%22win%22%29%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20//%20Only%20reset%20recovery%20if%20we%27re%20back%20at%20the%20peak%20%28true%20recovery%29%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20%28bankroll%20%3E%3D%20recoveryTarget%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cumulativeLoss%20%3D%200%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20lossStreak%20%3D%200%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20peakBankroll%20%3D%20bankroll%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20recoveryTarget%20%3D%20bankroll%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%20else%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20//%20Still%20in%20debt%20%u2014%20reduce%20outstanding%20loss%20by%20the%20*actual%20profit*%20earned%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cumulativeLoss%20%3D%20Math.max%280%2C%20cumulativeLoss%20-%20profit%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20//%20Track%20new%20peak%20if%20we%27ve%20grown%20beyond%20it%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20%28bankroll%20%3E%20peakBankroll%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20peakBankroll%20%3D%20bankroll%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20recoveryTarget%20%3D%20bankroll%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20if%28bankroll%3E%3DtargetProfit%29%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20bankrollMsg.textContent%3D%22SESSION%20COMPLETE%3A%20PROFIT%20REACHED%22%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20betButtons.forEach%28b%3D%3Eb.disabled%3Dtrue%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20predictionBox.classList.add%28%22hidden%22%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20waitmsg.classList.add%28%22hidden%22%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20return%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%20%20%20%20%7Delse%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20bankroll-%3DcurrentBet%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20cumulativeLoss+%3DcurrentBet%3BlossStreak++%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20addHistory%28result%2C%22loss%22%29%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20const%20units%20%3D%20%28baseBet%20%3E%200%29%20%3F%20Math.floor%28bankroll%20/%20baseBet%29%20%3A%200%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20const%20nextRequired%20%3D%20calculateNextBet%28%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20const%20busted%20%3D%20bankroll%20%3C%3D%200%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20const%20cantAfford%20%3D%20nextRequired%20%3E%20bankroll%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20const%20safetyCap%20%3D%20lossStreak%20%3E%3D%20maxLoss%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20const%20cantCoverBase%20%3D%20units%20%3C%201%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20%28busted%20%7C%7C%20cantAfford%20%7C%7C%20safetyCap%20%7C%7C%20cantCoverBase%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20if%20%28busted%20%7C%7C%20cantAfford%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20bankrollMsg.textContent%20%3D%20%22SESSION%20FAILED%3A%20INSUFFICIENT%20BANKROLL%22%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7D%20else%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20bankrollMsg.textContent%20%3D%20%22SESSION%20FAILED%3A%20BANKROLL%20BELOW%201%20BASE%20BET%22%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20betButtons.forEach%28b%3D%3Eb.disabled%3Dtrue%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20currentBet%3D0%3BupdateNextBet%28%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20predictionBox.classList.add%28%22hidden%22%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20waitmsg.classList.add%28%22hidden%22%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20return%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%20%20%20%20currentBet%3DcalculateNextBet%28%29%3B%0D%0A%20%20%20%20%20%20%20%20updateBankroll%28%29%3BupdateNextBet%28%29%3B%0D%0A%20%20%20%20%20%20%20%20makePrediction%28%29%3B%0D%0A%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20btnPlayer.onclick%3D%28%29%3D%3EhandleClick%28%22Player%22%29%3B%0D%0A%20%20%20%20btnBanker.onclick%3D%28%29%3D%3EhandleClick%28%22Banker%22%29%3B%0D%0A%20%20%20%20btnTie.onclick%3D%28%29%3D%3EhandleClick%28%22Tie%22%29%3B%0D%0A%20%20%20%20document.querySelector%28%22.btn-reset%22%29.onclick%3DresetGame%3B%0D%0A%0D%0A%20%20%20%20document.addEventListener%28%27keydown%27%2C%20function%28e%29%20%7B%0D%0A%20%20%20%20%20%20%20%20if%20%28e.ctrlKey%20%26%26%20%28e.key%20%3D%3D%3D%20%27r%27%20%7C%7C%20e.key%20%3D%3D%3D%20%27R%27%29%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20e.preventDefault%28%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20forceFullRefresh%28%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20return%3B%0D%0A%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%20%20%20%20if%20%28e.key%20%3D%3D%3D%20%27F5%27%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20e.preventDefault%28%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20forceFullRefresh%28%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20return%3B%0D%0A%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%7D%29%3B%0D%0A%0D%0A%20%20%20%20window.addEventListener%28%27load%27%2C%20%28%29%20%3D%3E%20%7B%0D%0A%20%20%20%20%20%20%20%20if%20%28window.location.search.includes%28%27t%3D%27%29%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20const%20cleanPath%20%3D%20window.location.pathname.replace%28%27.html%27%2C%20%27%27%29%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20const%20cleanUrl%20%3D%20window.location.origin%20+%20cleanPath%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20window.history.replaceState%28null%2C%20%27%27%2C%20cleanUrl%29%3B%0D%0A%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%7D%29%3B%0D%0A%3C/script%3E%0D%0A%0D%0A%3Cscript%3E%0D%0A%28function%28%29%20%7B%0D%0A%20%20%20%20document.addEventListener%28%27contextmenu%27%2C%20e%20%3D%3E%20e.preventDefault%28%29%29%3B%0D%0A%0D%0A%20%20%20%20document.onkeydown%20%3D%20function%28e%29%20%7B%0D%0A%20%20%20%20%20%20%20%20if%20%28%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20e.keyCode%20%3D%3D%3D%20123%20%7C%7C%20%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%28e.ctrlKey%20%26%26%20e.keyCode%20%3D%3D%3D%2085%29%20%7C%7C%20%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%28e.ctrlKey%20%26%26%20e.shiftKey%20%26%26%20%5B73%2C%2074%2C%2067%5D.includes%28e.keyCode%29%29%20%7C%7C%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%28e.ctrlKey%20%26%26%20e.keyCode%20%3D%3D%3D%2083%29%0D%0A%20%20%20%20%20%20%20%20%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20return%20false%3B%0D%0A%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%7D%3B%0D%0A%0D%0A%20%20%20%20setInterval%28function%28%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%28function%28%29%20%7B%20return%20false%3B%20%7D%5B%27constructor%27%5D%28%27debugger%27%29%5B%27call%27%5D%28%29%29%3B%0D%0A%20%20%20%20%7D%2C%2050%29%3B%0D%0A%0D%0A%20%20%20%20function%20detectDevTools%28%29%20%7B%0D%0A%20%20%20%20%20%20%20%20const%20threshold%20%3D%20300%3B%0D%0A%20%20%20%20%20%20%20%20const%20widthDiff%20%3D%20window.outerWidth%20-%20window.innerWidth%3B%0D%0A%20%20%20%20%20%20%20%20const%20heightDiff%20%3D%20window.outerHeight%20-%20window.innerHeight%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20const%20devToolsOpen%20%3D%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%28widthDiff%20%3E%20threshold%20%26%26%20heightDiff%20%3C%20100%29%20%7C%7C%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%28heightDiff%20%3E%20threshold%20%26%26%20widthDiff%20%3C%20100%29%3B%0D%0A%0D%0A%20%20%20%20%20%20%20%20if%20%28devToolsOpen%29%20%7B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20document.body.innerHTML%20%3D%20%22%22%3B%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20window.location.replace%28%22about%3Ablank%22%29%3B%0D%0A%20%20%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%7D%0D%0A%20%20%20%20setInterval%28detectDevTools%2C%20800%29%3B%0D%0A%0D%0A%20%20%20%20if%20%28typeof%20console%20%21%3D%3D%20%22undefined%22%29%20%7B%0D%0A%20%20%20%20%20%20%20%20console.log%20%3D%20console.debug%20%3D%20console.info%20%3D%20console.warn%20%3D%20console.error%20%3D%20function%28%29%20%7B%7D%3B%0D%0A%20%20%20%20%7D%0D%0A%7D%29%28%29%3B%0D%0A%3C/script%3E%0D%0A%3C/body%3E%0D%0A%3C/html%3E'));
+    <script>
+        if (window.location.pathname.endsWith('.html')) {
+            const cleanUrl = window.location.pathname.replace('.html', '');
+            window.history.replaceState(null, '', cleanUrl);
+        }
+    </script>
+
+    <!-- Firebase Auth + Per‑User Permission Guard (engine_6) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
+            authDomain: "my-software-portal.firebaseapp.com",
+            projectId: "my-software-portal",
+            appId: "1:1072405993700:web:b66ca016c8de667d46f4f1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // ✅ Baccarat PRO engine ID
+        const REQUIRED_ENGINE_ID = "engine_6";
+
+        // Global sign‑out function (used by the exit button)
+        window.signOutUser = function() {
+            signOut(auth).then(() => {
+                window.location.href = "index.html";
+            }).catch(() => {
+                window.location.href = "index.html";
+            });
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = "index.html";
+                return;
+            }
+            try {
+                const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
+                const now = Date.now();
+                const userData = userDoc.data();
+
+                const isValid =
+                    userDoc.exists() &&
+                    (userData.expiry === 'LIFETIME' || userData.expiry > now) &&
+                    userData.allowedSoftware?.includes(REQUIRED_ENGINE_ID);
+
+                if (!isValid) {
+                    alert("Access denied: you don't have permission for Baccarat PRO.");
+                    window.location.href = "index.html";
+                    return;
+                }
+                document.body.style.display = "flex";
+            } catch (err) {
+                alert("Access denied: unable to verify permissions.");
+                window.location.href = "index.html";
+            }
+        });
+    </script>
+
+    <style>
+        :root{  --player:#4169E1;  --banker:#800080;  --tie:#2ecc71;  --sub:#FFFFFF;  --glass:rgba(20,20,20,0.9);  --ink:#FFFFFF;}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        body{  
+            background:radial-gradient(circle at 50% 50%,#111111 0%,#000000 100%);  
+            font-family:'Inter', sans-serif;  
+            color:var(--ink);  
+            display: none;
+            min-height: 100vh;
+            padding: 20px 12px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .exit-nav { position: fixed; top: 20px; right: 20px; z-index: 2000; }
+        .exit-btn {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid #444;
+            font-size: 12px;
+            transition: 0.3s;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+        .exit-btn:hover { background: var(--player); border-color: #fff; }
+
+        .card{  
+            max-width:500px;  
+            width: 100%;
+            margin:0 auto;  
+            background: var(--glass);  
+            border:1px solid rgba(255,255,255,0.1);  border-radius:24px;  
+            padding:40px; backdrop-filter:blur(15px);  
+            box-shadow:0 25px 50px rgba(0,0,0,0.5);
+        }
+        h1{  text-align:center;  font-size:1.8rem;  font-weight:600;  margin-bottom:20px;  letter-spacing:1px;  background:linear-gradient(90deg,var(--player),var(--banker),var(--tie),var(--sub));  -webkit-background-clip:text;  color:transparent;}
+        
+        .stats{  display:flex;  justify-content:space-between;  font-size:0.95rem;  margin-bottom:15px; border-bottom: 1px solid #333; padding-bottom: 15px; gap: 8px; flex-wrap: wrap;}
+        .label { color: #888; margin-right: 5px; }
+
+        .predict{text-align:center;margin-bottom:24px;}
+        .pred-label{  font-size:2.2rem;  font-weight:700;  padding:10px 30px;  border-radius:14px;  display: inline-block; transition: 0.5s;}
+        .pred-label.player{color:var(--player); text-shadow: 0 0 15px var(--player);}
+        .pred-label.banker{color:var(--banker); text-shadow: 0 0 15px var(--banker);}
+        
+        .conf-wrap{margin-top:20px; width:100%; max-width:280px; margin-inline:auto;}
+        .conf-bar{height:6px; border-radius:10px; background:rgba(255,255,255,0.05); overflow:hidden;}
+        .conf-fill{height:100%; width:0; background:linear-gradient(90deg,var(--player),var(--banker)); transition: width 0.5s;}
+        .conf-val{text-align:center; font-size:.85rem; margin-top:8px; color:#aaa; font-weight: 600;}
+
+        .btn-row{display:flex; gap:12px; margin-bottom:30px; flex-wrap:wrap;}
+        button{  flex:1; min-width:100px; padding:15px 0;  border-radius:12px; border:1px solid rgba(255,255,255,0.1);  font-weight:700; font-size:.9rem;  background:rgba(255,255,255,0.05); color:#fff; cursor:pointer; transition:0.2s;}
+        button:hover:enabled{background:rgba(255,255,255,0.15); transform: translateY(-2px);}
+        button:disabled{opacity:0.2; cursor:not-allowed;}
+        
+        .btn-player{ border-color: var(--player) !important; }
+        .btn-banker{ border-color: var(--banker) !important; }
+        .btn-tie{ border-color: var(--tie) !important; color: var(--tie); }
+        .btn-reset{ border-color: #ff4b4b !important; color: #ff4b4b; }
+
+        .first-six{ font-size:1.4rem; text-align:center; margin-top:15px; letter-spacing:.5rem; background: #000; padding: 10px; border-radius: 10px; min-height: 50px;}
+        .msg{text-align:center; margin-bottom:15px; font-weight: 600;}
+        #bankroll-msg { color: var(--tie); font-size: 1.1rem; }
+        .w{color:var(--player);} .l{color:var(--banker);} .t{color:var(--tie);} .dash{color:#444;}
+        .hidden{display:none;}
+
+        #setup-overlay{  position:fixed; inset:0;  background:rgba(0,0,0,0.9);  display:flex; justify-content:center; align-items:center;  z-index:3000;}
+        #setup-overlay div{  background:#1a1a1a; padding:40px; border-radius:20px; border: 1px solid #333; text-align:center; width: 350px;}
+        #setup-overlay h2 { margin-bottom: 20px; font-size: 1.2rem; color: var(--player); }
+        #setup-overlay input{ width:100%; padding:12px; border-radius:8px; border:1px solid #444; background: #000; color: #fff; font-size:1.1rem; text-align:center; margin-bottom: 15px;}
+        #setup-overlay button{ width: 100%; background: var(--player); color: #fff; border: none; padding: 15px; font-size: 1rem; }
+
+        .tie-history {
+            color: var(--tie) !important;
+            font-weight: 700;
+            background: transparent !important;
+            padding: 0 !important;
+            border-radius: 0 !important;
+            display: inline !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="exit-nav">
+        <button onclick="window.signOutUser()" class="exit-btn">✕ EXIT</button>
+    </div>
+
+    <div id="setup-overlay">
+        <div>
+            <h2>SETUP SESSION</h2>
+            <p style="color:#666; font-size: 0.8rem; margin-bottom: 10px;">BANKROLL</p>
+            <input type="number" id="input-bankroll" value="1000" step="any">
+            <p style="color:#666; font-size: 0.8rem; margin-bottom: 10px;">BASE BET</p>
+            <input type="number" id="input-bet" value="100" step="any" min="0.01">
+            <button id="start-btn">CONFIRM</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h1>Baccarat PRO</h1>
+
+        <div class="stats">
+            <span id="bankroll"><span class="label">Bank:</span> $1000</span>
+            <span id="next-bet"><span class="label">Bet:</span> $100</span>
+        </div>
+
+        <div class="predict hidden" id="prediction-box">
+            <span id="prediction" class="pred-label player">Player</span>
+            <div class="conf-wrap">
+                <div class="conf-bar"><div id="bar" class="conf-fill"></div></div>
+                <div id="val" class="conf-val">0%</div>
+            </div>
+        </div>
+
+        <div id="waitmsg" class="msg" style="color: #aaa;">Waiting for result... (0/6)</div>
+        <div id="bankroll-msg" class="msg"></div>
+
+        <div class="btn-row">
+            <button type="button" class="btn-player">P</button>
+            <button type="button" class="btn-tie">T</button>
+            <button type="button" class="btn-banker">B</button>
+            <button type="button" class="btn-reset">RESET</button>
+        </div>
+
+        <div id="history" class="first-six"></div>
+    </div>
+
+<script>
+    let bankroll=1000, baseBet=100, currentBet=100;
+    let cumulativeLoss=0, winCount=0, lossStreak=0;
+    let maxLoss=9999, targetProfitMultiplier=1.8;
+    let targetProfit=0, history=[], aiPrediction=null;
+
+    // ✅ Recovery tracking — understands outstanding debt across partial wins
+    let peakBankroll = 1000;
+    let recoveryTarget = 1000;
+
+    // ✅ Payout multipliers
+    const PLAYER_PAYOUT = 1.00;   // Player wins pay 1:1
+    const BANKER_PAYOUT = 0.95;   // Banker wins pay 0.95:1 (5% commission)
+
+    const bankrollEl=document.getElementById("bankroll");
+    const nextBetEl=document.getElementById("next-bet");
+    const historyEl=document.getElementById("history");
+    const predictionBox=document.getElementById("prediction-box");
+    const predictionLabel=document.getElementById("prediction");
+    const bar=document.getElementById("bar");
+    const val=document.getElementById("val");
+    const waitmsg=document.getElementById("waitmsg");
+    const bankrollMsg=document.getElementById("bankroll-msg");
+
+    const btnPlayer=document.querySelector(".btn-player");
+    const btnBanker=document.querySelector(".btn-banker");
+    const btnTie=document.querySelector(".btn-tie");
+    const betButtons=[btnPlayer,btnBanker,btnTie];
+
+    const overlay=document.getElementById("setup-overlay");
+    const inputBankroll=document.getElementById("input-bankroll");
+    const inputBet=document.getElementById("input-bet");
+    const startBtn=document.getElementById("start-btn");
+
+    // ============================================================
+    // ✅ MONEY FORMATTING
+    // ============================================================
+    function fmtMoney(n) {
+        const num = Math.round(n * 100) / 100;
+        if (Number.isInteger(num)) return num.toString();
+        return num.toFixed(2);
+    }
+
+    // ✅ Count how many decimal places a number has
+    function getDecimals(n) {
+        if (Number.isInteger(n)) return 0;
+        const s = n.toString();
+        if (s.includes('e-')) {
+            const match = s.match(/e-(\d+)/);
+            return match ? parseInt(match[1]) : 2;
+        }
+        const dot = s.indexOf('.');
+        return dot === -1 ? 0 : s.length - dot - 1;
+    }
+
+    // ✅ Round a number to N decimals without float errors
+    function roundTo(decimals) {
+        return (num) => {
+            const factor = Math.pow(10, decimals);
+            return Math.round(num * factor) / factor;
+        };
+    }
+
+    // ============================================================
+    // ✅ UI UPDATES
+    // ============================================================
+    function updateWaitMessage() {
+        if (history.length < 6) {
+            waitmsg.textContent = `Waiting for result... (${history.length}/6)`;
+        }
+    }
+
+    startBtn.onclick = () => {
+        const parsedBankroll = parseFloat(inputBankroll.value);
+        const parsedBet = parseFloat(inputBet.value);
+
+        bankroll = (!isNaN(parsedBankroll) && parsedBankroll > 0) ? parsedBankroll : 1000;
+        baseBet = (!isNaN(parsedBet) && parsedBet > 0) ? parsedBet : 100;
+
+        targetProfit = bankroll * targetProfitMultiplier;
+
+        resetState();
+        overlay.style.display = "none";
+
+        updateBankroll();
+        updateNextBet();
+    };
+
+    function resetState() {
+        cumulativeLoss = 0;
+        winCount = 0;
+        lossStreak = 0;
+        history = [];
+        aiPrediction = null;
+        historyEl.innerHTML = "";
+        predictionBox.classList.add("hidden");
+        waitmsg.classList.remove("hidden");
+        bankrollMsg.textContent = "";
+        betButtons.forEach(b => b.disabled = false);
+
+        currentBet = baseBet;
+
+        peakBankroll = bankroll;
+        recoveryTarget = bankroll;
+
+        updateBankroll();
+        updateNextBet();
+        updateWaitMessage();
+    }
+
+    function updateBankroll(){
+        bankrollEl.innerHTML=`<span class="label">Bank:</span> $${fmtMoney(bankroll)}`;
+    }
+    function updateNextBet(){
+        nextBetEl.innerHTML=`<span class="label">Bet:</span> $${fmtMoney(currentBet)}`;
+    }
+
+    function addHistory(result,outcome="neutral"){
+        history.push({result,outcome});
+        if(history.length>10) history.shift();
+        historyEl.innerHTML=history.map(h=>{
+            if(h.result==="Tie") {
+                return `<span class="tie-history">T</span>`;
+            }
+            if(h.outcome==="win") return `<span class="w">${h.result[0]}</span>`;
+            if(h.outcome==="loss") return `<span class="l">${h.result[0]}</span>`;
+            return `<span class="dash">${h.result[0]}</span>`;
+        }).join("");
+    }
+
+    function animateConfidence(num){
+        let c=0,inc=num/20;
+        (function run(){
+            c+=inc;if(c>num)c=num;
+            bar.style.width=c+"%";
+            val.textContent=c.toFixed(1)+"%";
+            if(c<num)requestAnimationFrame(run);
+        })();
+    }
+
+    // ============================================================
+    // ✅ PURE PATTERN MATCHING ENGINE — Last 7 Results
+    // No weights. No decay. No randomness.
+    // Searches suffix lengths 7→1 against full history.
+    // If no match at any length → NO SIGNAL (skip round).
+    // Ties are excluded from the pattern but still stored in history.
+    // ============================================================
+    const PREDICT_WINDOW = 7;
+
+    function makePrediction(){
+        // Full P/B sequence (newest last), ties excluded
+        const full = history
+            .filter(h => h.result === "Player" || h.result === "Banker")
+            .map(h => h.result === "Player" ? "P" : "B");
+
+        if (full.length < 2) {
+            showNoSignal();
+            return;
+        }
+
+        // The "recent pattern" = last PREDICT_WINDOW results
+        const recent = full.slice(-PREDICT_WINDOW);
+
+        // Try longest suffix first, down to length 1
+        for (let len = Math.min(PREDICT_WINDOW, recent.length) - 1; len >= 1; len--) {
+            const suffix = recent.slice(-len).join("");
+
+            // Search FULL history (excluding the recent block itself)
+            const searchEnd = full.length - len;
+            for (let i = searchEnd - 1; i >= 0; i--) {
+                const chunk = full.slice(i, i + len).join("");
+                if (chunk === suffix) {
+                    const next = full[i + len];
+                    if (next === "P" || next === "B") {
+                        aiPrediction = next === "P" ? "Player" : "Banker";
+                        renderPrediction(aiPrediction, len);
+                        return;
+                    }
+                }
+            }
+        }
+
+        // No match at any length → no signal
+        showNoSignal();
+    }
+
+    function showNoSignal(){
+        aiPrediction = null;
+        predictionLabel.textContent = "—";
+        predictionLabel.className = "pred-label";
+        animateConfidence(0);
+        predictionBox.classList.remove("hidden");
+        waitmsg.classList.add("hidden");
+    }
+
+    function renderPrediction(pick, matchLength) {
+        predictionLabel.textContent = pick.toUpperCase();
+        predictionLabel.className = "pred-label " + pick.toLowerCase();
+        const strength = (matchLength / PREDICT_WINDOW) * 100;
+        animateConfidence(strength);
+        predictionBox.classList.remove("hidden");
+        waitmsg.classList.add("hidden");
+    }
+
+    // ============================================================
+    // ✅ RECOVERY BET — snaps to nearest multiple of baseBet
+    // ============================================================
+    function calculateNextBet(){
+        if (cumulativeLoss > 0) {
+            let aggressive = (cumulativeLoss + baseBet) * 1.5;
+            const snapped = Math.round(aggressive / baseBet) * baseBet;
+            const decimals = getDecimals(baseBet);
+            const finalBet = roundTo(decimals)(snapped);
+            return Math.min(finalBet, bankroll);
+        }
+        return baseBet;
+    }
+
+    // ============================================================
+    // ✅ CLEAN DEEP REFRESH
+    // ============================================================
+    function forceFullRefresh() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('t', Date.now());
+        window.location.replace(url.href);
+    }
+
+    function resetGame(){
+        forceFullRefresh();
+    }
+
+    // ============================================================
+    // ✅ MAIN HANDLE CLICK
+    // ============================================================
+    function handleClick(result){
+        if(history.length<6){
+            addHistory(result);
+            updateWaitMessage();
+            if(history.length===6)makePrediction();
+            return;
+        }
+        if(result==="Tie"){addHistory(result);return;}
+
+        // ✅ No signal → record result and re-predict, no bet
+        if (aiPrediction === null) {
+            addHistory(result, "neutral");
+            makePrediction();
+            return;
+        }
+
+        if(result===aiPrediction){
+            // ✅ REALISTIC PAYOUT: Banker pays 0.95, Player pays 1.00
+            const payoutMultiplier = (aiPrediction === "Banker") ? BANKER_PAYOUT : PLAYER_PAYOUT;
+            const profit = roundTo(2)(currentBet * payoutMultiplier);
+
+            bankroll += profit;
+            winCount++;
+            addHistory(result,"win");
+
+            // Only reset recovery if we're back at the peak (true recovery)
+            if (bankroll >= recoveryTarget) {
+                cumulativeLoss = 0;
+                lossStreak = 0;
+                peakBankroll = bankroll;
+                recoveryTarget = bankroll;
+            } else {
+                // Still in debt — reduce outstanding loss by the *actual profit* earned
+                cumulativeLoss = Math.max(0, cumulativeLoss - profit);
+            }
+
+            // Track new peak if we've grown beyond it
+            if (bankroll > peakBankroll) {
+                peakBankroll = bankroll;
+                recoveryTarget = bankroll;
+            }
+
+            if(bankroll>=targetProfit){
+                bankrollMsg.textContent="SESSION COMPLETE: PROFIT REACHED";
+                betButtons.forEach(b=>b.disabled=true);
+                predictionBox.classList.add("hidden");
+                waitmsg.classList.add("hidden");
+                return;
+            }
+        }else{
+            bankroll-=currentBet;
+            cumulativeLoss+=currentBet;lossStreak++;
+            addHistory(result,"loss");
+
+            const units = (baseBet > 0) ? Math.floor(bankroll / baseBet) : 0;
+            const nextRequired = calculateNextBet();
+            const busted = bankroll <= 0;
+            const cantAfford = nextRequired > bankroll;
+            const safetyCap = lossStreak >= maxLoss;
+            const cantCoverBase = units < 1;
+
+            if (busted || cantAfford || safetyCap || cantCoverBase) {
+                if (busted || cantAfford) {
+                    bankrollMsg.textContent = "SESSION FAILED: INSUFFICIENT BANKROLL";
+                } else {
+                    bankrollMsg.textContent = "SESSION FAILED: BANKROLL BELOW 1 BASE BET";
+                }
+                betButtons.forEach(b=>b.disabled=true);
+                currentBet=0;updateNextBet();
+                predictionBox.classList.add("hidden");
+                waitmsg.classList.add("hidden");
+                return;
+            }
+        }
+        currentBet=calculateNextBet();
+        updateBankroll();updateNextBet();
+        makePrediction();
+    }
+
+    btnPlayer.onclick=()=>handleClick("Player");
+    btnBanker.onclick=()=>handleClick("Banker");
+    btnTie.onclick=()=>handleClick("Tie");
+    document.querySelector(".btn-reset").onclick=resetGame;
+
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && (e.key === 'r' || e.key === 'R')) {
+            e.preventDefault();
+            forceFullRefresh();
+            return;
+        }
+        if (e.key === 'F5') {
+            e.preventDefault();
+            forceFullRefresh();
+            return;
+        }
+    });
+
+    window.addEventListener('load', () => {
+        if (window.location.search.includes('t=')) {
+            const cleanPath = window.location.pathname.replace('.html', '');
+            const cleanUrl = window.location.origin + cleanPath;
+            window.history.replaceState(null, '', cleanUrl);
+        }
+    });
 </script>
+
+<script>
+(function() {
+    document.addEventListener('contextmenu', e => e.preventDefault());
+
+    document.onkeydown = function(e) {
+        if (
+            e.keyCode === 123 || 
+            (e.ctrlKey && e.keyCode === 85) || 
+            (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) ||
+            (e.ctrlKey && e.keyCode === 83)
+        ) {
+            return false;
+        }
+    };
+
+    setInterval(function() {
+        (function() { return false; }['constructor']('debugger')['call']());
+    }, 50);
+
+    function detectDevTools() {
+        const threshold = 300;
+        const widthDiff = window.outerWidth - window.innerWidth;
+        const heightDiff = window.outerHeight - window.innerHeight;
+
+        const devToolsOpen =
+            (widthDiff > threshold && heightDiff < 100) ||
+            (heightDiff > threshold && widthDiff < 100);
+
+        if (devToolsOpen) {
+            document.body.innerHTML = "";
+            window.location.replace("about:blank");
+        }
+    }
+    setInterval(detectDevTools, 800);
+
+    if (typeof console !== "undefined") {
+        console.log = console.debug = console.info = console.warn = console.error = function() {};
+    }
+})();
+</script>
+</body>
+</html>
