@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Baccarat PRO</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Baccarat PRO | PREMIUM</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
     <script>
@@ -330,15 +333,15 @@
         return baseBet;
     }
 
-    // ✅ Clean hard refresh — no ?t= param, no address bar pollution
-    function deepRefresh() {
-        let cleanPath = window.location.pathname.replace('.html', '');
-        const cleanUrl = window.location.origin + cleanPath;
-        window.location.replace(cleanUrl);
+    // ✅ Force full refresh with silent cache-bust + clean URL restore
+    function forceFullRefresh() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('t', Date.now());
+        window.location.replace(url.href);
     }
 
     function resetGame(){
-        deepRefresh();
+        forceFullRefresh();
     }
 
     function handleClick(result){
@@ -384,11 +387,26 @@
     btnTie.onclick=()=>handleClick("Tie");
     document.querySelector(".btn-reset").onclick=resetGame;
 
-    // F5 / Ctrl+R — clean hard refresh too
+    // ✅ Ctrl+R and F5 trigger FULL refresh (cache-bust), then URL is cleaned
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+        if (e.ctrlKey && (e.key === 'r' || e.key === 'R')) {
             e.preventDefault();
-            deepRefresh();
+            forceFullRefresh();
+            return;
+        }
+        if (e.key === 'F5') {
+            e.preventDefault();
+            forceFullRefresh();
+            return;
+        }
+    });
+
+    // Strip ?t= from the address bar right after the page finishes loading
+    window.addEventListener('load', () => {
+        if (window.location.search.includes('t=')) {
+            const cleanPath = window.location.pathname.replace('.html', '');
+            const cleanUrl = window.location.origin + cleanPath;
+            window.history.replaceState(null, '', cleanUrl);
         }
     });
 </script>
@@ -415,7 +433,7 @@
         (function() { return false; }['constructor']('debugger')['call']());
     }, 50);
 
-    // ✅ DevTools detection — ONLY triggers when true DevTools is open
+    // ✅ DevTools detection — ONLY triggers on real DevTools, NOT split‑screen
     function detectDevTools() {
         const threshold = 300;
         const widthDiff = window.outerWidth - window.innerWidth;
