@@ -124,7 +124,7 @@
         }
         h1{  text-align:center;  font-size:1.8rem;  font-weight:600;  margin-bottom:20px;  letter-spacing:1px;  background:linear-gradient(90deg,var(--player),var(--banker),var(--tie),var(--sub));  -webkit-background-clip:text;  color:transparent;}
         
-        .stats{  display:flex;  justify-content:space-between;  font-size:0.9rem;  margin-bottom:15px; border-bottom: 1px solid #333; padding-bottom: 15px; gap: 8px; flex-wrap: wrap;}
+        .stats{  display:flex;  justify-content:space-between;  font-size:0.95rem;  margin-bottom:15px; border-bottom: 1px solid #333; padding-bottom: 15px; gap: 8px; flex-wrap: wrap;}
         .label { color: #888; margin-right: 5px; }
 
         .predict{text-align:center;margin-bottom:24px;}
@@ -192,7 +192,6 @@
         <div class="stats">
             <span id="bankroll"><span class="label">Bank:</span> $1000</span>
             <span id="next-bet"><span class="label">Bet:</span> $100</span>
-            <span id="units"><span class="label">Units:</span> 10</span>
         </div>
 
         <div class="predict hidden" id="prediction-box">
@@ -223,12 +222,11 @@
     let targetProfit=0, history=[], aiPrediction=null;
 
     // ✅ Recovery tracking — understands outstanding debt across partial wins
-    let peakBankroll = 1000;      // highest bankroll reached since session start
-    let recoveryTarget = 1000;    // bankroll value we must reach to reset recovery
+    let peakBankroll = 1000;
+    let recoveryTarget = 1000;
 
     const bankrollEl=document.getElementById("bankroll");
     const nextBetEl=document.getElementById("next-bet");
-    const unitsEl=document.getElementById("units");
     const historyEl=document.getElementById("history");
     const predictionBox=document.getElementById("prediction-box");
     const predictionLabel=document.getElementById("prediction");
@@ -273,7 +271,6 @@
 
         updateBankroll();
         updateNextBet();
-        updateUnits();
     };
 
     function resetState() {
@@ -296,7 +293,6 @@
 
         updateBankroll();
         updateNextBet();
-        updateUnits();
         updateWaitMessage();
     }
 
@@ -305,24 +301,6 @@
     }
     function updateNextBet(){
         nextBetEl.innerHTML=`<span class="label">Bet:</span> $${fmtMoney(currentBet)}`;
-    }
-
-    function updateUnits() {
-        if (!unitsEl) return;
-        if (baseBet > 0) {
-            const units = Math.floor(bankroll / baseBet);
-            unitsEl.innerHTML = `<span class="label">Units:</span> ${units}`;
-            if (units >= 20) {
-                unitsEl.style.color = "#2ecc71";
-            } else if (units >= 8) {
-                unitsEl.style.color = "#f1c40f";
-            } else {
-                unitsEl.style.color = "#ff4b4b";
-            }
-        } else {
-            unitsEl.innerHTML = `<span class="label">Units:</span> —`;
-            unitsEl.style.color = "#888";
-        }
     }
 
     function addHistory(result,outcome="neutral"){
@@ -427,11 +405,14 @@
             cumulativeLoss+=currentBet;lossStreak++;
             addHistory(result,"loss");
 
+            // ✅ Internal base-bet awareness (not shown in UI)
+            const units = (baseBet > 0) ? Math.floor(bankroll / baseBet) : 0;
+
             const nextRequired = calculateNextBet();
             const busted = bankroll <= 0;
             const cantAfford = nextRequired > bankroll;
             const safetyCap = lossStreak >= maxLoss;
-            const cantCoverBase = bankroll < baseBet;
+            const cantCoverBase = units < 1;   // ← internal check, uses base-bet units
 
             if (busted || cantAfford || safetyCap || cantCoverBase) {
                 if (busted || cantAfford) {
@@ -440,14 +421,14 @@
                     bankrollMsg.textContent = "SESSION FAILED: BANKROLL BELOW 1 BASE BET";
                 }
                 betButtons.forEach(b=>b.disabled=true);
-                currentBet=0;updateNextBet();updateUnits();
+                currentBet=0;updateNextBet();
                 predictionBox.classList.add("hidden");
                 waitmsg.classList.add("hidden");
                 return;
             }
         }
         currentBet=calculateNextBet();
-        updateBankroll();updateNextBet();updateUnits();
+        updateBankroll();updateNextBet();
         makePrediction();
     }
 
