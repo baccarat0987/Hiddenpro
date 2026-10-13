@@ -46,34 +46,27 @@
         };
 
         onAuthStateChanged(auth, async (user) => {
-            // 1. Not logged in → redirect
             if (!user) {
                 window.location.href = "index.html";
                 return;
             }
-
             try {
                 const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
                 const now = Date.now();
                 const userData = userDoc.data();
 
-                // 2. Check expiry + per‑user software permission
                 const isValid =
                     userDoc.exists() &&
                     (userData.expiry === 'LIFETIME' || userData.expiry > now) &&
                     userData.allowedSoftware?.includes(REQUIRED_ENGINE_ID);
 
                 if (!isValid) {
-                    // 3. Alert on access denial
                     alert("Access denied: you don't have permission for Baccarat PRO.");
                     window.location.href = "index.html";
                     return;
                 }
-
-                // 4. All good – show the app
                 document.body.style.display = "flex";
             } catch (err) {
-                // If Firestore read fails, treat as denial
                 alert("Access denied: unable to verify permissions.");
                 window.location.href = "index.html";
             }
@@ -83,7 +76,6 @@
     <style>
         :root{  --player:#4169E1;  --banker:#800080;  --tie:#2ecc71;  --sub:#FFFFFF;  --glass:rgba(20,20,20,0.9);  --ink:#FFFFFF;}
 
-        /* User‑select disabled (global) */
         * {
             margin: 0;
             padding: 0;
@@ -98,14 +90,13 @@
             background:radial-gradient(circle at 50% 50%,#111111 0%,#000000 100%);  
             font-family:'Inter', sans-serif;  
             color:var(--ink);  
-            display: none; /* hidden until auth passes */
+            display: none;
             min-height: 100vh;
             padding: 20px 12px;
             justify-content: center;
             align-items: center;
         }
 
-        /* EXIT BUTTON — calls signOutUser() */
         .exit-nav { position: fixed; top: 20px; right: 20px; z-index: 2000; }
         .exit-btn {
             background: rgba(255,255,255,0.1);
@@ -168,7 +159,6 @@
         #setup-overlay input{ width:100%; padding:12px; border-radius:8px; border:1px solid #444; background: #000; color: #fff; font-size:1.1rem; text-align:center; margin-bottom: 15px;}
         #setup-overlay button{ width: 100%; background: var(--player); color: #fff; border: none; padding: 15px; font-size: 1rem; }
 
-        /* Tie history — plain green letter, no background container */
         .tie-history {
             color: var(--tie) !important;
             font-weight: 700;
@@ -229,9 +219,12 @@
 <script>
     let bankroll=1000, baseBet=100, currentBet=100;
     let cumulativeLoss=0, winCount=0, lossStreak=0;
-    // ✅ maxLoss is now a very high safety cap — real failure is bankroll-based
     let maxLoss=9999, targetProfitMultiplier=1.8;
     let targetProfit=0, history=[], aiPrediction=null;
+
+    // ✅ Recovery tracking — understands outstanding debt across partial wins
+    let peakBankroll = 1000;      // highest bankroll reached since session start
+    let recoveryTarget = 1000;    // bankroll value we must reach to reset recovery
 
     const bankrollEl=document.getElementById("bankroll");
     const nextBetEl=document.getElementById("next-bet");
@@ -254,7 +247,6 @@
     const inputBet=document.getElementById("input-bet");
     const startBtn=document.getElementById("start-btn");
 
-    // ✅ Format money — integers as-is, decimals always 2 places
     function fmtMoney(n) {
         const num = Math.round(n * 100) / 100;
         if (Number.isInteger(num)) return num.toString();
@@ -267,7 +259,6 @@
         }
     }
 
-    // ✅ startBtn — sets currentBet = baseBet BEFORE updating UI
     startBtn.onclick = () => {
         const parsedBankroll = parseFloat(inputBankroll.value);
         const parsedBet = parseFloat(inputBet.value);
@@ -285,7 +276,6 @@
         updateUnits();
     };
 
-    // ✅ resetState — assigns currentBet before rendering
     function resetState() {
         cumulativeLoss = 0;
         winCount = 0;
@@ -300,6 +290,10 @@
 
         currentBet = baseBet;
 
+        // ✅ Initialize recovery tracking
+        peakBankroll = bankroll;
+        recoveryTarget = bankroll;
+
         updateBankroll();
         updateNextBet();
         updateUnits();
@@ -313,13 +307,11 @@
         nextBetEl.innerHTML=`<span class="label">Bet:</span> $${fmtMoney(currentBet)}`;
     }
 
-    // ✅ NEW: Units display — shows how many base bets your bankroll can survive
     function updateUnits() {
         if (!unitsEl) return;
         if (baseBet > 0) {
             const units = Math.floor(bankroll / baseBet);
             unitsEl.innerHTML = `<span class="label">Units:</span> ${units}`;
-            // Color-code: green (healthy), yellow (moderate), red (critical)
             if (units >= 20) {
                 unitsEl.style.color = "#2ecc71";
             } else if (units >= 8) {
@@ -372,16 +364,16 @@
         animateConfidence((aiPrediction==="Player"?p:b)/(p+b)*100);
     }
 
+    // ✅ Bet is based on OUTSTANDING DEBT (cumulativeLoss), not just streak
     function calculateNextBet(){
-        if(lossStreak>0){
-            let aggressive=(cumulativeLoss+baseBet)*1.5;
+        if (cumulativeLoss > 0) {
+            let aggressive = (cumulativeLoss + baseBet) * 1.5;
             aggressive = Math.round(aggressive * 100) / 100;
             return Math.min(aggressive, bankroll);
         }
         return baseBet;
     }
 
-    // ✅ Force full refresh with silent cache-bust + clean URL restore
     function forceFullRefresh() {
         const url = new URL(window.location.href);
         url.searchParams.set('t', Date.now());
@@ -403,8 +395,26 @@
 
         if(result===aiPrediction){
             bankroll+=currentBet;
-            cumulativeLoss=0;lossStreak=0;winCount++;
+            winCount++;
             addHistory(result,"win");
+
+            // ✅ Only reset recovery if we're back at the peak (true recovery)
+            if (bankroll >= recoveryTarget) {
+                cumulativeLoss = 0;
+                lossStreak = 0;
+                peakBankroll = bankroll;
+                recoveryTarget = bankroll;
+            } else {
+                // Still in debt — reduce the outstanding loss by the amount won
+                cumulativeLoss = Math.max(0, cumulativeLoss - currentBet);
+            }
+
+            // Track new peak if we've grown beyond it
+            if (bankroll > peakBankroll) {
+                peakBankroll = bankroll;
+                recoveryTarget = bankroll;
+            }
+
             if(bankroll>=targetProfit){
                 bankrollMsg.textContent="SESSION COMPLETE: PROFIT REACHED";
                 betButtons.forEach(b=>b.disabled=true);
@@ -417,7 +427,6 @@
             cumulativeLoss+=currentBet;lossStreak++;
             addHistory(result,"loss");
 
-            // ✅ Adaptive failure — understands bankroll AND baseBet size
             const nextRequired = calculateNextBet();
             const busted = bankroll <= 0;
             const cantAfford = nextRequired > bankroll;
@@ -447,7 +456,6 @@
     btnTie.onclick=()=>handleClick("Tie");
     document.querySelector(".btn-reset").onclick=resetGame;
 
-    // ✅ Ctrl+R and F5 trigger FULL refresh (cache-bust), then URL is cleaned
     document.addEventListener('keydown', function(e) {
         if (e.ctrlKey && (e.key === 'r' || e.key === 'R')) {
             e.preventDefault();
@@ -461,7 +469,6 @@
         }
     });
 
-    // Strip ?t= from the address bar right after the page finishes loading
     window.addEventListener('load', () => {
         if (window.location.search.includes('t=')) {
             const cleanPath = window.location.pathname.replace('.html', '');
@@ -473,10 +480,8 @@
 
 <script>
 (function() {
-    // Prevent Right-Click
     document.addEventListener('contextmenu', e => e.preventDefault());
 
-    // Block Logic Inspection Shortcuts
     document.onkeydown = function(e) {
         if (
             e.keyCode === 123 || 
@@ -488,12 +493,10 @@
         }
     };
 
-    // Script Freeze (Interruption)
     setInterval(function() {
         (function() { return false; }['constructor']('debugger')['call']());
     }, 50);
 
-    // ✅ DevTools detection — ONLY triggers on real DevTools, NOT split‑screen
     function detectDevTools() {
         const threshold = 300;
         const widthDiff = window.outerWidth - window.innerWidth;
@@ -510,7 +513,6 @@
     }
     setInterval(detectDevTools, 800);
 
-    // Silent Console
     if (typeof console !== "undefined") {
         console.log = console.debug = console.info = console.warn = console.error = function() {};
     }
