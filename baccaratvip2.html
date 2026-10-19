@@ -1,31 +1,31 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Roulette VIP PRO</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
-    
-    <!-- ========== ADDED 1: CLEAN URL SCRIPT ========== -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Baccarat PRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
     <script>
         if (window.location.pathname.endsWith('.html')) {
             const cleanUrl = window.location.pathname.replace('.html', '');
             window.history.replaceState(null, '', cleanUrl);
         }
     </script>
-    
-    <!-- ========== ADDED 2: FIREBASE AUTHENTICATION MODULE ========== -->
+
+    <!-- Firebase Auth + Per‑User Permission Guard (engine_6) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDHkhd7O2rJ2goNTCudeRUxQjrTFe2KoHc",
             authDomain: "my-software-portal.firebaseapp.com",
             projectId: "my-software-portal",
-            storageBucket: "my-software-portal.firebasestorage.app",
-            messagingSenderId: "1072405993700",
             appId: "1:1072405993700:web:b66ca016c8de667d46f4f1"
         };
 
@@ -33,1368 +33,588 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const REQUIRED_ENGINE_ID = "engine_15";
+        // ✅ Baccarat PRO engine ID
+        const REQUIRED_ENGINE_ID = "engine_18";
+
+        // Global sign‑out function (used by the exit button)
+        window.signOutUser = function() {
+            signOut(auth).then(() => {
+                window.location.href = "index.html";
+            }).catch(() => {
+                window.location.href = "index.html";
+            });
+        };
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = "index.html";
                 return;
             }
-            const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
-            const now = Date.now();
-            const userData = userDoc.data();
-            const isValid = userDoc.exists() && 
-                           (userData.expiry === 'LIFETIME' || userData.expiry > now) &&
-                           userData.allowedSoftware?.includes(REQUIRED_ENGINE_ID);
-            if (!isValid) {
-                alert("Access denied: you don't have permission for Roulette VIP PRO (engine_14).");
+            try {
+                const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
+                const now = Date.now();
+                const userData = userDoc.data();
+
+                const isValid =
+                    userDoc.exists() &&
+                    (userData.expiry === 'LIFETIME' || userData.expiry > now) &&
+                    userData.allowedSoftware?.includes(REQUIRED_ENGINE_ID);
+
+                if (!isValid) {
+                    alert("Access denied: you don't have permission for Baccarat PRO.");
+                    window.location.href = "index.html";
+                    return;
+                }
+                document.body.style.display = "flex";
+            } catch (err) {
+                alert("Access denied: unable to verify permissions.");
                 window.location.href = "index.html";
-                return;
             }
-            document.body.style.display = "flex";
         });
     </script>
-    
-    <!-- ========== ADDED 3: RIGHT-CLICK & SHORTCUT BLOCKER ========== -->
-    <script>
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.onkeydown = function(e) {
-            if (e.keyCode === 123 || 
-                (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
-                (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
-                return false;
-            }
-        };
-    </script>
-    
-    <!-- ========== ADDED 4: EXIT BUTTON STYLES ========== -->
+
     <style>
-        .exit-nav {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            z-index: 1000;
-        }
-        .exit-btn {
-            background: rgba(0, 0, 0, 0.7);
-            color: #9D6AF5;
-            padding: 6px 14px;
-            border-radius: 40px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 11px;
-            border: 1px solid rgba(157, 106, 245, 0.5);
-            backdrop-filter: blur(8px);
-            transition: 0.2s;
-            font-family: 'Inter', -apple-system, sans-serif;
-        }
-        .exit-btn:hover {
-            background: #9D6AF5;
-            color: #030407;
-            box-shadow: 0 0 12px #9D6AF5;
-        }
-    </style>
-    
-    <style>
+        :root{  --player:#4169E1;  --banker:#800080;  --tie:#2ecc71;  --sub:#FFFFFF;  --glass:rgba(20,20,20,0.9);  --ink:#FFFFFF;}
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
 
-        body {
-            background: radial-gradient(circle at 10% 20%, #0A0E1A 0%, #03050A 100%);
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-            min-height: 100vh;
+        body{  
+            background:radial-gradient(circle at 50% 50%,#111111 0%,#000000 100%);  
+            font-family:'Inter', sans-serif;  
+            color:var(--ink);  
             display: none;
+            min-height: 100vh;
+            padding: 20px 12px;
             justify-content: center;
             align-items: center;
-            padding: 20px;
         }
 
-        .internal-refresh-active {
-            animation: internalRefreshPulse 0.28s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
-        }
-        
-        @keyframes internalRefreshPulse {
-            0% { opacity: 1; box-shadow: 0 0 0px rgba(157, 106, 245, 0); }
-            35% { opacity: 0.95; box-shadow: 0 0 18px 3px rgba(157, 106, 245, 0.8), inset 0 0 8px rgba(201, 179, 255, 0.4); }
-            100% { opacity: 1; box-shadow: 0 0 0px rgba(157, 106, 245, 0); }
-        }
-
-        .aequitas-app {
-            width: 620px;
-            max-width: 100%;
-            background: linear-gradient(145deg, #12172B, #0A0E1F);
-            border-radius: 24px;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.6), inset 0 1px 0 rgba(157, 106, 245, 0.12);
-            border: 1px solid rgba(157, 106, 245, 0.35);
-            overflow: hidden;
-            position: relative;
-            z-index: 1;
-        }
-
-        .title-bar-brand {
-            background: linear-gradient(90deg, #0C1126, #080C1C);
-            padding: 10px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(157, 106, 245, 0.45);
-        }
-        .brand-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .minimal-ai-logo {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            animation: slowRotate 8s linear infinite;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .minimal-ai-logo:hover {
-            transform: scale(1.05);
-            animation: slowRotate 4s linear infinite;
-        }
-        
-        .minimal-svg {
-            width: 100%;
-            height: 100%;
-            filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
-        }
-        
-        @keyframes slowRotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .brand-text {
-            display: flex;
-            flex-direction: column;
-        }
-        .brand-name {
-            font-weight: 800;
-            font-size: 0.95rem;
-            letter-spacing: 0.5px;
-            background: linear-gradient(135deg, #C9B3FF, #9D6AF5);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .brand-sub {
-            font-size: 0.5rem;
-            font-weight: 600;
-            color: #9D6AF5;
-            letter-spacing: 0.8px;
-        }
-        .brand-badge {
-            background: rgba(157, 106, 245, 0.18);
-            border: 1px solid rgba(157, 106, 245, 0.45);
-            border-radius: 30px;
-            padding: 3px 10px;
-            font-size: 0.55rem;
-            font-weight: 700;
-            color: #C9B3FF;
-        }
-
-        .four-columns {
-            display: grid;
-            grid-template-columns: 125px 90px 105px 1fr;
-            gap: 10px;
-            padding: 14px;
-        }
-
-        .numbers-col {
-            background: rgba(10, 14, 28, 0.75);
-            backdrop-filter: blur(4px);
-            border-radius: 18px;
-            padding: 10px 6px;
-            border: 1px solid rgba(157, 106, 245, 0.3);
-        }
-        .col-header {
-            font-size: 0.55rem;
-            font-weight: 800;
-            color: #B88AFF;
-            text-align: center;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-        .zero-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-        .zero-btn {
-            background: linear-gradient(145deg, #2D5A3F, #1E3D2A);
-            border: none;
+        .exit-nav { position: fixed; top: 20px; right: 20px; z-index: 2000; }
+        .exit-btn {
+            background: rgba(255,255,255,0.1);
             color: white;
-            font-weight: 800;
-            font-size: 0.85rem;
-            font-family: monospace;
-            cursor: pointer;
-            text-align: center;
-            width: 52px;
-            padding: 6px 0;
-            border-radius: 35px;
-            box-shadow: 0 2px 0 #0F2A1A;
-            transition: 0.03s linear;
-        }
-        .zero-btn:active { transform: translateY(2px); box-shadow: none; }
-        
-        .number-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 5px;
-        }
-        .num-btn {
-            background: rgba(25, 30, 50, 0.9);
-            border: 1px solid rgba(157, 106, 245, 0.4);
-            padding: 6px 0;
-            border-radius: 25px;
-            font-weight: 800;
-            font-size: 0.7rem;
-            font-family: monospace;
-            cursor: pointer;
-            text-align: center;
-            color: #F0E6FF;
-        }
-        .num-btn:active { transform: translateY(1px); background: rgba(157, 106, 245, 0.4); }
-        .btn-flash {
-            animation: flashBrand 0.12s ease-out;
-        }
-        @keyframes flashBrand {
-            0% { transform: scale(1); background: rgba(157, 106, 245, 0.3); }
-            50% { transform: scale(0.92); background: #9D6AF5; color: white; }
-            100% { transform: scale(1); background: rgba(25, 30, 50, 0.9); }
-        }
-        .red-num { background: rgba(198, 40, 40, 0.85); border-color: rgba(198, 80, 80, 0.5); color: #FFE0E0; }
-        .black-num { background: rgba(35, 35, 55, 0.95); border-color: rgba(120, 120, 160, 0.4); color: #E0D4FF; }
-        .zero-flash {
-            animation: zeroBrandFlash 0.12s ease-out;
-        }
-        @keyframes zeroBrandFlash {
-            0% { transform: scale(1); background: #2D5A3F; }
-            50% { transform: scale(0.92); background: #9D6AF5; color: white; }
-            100% { transform: scale(1); background: #2D5A3F; }
-        }
-
-        .history-col {
-            background: rgba(10, 14, 28, 0.75);
-            backdrop-filter: blur(4px);
-            border-radius: 18px;
-            padding: 10px 6px;
-            border: 1px solid rgba(157, 106, 245, 0.3);
-            display: flex;
-            flex-direction: column;
-            height: 340px;
-        }
-        .history-scroll {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            padding-right: 2px;
-        }
-        .spin-item {
-            background: linear-gradient(135deg, rgba(157, 106, 245, 0.25), rgba(108, 63, 217, 0.2));
-            padding: 6px;
-            text-align: center;
-            border-radius: 20px;
-            font-weight: 800;
-            font-family: monospace;
-            font-size: 0.85rem;
-            border-left: 3px solid #C9B3FF;
-            color: #F5EFFF;
-            text-shadow: 0 0 2px rgba(0,0,0,0.3);
-        }
-        .spin-item-new {
-            background: linear-gradient(135deg, #9D6AF5, #7B4FDD);
-            color: #FFFFFF;
-            border-left-color: #FFE8B6;
-            animation: highlightBrand 0.45s ease-out;
-        }
-        @keyframes highlightBrand {
-            0% { background: #C9B3FF; transform: translateX(-2px); }
-            100% { background: linear-gradient(135deg, #9D6AF5, #7B4FDD); transform: translateX(0); }
-        }
-        .history-count {
-            font-size: 0.55rem;
-            text-align: center;
-            margin-top: 8px;
-            color: #B88AFF;
-            font-weight: 700;
-        }
-
-        .group-col {
-            background: rgba(10, 14, 28, 0.75);
-            backdrop-filter: blur(4px);
-            border-radius: 18px;
-            padding: 10px 6px;
-            border: 1px solid rgba(157, 106, 245, 0.3);
-            height: 340px;
-            display: flex;
-            flex-direction: column;
-        }
-        .group-scroll {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .group-item {
-            background: rgba(157, 106, 245, 0.15);
-            padding: 5px;
-            text-align: center;
-            border-radius: 18px;
-            font-size: 0.7rem;
-            font-family: monospace;
-            font-weight: 700;
-            word-break: break-word;
-            color: #E0D0FF;
-            border: 1px solid rgba(157, 106, 245, 0.3);
-        }
-
-        .prediction-col {
-            background: rgba(10, 14, 28, 0.75);
-            backdrop-filter: blur(4px);
-            border-radius: 18px;
-            padding: 10px;
-            border: 1px solid rgba(157, 106, 245, 0.3);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .pred-glass {
-            background: rgba(157, 106, 245, 0.2);
-            backdrop-filter: blur(12px);
-            border-radius: 18px;
-            padding: 12px;
-            text-align: center;
-            border: 1px solid rgba(201, 179, 255, 0.6);
-            box-shadow: 0 0 20px rgba(157, 106, 245, 0.5), inset 0 0 8px rgba(201, 179, 255, 0.3);
-            transition: all 0.1s;
-        }
-        .prediction-flash {
-            animation: predGlassPulse 0.25s ease-out;
-        }
-        @keyframes predGlassPulse {
-            0% { box-shadow: 0 0 0px rgba(157, 106, 245, 0.5); transform: scale(1); background: rgba(157, 106, 245, 0.2); }
-            50% { box-shadow: 0 0 35px rgba(157, 106, 245, 0.9); transform: scale(1.02); background: rgba(157, 106, 245, 0.45); }
-            100% { box-shadow: 0 0 20px rgba(157, 106, 245, 0.5); transform: scale(1); background: rgba(157, 106, 245, 0.2); }
-        }
-        .pred-label-small {
-            font-size: 0.55rem;
-            font-weight: 800;
-            color: #F0E6FF;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-        .pred-value {
-            font-size: 1rem;
-            font-weight: 900;
-            font-family: monospace;
-            background: rgba(10, 14, 26, 0.8);
-            display: inline-block;
-            padding: 5px 14px;
-            border-radius: 35px;
-            margin-top: 8px;
-            color: #FFE8B6;
-            letter-spacing: 1px;
-            border: 1px solid rgba(201, 179, 255, 0.5);
-        }
-        
-        .alternatives-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .alt-row {
-            background: linear-gradient(135deg, rgba(157, 106, 245, 0.2), rgba(108, 63, 217, 0.15));
-            border-radius: 25px;
-            padding: 7px 10px;
-            text-align: center;
-            font-weight: 800;
-            font-family: monospace;
-            font-size: 0.75rem;
-            border: 1px solid rgba(157, 106, 245, 0.45);
-            color: #F2E8FF;
-            text-shadow: 0 0 1px rgba(0,0,0,0.2);
-        }
-        
-        .clear-btn {
-            background: linear-gradient(145deg, #2D1F3A, #1A1225);
-            border: 1px solid rgba(157, 106, 245, 0.6);
-            width: 100%;
-            padding: 9px;
-            border-radius: 35px;
-            font-weight: 800;
-            font-size: 0.7rem;
-            color: #D9C8FF;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            cursor: pointer;
-            margin-top: 4px;
-            transition: 0.05s linear;
-        }
-        .clear-btn:active { transform: scale(0.97); background: #2D1F3A; }
-
-        .history-scroll::-webkit-scrollbar, .group-scroll::-webkit-scrollbar {
-            width: 3px;
-        }
-        .history-scroll::-webkit-scrollbar-track, .group-scroll::-webkit-scrollbar-track {
-            background: #1A1F30;
-            border-radius: 3px;
-        }
-        .history-scroll::-webkit-scrollbar-thumb, .group-scroll::-webkit-scrollbar-thumb {
-            background: #9D6AF5;
-            border-radius: 3px;
-        }
-
-        @media (max-width: 580px) {
-            .four-columns { grid-template-columns: 1fr; gap: 10px; }
-            .aequitas-app { width: 95%; }
-            .history-col, .group-col { height: auto; min-height: 180px; }
-        }
-
-        /* ==================== PROVIDER PICKER (TEXT-ONLY) ==================== */
-        .provider-picker-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(3, 5, 12, 0.96);
-            backdrop-filter: blur(14px);
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            animation: fadeInOverlay 0.35s ease;
-            gap: 28px;
-            overflow-y: auto;
-        }
-        @keyframes fadeInOverlay {
-            from { opacity: 0; backdrop-filter: blur(0px); }
-            to { opacity: 1; backdrop-filter: blur(12px); }
-        }
-        .provider-picker-title {
-            font-size: clamp(0.85rem, 4vw, 1.15rem);
-            font-weight: 800;
-            letter-spacing: 5px;
-            color: #C9B3FF;
-            text-transform: uppercase;
-            text-align: center;
-            background: rgba(157,106,245,0.2);
-            padding: 10px 32px;
-            border-radius: 60px;
-            border: 1px solid rgba(157,106,245,0.5);
-            backdrop-filter: blur(4px);
-        }
-        .provider-picker-sub {
-            font-size: 0.6rem;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
             font-weight: 600;
-            letter-spacing: 2.5px;
-            color: #8A7ACC;
-            text-align: center;
-            margin-top: -14px;
-            text-transform: uppercase;
-        }
-        .provider-buttons-stack {
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-            width: min(380px, 88vw);
-        }
-        .provider-btn {
-            width: 100%;
-            padding: 22px 28px;
-            border-radius: 20px;
-            background: linear-gradient(145deg, #12172B, #0A0E1F);
-            border: 2px solid rgba(157, 106, 245, 0.55);
-            color: #E8DBFF;
-            font-family: 'Inter', sans-serif;
-            font-weight: 900;
-            font-size: clamp(0.95rem, 3.6vw, 1.15rem);
-            letter-spacing: 4px;
-            text-transform: uppercase;
+            border: 1px solid #444;
+            font-size: 12px;
+            transition: 0.3s;
             cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-            box-shadow: 0 12px 24px rgba(0,0,0,0.55);
-            text-align: center;
-        }
-        .provider-btn:hover {
-            transform: translateY(-3px) scale(1.015);
-            border-color: #C9B3FF;
-            background: linear-gradient(145deg, #1E2544, #10162E);
-            box-shadow: 0 16px 38px rgba(157,106,245,0.6), 0 0 0 1px rgba(201,179,255,0.5);
-            color: #FFFFFF;
-        }
-        .provider-btn:active {
-            transform: translateY(-1px) scale(0.99);
-        }
-
-        /* ==================== PREDICTION WHEEL OVERLAY ==================== */
-        .wheel-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(3, 5, 12, 0.94);
-            backdrop-filter: blur(12px);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             font-family: 'Inter', sans-serif;
-            animation: fadeInOverlay 0.25s ease;
-            padding: 20px;
-            overflow: hidden;
         }
-        .wheel-container {
-            background: linear-gradient(145deg, #12172B, #0A0E1F);
-            border-radius: 24px;
-            padding: 14px;
-            border: 1px solid rgba(157, 106, 245, 0.35);
-            box-shadow: 0 20px 35px rgba(0,0,0,0.6), inset 0 1px 0 rgba(157, 106, 245, 0.12);
-            position: relative;
-            width: 620px;
-            max-width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            box-sizing: border-box;
-        }
-        .close-wheel-btn {
-            position: absolute;
-            top: 8px;
-            right: 10px;
-            background: rgba(10, 14, 28, 0.9);
-            border: 1px solid rgba(157, 106, 245, 0.8);
-            color: #D9C8FF;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.15s;
-            font-family: monospace;
-            backdrop-filter: blur(4px);
-            z-index: 10;
-        }
-        .close-wheel-btn:hover {
-            background: #9D6AF5;
-            color: #0A0E1A;
-            transform: scale(1.07);
-            box-shadow: 0 0 12px #9D6AF5;
-        }
-        .wheel-title {
-            text-align: center;
-            font-size: clamp(0.55rem, 2.4vw, 0.72rem);
-            font-weight: 800;
-            letter-spacing: 1.6px;
-            color: #C9B3FF;
-            margin-bottom: 8px;
-            margin-top: 4px;
-            text-transform: uppercase;
-            background: rgba(157,106,245,0.2);
-            display: inline-block;
-            padding: 5px 18px;
-            border-radius: 60px;
-            backdrop-filter: blur(4px);
-            position: relative;
-            left: 50%;
-            transform: translateX(-50%);
-            white-space: nowrap;
-            max-width: calc(100% - 60px);
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        .exit-btn:hover { background: var(--player); border-color: #fff; }
 
-        .racetrack-wrap {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .card{  
+            max-width:500px;  
             width: 100%;
-            overflow: hidden;
-            padding: 6px 0;
+            margin:0 auto;  
+            background: var(--glass);  
+            border:1px solid rgba(255,255,255,0.1);  border-radius:24px;  
+            padding:40px; backdrop-filter:blur(15px);  
+            box-shadow:0 25px 50px rgba(0,0,0,0.5);
         }
-        .racetrack-svg {
-            display: block;
-            width: 100%;
-            height: auto;
-            max-height: 60vh;
-            filter: drop-shadow(0 12px 28px rgba(0,0,0,0.9));
-        }
+        h1{  text-align:center;  font-size:1.8rem;  font-weight:600;  margin-bottom:20px;  letter-spacing:1px;  background:linear-gradient(90deg,var(--player),var(--banker),var(--tie),var(--sub));  -webkit-background-clip:text;  color:transparent;}
+        
+        .stats{  display:flex;  justify-content:space-between;  font-size:0.95rem;  margin-bottom:15px; border-bottom: 1px solid #333; padding-bottom: 15px; gap: 8px; flex-wrap: wrap;}
+        .label { color: #888; margin-right: 5px; }
 
-        /* --- Evolution tile styles --- */
-        .tile-path.evo {
-            stroke: #b39b82;
-            stroke-width: 1.1px;
-            transition: filter 0.12s ease, stroke 0.12s ease, fill 0.12s ease;
-        }
-        .tile-text.evo {
-            fill: #ebdcd0;
+        .predict{text-align:center;margin-bottom:24px;}
+        .pred-label{  font-size:2.2rem;  font-weight:700;  padding:10px 30px;  border-radius:14px;  display: inline-block; transition: 0.5s;}
+        .pred-label.player{color:var(--player); text-shadow: 0 0 15px var(--player);}
+        .pred-label.banker{color:var(--banker); text-shadow: 0 0 15px var(--banker);}
+        
+        .conf-wrap{margin-top:20px; width:100%; max-width:280px; margin-inline:auto;}
+        .conf-bar{height:6px; border-radius:10px; background:rgba(255,255,255,0.05); overflow:hidden;}
+        .conf-fill{height:100%; width:0; background:linear-gradient(90deg,var(--player),var(--banker)); transition: width 0.5s;}
+        .conf-val{text-align:center; font-size:.85rem; margin-top:8px; color:#aaa; font-weight: 600;}
+
+        .btn-row{display:flex; gap:12px; margin-bottom:30px; flex-wrap:wrap;}
+        button{  flex:1; min-width:100px; padding:15px 0;  border-radius:12px; border:1px solid rgba(255,255,255,0.1);  font-weight:700; font-size:.9rem;  background:rgba(255,255,255,0.05); color:#fff; cursor:pointer; transition:0.2s;}
+        button:hover:enabled{background:rgba(255,255,255,0.15); transform: translateY(-2px);}
+        button:disabled{opacity:0.2; cursor:not-allowed;}
+        
+        .btn-player{ border-color: var(--player) !important; }
+        .btn-banker{ border-color: var(--banker) !important; }
+        .btn-tie{ border-color: var(--tie) !important; color: var(--tie); }
+        .btn-reset{ border-color: #ff4b4b !important; color: #ff4b4b; }
+
+        .first-six{ font-size:1.4rem; text-align:center; margin-top:15px; letter-spacing:.5rem; background: #000; padding: 10px; border-radius: 10px; min-height: 50px;}
+        .msg{text-align:center; margin-bottom:15px; font-weight: 600;}
+        #bankroll-msg { color: var(--tie); font-size: 1.1rem; }
+        .w{color:var(--player);} .l{color:var(--banker);} .t{color:var(--tie);} .dash{color:#444;}
+        .hidden{display:none;}
+
+        #setup-overlay{  position:fixed; inset:0;  background:rgba(0,0,0,0.9);  display:flex; justify-content:center; align-items:center;  z-index:3000;}
+        #setup-overlay div{  background:#1a1a1a; padding:40px; border-radius:20px; border: 1px solid #333; text-align:center; width: 350px;}
+        #setup-overlay h2 { margin-bottom: 20px; font-size: 1.2rem; color: var(--player); }
+        #setup-overlay input{ width:100%; padding:12px; border-radius:8px; border:1px solid #444; background: #000; color: #fff; font-size:1.1rem; text-align:center; margin-bottom: 15px;}
+        #setup-overlay button{ width: 100%; background: var(--player); color: #fff; border: none; padding: 15px; font-size: 1rem; }
+
+        .tie-history {
+            color: var(--tie) !important;
             font-weight: 700;
-            font-size: 25px;
-            text-anchor: middle;
-            dominant-baseline: central;
-            pointer-events: none;
-            font-family: 'Inter', system-ui, sans-serif;
-            letter-spacing: -0.02em;
-        }
-        .racetrack-outline.evo {
-            fill: none;
-            stroke: #c2ac97;
-            stroke-width: 1.5px;
-            pointer-events: none;
-        }
-
-        /* --- Pragmatic tile styles --- */
-        .tile-path.prag {
-            stroke: #a2b0c4;
-            stroke-width: 1.2px;
-            transition: filter 0.12s ease, stroke 0.12s ease, fill 0.12s ease;
-        }
-        .tile-text.prag {
-            fill: #ffffff;
-            font-weight: 800;
-            font-size: 26px;
-            text-anchor: middle;
-            dominant-baseline: central;
-            pointer-events: none;
-            font-family: 'Inter', system-ui, sans-serif;
-            letter-spacing: -0.02em;
-        }
-        .racetrack-outline.prag {
-            fill: none;
-            stroke: #b5c4d8;
-            stroke-width: 1.8px;
-            pointer-events: none;
-        }
-
-        /* --- Highlight overrides (shared) --- */
-        .tile-path.hl-center {
-            fill: #FF69B4 !important;
-            stroke: #FFFFFF !important;
-            stroke-width: 2px !important;
-            filter: drop-shadow(0 0 10px rgba(255,105,180,0.95));
-        }
-        .tile-path.hl-neighbor {
-            fill: #FFD966 !important;
-            stroke: #FFF2C0 !important;
-            stroke-width: 1.8px !important;
-            filter: drop-shadow(0 0 8px rgba(255,217,102,0.9));
-        }
-        .tile-text.hl-dark {
-            fill: #0A0E1A;
-            font-weight: 900;
-        }
-
-        .wheel-note {
-            text-align: center;
-            margin-top: 8px;
-            font-size: clamp(0.5rem, 2.1vw, 0.6rem);
-            font-weight: 600;
-            color: #B88AFF;
-            background: rgba(0,0,0,0.35);
-            padding: 5px 14px;
-            border-radius: 40px;
-            display: inline-block;
-            letter-spacing: 0.5px;
-            position: relative;
-            left: 50%;
-            transform: translateX(-50%);
-            white-space: nowrap;
-            max-width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            background: transparent !important;
+            padding: 0 !important;
+            border-radius: 0 !important;
+            display: inline !important;
         }
     </style>
 </head>
 <body>
 
-<!-- ========== ADDED 5: EXIT BUTTON HTML ========== -->
-<div class="exit-nav">
-    <a href="index.html" class="exit-btn">← EXIT TERMINAL</a>
-</div>
-
-<div class="aequitas-app" id="mainAppContainer">
-    <div class="title-bar-brand">
-        <div class="brand-container">
-            <div class="minimal-ai-logo">
-                <svg class="minimal-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="20" cy="20" r="16" stroke="rgba(201, 179, 255, 0.7)" stroke-width="1.2" fill="none"/>
-                    <circle cx="20" cy="20" r="10" stroke="rgba(255, 255, 255, 0.5)" stroke-width="0.8" fill="none"/>
-                    <path d="M20 8 L23 15 L31 17 L25 23 L27 31 L20 26 L13 31 L15 23 L9 17 L17 15 L20 8Z" 
-                          fill="rgba(201, 179, 255, 0.3)" stroke="rgba(255, 255, 255, 0.7)" stroke-width="0.8" stroke-linejoin="round"/>
-                    <circle cx="20" cy="20" r="2" fill="white" fill-opacity="0.8"/>
-                </svg>
-            </div>
-            <div class="brand-text">
-                <span class="brand-name">ROULETTE PREMIUM</span>
-                <span class="brand-sub">VIP ALGORITHM</span>
-            </div>
-        </div>
-        <div class="brand-badge"> AI</div>
+    <div class="exit-nav">
+        <button onclick="window.signOutUser()" class="exit-btn">✕ EXIT</button>
     </div>
 
-    <div class="four-columns">
-        <div class="numbers-col">
-            <div class="col-header"></div>
-            <div class="zero-container">
-                <button class="zero-btn" id="zeroButton">0</button>
-            </div>
-            <div class="number-grid" id="numbersGrid"></div>
-        </div>
-
-        <div class="history-col">
-            <div class="col-header"></div>
-            <div class="history-scroll" id="spinHistoryList"></div>
-            <div class="history-count">Total: <span id="spinCount">0</span></div>
-        </div>
-
-        <div class="group-col">
-            <div class="col-header"></div>
-            <div class="group-scroll" id="groupHistoryList"></div>
-            <div class="history-count">Groups: <span id="groupCount">0</span></div>
-        </div>
-
-        <div class="prediction-col">
-            <div class="pred-glass" id="predBox">
-                <div class="pred-label-small"></div>
-                <div class="pred-value" id="mainPrediction">———</div>
-            </div>
-            <div class="alternatives-list" id="alternativesList"></div>
-            <button class="clear-btn" id="clearAllBtn">
-                🔄 RESET
-            </button>
+    <div id="setup-overlay">
+        <div>
+            <h2>SETUP SESSION</h2>
+            <p style="color:#666; font-size: 0.8rem; margin-bottom: 10px;">BANKROLL</p>
+            <input type="number" id="input-bankroll" value="1000" step="any">
+            <p style="color:#666; font-size: 0.8rem; margin-bottom: 10px;">BASE BET</p>
+            <input type="number" id="input-bet" value="100" step="any" min="0.01">
+            <button id="start-btn">CONFIRM</button>
         </div>
     </div>
-</div>
+
+    <div class="card">
+        <h1>Baccarat PRO</h1>
+
+        <div class="stats">
+            <span id="bankroll"><span class="label">Bank:</span> $1000</span>
+            <span id="next-bet"><span class="label">Bet:</span> $100</span>
+        </div>
+
+        <div class="predict hidden" id="prediction-box">
+            <span id="prediction" class="pred-label player">Player</span>
+            <div class="conf-wrap">
+                <div class="conf-bar"><div id="bar" class="conf-fill"></div></div>
+                <div id="val" class="conf-val">0%</div>
+            </div>
+        </div>
+
+        <div id="waitmsg" class="msg" style="color: #aaa;">Waiting for result... (0/7)</div>
+        <div id="bankroll-msg" class="msg"></div>
+
+        <div class="btn-row">
+            <button type="button" class="btn-player">P</button>
+            <button type="button" class="btn-tie">T</button>
+            <button type="button" class="btn-banker">B</button>
+            <button type="button" class="btn-reset">RESET</button>
+        </div>
+
+        <div id="history" class="first-six"></div>
+    </div>
 
 <script>
-    // ==================== GROUPS MAPPING ====================
-    const groupsPerNumber = {
-        0: ["0-10-20-30", "3-13-23-33", "6-16-26-36", "2-12-22-32", "5-15-25-35"],
-        1: ["0-10-20-30", "3-13-23-33", "6-16-26-36", "1-11-21-31", "4-14-24-34"],
-        2: ["4-14-24-34", "1-11-21-31", "7-17-27", "2-12-22-32", "5-15-25-35"],
-        3: ["0-10-20-30", "6-16-26-36", "3-13-23-33", "2-12-22-32", "5-15-25-35"],
-        4: ["4-14-24-34", "1-11-21-31", "2-12-22-32", "9-19-29", "5-15-25-35"],
-        5: ["3-13-23-33", "0-10-20-30", "4-14-24-34", "6-16-26-36", "5-15-25-35"],
-        6: ["4-14-24-34", "6-16-26-36", "7-17-27", "3-13-23-33"],
-        7: ["9-19-29", "7-17-27", "2-12-22-32", "8-18-28"],
-        8: ["0-10-20-30", "1-11-21-31", "8-18-28", "3-13-23-33"],
-        9: ["4-14-24-34", "1-11-21-31", "9-19-29", "2-12-22-32", "8-18-28"],
-        10: ["4-14-24-34", "8-18-28", "3-13-23-33", "0-10-20-30", "5-15-25-35"],
-        11: ["3-13-23-33", "1-11-21-31", "6-16-26-36", "0-10-20-30", "8-18-28"],
-        12: ["7-17-27", "8-18-28", "2-12-22-32", "3-13-23-33", "5-15-25-35"],
-        13: ["1-11-21-31", "7-17-27", "3-13-23-33", "6-16-26-36"],
-        14: ["4-14-24-34", "1-11-21-31", "9-19-29", "0-10-20-30"],
-        15: ["4-14-24-34", "9-19-29", "2-12-22-32", "0-10-20-30", "5-15-25-35"],
-        16: ["4-14-24-34", "1-11-21-31", "3-13-23-33", "6-16-26-36", "5-15-25-35"],
-        17: ["4-14-24-34", "6-16-26-36", "7-17-27", "2-12-22-32", "5-15-25-35"],
-        18: ["2-12-22-32", "7-17-27", "9-19-29", "8-18-28"],
-        19: ["4-14-24-34", "1-11-21-31", "9-19-29", "2-12-22-32", "5-15-25-35"],
-        20: ["4-14-24-34", "1-11-21-31", "0-10-20-30", "3-13-23-33"],
-        21: ["4-14-24-34", "1-11-21-31", "9-19-29", "2-12-22-32", "5-15-25-35"],
-        22: ["1-11-21-31", "8-18-28", "2-12-22-32", "9-19-29"],
-        23: ["0-10-20-30", "3-13-23-33", "8-18-28", "5-15-25-35"],
-        24: ["4-14-24-34", "3-13-23-33", "6-16-26-36", "0-10-20-30", "5-15-25-35"],
-        25: ["4-14-24-34", "1-11-21-31", "7-17-27", "2-12-22-32", "5-15-25-35"],
-        26: ["3-13-23-33", "6-16-26-36", "0-10-20-30", "2-12-22-32", "5-15-25-35"],
-        27: ["4-14-24-34", "6-16-26-36", "7-17-27", "3-13-23-33"],
-        28: ["9-19-29", "7-17-27", "8-18-28", "2-12-22-32", "5-15-25-35"],
-        29: ["8-18-28", "9-19-29", "7-17-27", "2-12-22-32"],
-        30: ["6-16-26-36", "1-11-21-31", "0-10-20-30", "8-18-28", "3-13-23-33"],
-        31: ["4-14-24-34", "1-11-21-31", "0-10-20-30", "2-12-22-32", "9-19-29"],
-        32: ["6-16-26-36", "0-10-20-30", "9-19-29", "2-12-22-32", "5-15-25-35"],
-        33: ["0-10-20-30", "1-11-21-31", "3-13-23-33", "6-16-26-36", "4-14-24-34"],
-        34: ["4-14-24-34", "7-17-27", "6-16-26-36", "5-15-25-35"],
-        35: ["6-16-26-36", "3-13-23-33", "8-18-28", "2-12-22-32", "5-15-25-35"],
-        36: ["0-10-20-30", "1-11-21-31", "7-17-27", "3-13-23-33", "6-16-26-36"]
+    let bankroll=1000, baseBet=100, currentBet=100;
+    let cumulativeLoss=0, winCount=0, lossStreak=0;
+    let maxLoss=9999, targetProfitMultiplier=1.8;
+    let targetProfit=0, history=[], aiPrediction=null;
+
+    // ✅ Recovery tracking — understands outstanding debt across partial wins
+    let peakBankroll = 1000;
+    let recoveryTarget = 1000;
+
+    // ✅ Payout multipliers
+    const PLAYER_PAYOUT = 1.00;   // Player wins pay 1:1
+    const BANKER_PAYOUT = 0.95;   // Banker wins pay 0.95:1 (5% commission)
+
+    const bankrollEl=document.getElementById("bankroll");
+    const nextBetEl=document.getElementById("next-bet");
+    const historyEl=document.getElementById("history");
+    const predictionBox=document.getElementById("prediction-box");
+    const predictionLabel=document.getElementById("prediction");
+    const bar=document.getElementById("bar");
+    const val=document.getElementById("val");
+    const waitmsg=document.getElementById("waitmsg");
+    const bankrollMsg=document.getElementById("bankroll-msg");
+
+    const btnPlayer=document.querySelector(".btn-player");
+    const btnBanker=document.querySelector(".btn-banker");
+    const btnTie=document.querySelector(".btn-tie");
+    const betButtons=[btnPlayer,btnBanker,btnTie];
+
+    const overlay=document.getElementById("setup-overlay");
+    const inputBankroll=document.getElementById("input-bankroll");
+    const inputBet=document.getElementById("input-bet");
+    const startBtn=document.getElementById("start-btn");
+
+    // ============================================================
+    // ✅ MONEY FORMATTING
+    // ============================================================
+    function fmtMoney(n) {
+        const num = Math.round(n * 100) / 100;
+        if (Number.isInteger(num)) return num.toString();
+        return num.toFixed(2);
+    }
+
+    // ✅ Count how many decimal places a number has
+    function getDecimals(n) {
+        if (Number.isInteger(n)) return 0;
+        const s = n.toString();
+        if (s.includes('e-')) {
+            const match = s.match(/e-(\d+)/);
+            return match ? parseInt(match[1]) : 2;
+        }
+        const dot = s.indexOf('.');
+        return dot === -1 ? 0 : s.length - dot - 1;
+    }
+
+    // ✅ Round a number to N decimals without float errors
+    function roundTo(decimals) {
+        return (num) => {
+            const factor = Math.pow(10, decimals);
+            return Math.round(num * factor) / factor;
+        };
+    }
+
+    // ============================================================
+    // ✅ UI UPDATES
+    // ============================================================
+    function updateWaitMessage() {
+        if (history.length < 7) {
+            waitmsg.textContent = `Waiting for result... (${history.length}/7)`;
+        }
+    }
+
+    startBtn.onclick = () => {
+        const parsedBankroll = parseFloat(inputBankroll.value);
+        const parsedBet = parseFloat(inputBet.value);
+
+        bankroll = (!isNaN(parsedBankroll) && parsedBankroll > 0) ? parsedBankroll : 1000;
+        baseBet = (!isNaN(parsedBet) && parsedBet > 0) ? parsedBet : 100;
+
+        targetProfit = bankroll * targetProfitMultiplier;
+
+        resetState();
+        overlay.style.display = "none";
+
+        updateBankroll();
+        updateNextBet();
     };
 
-    // ==================== APP STATE ====================
-    let spinHistory = [];
-    let groupHistory = [];
-    let overlayVisible = false;
+    function resetState() {
+        cumulativeLoss = 0;
+        winCount = 0;
+        lossStreak = 0;
+        history = [];
+        aiPrediction = null;
+        historyEl.innerHTML = "";
+        predictionBox.classList.add("hidden");
+        waitmsg.classList.remove("hidden");
+        bankrollMsg.textContent = "";
+        betButtons.forEach(b => b.disabled = false);
 
-    let lastPrediction = null;
-    let lastPredictionGroups = [];
-    let hitCount = 0;
-    let missCount = 0;
+        currentBet = baseBet;
 
-    let chosenProvider = null;
+        peakBankroll = bankroll;
+        recoveryTarget = bankroll;
 
-    const numbersGrid = document.getElementById('numbersGrid');
-    const zeroButton = document.getElementById('zeroButton');
-    const spinContainer = document.getElementById('spinHistoryList');
-    const groupContainer = document.getElementById('groupHistoryList');
-    const spinCountSpan = document.getElementById('spinCount');
-    const groupCountSpan = document.getElementById('groupCount');
-    const mainPredictionSpan = document.getElementById('mainPrediction');
-    const alternativesContainer = document.getElementById('alternativesList');
-    const clearBtn = document.getElementById('clearAllBtn');
-    const predBox = document.getElementById('predBox');
-    const appContainer = document.getElementById('mainAppContainer');
+        updateBankroll();
+        updateNextBet();
+        updateWaitMessage();
+    }
 
-    // ==================== ENHANCED PREDICTION LOGIC (v2) ====================
-    function analiz() {
-        if (lastPrediction && lastPredictionGroups.length > 0 && groupHistory.length > 0) {
-            const evalWindow = groupHistory.slice(-lastPredictionGroups.length);
-            const hit = evalWindow.some(g => g === lastPrediction);
-            if (hit) hitCount++;
-            else missCount++;
-            lastPrediction = null;
-            lastPredictionGroups = [];
-        }
+    function updateBankroll(){
+        bankrollEl.innerHTML=`<span class="label">Bank:</span> $${fmtMoney(bankroll)}`;
+    }
+    function updateNextBet(){
+        nextBetEl.innerHTML=`<span class="label">Bet:</span> $${fmtMoney(currentBet)}`;
+    }
 
-        if (groupHistory.length === 0) {
-            mainPredictionSpan.innerText = "———";
-            alternativesContainer.innerHTML = `
-                <div class="alt-row">———</div>
-                <div class="alt-row">———</div>
-                <div class="alt-row">———</div>
-                <div class="alt-row">———</div>
-                <div class="alt-row">———</div>
-            `;
+    function addHistory(result,outcome="neutral"){
+        history.push({result,outcome});
+        if(history.length>10) history.shift();
+        historyEl.innerHTML=history.map(h=>{
+            if(h.result==="Tie") {
+                return `<span class="tie-history">T</span>`;
+            }
+            if(h.outcome==="win") return `<span class="w">${h.result[0]}</span>`;
+            if(h.outcome==="loss") return `<span class="l">${h.result[0]}</span>`;
+            return `<span class="dash">${h.result[0]}</span>`;
+        }).join("");
+    }
+
+    function animateConfidence(num){
+        let c=0,inc=num/20;
+        (function run(){
+            c+=inc;if(c>num)c=num;
+            bar.style.width=c+"%";
+            val.textContent=c.toFixed(1)+"%";
+            if(c<num)requestAnimationFrame(run);
+        })();
+    }
+
+    // ============================================================
+    // ✅ PURE PATTERN MATCHING ENGINE — Last 7 Results
+    //
+    // ✅ FIXES APPLIED (pattern logic only):
+    //   1. Removed the -1 off-by-one → length 7 now actually matches.
+    //   2. searchEnd = full.length - recent.length → matches must END
+    //      before the recent window starts (no self-reference / data leak).
+    //   3. MIN_PATTERN_LEN = 2 → a single character is not a pattern;
+    //      length-1 matches now report NO SIGNAL instead of guessing.
+    //   4. "No signal" is now a real, reachable state.
+    //
+    // ✅ UNCHANGED (still pure):
+    //   - No votes, no weights, no scoring.
+    //   - Longest match first; first length that matches wins.
+    //   - Within a length, most recent occurrence wins.
+    //   - Prediction = character immediately after the matched pattern.
+    //   - Ties excluded from the P/B sequence.
+    // ============================================================
+    const PREDICT_WINDOW = 7;
+    const MIN_PATTERN_LEN = 2;
+
+    function makePrediction(){
+        // Full P/B sequence (newest last), ties excluded
+        const full = history
+            .filter(h => h.result === "Player" || h.result === "Banker")
+            .map(h => h.result === "Player" ? "P" : "B");
+
+        if (full.length < 2) {
+            showNoSignal();
             return;
         }
 
-        const norm = (g) => g.split('-').map(Number).sort((a, b) => a - b).join('-');
-        const normalizedHistory = groupHistory.map(norm);
+        // The "recent pattern" = last PREDICT_WINDOW results
+        const recent = full.slice(-PREDICT_WINDOW);
 
-        const startIdx = Math.max(0, normalizedHistory.length - 20);
-        const lastGroups = normalizedHistory.slice(startIdx);
-        const DECAY = 0.85;
+        // Matches must END before the recent window begins.
+        // This prevents the engine from predicting from its own input.
+        const searchEnd = full.length - recent.length;
 
-        const freqMap = new Map();
-        lastGroups.forEach((g, idx) => {
-            const age = lastGroups.length - 1 - idx;
-            const weight = Math.pow(DECAY, age);
-            freqMap.set(g, (freqMap.get(g) || 0) + weight);
-        });
+        // Try longest suffix first, down to MIN_PATTERN_LEN
+        for (let len = Math.min(PREDICT_WINDOW, recent.length); len >= MIN_PATTERN_LEN; len--) {
+            const suffix = recent.slice(-len).join("");
 
-        if (normalizedHistory.length >= 4) {
-            const lastThree = normalizedHistory.slice(-3).join(',');
-            const patternHits = [];
-
-            for (let i = 0; i <= normalizedHistory.length - 4; i++) {
-                const pattern = normalizedHistory.slice(i, i + 3).join(',');
-                if (pattern === lastThree) {
-                    const nextGroup = normalizedHistory[i + 3];
-                    const distFromEnd = normalizedHistory.length - (i + 3);
-                    patternHits.push({ nextGroup, distFromEnd });
+            // Scan backward: most recent occurrence wins
+            for (let i = searchEnd - 1; i >= 0; i--) {
+                const chunk = full.slice(i, i + len).join("");
+                if (chunk === suffix) {
+                    const next = full[i + len];
+                    if (next === "P" || next === "B") {
+                        aiPrediction = next === "P" ? "Player" : "Banker";
+                        renderPrediction(aiPrediction, len);
+                        return;
+                    }
                 }
             }
+        }
 
-            const totalEval = hitCount + missCount;
-            const hitRateScale = totalEval >= 3 ? (0.5 + 0.5 * (hitCount / totalEval)) : 1.0;
+        // No pattern of length >= MIN_PATTERN_LEN found
+        showNoSignal();
+    }
 
-            for (const { nextGroup, distFromEnd } of patternHits) {
-                const decay = Math.pow(0.9, distFromEnd);
-                const boost = 4 * decay * hitRateScale;
-                freqMap.set(nextGroup, (freqMap.get(nextGroup) || 0) + boost);
+    function showNoSignal(){
+        aiPrediction = null;
+        predictionLabel.textContent = "—";
+        predictionLabel.className = "pred-label";
+        animateConfidence(0);
+        predictionBox.classList.remove("hidden");
+        waitmsg.classList.add("hidden");
+    }
+
+    function renderPrediction(pick, matchLength) {
+        predictionLabel.textContent = pick.toUpperCase();
+        predictionLabel.className = "pred-label " + pick.toLowerCase();
+        const strength = (matchLength / PREDICT_WINDOW) * 100;
+        animateConfidence(strength);
+        predictionBox.classList.remove("hidden");
+        waitmsg.classList.add("hidden");
+    }
+
+    // ============================================================
+    // ✅ RECOVERY BET — snaps to nearest multiple of baseBet
+    // ============================================================
+    function calculateNextBet(){
+        if (cumulativeLoss > 0) {
+            let aggressive = (cumulativeLoss + baseBet) * 1.5;
+            const snapped = Math.round(aggressive / baseBet) * baseBet;
+            const decimals = getDecimals(baseBet);
+            const finalBet = roundTo(decimals)(snapped);
+            return Math.min(finalBet, bankroll);
+        }
+        return baseBet;
+    }
+
+    // ============================================================
+    // ✅ CLEAN DEEP REFRESH
+    // ============================================================
+    function forceFullRefresh() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('t', Date.now());
+        window.location.replace(url.href);
+    }
+
+    function resetGame(){
+        forceFullRefresh();
+    }
+
+    // ============================================================
+    // ✅ MAIN HANDLE CLICK
+    // ============================================================
+    function handleClick(result){
+        if(history.length<7){
+            addHistory(result);
+            updateWaitMessage();
+            if(history.length===7)makePrediction();
+            return;
+        }
+        if(result==="Tie"){
+            // Tie doesn't change the P/B sequence, but re-render the
+            // prediction so the UI stays in sync with the engine.
+            addHistory(result);
+            makePrediction();
+            return;
+        }
+
+        // ✅ No signal → record result and re-predict, no bet
+        if (aiPrediction === null) {
+            addHistory(result, "neutral");
+            makePrediction();
+            return;
+        }
+
+        if(result===aiPrediction){
+            // ✅ REALISTIC PAYOUT: Banker pays 0.95, Player pays 1.00
+            const payoutMultiplier = (aiPrediction === "Banker") ? BANKER_PAYOUT : PLAYER_PAYOUT;
+            const profit = roundTo(2)(currentBet * payoutMultiplier);
+
+            bankroll += profit;
+            winCount++;
+            addHistory(result,"win");
+
+            // Only reset recovery if we're back at the peak (true recovery)
+            if (bankroll >= recoveryTarget) {
+                cumulativeLoss = 0;
+                lossStreak = 0;
+                peakBankroll = bankroll;
+                recoveryTarget = bankroll;
+            } else {
+                // Still in debt — reduce outstanding loss by the *actual profit* earned
+                cumulativeLoss = Math.max(0, cumulativeLoss - profit);
+            }
+
+            // Track new peak if we've grown beyond it
+            if (bankroll > peakBankroll) {
+                peakBankroll = bankroll;
+                recoveryTarget = bankroll;
+            }
+
+            if(bankroll>=targetProfit){
+                bankrollMsg.textContent="SESSION COMPLETE: PROFIT REACHED";
+                betButtons.forEach(b=>b.disabled=true);
+                predictionBox.classList.add("hidden");
+                waitmsg.classList.add("hidden");
+                return;
+            }
+        }else{
+            bankroll-=currentBet;
+            cumulativeLoss+=currentBet;lossStreak++;
+            addHistory(result,"loss");
+
+            const units = (baseBet > 0) ? Math.floor(bankroll / baseBet) : 0;
+            const nextRequired = calculateNextBet();
+            const busted = bankroll <= 0;
+            const cantAfford = nextRequired > bankroll;
+            const safetyCap = lossStreak >= maxLoss;
+            const cantCoverBase = units < 1;
+
+            if (busted || cantAfford || safetyCap || cantCoverBase) {
+                if (busted || cantAfford) {
+                    bankrollMsg.textContent = "SESSION FAILED: INSUFFICIENT BANKROLL";
+                } else {
+                    bankrollMsg.textContent = "SESSION FAILED: BANKROLL BELOW 1 BASE BET";
+                }
+                betButtons.forEach(b=>b.disabled=true);
+                currentBet=0;updateNextBet();
+                predictionBox.classList.add("hidden");
+                waitmsg.classList.add("hidden");
+                return;
             }
         }
-
-        const sorted = Array.from(freqMap.entries()).sort((a, b) => {
-            if (b[1] !== a[1]) return b[1] - a[1];
-            return a[0].localeCompare(b[0]);
-        });
-
-        const selected = [];
-        const selectedNums = [];
-        for (const [grp, score] of sorted) {
-            const nums = grp.split('-').map(Number);
-            const overlap = nums.filter(n => selectedNums.includes(n)).length;
-            if (overlap >= 2) continue;
-            selected.push([grp, score]);
-            selectedNums.push(...nums);
-            if (selected.length === 5) break;
-        }
-
-        if (selected.length === 0) {
-            mainPredictionSpan.innerText = "———";
-        } else {
-            mainPredictionSpan.innerText = selected[0][0];
-            lastPrediction = selected[0][0];
-            lastPredictionGroups = [selected[0][0]];
-        }
-
-        alternativesContainer.innerHTML = '';
-        for (let i = 0; i < 5; i++) {
-            const groupValue = (i < selected.length) ? selected[i][0] : '———';
-            const row = document.createElement('div');
-            row.className = 'alt-row';
-            row.innerText = groupValue;
-            alternativesContainer.appendChild(row);
-        }
+        currentBet=calculateNextBet();
+        updateBankroll();updateNextBet();
+        makePrediction();
     }
 
-    // ==================== PHYSICAL WHEEL ORDER ====================
-    const wheelNumbers = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+    btnPlayer.onclick=()=>handleClick("Player");
+    btnBanker.onclick=()=>handleClick("Banker");
+    btnTie.onclick=()=>handleClick("Tie");
+    document.querySelector(".btn-reset").onclick=resetGame;
 
-    // ==================== PROVIDER PICKER (TEXT ONLY) ====================
-    function showProviderPicker() {
-        const overlay = document.createElement('div');
-        overlay.className = 'provider-picker-overlay';
-        overlay.id = 'providerPickerOverlay';
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && (e.key === 'r' || e.key === 'R')) {
+            e.preventDefault();
+            forceFullRefresh();
+            return;
+        }
+        if (e.key === 'F5') {
+            e.preventDefault();
+            forceFullRefresh();
+            return;
+        }
+    });
 
-        const title = document.createElement('div');
-        title.className = 'provider-picker-title';
-        title.innerText = ' WELCOME ';
+    window.addEventListener('load', () => {
+        if (window.location.search.includes('t=')) {
+            const cleanPath = window.location.pathname.replace('.html', '');
+            const cleanUrl = window.location.origin + cleanPath;
+            window.history.replaceState(null, '', cleanUrl);
+        }
+    });
+</script>
 
-        const sub = document.createElement('div');
-        sub.className = 'provider-picker-sub';
-        sub.innerText = 'Choose provider layout';
+<script>
+(function() {
+    document.addEventListener('contextmenu', e => e.preventDefault());
 
-        const stack = document.createElement('div');
-        stack.className = 'provider-buttons-stack';
-
-        const evoBtn = document.createElement('button');
-        evoBtn.className = 'provider-btn';
-        evoBtn.innerText = 'EVOLUTION WHEEL';
-        evoBtn.addEventListener('click', () => {
-            chosenProvider = 'evolution';
-            closePickerAndStart();
-        });
-
-        const pragBtn = document.createElement('button');
-        pragBtn.className = 'provider-btn';
-        pragBtn.innerText = 'PRAGMATIC WHEEL';
-        pragBtn.addEventListener('click', () => {
-            chosenProvider = 'pragmatic';
-            closePickerAndStart();
-        });
-
-        stack.appendChild(evoBtn);
-        stack.appendChild(pragBtn);
-
-        overlay.appendChild(title);
-        overlay.appendChild(sub);
-        overlay.appendChild(stack);
-        document.body.appendChild(overlay);
-    }
-
-    function closePickerAndStart() {
-        const picker = document.getElementById('providerPickerOverlay');
-        if (picker) picker.remove();
-        showWheelOverlay();
-    }
-
-    // ==================== WHEEL LAYOUT DATA ====================
-    // --- Evolution layout ---
-    const EVO_TOP = [
-        { num: 16, type: 'red' },   { num: 33, type: 'black' }, { num: 1,  type: 'red' },
-        { num: 20, type: 'black' }, { num: 14, type: 'red' },   { num: 31, type: 'black' },
-        { num: 9,  type: 'red' },   { num: 22, type: 'black' }, { num: 18, type: 'red' },
-        { num: 29, type: 'black' }, { num: 7,  type: 'red' },   { num: 28, type: 'black' },
-        { num: 12, type: 'red' }
-    ];
-    const EVO_BOTTOM = [
-        { num: 11, type: 'black' }, { num: 36, type: 'red' },   { num: 13, type: 'black' },
-        { num: 27, type: 'red' },   { num: 6,  type: 'black' }, { num: 34, type: 'red' },
-        { num: 17, type: 'black' }, { num: 25, type: 'red' },   { num: 2,  type: 'black' },
-        { num: 21, type: 'red' },   { num: 4,  type: 'black' }, { num: 19, type: 'red' },
-        { num: 15, type: 'black' }
-    ];
-    const EVO_RIGHT_ARC = [
-        { num: 35, type: 'black' }, { num: 3,  type: 'red' }, { num: 26, type: 'black' },
-        { num: 0,  type: 'green' }, { num: 32, type: 'red' }
-    ];
-    const EVO_LEFT_ARC = [
-        { num: 24, type: 'black' }, { num: 5,  type: 'red' },   { num: 10, type: 'black' },
-        { num: 23, type: 'red' },   { num: 8,  type: 'black' }, { num: 30, type: 'red' }
-    ];
-
-    // --- Pragmatic layout ---
-    const PRAG_TOP = [
-        { num: 15, type: 'black' }, { num: 19, type: 'red' },   { num: 4,  type: 'black' },
-        { num: 21, type: 'red' },   { num: 2,  type: 'black' }, { num: 25, type: 'red' },
-        { num: 17, type: 'black' }, { num: 34, type: 'red' },   { num: 6,  type: 'black' },
-        { num: 27, type: 'red' },   { num: 13, type: 'black' }, { num: 36, type: 'red' },
-        { num: 11, type: 'black' }
-    ];
-    const PRAG_BOTTOM = [
-        { num: 12, type: 'red' },   { num: 28, type: 'black' }, { num: 7,  type: 'red' },
-        { num: 29, type: 'black' }, { num: 18, type: 'red' },   { num: 22, type: 'black' },
-        { num: 9,  type: 'red' },   { num: 31, type: 'black' }, { num: 14, type: 'red' },
-        { num: 20, type: 'black' }, { num: 1,  type: 'red' },   { num: 33, type: 'black' },
-        { num: 16, type: 'red' }
-    ];
-    const PRAG_LEFT_ARC = [
-        { num: 32, type: 'red' },   { num: 0,  type: 'green' }, { num: 26, type: 'black' },
-        { num: 3,  type: 'red' },   { num: 35, type: 'black' }
-    ];
-    const PRAG_RIGHT_ARC = [
-        { num: 30, type: 'red' },   { num: 8,  type: 'black' }, { num: 23, type: 'red' },
-        { num: 10, type: 'black' }, { num: 5,  type: 'red' },   { num: 24, type: 'black' }
-    ];
-
-    // --- Provider palettes ---
-    const PALETTES = {
-        evolution: {
-            red: '#7d1316', black: '#120d0e', green: '#0d4a3a',
-            bg: '#3A0C0C',
-            tileClass: 'evo', textClass: 'evo', outlineClass: 'evo'
-        },
-        pragmatic: {
-            red: '#a61217', black: '#14171d', green: '#107a3e',
-            bg: '#0c1220',
-            tileClass: 'prag', textClass: 'prag', outlineClass: 'prag'
+    document.onkeydown = function(e) {
+        if (
+            e.keyCode === 123 || 
+            (e.ctrlKey && e.keyCode === 85) || 
+            (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) ||
+            (e.ctrlKey && e.keyCode === 83)
+        ) {
+            return false;
         }
     };
 
-    function tileFill(type, palette) {
-        if (type === 'red') return palette.red;
-        if (type === 'black') return palette.black;
-        if (type === 'green') return palette.green;
-        return palette.black;
-    }
+    setInterval(function() {
+        (function() { return false; }['constructor']('debugger')['call']());
+    }, 50);
 
-    function svgEl(tag, attrs) {
-        const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
-        for (const k in attrs) el.setAttribute(k, attrs[k]);
-        return el;
-    }
+    function detectDevTools() {
+        const threshold = 300;
+        const widthDiff = window.outerWidth - window.innerWidth;
+        const heightDiff = window.outerHeight - window.innerHeight;
 
-    // ==================== PREDICTION WHEEL OVERLAY ====================
-    function showWheelOverlay() {
-        if (!chosenProvider) return;
-        if (overlayVisible) return;
-        if (spinHistory.length < 5) return;
-        const mainPredRaw = mainPredictionSpan.innerText;
-        if (!mainPredRaw || mainPredRaw === '———') return;
+        const devToolsOpen =
+            (widthDiff > threshold && heightDiff < 100) ||
+            (heightDiff > threshold && widthDiff < 100);
 
-        const numbersInGroup = mainPredRaw.split('-').map(Number).filter(n => !isNaN(n) && n >= 0 && n <= 36);
-        if (numbersInGroup.length === 0) return;
-
-        const centerNums = new Set(numbersInGroup);
-        const neighborNums = new Set();
-        numbersInGroup.forEach(num => {
-            const idx = wheelNumbers.indexOf(num);
-            if (idx === -1) return;
-            for (let offset = -2; offset <= 2; offset++) {
-                if (offset === 0) continue;
-                const neighborIdx = (idx + offset + wheelNumbers.length) % wheelNumbers.length;
-                neighborNums.add(wheelNumbers[neighborIdx]);
-            }
-        });
-
-        const overlay = document.createElement('div');
-        overlay.className = 'wheel-overlay';
-
-        const containerDiv = document.createElement('div');
-        containerDiv.className = 'wheel-container';
-
-        const closeBtn = document.createElement('div');
-        closeBtn.className = 'close-wheel-btn';
-        closeBtn.innerHTML = '✕';
-        closeBtn.addEventListener('click', () => {
-            overlay.remove();
-            overlayVisible = false;
-        });
-
-        const title = document.createElement('div');
-        title.className = 'wheel-title';
-        const providerLabel = chosenProvider === 'evolution' ? '' : '';
-        title.innerText = `${providerLabel} SUGGESTION: ${mainPredRaw}`;
-
-        const wrap = document.createElement('div');
-        wrap.className = 'racetrack-wrap';
-
-        const svg = svgEl('svg', {
-            viewBox: '0 0 960 280',
-            preserveAspectRatio: 'xMidYMid meet',
-            class: 'racetrack-svg'
-        });
-
-        const R_out = 125;
-        const R_in = 68;
-        const centerLeft = 145;
-        const centerRight = 815;
-        const yCenter = 140;
-        const rMid = (R_out + R_in) / 2;
-        const straightWidth = centerRight - centerLeft;
-        const cellW = straightWidth / 13;
-
-        // Choose layout + palette based on provider
-        const isEvo = chosenProvider === 'evolution';
-        const palette = isEvo ? PALETTES.evolution : PALETTES.pragmatic;
-        const TOP = isEvo ? EVO_TOP : PRAG_TOP;
-        const BOTTOM = isEvo ? EVO_BOTTOM : PRAG_BOTTOM;
-        const LEFT_ARC = isEvo ? EVO_LEFT_ARC : PRAG_LEFT_ARC;
-        const RIGHT_ARC = isEvo ? EVO_RIGHT_ARC : PRAG_RIGHT_ARC;
-
-        // Background felt fill (outer racetrack)
-        const outerPathBg = `M ${centerLeft} ${yCenter - R_out} L ${centerRight} ${yCenter - R_out} A ${R_out} ${R_out} 0 0 1 ${centerRight} ${yCenter + R_out} L ${centerLeft} ${yCenter + R_out} A ${R_out} ${R_out} 0 0 1 ${centerLeft} ${yCenter - R_out} Z`;
-        svg.appendChild(svgEl('path', { d: outerPathBg, fill: palette.bg }));
-
-        function buildTile(num, type, pathD, tx, ty) {
-            const g = svgEl('g', {});
-            const path = svgEl('path', {
-                d: pathD,
-                fill: tileFill(type, palette),
-                class: 'tile-path ' + palette.tileClass
-            });
-            if (centerNums.has(num)) path.classList.add('hl-center');
-            else if (neighborNums.has(num)) path.classList.add('hl-neighbor');
-
-            const text = svgEl('text', {
-                x: tx,
-                y: ty,
-                class: 'tile-text ' + palette.textClass
-            });
-            if (centerNums.has(num) || neighborNums.has(num)) text.classList.add('hl-dark');
-            text.textContent = num;
-            g.appendChild(path);
-            g.appendChild(text);
-            svg.appendChild(g);
-        }
-
-        // --- Top straight (13) ---
-        TOP.forEach((item, i) => {
-            const x1 = centerLeft + i * cellW;
-            const x2 = x1 + cellW;
-            const yOut = yCenter - R_out;
-            const yIn = yCenter - R_in;
-            const pathD = `M ${x1} ${yOut} L ${x2} ${yOut} L ${x2} ${yIn} L ${x1} ${yIn} Z`;
-            buildTile(item.num, item.type, pathD, (x1 + x2) / 2, (yOut + yIn) / 2);
-        });
-
-        // --- Bottom straight (13) ---
-        BOTTOM.forEach((item, i) => {
-            const x1 = centerLeft + i * cellW;
-            const x2 = x1 + cellW;
-            const yIn = yCenter + R_in;
-            const yOut = yCenter + R_out;
-            const pathD = `M ${x1} ${yIn} L ${x2} ${yIn} L ${x2} ${yOut} L ${x1} ${yOut} Z`;
-            buildTile(item.num, item.type, pathD, (x1 + x2) / 2, (yOut + yIn) / 2);
-        });
-
-        // --- Right arc: step depends on count ---
-        const rightStep = Math.PI / RIGHT_ARC.length;
-        RIGHT_ARC.forEach((item, i) => {
-            const a1 = -Math.PI / 2 + i * rightStep;
-            const a2 = -Math.PI / 2 + (i + 1) * rightStep;
-
-            const x1_out = centerRight + R_out * Math.cos(a1);
-            const y1_out = yCenter + R_out * Math.sin(a1);
-            const x2_out = centerRight + R_out * Math.cos(a2);
-            const y2_out = yCenter + R_out * Math.sin(a2);
-
-            const x1_in = centerRight + R_in * Math.cos(a1);
-            const y1_in = yCenter + R_in * Math.sin(a1);
-            const x2_in = centerRight + R_in * Math.cos(a2);
-            const y2_in = yCenter + R_in * Math.sin(a2);
-
-            const pathD = `M ${x1_out} ${y1_out} A ${R_out} ${R_out} 0 0 1 ${x2_out} ${y2_out} L ${x2_in} ${y2_in} A ${R_in} ${R_in} 0 0 0 ${x1_in} ${y1_in} Z`;
-
-            const midA = (a1 + a2) / 2;
-            const tx = centerRight + rMid * Math.cos(midA);
-            const ty = yCenter + rMid * Math.sin(midA);
-
-            buildTile(item.num, item.type, pathD, tx, ty);
-        });
-
-        // --- Left arc: step depends on count ---
-        const leftStep = Math.PI / LEFT_ARC.length;
-        LEFT_ARC.forEach((item, i) => {
-            const a1 = -Math.PI / 2 + i * leftStep;
-            const a2 = -Math.PI / 2 + (i + 1) * leftStep;
-
-            const x1_out = centerLeft - R_out * Math.sin(a1 + Math.PI / 2);
-            const y1_out = yCenter - R_out * Math.cos(a1 + Math.PI / 2);
-            const x2_out = centerLeft - R_out * Math.sin(a2 + Math.PI / 2);
-            const y2_out = yCenter - R_out * Math.cos(a2 + Math.PI / 2);
-
-            const x1_in = centerLeft - R_in * Math.sin(a1 + Math.PI / 2);
-            const y1_in = yCenter - R_in * Math.cos(a1 + Math.PI / 2);
-            const x2_in = centerLeft - R_in * Math.sin(a2 + Math.PI / 2);
-            const y2_in = yCenter - R_in * Math.cos(a2 + Math.PI / 2);
-
-            const pathD = `M ${x1_out} ${y1_out} A ${R_out} ${R_out} 0 0 0 ${x2_out} ${y2_out} L ${x2_in} ${y2_in} A ${R_in} ${R_in} 0 0 1 ${x1_in} ${y1_in} Z`;
-
-            const midA = (a1 + a2) / 2;
-            const tx = centerLeft - rMid * Math.sin(midA + Math.PI / 2);
-            const ty = yCenter - rMid * Math.cos(midA + Math.PI / 2);
-
-            buildTile(item.num, item.type, pathD, tx, ty);
-        });
-
-        // --- Continuous outline paths ---
-        const outerPath = `M ${centerLeft} ${yCenter - R_out} L ${centerRight} ${yCenter - R_out} A ${R_out} ${R_out} 0 0 1 ${centerRight} ${yCenter + R_out} L ${centerLeft} ${yCenter + R_out} A ${R_out} ${R_out} 0 0 1 ${centerLeft} ${yCenter - R_out} Z`;
-        const innerPath = `M ${centerLeft} ${yCenter - R_in} L ${centerRight} ${yCenter - R_in} A ${R_in} ${R_in} 0 0 1 ${centerRight} ${yCenter + R_in} L ${centerLeft} ${yCenter + R_in} A ${R_in} ${R_in} 0 0 1 ${centerLeft} ${yCenter - R_in} Z`;
-        svg.appendChild(svgEl('path', { d: outerPath, class: 'racetrack-outline ' + palette.outlineClass }));
-        svg.appendChild(svgEl('path', { d: innerPath, class: 'racetrack-outline ' + palette.outlineClass }));
-
-        wrap.appendChild(svg);
-
-        const note = document.createElement('div');
-        note.className = 'wheel-note';
-        note.innerHTML = '💗 <strong style="color:#FF69B4">PINK</strong> = Center &nbsp; 💛 <strong style="color:#FFD966">Yellow</strong> = ±2 Physical Neighbors';
-
-        containerDiv.appendChild(closeBtn);
-        containerDiv.appendChild(title);
-        containerDiv.appendChild(wrap);
-        containerDiv.appendChild(note);
-        overlay.appendChild(containerDiv);
-        document.body.appendChild(overlay);
-        overlayVisible = true;
-
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
-                overlay.remove();
-                overlayVisible = false;
-            }
-        });
-    }
-
-    // ==================== UI REFRESH ====================
-    function scrollToTop(container) {
-        if (container) container.scrollTop = 0;
-    }
-
-    function refreshUI() {
-        spinContainer.innerHTML = '';
-        [...spinHistory].reverse().forEach(spin => {
-            const item = document.createElement('div');
-            item.className = 'spin-item';
-            item.innerText = spin;
-            spinContainer.appendChild(item);
-        });
-        spinCountSpan.innerText = spinHistory.length;
-        scrollToTop(spinContainer);
-
-        groupContainer.innerHTML = '';
-        groupHistory.forEach(grp => {
-            const gItem = document.createElement('div');
-            gItem.className = 'group-item';
-            gItem.innerText = grp;
-            groupContainer.appendChild(gItem);
-        });
-        groupCountSpan.innerText = groupHistory.length;
-        if (groupContainer) groupContainer.scrollTop = groupContainer.scrollHeight;
-
-        analiz();
-        showWheelOverlay();
-    }
-
-    // ==================== ADD SPIN ====================
-    function addSpin(number) {
-        spinHistory.push(number);
-
-        const groups = groupsPerNumber[number];
-        if (groups && groups.length) {
-            for (let g of groups) groupHistory.push(g);
-        } else {
-            groupHistory.push(`ERR-${number}`);
-        }
-
-        refreshUI();
-
-        const spinItems = spinContainer.querySelectorAll('.spin-item');
-        if (spinItems.length > 0) {
-            spinItems[0].classList.add('spin-item-new');
-            setTimeout(() => spinItems[0].classList.remove('spin-item-new'), 450);
-        }
-
-        predBox.classList.add('prediction-flash');
-        setTimeout(() => predBox.classList.remove('prediction-flash'), 250);
-    }
-
-    // ==================== RESET ====================
-    function hardResetFullReload() {
-        window.location.reload();
-    }
-
-    // ==================== BUILD NUMBER PAD ====================
-    function buildNumberPad() {
-        numbersGrid.innerHTML = '';
-        const redNumbers = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
-
-        for (let i = 1; i <= 36; i++) {
-            const btn = document.createElement('button');
-            btn.innerText = i;
-            btn.className = 'num-btn';
-            if (redNumbers.has(i)) btn.classList.add('red-num');
-            else btn.classList.add('black-num');
-            btn.addEventListener('click', (function(val) {
-                return () => {
-                    btn.classList.add('btn-flash');
-                    setTimeout(() => btn.classList.remove('btn-flash'), 120);
-                    addSpin(val);
-                };
-            })(i));
-            numbersGrid.appendChild(btn);
+        if (devToolsOpen) {
+            document.body.innerHTML = "";
+            window.location.replace("about:blank");
         }
     }
+    setInterval(detectDevTools, 800);
 
-    // ==================== INTERNAL REFRESH ====================
-    function triggerInternalRefresh() {
-        if (!appContainer) return;
-        appContainer.classList.remove('internal-refresh-active');
-        void appContainer.offsetWidth;
-        appContainer.classList.add('internal-refresh-active');
-        setTimeout(() => {
-            if (appContainer) appContainer.classList.remove('internal-refresh-active');
-        }, 280);
+    if (typeof console !== "undefined") {
+        console.log = console.debug = console.info = console.warn = console.error = function() {};
     }
-
-    function setupInternalRefresh() {
-        document.body.addEventListener('click', (e) => {
-            const resetBtn = document.getElementById('clearAllBtn');
-            if (resetBtn && (e.target === resetBtn || resetBtn.contains(e.target))) return;
-            triggerInternalRefresh();
-        });
-    }
-
-    // ==================== EVENT LISTENERS ====================
-    zeroButton.addEventListener('click', () => {
-        zeroButton.classList.add('zero-flash');
-        setTimeout(() => zeroButton.classList.remove('zero-flash'), 120);
-        addSpin(0);
-    });
-
-    clearBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        hardResetFullReload();
-    });
-
-    // ==================== INITIALIZATION ====================
-    buildNumberPad();
-
-    spinHistory = [];
-    groupHistory = [];
-    refreshUI();
-    mainPredictionSpan.innerText = "———";
-
-    setupInternalRefresh();
-
-    setTimeout(() => {
-        showProviderPicker();
-    }, 120);
+})();
 </script>
 </body>
 </html>
