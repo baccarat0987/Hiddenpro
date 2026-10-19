@@ -33,10 +33,8 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // ✅ Baccarat PRO engine ID
         const REQUIRED_ENGINE_ID = "engine_18";
 
-        // Global sign‑out function (used by the exit button)
         window.signOutUser = function() {
             signOut(auth).then(() => {
                 window.location.href = "index.html";
@@ -221,13 +219,11 @@
     let maxLoss=9999, targetProfitMultiplier=1.8;
     let targetProfit=0, history=[], aiPrediction=null;
 
-    // ✅ Recovery tracking — understands outstanding debt across partial wins
     let peakBankroll = 1000;
     let recoveryTarget = 1000;
 
-    // ✅ Payout multipliers
-    const PLAYER_PAYOUT = 1.00;   // Player wins pay 1:1
-    const BANKER_PAYOUT = 0.95;   // Banker wins pay 0.95:1 (5% commission)
+    const PLAYER_PAYOUT = 1.00;
+    const BANKER_PAYOUT = 0.95;
 
     const bankrollEl=document.getElementById("bankroll");
     const nextBetEl=document.getElementById("next-bet");
@@ -249,16 +245,12 @@
     const inputBet=document.getElementById("input-bet");
     const startBtn=document.getElementById("start-btn");
 
-    // ============================================================
-    // ✅ MONEY FORMATTING
-    // ============================================================
     function fmtMoney(n) {
         const num = Math.round(n * 100) / 100;
         if (Number.isInteger(num)) return num.toString();
         return num.toFixed(2);
     }
 
-    // ✅ Count how many decimal places a number has
     function getDecimals(n) {
         if (Number.isInteger(n)) return 0;
         const s = n.toString();
@@ -270,7 +262,6 @@
         return dot === -1 ? 0 : s.length - dot - 1;
     }
 
-    // ✅ Round a number to N decimals without float errors
     function roundTo(decimals) {
         return (num) => {
             const factor = Math.pow(10, decimals);
@@ -278,12 +269,12 @@
         };
     }
 
-    // ============================================================
-    // ✅ UI UPDATES
-    // ============================================================
     function updateWaitMessage() {
         if (history.length < 7) {
             waitmsg.textContent = `Waiting for result... (${history.length}/7)`;
+            waitmsg.classList.remove("hidden");
+        } else {
+            waitmsg.classList.add("hidden");
         }
     }
 
@@ -356,28 +347,21 @@
     }
 
     // ============================================================
-    // ✅ PURE PATTERN MATCHING ENGINE — Last 7 Results
+    // ✅ PURE PATTERN MATCHING ENGINE — CHOICE A
     //
-    // ✅ FIXES APPLIED (pattern logic only):
-    //   1. Removed the -1 off-by-one → length 7 now actually matches.
-    //   2. searchEnd = full.length - recent.length → matches must END
-    //      before the recent window starts (no self-reference / data leak).
-    //   3. MIN_PATTERN_LEN = 2 → a single character is not a pattern;
-    //      length-1 matches now report NO SIGNAL instead of guessing.
-    //   4. "No signal" is now a real, reachable state.
-    //
-    // ✅ UNCHANGED (still pure):
-    //   - No votes, no weights, no scoring.
-    //   - Longest match first; first length that matches wins.
-    //   - Within a length, most recent occurrence wins.
-    //   - Prediction = character immediately after the matched pattern.
-    //   - Ties excluded from the P/B sequence.
+    // Query = last 7 non-tie results (slides every result).
+    // Search = entire history BEFORE the query window.
+    //   → An earlier 7-copy can be found, and its 8th char
+    //     becomes the prediction. Length 7 CAN fire.
+    // No votes. No weights. No scoring.
+    // Longest match wins. Most recent occurrence wins.
+    // Prediction = character immediately after the match.
+    // Ties excluded from the P/B sequence.
     // ============================================================
     const PREDICT_WINDOW = 7;
     const MIN_PATTERN_LEN = 2;
 
     function makePrediction(){
-        // Full P/B sequence (newest last), ties excluded
         const full = history
             .filter(h => h.result === "Player" || h.result === "Banker")
             .map(h => h.result === "Player" ? "P" : "B");
@@ -387,14 +371,13 @@
             return;
         }
 
-        // The "recent pattern" = last PREDICT_WINDOW results
         const recent = full.slice(-PREDICT_WINDOW);
 
         // Matches must END before the recent window begins.
-        // This prevents the engine from predicting from its own input.
+        // This lets length-7 match an earlier 7-copy and read its 8th char.
         const searchEnd = full.length - recent.length;
 
-        // Try longest suffix first, down to MIN_PATTERN_LEN
+        // Try longest suffix first (7 → 2)
         for (let len = Math.min(PREDICT_WINDOW, recent.length); len >= MIN_PATTERN_LEN; len--) {
             const suffix = recent.slice(-len).join("");
 
@@ -412,13 +395,12 @@
             }
         }
 
-        // No pattern of length >= MIN_PATTERN_LEN found
         showNoSignal();
     }
 
     function showNoSignal(){
         aiPrediction = null;
-        predictionLabel.textContent = "WAIT";
+        predictionLabel.textContent = "—";
         predictionLabel.className = "pred-label";
         animateConfidence(0);
         predictionBox.classList.remove("hidden");
@@ -434,9 +416,6 @@
         waitmsg.classList.add("hidden");
     }
 
-    // ============================================================
-    // ✅ RECOVERY BET — snaps to nearest multiple of baseBet
-    // ============================================================
     function calculateNextBet(){
         if (cumulativeLoss > 0) {
             let aggressive = (cumulativeLoss + baseBet) * 1.5;
@@ -448,9 +427,6 @@
         return baseBet;
     }
 
-    // ============================================================
-    // ✅ CLEAN DEEP REFRESH
-    // ============================================================
     function forceFullRefresh() {
         const url = new URL(window.location.href);
         url.searchParams.set('t', Date.now());
@@ -461,9 +437,6 @@
         forceFullRefresh();
     }
 
-    // ============================================================
-    // ✅ MAIN HANDLE CLICK
-    // ============================================================
     function handleClick(result){
         if(history.length<7){
             addHistory(result);
@@ -472,14 +445,11 @@
             return;
         }
         if(result==="Tie"){
-            // Tie doesn't change the P/B sequence, but re-render the
-            // prediction so the UI stays in sync with the engine.
             addHistory(result);
             makePrediction();
             return;
         }
 
-        // ✅ No signal → record result and re-predict, no bet
         if (aiPrediction === null) {
             addHistory(result, "neutral");
             makePrediction();
@@ -487,7 +457,6 @@
         }
 
         if(result===aiPrediction){
-            // ✅ REALISTIC PAYOUT: Banker pays 0.95, Player pays 1.00
             const payoutMultiplier = (aiPrediction === "Banker") ? BANKER_PAYOUT : PLAYER_PAYOUT;
             const profit = roundTo(2)(currentBet * payoutMultiplier);
 
@@ -495,18 +464,15 @@
             winCount++;
             addHistory(result,"win");
 
-            // Only reset recovery if we're back at the peak (true recovery)
             if (bankroll >= recoveryTarget) {
                 cumulativeLoss = 0;
                 lossStreak = 0;
                 peakBankroll = bankroll;
                 recoveryTarget = bankroll;
             } else {
-                // Still in debt — reduce outstanding loss by the *actual profit* earned
                 cumulativeLoss = Math.max(0, cumulativeLoss - profit);
             }
 
-            // Track new peak if we've grown beyond it
             if (bankroll > peakBankroll) {
                 peakBankroll = bankroll;
                 recoveryTarget = bankroll;
