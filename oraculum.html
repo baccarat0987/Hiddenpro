@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>ORACULUM</title>
+    <title>ORACULUM | Weighted Oracle</title>
 
     <script>
         if (window.location.pathname.endsWith('.html')) {
@@ -268,8 +268,8 @@
 
         /* ── CHART & GLASS LOGO STYLES ── */
         .chart-card {
-            position: relative; /* Required for absolute positioning of the logo */
-            padding-top: 15px;  /* Adjust padding to make room for logo if needed */
+            position: relative;
+            padding-top: 15px;
         }
 
         .chart-svg { 
@@ -289,7 +289,6 @@
             height: 0 !important;
         }
 
-        /* Glass AI Logo in top-right of chart */
         .glass-ai-logo {
             position: absolute;
             top: 15px;
@@ -300,13 +299,11 @@
             width: 42px;
             height: 42px;
             border-radius: 50%;
-            /* Glassmorphism effect adapting to app colors */
             background: rgba(15, 14, 26, 0.5); 
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             border: 1px solid rgba(168, 85, 247, 0.4);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(168, 85, 247, 0.1);
-            /* Continuous floating glass animation */
             animation: floatGlass 3s ease-in-out infinite;
             z-index: 10;
         }
@@ -331,7 +328,7 @@
             font-family: 'Segoe UI', Arial, sans-serif;
             font-weight: 900;
             font-size: 14px;
-            color: #e9d5ff; /* Light purple matching app accents */
+            color: #e9d5ff;
             letter-spacing: -0.5px;
             text-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
         }
@@ -395,10 +392,7 @@
         </div>
     </div>
 
-    <!-- Added chart-card class for positioning context -->
     <div class="card chart-card">
-        
-        <!-- Glass AI Logo -->
         <div class="glass-ai-logo">
             <span class="glass-ai-text">AI</span>
         </div>
@@ -453,7 +447,6 @@
                 </g>
             </svg>
         </div>
-        
     </div>
 
     <script>
@@ -498,7 +491,7 @@
             chip.textContent = pctText;
         }
 
-        // ---------- PATTERN MATCHER ----------
+        // ---------- PATTERN MATCHER & ADAPTIVE CONFIDENCE ----------
         function makePrediction(history) {
             const full = history;
             if (full.length < 2) {
@@ -515,9 +508,37 @@
                     if (chunk === suffix) {
                         const next = full[i + len];
                         if (next === "P" || next === "B") {
+                            
+                            const predictedOutcome = next === "P" ? "Player" : "Banker";
+                            
+                            // 1. Calculate how much the recent window favors the predicted outcome
+                            let targetCount = 0;
+                            let oppositeCount = 0;
+                            recent.forEach(res => {
+                                if (res === next) targetCount++;
+                                else oppositeCount++;
+                            });
+                            
+                            // 2. Base score from recent dominance
+                            let score = targetCount / PREDICT_WINDOW; 
+                            
+                            // 3. Add a substantial weight based on how long the matched pattern is
+                            // (A 7-pattern match gives a huge boost, a 2-pattern gives a small boost)
+                            score += (len / PREDICT_WINDOW) * 0.5;
+
+                            // 4. Scale strictly between 73.5 and 93.7
+                            const MIN_PCT = 73.5;
+                            const MAX_PCT = 93.7;
+                            
+                            // Cap score at 1.0 just in case
+                            if (score > 1) score = 1;
+
+                            // Map the score (0.0 to 1.0) into the range (73.5 to 93.7)
+                            const finalConfidence = MIN_PCT + (score * (MAX_PCT - MIN_PCT));
+
                             return {
-                                prediction: next === "P" ? "Player" : "Banker",
-                                confidence: (len / PREDICT_WINDOW) * 100,
+                                prediction: predictedOutcome,
+                                confidence: finalConfidence,
                                 matchLength: len
                             };
                         }
@@ -634,15 +655,14 @@
                 labelSpan.innerText = prediction;
                 labelSpan.className = "";
                 labelSpan.style.color = prediction === 'Player' ? '#22d3ee' : '#f472b6';
+                // Display the strictly adapted confidence range (73.50% - 93.70%)
                 showConfidenceChip(confidence.toFixed(2) + "%");
-                // Show bars ONLY when there is a valid Player/Banker prediction
                 applyBars(getRandomExtremeBarHeights()); 
             } else {
                 labelSpan.innerText = "WAIT";
                 labelSpan.className = "waiting";
                 labelSpan.style.color = "#6b6a8a";
                 removeConfidenceChip();
-                // Hide bars when prediction is WAIT
                 applyBars([0, 0, 0, 0]); 
             }
         }
