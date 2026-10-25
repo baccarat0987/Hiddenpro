@@ -184,6 +184,10 @@
             border-radius: 8px;
         }
 
+        /* Backup layers — works with or without :has() support */
+        .pred-box.no-conf .pct-green {
+            display: none !important;
+        }
         .pred-box:has(#label.waiting) .pct-green {
             display: none !important;
         }
@@ -346,21 +350,16 @@
         <div class="chart-svg">
             <svg width="100%" height="100%" viewBox="0 0 340 220">
                 <defs>
-                    <!-- Chat Gpt: Fern green + white -->
                     <linearGradient id="grad1" x1="0%" y1="100%" x2="0%" y2="0%">
                         <stop offset="0%"   stop-color="#0c1a12"/>
                         <stop offset="45%"  stop-color="#4F7942"/>
                         <stop offset="100%" stop-color="#FFFFFF"/>
                     </linearGradient>
-
-                    <!-- Grok: Monochrome black & white -->
                     <linearGradient id="grad2" x1="0%" y1="100%" x2="0%" y2="0%">
                         <stop offset="0%"   stop-color="#000000"/>
                         <stop offset="55%"  stop-color="#3a3a3a"/>
                         <stop offset="100%" stop-color="#FFFFFF"/>
                     </linearGradient>
-
-                    <!-- Gemini: Blue, red, yellow, green -->
                     <linearGradient id="grad3" x1="0%" y1="100%" x2="0%" y2="0%">
                         <stop offset="0%"   stop-color="#0c0a1a"/>
                         <stop offset="25%"  stop-color="#1E90FF"/>
@@ -368,8 +367,6 @@
                         <stop offset="75%"  stop-color="#FFD700"/>
                         <stop offset="100%" stop-color="#3CB371"/>
                     </linearGradient>
-
-                    <!-- DeepSeek: Vibrant electric / Dodger Blue -->
                     <linearGradient id="grad4" x1="0%" y1="100%" x2="0%" y2="0%">
                         <stop offset="0%"   stop-color="#020108"/>
                         <stop offset="40%"  stop-color="#0a3a6b"/>
@@ -404,19 +401,6 @@
     </div>
 
     <script>
-        // ============================================================
-        // UI = EXACT original ORACULUM
-        // Logic = PURE PATTERN MATCHER (1:1 with fixed Baccarat PRO)
-        //   - PREDICT_WINDOW = 7
-        //   - MIN_PATTERN_LEN = 2
-        //   - searchEnd = full.length - recent.length
-        //   - Try longest suffix first (7 -> 2)
-        //   - Most recent occurrence wins
-        //   - No match -> "WAIT" (no confidence bar / % shown)
-        //   - fullResults capped at 10 (1:1 with Baccarat PRO history cap)
-        //   - Bars = RANDOM (as original), new themed palettes
-        // ============================================================
-
         let fullResults = [];
         let stateStack = [];
 
@@ -429,6 +413,7 @@
         const labelSpan = document.getElementById('label');
         const accSpan = document.getElementById('acc');
         const thresholdMsgDiv = document.getElementById('thresholdMsg');
+        const predBox = document.querySelector('.pred-box');
 
         const barData = [
             { el: document.getElementById('gpt') },
@@ -436,6 +421,16 @@
             { el: document.getElementById('gemini') },
             { el: document.getElementById('deep') }
         ];
+
+        // 🔒 Single source of truth for confidence visibility
+        function syncConfidenceVisibility() {
+            const isWaiting = labelSpan.classList.contains('waiting');
+            predBox.classList.toggle('no-conf', isWaiting);   // CSS fallback layer
+            if (isWaiting) {
+                accSpan.style.display = "none";
+                accSpan.innerText = "";
+            }
+        }
 
         function makePrediction(history) {
             const full = history;
@@ -526,6 +521,7 @@
             accSpan.innerText = state.confidenceText;
             accSpan.style.display = state.confidenceDisplay;
             thresholdMsgDiv.innerText = state.thresholdText || '';
+            syncConfidenceVisibility();                     // 🔒 enforce rule
             applyBars(state.barHeights && state.barHeights.length === 4 ? state.barHeights : [0,0,0,0]);
         }
 
@@ -539,6 +535,7 @@
                 labelSpan.style.color = "#6b6a8a";
                 accSpan.style.display = "none";
                 accSpan.innerText = "";
+                syncConfidenceVisibility();
                 thresholdMsgDiv.innerText = `⚡ Needs ${MIN_ENTRIES} results (0/${MIN_ENTRIES})`;
                 applyBars([0, 0, 0, 0]);
                 return;
@@ -550,6 +547,7 @@
                 labelSpan.style.color = "#6b6a8a";
                 accSpan.style.display = "none";
                 accSpan.innerText = "";
+                syncConfidenceVisibility();
                 thresholdMsgDiv.innerText = `⚡ Calibrating... ${len}/${MIN_ENTRIES} results needed`;
                 applyBars([0, 0, 0, 0]);
                 return;
@@ -565,12 +563,14 @@
                 labelSpan.style.color = prediction === 'Player' ? '#22d3ee' : '#f472b6';
                 accSpan.style.display = "inline";
                 accSpan.innerText = confidence.toFixed(2) + "%";
+                syncConfidenceVisibility();                 // will not hide (not waiting)
             } else {
                 labelSpan.innerText = "WAIT";
                 labelSpan.className = "waiting";
                 labelSpan.style.color = "#6b6a8a";
                 accSpan.style.display = "none";
                 accSpan.innerText = "";
+                syncConfidenceVisibility();                 // 🔒 force hide
             }
 
             applyBars(getRandomExtremeBarHeights());
