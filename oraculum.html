@@ -337,7 +337,7 @@
         </div>
         <div class="title-brand">
             <div class="main-title">ORACULUM</div>
-            <div class="sub-badge">PATTERN ORACLE</div>
+            <div class="sub-badge"></div>
         </div>
     </div>
 
@@ -590,7 +590,7 @@
                 labelSpan.className = "waiting";
                 labelSpan.style.color = "#6b6a8a";
                 removeConfidenceChip();
-                thresholdMsgDiv.innerText = `⚡ Needs ${MIN_ENTRIES} results (0/${MIN_ENTRIES})`;
+                thresholdMsgDiv.innerText = ` Needs ${MIN_ENTRIES} results (0/${MIN_ENTRIES})`;
                 applyBars([0, 0, 0, 0]);
                 return;
             }
@@ -600,7 +600,7 @@
                 labelSpan.className = "waiting";
                 labelSpan.style.color = "#6b6a8a";
                 removeConfidenceChip();
-                thresholdMsgDiv.innerText = `⚡ Calibrating... ${len}/${MIN_ENTRIES} results needed`;
+                thresholdMsgDiv.innerText = ` Calibrating... ${len}/${MIN_ENTRIES} results needed`;
                 applyBars([0, 0, 0, 0]);
                 return;
             }
