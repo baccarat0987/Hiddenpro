@@ -174,14 +174,19 @@
 
         .waiting { color: #6b6a8a; }
 
+        /* Confidence badge — blends with background, same cyan color */
         .pct-green {
             color: #a5f3fc;
             font-size: 16px;
             margin-left: 8px;
             display: none;
-            background: rgba(0,0,0,0.5);
+            background: rgba(165, 243, 252, 0.06);
             padding: 2px 8px;
             border-radius: 8px;
+            border: 1px solid rgba(165, 243, 252, 0.12);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            text-shadow: 0 0 8px rgba(165, 243, 252, 0.35);
         }
 
         .threshold-message {
@@ -354,8 +359,8 @@
                     <line x1="35" y1="192" x2="330" y2="192" />
                 </g>
 
-                <!-- Chat Gpt: Cream white -->
-                <rect id="gpt" class="bar-rect hidden-bar" x="45" y="192" width="55" height="0" fill="#FFFDD0" stroke="#e8e4b0" stroke-width="1" />
+                <!-- Chat Gpt: pure White -->
+                <rect id="gpt" class="bar-rect hidden-bar" x="45" y="192" width="55" height="0" fill="#FFFFFF" stroke="#cfcfcf" stroke-width="1" />
                 <!-- Grok: Black -->
                 <rect id="grok" class="bar-rect hidden-bar" x="115" y="192" width="55" height="0" fill="#000000" stroke="#444" stroke-width="1" />
                 <!-- Gemini: Sky blue -->
@@ -374,12 +379,16 @@
 
     <script>
         // ============================================================
-        // PURE PATTERN-MATCHING ENGINE (no weights, no randomness)
-        // - Suffix match lengths 6 -> 1 against older history
-        // - No match -> "WAIT"
-        // - Confidence = matchLength / 7 * 100
-        // - Each bar shows match strength at a different suffix depth
-        //   Chat Gpt = length 6, Grok = 5, Gemini = 4, DeepSeek = 3
+        // PURE PATTERN-MATCHING ENGINE
+        // Ported EXACTLY from fixed Baccarat PRO:
+        //   - PREDICT_WINDOW = 7
+        //   - MIN_PATTERN_LEN = 2  (single char is NOT a pattern)
+        //   - searchEnd = full.length - recent.length
+        //   - Try longest suffix first (7 → 2)
+        //   - Within a length, most recent occurrence wins
+        //   - No match → "WAIT"
+        //
+        // Bars (option b): Chat Gpt=7, Grok=6, Gemini=5, DeepSeek=4
         // ============================================================
 
         let fullResults = [];
@@ -387,6 +396,7 @@
 
         const MIN_ENTRIES = 7;
         const PREDICT_WINDOW = 7;
+        const MIN_PATTERN_LEN = 2;
 
         const hDiv = document.getElementById('history');
         const labelSpan = document.getElementById('label');
@@ -400,20 +410,16 @@
             { el: document.getElementById('deep') }
         ];
 
-        // ---------- PREDICTION (pure pattern) ----------
         function makePrediction(history) {
             const full = history;
-
             if (full.length < 2) {
                 return { prediction: null, confidence: null, matchLength: 0 };
             }
-
             const recent = full.slice(-PREDICT_WINDOW);
+            const searchEnd = full.length - recent.length;
 
-            for (let len = Math.min(PREDICT_WINDOW, recent.length) - 1; len >= 1; len--) {
+            for (let len = Math.min(PREDICT_WINDOW, recent.length); len >= MIN_PATTERN_LEN; len--) {
                 const suffix = recent.slice(-len).join("");
-                const searchEnd = full.length - len;
-
                 for (let i = searchEnd - 1; i >= 0; i--) {
                     const chunk = full.slice(i, i + len).join("");
                     if (chunk === suffix) {
@@ -428,11 +434,9 @@
                     }
                 }
             }
-
             return { prediction: null, confidence: null, matchLength: 0 };
         }
 
-        // ---------- BARS ----------
         function applyBars(heights) {
             barData.forEach((b, idx) => {
                 const h = heights[idx];
@@ -448,19 +452,18 @@
             });
         }
 
-        // Each bar = match strength at a fixed suffix length.
-        // Heights proportional to length (len/6 * 180), 0 if no match.
         function applyPatternBars(full) {
-            const lengths = [6, 5, 4, 3]; // gpt, grok, gemini, deep
+            const lengths = [7, 6, 5, 4];
             const heights = lengths.map(L => {
                 if (full.length < L + 1) return 0;
                 const suffix = full.slice(-L).join("");
-                const searchEnd = full.length - L;
+                const searchEnd = full.length - full.slice(-PREDICT_WINDOW).length;
+                if (searchEnd - 1 < 0) return 0;
                 for (let i = searchEnd - 1; i >= 0; i--) {
                     if (full.slice(i, i + L).join("") === suffix) {
                         const next = full[i + L];
                         if (next === "P" || next === "B") {
-                            return Math.round((L / 6) * 180);
+                            return Math.round((L / PREDICT_WINDOW) * 180);
                         }
                     }
                 }
@@ -469,7 +472,6 @@
             applyBars(heights);
         }
 
-        // ---------- HISTORY ----------
         function renderHistory(history) {
             hDiv.innerHTML = '';
             history.slice(-6).forEach(val => {
@@ -480,7 +482,6 @@
             });
         }
 
-        // ---------- STATE ----------
         function saveState() {
             const currentBars = barData.map(b => {
                 if (b.el.classList.contains('hidden-bar')) return 0;
@@ -511,7 +512,6 @@
             applyBars(state.barHeights && state.barHeights.length === 4 ? state.barHeights : [0,0,0,0]);
         }
 
-        // ---------- UI ----------
         function updateUI() {
             renderHistory(fullResults);
             const len = fullResults.length;
@@ -556,7 +556,6 @@
             applyPatternBars(fullResults);
         }
 
-        // ---------- ACTIONS ----------
         function add(val) {
             saveState();
             fullResults.push(val);
