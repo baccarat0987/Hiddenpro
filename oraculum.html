@@ -187,12 +187,6 @@
             border-radius: 8px;
         }
 
-        /* ── HIDE CONFIDENCE CHIP WHEN PREDICTION IS WAIT / WAITING ── */
-        #label.waiting ~ #acc,
-        .pred-box:has(#label.waiting) #acc {
-            display: none !important;
-        }
-
         .threshold-message {
             font-size: 11px;
             color: #a78bfa;
@@ -402,16 +396,6 @@
     </div>
 
     <script>
-        // ============================================================
-        // NUCLEAR WAIT handling:
-        //   When prediction is WAIT (or early Waiting../Calibrating),
-        //   #acc is physically REMOVED from the DOM.
-        //   When prediction is Player/Banker, #acc is (re)inserted
-        //   with the confidence percentage.
-        //   The element cannot show if it does not exist.
-        //   CSS also force-hides #acc whenever #label has .waiting.
-        // ============================================================
-
         let fullResults = [];
         let stateStack = [];
 
@@ -432,21 +416,18 @@
             { el: document.getElementById('deep') }
         ];
 
-        // ---------- NUCLEAR CHIP CONTROL ----------
-        // Remove #acc from DOM entirely (WAIT / Waiting.. / Calibrating).
+        // ---------- CHIP CONTROL ----------
         function removeConfidenceChip() {
             const chip = document.getElementById('acc');
             if (chip) chip.remove();
         }
 
-        // Insert #acc (or update it) with the given percentage.
         function showConfidenceChip(pctText) {
             let chip = document.getElementById('acc');
             if (!chip) {
                 chip = document.createElement('span');
                 chip.id = 'acc';
                 chip.className = 'pct-green';
-                // Insert after labelSpan, inside pred-box, before thresholdMsg
                 if (thresholdMsgDiv && thresholdMsgDiv.parentNode === predBox) {
                     predBox.insertBefore(chip, thresholdMsgDiv);
                 } else {
@@ -486,7 +467,7 @@
             return { prediction: null, confidence: null, matchLength: 0 };
         }
 
-        // ---------- RANDOM BARS (as original) ----------
+        // ---------- BARS ----------
         function getRandomExtremeBarHeights() {
             const gptH = Math.floor(Math.random() * 176) + 10;
             const grokH = Math.floor(Math.random() * 176) + 10;
@@ -547,7 +528,6 @@
             labelSpan.style.color = state.predictionColor;
             labelSpan.className = state.predictionClass;
 
-            // Derive chip state purely from label class — never from a stale display.
             if (labelSpan.classList.contains('waiting')) {
                 removeConfidenceChip();
             } else if (state.confidenceText) {
@@ -594,14 +574,16 @@
                 labelSpan.className = "";
                 labelSpan.style.color = prediction === 'Player' ? '#22d3ee' : '#f472b6';
                 showConfidenceChip(confidence.toFixed(2) + "%");
+                // Show bars ONLY when there is a valid Player/Banker prediction
+                applyBars(getRandomExtremeBarHeights()); 
             } else {
                 labelSpan.innerText = "WAIT";
                 labelSpan.className = "waiting";
                 labelSpan.style.color = "#6b6a8a";
-                removeConfidenceChip();   // ← NUCLEAR: chip gone from DOM
+                removeConfidenceChip();
+                // Hide bars when prediction is WAIT
+                applyBars([0, 0, 0, 0]); 
             }
-
-            applyBars(getRandomExtremeBarHeights());
         }
 
         // ---------- ACTIONS ----------
