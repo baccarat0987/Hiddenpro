@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ORACULUM | Weighted Oracle</title>
+    <title>ORACULUM | Pattern Oracle</title>
 
-    <!-- Clean URL script -->
     <script>
         if (window.location.pathname.endsWith('.html')) {
             const cleanUrl = window.location.pathname.replace('.html', '');
@@ -13,7 +12,6 @@
         }
     </script>
 
-    <!-- Firebase Authentication & Permission Check -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
@@ -54,7 +52,6 @@
         });
     </script>
 
-    <!-- Right-click and shortcut blocker -->
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = function(e) {
@@ -344,24 +341,6 @@
     <div class="card">
         <div class="chart-svg">
             <svg width="100%" height="100%" viewBox="0 0 340 220">
-                <defs>
-                    <linearGradient id="grad1" x1="0%" y1="100%" x2="0%" y2="0%">
-                        <stop offset="0%" stop-color="#0891b2"/>
-                        <stop offset="100%" stop-color="#22d3ee"/>
-                    </linearGradient>
-                    <linearGradient id="grad2" x1="0%" y1="100%" x2="0%" y2="0%">
-                        <stop offset="0%" stop-color="#be185d"/>
-                        <stop offset="100%" stop-color="#f472b6"/>
-                    </linearGradient>
-                    <linearGradient id="grad3" x1="0%" y1="100%" x2="0%" y2="0%">
-                        <stop offset="0%" stop-color="#6d28d9"/>
-                        <stop offset="100%" stop-color="#c084fc"/>
-                    </linearGradient>
-                    <linearGradient id="grad4" x1="0%" y1="100%" x2="0%" y2="0%">
-                        <stop offset="0%" stop-color="#1e293b"/>
-                        <stop offset="100%" stop-color="#64748b"/>
-                    </linearGradient>
-                </defs>
                 <g fill="#7c7a9e" font-size="10" text-anchor="end">
                     <text x="25" y="15">2.0</text><text x="25" y="105">1.0</text><text x="25" y="195">0</text>
                 </g>
@@ -375,10 +354,14 @@
                     <line x1="35" y1="192" x2="330" y2="192" />
                 </g>
 
-                <rect id="gpt" class="bar-rect hidden-bar" x="45" y="192" width="55" height="0" fill="url(#grad1)" />
-                <rect id="grok" class="bar-rect hidden-bar" x="115" y="192" width="55" height="0" fill="url(#grad2)" />
-                <rect id="gemini" class="bar-rect hidden-bar" x="185" y="192" width="55" height="0" fill="url(#grad3)" />
-                <rect id="deep" class="bar-rect hidden-bar" x="255" y="192" width="55" height="0" fill="url(#grad4)" />
+                <!-- Chat Gpt: Cream white -->
+                <rect id="gpt" class="bar-rect hidden-bar" x="45" y="192" width="55" height="0" fill="#FFFDD0" stroke="#e8e4b0" stroke-width="1" />
+                <!-- Grok: Black -->
+                <rect id="grok" class="bar-rect hidden-bar" x="115" y="192" width="55" height="0" fill="#000000" stroke="#444" stroke-width="1" />
+                <!-- Gemini: Sky blue -->
+                <rect id="gemini" class="bar-rect hidden-bar" x="185" y="192" width="55" height="0" fill="#87CEEB" stroke="#5aa9c7" stroke-width="1" />
+                <!-- DeepSeek: Navy / dark blue -->
+                <rect id="deep" class="bar-rect hidden-bar" x="255" y="192" width="55" height="0" fill="#001F3F" stroke="#2a4a6b" stroke-width="1" />
 
                 <g font-size="10" fill="#8b89ab" text-anchor="middle">
                     <text x="72" y="212">Chat Gpt</text><text x="142" y="212">Grok</text>
@@ -391,12 +374,12 @@
 
     <script>
         // ============================================================
-        // PATTERN-MATCHING ENGINE (ported from Baccarat PRO)
-        // - Pure P/B history (ORACULUM has no Tie button)
-        // - Tries suffix lengths 6 -> 1 against older history
-        // - No match at any length -> "WAIT" (no signal)
+        // PURE PATTERN-MATCHING ENGINE (no weights, no randomness)
+        // - Suffix match lengths 6 -> 1 against older history
+        // - No match -> "WAIT"
         // - Confidence = matchLength / 7 * 100
-        // - Bars reflect match length (no randomness)
+        // - Each bar shows match strength at a different suffix depth
+        //   Chat Gpt = length 6, Grok = 5, Gemini = 4, DeepSeek = 3
         // ============================================================
 
         let fullResults = [];
@@ -417,9 +400,9 @@
             { el: document.getElementById('deep') }
         ];
 
-        // ---------- PATTERN MATCHER ----------
+        // ---------- PREDICTION (pure pattern) ----------
         function makePrediction(history) {
-            const full = history; // already P/B only
+            const full = history;
 
             if (full.length < 2) {
                 return { prediction: null, confidence: null, matchLength: 0 };
@@ -449,7 +432,7 @@
             return { prediction: null, confidence: null, matchLength: 0 };
         }
 
-        // ---------- BAR RENDERING ----------
+        // ---------- BARS ----------
         function applyBars(heights) {
             barData.forEach((b, idx) => {
                 const h = heights[idx];
@@ -465,16 +448,28 @@
             });
         }
 
-        function applyPatternBars(matchLength) {
-            if (matchLength <= 0) {
-                applyBars([0, 0, 0, 0]);
-                return;
-            }
-            const h = 30 + (matchLength - 1) * 30; // len 1..6 -> 30..180
-            applyBars([h, h, h, h]);
+        // Each bar = match strength at a fixed suffix length.
+        // Heights proportional to length (len/6 * 180), 0 if no match.
+        function applyPatternBars(full) {
+            const lengths = [6, 5, 4, 3]; // gpt, grok, gemini, deep
+            const heights = lengths.map(L => {
+                if (full.length < L + 1) return 0;
+                const suffix = full.slice(-L).join("");
+                const searchEnd = full.length - L;
+                for (let i = searchEnd - 1; i >= 0; i--) {
+                    if (full.slice(i, i + L).join("") === suffix) {
+                        const next = full[i + L];
+                        if (next === "P" || next === "B") {
+                            return Math.round((L / 6) * 180);
+                        }
+                    }
+                }
+                return 0;
+            });
+            applyBars(heights);
         }
 
-        // ---------- HISTORY RENDER ----------
+        // ---------- HISTORY ----------
         function renderHistory(history) {
             hDiv.innerHTML = '';
             history.slice(-6).forEach(val => {
@@ -485,7 +480,7 @@
             });
         }
 
-        // ---------- STATE STACK ----------
+        // ---------- STATE ----------
         function saveState() {
             const currentBars = barData.map(b => {
                 if (b.el.classList.contains('hidden-bar')) return 0;
@@ -507,25 +502,18 @@
         function restoreState(state) {
             fullResults = [...state.results];
             renderHistory(fullResults);
-
             labelSpan.innerText = state.predictionText;
             labelSpan.style.color = state.predictionColor;
             labelSpan.className = state.predictionClass;
             accSpan.innerText = state.confidenceText;
             accSpan.style.display = state.confidenceDisplay;
             thresholdMsgDiv.innerText = state.thresholdText || '';
-
-            if (state.barHeights && state.barHeights.length === 4) {
-                applyBars(state.barHeights);
-            } else {
-                applyBars([0, 0, 0, 0]);
-            }
+            applyBars(state.barHeights && state.barHeights.length === 4 ? state.barHeights : [0,0,0,0]);
         }
 
-        // ---------- UI UPDATE ----------
+        // ---------- UI ----------
         function updateUI() {
             renderHistory(fullResults);
-
             const len = fullResults.length;
 
             if (len === 0) {
@@ -550,7 +538,7 @@
 
             thresholdMsgDiv.innerText = "";
 
-            const { prediction, confidence, matchLength } = makePrediction(fullResults);
+            const { prediction, confidence } = makePrediction(fullResults);
 
             if (prediction) {
                 labelSpan.innerText = prediction;
@@ -558,14 +546,14 @@
                 labelSpan.style.color = prediction === 'Player' ? '#22d3ee' : '#f472b6';
                 accSpan.style.display = "inline";
                 accSpan.innerText = confidence.toFixed(2) + "%";
-                applyPatternBars(matchLength);
             } else {
                 labelSpan.innerText = "WAIT";
                 labelSpan.className = "waiting";
                 labelSpan.style.color = "#6b6a8a";
                 accSpan.style.display = "none";
-                applyPatternBars(0);
             }
+
+            applyPatternBars(fullResults);
         }
 
         // ---------- ACTIONS ----------
@@ -577,8 +565,7 @@
 
         function undo() {
             if (stateStack.length === 0) return;
-            const prev = stateStack.pop();
-            restoreState(prev);
+            restoreState(stateStack.pop());
         }
 
         function reset() {
