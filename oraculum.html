@@ -187,6 +187,12 @@
             border-radius: 8px;
         }
 
+        /* Hide chip when prediction is WAIT / Waiting */
+        #label.waiting ~ #acc,
+        .pred-box:has(#label.waiting) #acc {
+            display: none !important;
+        }
+
         .threshold-message {
             font-size: 11px;
             color: #a78bfa;
@@ -274,12 +280,41 @@
             height: 0 !important;
         }
 
+        /* ── NEW AI LOGO CONTAINER FOOTER ── */
         .chart-footer {
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .ai-logo-container {
+            width: 24px;
+            height: 24px;
+            background: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .ai-logo-text {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-weight: 900;
+            font-size: 12px;
+            /* Text color matches the app background */
+            color: #0c0a1a; 
+            letter-spacing: -0.5px;
+        }
+
+        .footer-text {
             font-size: 9px;
             color: #a78bfa;
-            margin-top: 8px;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
         }
 
         .exit-nav {
@@ -392,7 +427,14 @@
                 </g>
             </svg>
         </div>
-        <div class="chart-footer">◉ PATTERN MATCHING ◉</div>
+        
+        <!-- New AI Logo Footer -->
+        <div class="chart-footer">
+            <div class="ai-logo-container">
+                <span class="ai-logo-text">AI</span>
+            </div>
+            <span class="footer-text">PATTERN MATCHING</span>
+        </div>
     </div>
 
     <script>
