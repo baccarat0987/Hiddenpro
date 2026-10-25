@@ -394,12 +394,13 @@
         // UI = EXACT original ORACULUM
         // Logic = PURE PATTERN MATCHER (1:1 with fixed Baccarat PRO)
         //   - PREDICT_WINDOW = 7
-        //   - MIN_PATTERN_LEN = 2  (single char is NOT a pattern)
+        //   - MIN_PATTERN_LEN = 2
         //   - searchEnd = full.length - recent.length
         //   - Try longest suffix first (7 -> 2)
-        //   - Within a length, most recent occurrence wins
-        //   - No match -> "—"
-        //   - Bars = RANDOM (as original), but re-themed to match bg
+        //   - Most recent occurrence wins
+        //   - No match -> "WAIT"
+        //   - fullResults capped at 10 (1:1 with Baccarat PRO history cap)
+        //   - Bars = RANDOM (as original), themed to blend with bg
         // ============================================================
 
         let fullResults = [];
@@ -408,6 +409,7 @@
         const MIN_ENTRIES = 7;
         const PREDICT_WINDOW = 7;
         const MIN_PATTERN_LEN = 2;
+        const MAX_HISTORY = 10;   // ← Baccarat PRO cap
 
         const hDiv = document.getElementById('history');
         const labelSpan = document.getElementById('label');
@@ -553,7 +555,7 @@
                 accSpan.style.display = "inline";
                 accSpan.innerText = confidence.toFixed(2) + "%";
             } else {
-                labelSpan.innerText = "—";
+                labelSpan.innerText = "WAIT";
                 labelSpan.className = "waiting";
                 labelSpan.style.color = "#6b6a8a";
                 accSpan.style.display = "none";
@@ -567,6 +569,7 @@
         function add(val) {
             saveState();
             fullResults.push(val);
+            if (fullResults.length > MAX_HISTORY) fullResults.shift();   // 1:1 cap
             updateUI();
         }
 
