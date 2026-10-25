@@ -187,6 +187,12 @@
             border-radius: 8px;
         }
 
+        /* ── HIDE CONFIDENCE CHIP WHEN PREDICTION IS WAIT / WAITING ── */
+        #label.waiting ~ #acc,
+        .pred-box:has(#label.waiting) #acc {
+            display: none !important;
+        }
+
         .threshold-message {
             font-size: 11px;
             color: #a78bfa;
@@ -403,6 +409,7 @@
         //   When prediction is Player/Banker, #acc is (re)inserted
         //   with the confidence percentage.
         //   The element cannot show if it does not exist.
+        //   CSS also force-hides #acc whenever #label has .waiting.
         // ============================================================
 
         let fullResults = [];
@@ -526,7 +533,6 @@
                 predictionText: labelSpan.innerText,
                 predictionColor: labelSpan.style.color,
                 predictionClass: labelSpan.className,
-                // If the chip doesn't exist at snapshot time, its text is "".
                 confidenceText: chip ? chip.textContent : "",
                 thresholdText: thresholdMsgDiv.innerText,
                 barHeights: [...currentBars]
