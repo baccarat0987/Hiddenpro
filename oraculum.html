@@ -398,7 +398,7 @@
         //   - searchEnd = full.length - recent.length
         //   - Try longest suffix first (7 -> 2)
         //   - Most recent occurrence wins
-        //   - No match -> "WAIT"
+        //   - No match -> "WAIT" (confidence hidden + cleared)
         //   - fullResults capped at 10 (1:1 with Baccarat PRO history cap)
         //   - Bars = RANDOM (as original), themed to blend with bg
         // ============================================================
@@ -409,7 +409,7 @@
         const MIN_ENTRIES = 7;
         const PREDICT_WINDOW = 7;
         const MIN_PATTERN_LEN = 2;
-        const MAX_HISTORY = 10;   // ← Baccarat PRO cap
+        const MAX_HISTORY = 10;   // Baccarat PRO cap
 
         const hDiv = document.getElementById('history');
         const labelSpan = document.getElementById('label');
@@ -529,7 +529,8 @@
                 labelSpan.className = "waiting";
                 labelSpan.style.color = "#6b6a8a";
                 accSpan.style.display = "none";
-                thresholdMsgDiv.innerText = `⚡ Needs ${MIN_ENTRIES} results (0/${MIN_ENTRIES})`;
+                accSpan.innerText = "";
+                thresholdMsgDiv.innerText = ` Needs ${MIN_ENTRIES} results (0/${MIN_ENTRIES})`;
                 applyBars([0, 0, 0, 0]);
                 return;
             }
@@ -539,7 +540,8 @@
                 labelSpan.className = "waiting";
                 labelSpan.style.color = "#6b6a8a";
                 accSpan.style.display = "none";
-                thresholdMsgDiv.innerText = `⚡ Calibrating... ${len}/${MIN_ENTRIES} results needed`;
+                accSpan.innerText = "";
+                thresholdMsgDiv.innerText = ` Calibrating... ${len}/${MIN_ENTRIES} results needed`;
                 applyBars([0, 0, 0, 0]);
                 return;
             }
@@ -555,10 +557,12 @@
                 accSpan.style.display = "inline";
                 accSpan.innerText = confidence.toFixed(2) + "%";
             } else {
+                // WAIT -> confidence hidden + cleared (0 / blank)
                 labelSpan.innerText = "WAIT";
                 labelSpan.className = "waiting";
                 labelSpan.style.color = "#6b6a8a";
                 accSpan.style.display = "none";
+                accSpan.innerText = "";
             }
 
             // RANDOM bars as original
