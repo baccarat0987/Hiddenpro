@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>ORACULUM | Weighted Oracle</title>
 
     <script>
@@ -178,18 +181,10 @@
             color: #a5f3fc;
             font-size: 16px;
             margin-left: 8px;
-            display: none;
+            display: inline;
             background: rgba(0,0,0,0.5);
             padding: 2px 8px;
             border-radius: 8px;
-        }
-
-        /* Backup layers — works with or without :has() support */
-        .pred-box.no-conf .pct-green {
-            display: none !important;
-        }
-        .pred-box:has(#label.waiting) .pct-green {
-            display: none !important;
         }
 
         .threshold-message {
@@ -332,7 +327,7 @@
     <div class="card">
         <div class="pred-box">
             <span class="next-label">Next: <span id="label" class="waiting">Waiting..</span></span>
-            <span id="acc" class="pct-green">88.48%</span>
+            <!-- #acc is inserted/removed dynamically by JS (nuclear) -->
             <div id="thresholdMsg" class="threshold-message"></div>
         </div>
 
@@ -401,6 +396,15 @@
     </div>
 
     <script>
+        // ============================================================
+        // NUCLEAR WAIT handling:
+        //   When prediction is WAIT (or early Waiting../Calibrating),
+        //   #acc is physically REMOVED from the DOM.
+        //   When prediction is Player/Banker, #acc is (re)inserted
+        //   with the confidence percentage.
+        //   The element cannot show if it does not exist.
+        // ============================================================
+
         let fullResults = [];
         let stateStack = [];
 
@@ -411,7 +415,6 @@
 
         const hDiv = document.getElementById('history');
         const labelSpan = document.getElementById('label');
-        const accSpan = document.getElementById('acc');
         const thresholdMsgDiv = document.getElementById('thresholdMsg');
         const predBox = document.querySelector('.pred-box');
 
@@ -422,16 +425,31 @@
             { el: document.getElementById('deep') }
         ];
 
-        // 🔒 Single source of truth for confidence visibility
-        function syncConfidenceVisibility() {
-            const isWaiting = labelSpan.classList.contains('waiting');
-            predBox.classList.toggle('no-conf', isWaiting);   // CSS fallback layer
-            if (isWaiting) {
-                accSpan.style.display = "none";
-                accSpan.innerText = "";
-            }
+        // ---------- NUCLEAR CHIP CONTROL ----------
+        // Remove #acc from DOM entirely (WAIT / Waiting.. / Calibrating).
+        function removeConfidenceChip() {
+            const chip = document.getElementById('acc');
+            if (chip) chip.remove();
         }
 
+        // Insert #acc (or update it) with the given percentage.
+        function showConfidenceChip(pctText) {
+            let chip = document.getElementById('acc');
+            if (!chip) {
+                chip = document.createElement('span');
+                chip.id = 'acc';
+                chip.className = 'pct-green';
+                // Insert after labelSpan, inside pred-box, before thresholdMsg
+                if (thresholdMsgDiv && thresholdMsgDiv.parentNode === predBox) {
+                    predBox.insertBefore(chip, thresholdMsgDiv);
+                } else {
+                    predBox.appendChild(chip);
+                }
+            }
+            chip.textContent = pctText;
+        }
+
+        // ---------- PATTERN MATCHER ----------
         function makePrediction(history) {
             const full = history;
             if (full.length < 2) {
@@ -461,6 +479,7 @@
             return { prediction: null, confidence: null, matchLength: 0 };
         }
 
+        // ---------- RANDOM BARS (as original) ----------
         function getRandomExtremeBarHeights() {
             const gptH = Math.floor(Math.random() * 176) + 10;
             const grokH = Math.floor(Math.random() * 176) + 10;
@@ -484,6 +503,7 @@
             });
         }
 
+        // ---------- HISTORY ----------
         function renderHistory(history) {
             hDiv.innerHTML = '';
             history.slice(-6).forEach(val => {
@@ -494,18 +514,20 @@
             });
         }
 
+        // ---------- STATE ----------
         function saveState() {
             const currentBars = barData.map(b => {
                 if (b.el.classList.contains('hidden-bar')) return 0;
                 return parseFloat(b.el.getAttribute('height')) || 0;
             });
+            const chip = document.getElementById('acc');
             stateStack.push({
                 results: [...fullResults],
                 predictionText: labelSpan.innerText,
                 predictionColor: labelSpan.style.color,
                 predictionClass: labelSpan.className,
-                confidenceText: accSpan.innerText,
-                confidenceDisplay: accSpan.style.display,
+                // If the chip doesn't exist at snapshot time, its text is "".
+                confidenceText: chip ? chip.textContent : "",
                 thresholdText: thresholdMsgDiv.innerText,
                 barHeights: [...currentBars]
             });
@@ -518,13 +540,21 @@
             labelSpan.innerText = state.predictionText;
             labelSpan.style.color = state.predictionColor;
             labelSpan.className = state.predictionClass;
-            accSpan.innerText = state.confidenceText;
-            accSpan.style.display = state.confidenceDisplay;
+
+            // Derive chip state purely from label class — never from a stale display.
+            if (labelSpan.classList.contains('waiting')) {
+                removeConfidenceChip();
+            } else if (state.confidenceText) {
+                showConfidenceChip(state.confidenceText);
+            } else {
+                removeConfidenceChip();
+            }
+
             thresholdMsgDiv.innerText = state.thresholdText || '';
-            syncConfidenceVisibility();                     // 🔒 enforce rule
             applyBars(state.barHeights && state.barHeights.length === 4 ? state.barHeights : [0,0,0,0]);
         }
 
+        // ---------- UI ----------
         function updateUI() {
             renderHistory(fullResults);
             const len = fullResults.length;
@@ -533,9 +563,7 @@
                 labelSpan.innerText = "Waiting..";
                 labelSpan.className = "waiting";
                 labelSpan.style.color = "#6b6a8a";
-                accSpan.style.display = "none";
-                accSpan.innerText = "";
-                syncConfidenceVisibility();
+                removeConfidenceChip();
                 thresholdMsgDiv.innerText = `⚡ Needs ${MIN_ENTRIES} results (0/${MIN_ENTRIES})`;
                 applyBars([0, 0, 0, 0]);
                 return;
@@ -545,9 +573,7 @@
                 labelSpan.innerText = "Waiting..";
                 labelSpan.className = "waiting";
                 labelSpan.style.color = "#6b6a8a";
-                accSpan.style.display = "none";
-                accSpan.innerText = "";
-                syncConfidenceVisibility();
+                removeConfidenceChip();
                 thresholdMsgDiv.innerText = `⚡ Calibrating... ${len}/${MIN_ENTRIES} results needed`;
                 applyBars([0, 0, 0, 0]);
                 return;
@@ -561,21 +587,18 @@
                 labelSpan.innerText = prediction;
                 labelSpan.className = "";
                 labelSpan.style.color = prediction === 'Player' ? '#22d3ee' : '#f472b6';
-                accSpan.style.display = "inline";
-                accSpan.innerText = confidence.toFixed(2) + "%";
-                syncConfidenceVisibility();                 // will not hide (not waiting)
+                showConfidenceChip(confidence.toFixed(2) + "%");
             } else {
                 labelSpan.innerText = "WAIT";
                 labelSpan.className = "waiting";
                 labelSpan.style.color = "#6b6a8a";
-                accSpan.style.display = "none";
-                accSpan.innerText = "";
-                syncConfidenceVisibility();                 // 🔒 force hide
+                removeConfidenceChip();   // ← NUCLEAR: chip gone from DOM
             }
 
             applyBars(getRandomExtremeBarHeights());
         }
 
+        // ---------- ACTIONS ----------
         function add(val) {
             saveState();
             fullResults.push(val);
