@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>ORACULUM</title>
+    <title>ORACULUM | Weighted Oracle</title>
 
     <script>
         if (window.location.pathname.endsWith('.html')) {
@@ -79,9 +79,10 @@
             margin: 0;
         }
 
+        /* ── UPDATED TITLE HEADER & AI LOGO ── */
         .logo-header {
             display: flex;
-            align-items: baseline;
+            align-items: center;
             justify-content: center;
             gap: 16px;
             margin-bottom: 35px;
@@ -89,43 +90,9 @@
             max-width: 400px;
         }
 
-        .spinning-logo {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, #1a1630, #0a0820);
-            border: 2px solid #a855f7;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
-            animation: spinMoveLogo 2s ease-in-out infinite;
+        .title-brand { 
+            text-align: left; 
         }
-
-        @keyframes spinMoveLogo {
-            0% { transform: rotate(0deg) translateY(0px); }
-            25% { transform: rotate(90deg) translateY(-4px); }
-            50% { transform: rotate(180deg) translateY(0px); }
-            75% { transform: rotate(270deg) translateY(4px); }
-            100% { transform: rotate(360deg) translateY(0px); }
-        }
-
-        .spinning-logo span {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #c084fc, #a855f7);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: counterSpinText 2s ease-in-out infinite;
-        }
-
-        @keyframes counterSpinText {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(-360deg); }
-        }
-
-        .title-brand { text-align: left; }
 
         .main-title {
             font-weight: 800;
@@ -143,6 +110,49 @@
             color: #a78bfa;
             text-transform: uppercase;
             margin-top: 3px;
+        }
+
+        .glass-ai-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            /* Glassmorphism effect adapting to app colors */
+            background: rgba(15, 14, 26, 0.5); 
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(168, 85, 247, 0.1);
+            /* Continuous floating glass animation */
+            animation: floatGlass 3s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes floatGlass {
+            0% { 
+                transform: translateY(0px) rotate(0deg); 
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(168, 85, 247, 0.1);
+            }
+            50% { 
+                transform: translateY(-6px) rotate(3deg); 
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(168, 85, 247, 0.3);
+                border-color: rgba(168, 85, 247, 0.8);
+            }
+            100% { 
+                transform: translateY(0px) rotate(0deg); 
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(168, 85, 247, 0.1);
+            }
+        }
+
+        .glass-ai-text {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-weight: 900;
+            font-size: 16px;
+            color: #e9d5ff;
+            letter-spacing: -0.5px;
+            text-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
         }
 
         .card {
@@ -266,7 +276,6 @@
             border-bottom: 2px solid #64748b;
         }
 
-        /* ── CHART & GLASS LOGO STYLES ── */
         .chart-card {
             position: relative;
             padding-top: 15px;
@@ -287,50 +296,6 @@
         .hidden-bar {
             opacity: 0;
             height: 0 !important;
-        }
-
-        .glass-ai-logo {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: rgba(15, 14, 26, 0.5); 
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(168, 85, 247, 0.4);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(168, 85, 247, 0.1);
-            animation: floatGlass 3s ease-in-out infinite;
-            z-index: 10;
-        }
-
-        @keyframes floatGlass {
-            0% { 
-                transform: translateY(0px) rotate(0deg); 
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(168, 85, 247, 0.1);
-            }
-            50% { 
-                transform: translateY(-6px) rotate(3deg); 
-                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(168, 85, 247, 0.3);
-                border-color: rgba(168, 85, 247, 0.8);
-            }
-            100% { 
-                transform: translateY(0px) rotate(0deg); 
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(168, 85, 247, 0.1);
-            }
-        }
-
-        .glass-ai-text {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            font-weight: 900;
-            font-size: 14px;
-            color: #e9d5ff;
-            letter-spacing: -0.5px;
-            text-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
         }
 
         .exit-nav {
@@ -365,13 +330,14 @@
         <a href="index.html" class="exit-btn">← EXIT TERMINAL</a>
     </div>
 
+    <!-- Updated Header with Glass AI Logo -->
     <div class="logo-header">
-        <div class="spinning-logo">
-            <span>◈</span>
+        <div class="glass-ai-logo">
+            <span class="glass-ai-text">AI</span>
         </div>
         <div class="title-brand">
             <div class="main-title">ORACULUM</div>
-            <div class="sub-badge"></div>
+            <div class="sub-badge">PATTERN ORACLE</div>
         </div>
     </div>
 
@@ -392,11 +358,8 @@
         </div>
     </div>
 
+    <!-- Chart Card (Logo removed from here) -->
     <div class="card chart-card">
-        <div class="glass-ai-logo">
-            <span class="glass-ai-text">AI</span>
-        </div>
-
         <div class="chart-svg">
             <svg width="100%" height="100%" viewBox="0 0 340 220">
                 <defs>
@@ -513,27 +476,22 @@
                             
                             // 1. Calculate how much the recent window favors the predicted outcome
                             let targetCount = 0;
-                            let oppositeCount = 0;
                             recent.forEach(res => {
                                 if (res === next) targetCount++;
-                                else oppositeCount++;
                             });
                             
                             // 2. Base score from recent dominance
                             let score = targetCount / PREDICT_WINDOW; 
                             
                             // 3. Add a substantial weight based on how long the matched pattern is
-                            // (A 7-pattern match gives a huge boost, a 2-pattern gives a small boost)
                             score += (len / PREDICT_WINDOW) * 0.5;
 
                             // 4. Scale strictly between 73.5 and 93.7
                             const MIN_PCT = 73.5;
                             const MAX_PCT = 93.7;
                             
-                            // Cap score at 1.0 just in case
                             if (score > 1) score = 1;
 
-                            // Map the score (0.0 to 1.0) into the range (73.5 to 93.7)
                             const finalConfidence = MIN_PCT + (score * (MAX_PCT - MIN_PCT));
 
                             return {
@@ -632,7 +590,7 @@
                 labelSpan.className = "waiting";
                 labelSpan.style.color = "#6b6a8a";
                 removeConfidenceChip();
-                thresholdMsgDiv.innerText = ` Needs ${MIN_ENTRIES} results (0/${MIN_ENTRIES})`;
+                thresholdMsgDiv.innerText = `⚡ Needs ${MIN_ENTRIES} results (0/${MIN_ENTRIES})`;
                 applyBars([0, 0, 0, 0]);
                 return;
             }
@@ -642,7 +600,7 @@
                 labelSpan.className = "waiting";
                 labelSpan.style.color = "#6b6a8a";
                 removeConfidenceChip();
-                thresholdMsgDiv.innerText = ` Calibrating... ${len}/${MIN_ENTRIES} results needed`;
+                thresholdMsgDiv.innerText = `⚡ Calibrating... ${len}/${MIN_ENTRIES} results needed`;
                 applyBars([0, 0, 0, 0]);
                 return;
             }
@@ -655,7 +613,6 @@
                 labelSpan.innerText = prediction;
                 labelSpan.className = "";
                 labelSpan.style.color = prediction === 'Player' ? '#22d3ee' : '#f472b6';
-                // Display the strictly adapted confidence range (73.50% - 93.70%)
                 showConfidenceChip(confidence.toFixed(2) + "%");
                 applyBars(getRandomExtremeBarHeights()); 
             } else {
