@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ORACULUM | Weighted Oracle</title>
 
-    <!-- Clean URL script -->
     <script>
         if (window.location.pathname.endsWith('.html')) {
             const cleanUrl = window.location.pathname.replace('.html', '');
@@ -13,7 +12,6 @@
         }
     </script>
 
-    <!-- Firebase Authentication & Permission Check -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
@@ -54,7 +52,6 @@
         });
     </script>
 
-    <!-- Right-click and shortcut blocker -->
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = function(e) {
@@ -185,6 +182,10 @@
             background: rgba(0,0,0,0.5);
             padding: 2px 8px;
             border-radius: 8px;
+        }
+
+        .pred-box:has(#label.waiting) .pct-green {
+            display: none !important;
         }
 
         .threshold-message {
@@ -345,21 +346,34 @@
         <div class="chart-svg">
             <svg width="100%" height="100%" viewBox="0 0 340 220">
                 <defs>
+                    <!-- Chat Gpt: Fern green + white -->
                     <linearGradient id="grad1" x1="0%" y1="100%" x2="0%" y2="0%">
-                        <stop offset="0%" stop-color="#1a1630"/>
+                        <stop offset="0%"   stop-color="#0c1a12"/>
+                        <stop offset="45%"  stop-color="#4F7942"/>
                         <stop offset="100%" stop-color="#FFFFFF"/>
                     </linearGradient>
+
+                    <!-- Grok: Monochrome black & white -->
                     <linearGradient id="grad2" x1="0%" y1="100%" x2="0%" y2="0%">
-                        <stop offset="0%" stop-color="#0a0820"/>
-                        <stop offset="100%" stop-color="#2d2a4a"/>
+                        <stop offset="0%"   stop-color="#000000"/>
+                        <stop offset="55%"  stop-color="#3a3a3a"/>
+                        <stop offset="100%" stop-color="#FFFFFF"/>
                     </linearGradient>
+
+                    <!-- Gemini: Blue, red, yellow, green -->
                     <linearGradient id="grad3" x1="0%" y1="100%" x2="0%" y2="0%">
-                        <stop offset="0%" stop-color="#0c0a1a"/>
-                        <stop offset="100%" stop-color="#87CEEB"/>
+                        <stop offset="0%"   stop-color="#0c0a1a"/>
+                        <stop offset="25%"  stop-color="#1E90FF"/>
+                        <stop offset="50%"  stop-color="#FF3B3B"/>
+                        <stop offset="75%"  stop-color="#FFD700"/>
+                        <stop offset="100%" stop-color="#3CB371"/>
                     </linearGradient>
+
+                    <!-- DeepSeek: Vibrant electric / Dodger Blue -->
                     <linearGradient id="grad4" x1="0%" y1="100%" x2="0%" y2="0%">
-                        <stop offset="0%" stop-color="#020108"/>
-                        <stop offset="100%" stop-color="#001F3F"/>
+                        <stop offset="0%"   stop-color="#020108"/>
+                        <stop offset="40%"  stop-color="#0a3a6b"/>
+                        <stop offset="100%" stop-color="#1E90FF"/>
                     </linearGradient>
                 </defs>
                 <g fill="#7c7a9e" font-size="10" text-anchor="end">
@@ -375,10 +389,10 @@
                     <line x1="35" y1="192" x2="330" y2="192" />
                 </g>
 
-                <rect id="gpt" class="bar-rect hidden-bar" x="45" y="192" width="55" height="0" fill="url(#grad1)" />
-                <rect id="grok" class="bar-rect hidden-bar" x="115" y="192" width="55" height="0" fill="url(#grad2)" />
+                <rect id="gpt"    class="bar-rect hidden-bar" x="45"  y="192" width="55" height="0" fill="url(#grad1)" />
+                <rect id="grok"   class="bar-rect hidden-bar" x="115" y="192" width="55" height="0" fill="url(#grad2)" />
                 <rect id="gemini" class="bar-rect hidden-bar" x="185" y="192" width="55" height="0" fill="url(#grad3)" />
-                <rect id="deep" class="bar-rect hidden-bar" x="255" y="192" width="55" height="0" fill="url(#grad4)" />
+                <rect id="deep"   class="bar-rect hidden-bar" x="255" y="192" width="55" height="0" fill="url(#grad4)" />
 
                 <g font-size="10" fill="#8b89ab" text-anchor="middle">
                     <text x="72" y="212">Chat Gpt</text><text x="142" y="212">Grok</text>
@@ -398,9 +412,9 @@
         //   - searchEnd = full.length - recent.length
         //   - Try longest suffix first (7 -> 2)
         //   - Most recent occurrence wins
-        //   - No match -> "WAIT" (confidence hidden + cleared)
+        //   - No match -> "WAIT" (no confidence bar / % shown)
         //   - fullResults capped at 10 (1:1 with Baccarat PRO history cap)
-        //   - Bars = RANDOM (as original), themed to blend with bg
+        //   - Bars = RANDOM (as original), new themed palettes
         // ============================================================
 
         let fullResults = [];
@@ -409,7 +423,7 @@
         const MIN_ENTRIES = 7;
         const PREDICT_WINDOW = 7;
         const MIN_PATTERN_LEN = 2;
-        const MAX_HISTORY = 10;   // Baccarat PRO cap
+        const MAX_HISTORY = 10;
 
         const hDiv = document.getElementById('history');
         const labelSpan = document.getElementById('label');
@@ -423,9 +437,8 @@
             { el: document.getElementById('deep') }
         ];
 
-        // ---------- PURE PATTERN MATCHER ----------
         function makePrediction(history) {
-            const full = history; // ORACULUM has no Tie -> already P/B
+            const full = history;
             if (full.length < 2) {
                 return { prediction: null, confidence: null, matchLength: 0 };
             }
@@ -453,7 +466,6 @@
             return { prediction: null, confidence: null, matchLength: 0 };
         }
 
-        // ---------- RANDOM BARS (as original) ----------
         function getRandomExtremeBarHeights() {
             const gptH = Math.floor(Math.random() * 176) + 10;
             const grokH = Math.floor(Math.random() * 176) + 10;
@@ -477,7 +489,6 @@
             });
         }
 
-        // ---------- HISTORY ----------
         function renderHistory(history) {
             hDiv.innerHTML = '';
             history.slice(-6).forEach(val => {
@@ -488,7 +499,6 @@
             });
         }
 
-        // ---------- STATE ----------
         function saveState() {
             const currentBars = barData.map(b => {
                 if (b.el.classList.contains('hidden-bar')) return 0;
@@ -519,7 +529,6 @@
             applyBars(state.barHeights && state.barHeights.length === 4 ? state.barHeights : [0,0,0,0]);
         }
 
-        // ---------- UI ----------
         function updateUI() {
             renderHistory(fullResults);
             const len = fullResults.length;
@@ -530,7 +539,7 @@
                 labelSpan.style.color = "#6b6a8a";
                 accSpan.style.display = "none";
                 accSpan.innerText = "";
-                thresholdMsgDiv.innerText = ` Needs ${MIN_ENTRIES} results (0/${MIN_ENTRIES})`;
+                thresholdMsgDiv.innerText = `⚡ Needs ${MIN_ENTRIES} results (0/${MIN_ENTRIES})`;
                 applyBars([0, 0, 0, 0]);
                 return;
             }
@@ -541,7 +550,7 @@
                 labelSpan.style.color = "#6b6a8a";
                 accSpan.style.display = "none";
                 accSpan.innerText = "";
-                thresholdMsgDiv.innerText = `Calibrating... ${len}/${MIN_ENTRIES} results needed`;
+                thresholdMsgDiv.innerText = `⚡ Calibrating... ${len}/${MIN_ENTRIES} results needed`;
                 applyBars([0, 0, 0, 0]);
                 return;
             }
@@ -557,7 +566,6 @@
                 accSpan.style.display = "inline";
                 accSpan.innerText = confidence.toFixed(2) + "%";
             } else {
-                // WAIT -> confidence hidden + cleared (0 / blank)
                 labelSpan.innerText = "WAIT";
                 labelSpan.className = "waiting";
                 labelSpan.style.color = "#6b6a8a";
@@ -565,15 +573,13 @@
                 accSpan.innerText = "";
             }
 
-            // RANDOM bars as original
             applyBars(getRandomExtremeBarHeights());
         }
 
-        // ---------- ACTIONS ----------
         function add(val) {
             saveState();
             fullResults.push(val);
-            if (fullResults.length > MAX_HISTORY) fullResults.shift();   // 1:1 cap
+            if (fullResults.length > MAX_HISTORY) fullResults.shift();
             updateUI();
         }
 
