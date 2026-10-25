@@ -266,7 +266,16 @@
             border-bottom: 2px solid #64748b;
         }
 
-        .chart-svg { width: 100%; height: 220px; }
+        /* ── CHART & GLASS LOGO STYLES ── */
+        .chart-card {
+            position: relative; /* Required for absolute positioning of the logo */
+            padding-top: 15px;  /* Adjust padding to make room for logo if needed */
+        }
+
+        .chart-svg { 
+            width: 100%; 
+            height: 220px; 
+        }
 
         .bar-rect {
             transition: height 0.55s cubic-bezier(0.2, 1.4, 0.3, 1.1), y 0.55s cubic-bezier(0.2, 1.4, 0.3, 1.1), opacity 0.25s;
@@ -280,41 +289,51 @@
             height: 0 !important;
         }
 
-        /* ── NEW AI LOGO CONTAINER FOOTER ── */
-        .chart-footer {
+        /* Glass AI Logo in top-right of chart */
+        .glass-ai-logo {
+            position: absolute;
+            top: 15px;
+            right: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            margin-top: 15px;
-        }
-
-        .ai-logo-container {
-            width: 24px;
-            height: 24px;
-            background: #ffffff;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            /* Glassmorphism effect adapting to app colors */
+            background: rgba(15, 14, 26, 0.5); 
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(168, 85, 247, 0.1);
+            /* Continuous floating glass animation */
+            animation: floatGlass 3s ease-in-out infinite;
+            z-index: 10;
         }
 
-        .ai-logo-text {
+        @keyframes floatGlass {
+            0% { 
+                transform: translateY(0px) rotate(0deg); 
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(168, 85, 247, 0.1);
+            }
+            50% { 
+                transform: translateY(-6px) rotate(3deg); 
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(168, 85, 247, 0.3);
+                border-color: rgba(168, 85, 247, 0.8);
+            }
+            100% { 
+                transform: translateY(0px) rotate(0deg); 
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(168, 85, 247, 0.1);
+            }
+        }
+
+        .glass-ai-text {
             font-family: 'Segoe UI', Arial, sans-serif;
             font-weight: 900;
-            font-size: 12px;
-            /* Text color matches the app background */
-            color: #0c0a1a; 
+            font-size: 14px;
+            color: #e9d5ff; /* Light purple matching app accents */
             letter-spacing: -0.5px;
-        }
-
-        .footer-text {
-            font-size: 9px;
-            color: #a78bfa;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            font-weight: 600;
+            text-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
         }
 
         .exit-nav {
@@ -355,7 +374,7 @@
         </div>
         <div class="title-brand">
             <div class="main-title">ORACULUM</div>
-            <div class="sub-badge">PATTERN ORACLE</div>
+            <div class="sub-badge"></div>
         </div>
     </div>
 
@@ -376,7 +395,14 @@
         </div>
     </div>
 
-    <div class="card">
+    <!-- Added chart-card class for positioning context -->
+    <div class="card chart-card">
+        
+        <!-- Glass AI Logo -->
+        <div class="glass-ai-logo">
+            <span class="glass-ai-text">AI</span>
+        </div>
+
         <div class="chart-svg">
             <svg width="100%" height="100%" viewBox="0 0 340 220">
                 <defs>
@@ -428,13 +454,6 @@
             </svg>
         </div>
         
-        <!-- New AI Logo Footer -->
-        <div class="chart-footer">
-            <div class="ai-logo-container">
-                <span class="ai-logo-text">AI</span>
-            </div>
-            <span class="footer-text">PATTERN MATCHING</span>
-        </div>
     </div>
 
     <script>
@@ -592,7 +611,7 @@
                 labelSpan.className = "waiting";
                 labelSpan.style.color = "#6b6a8a";
                 removeConfidenceChip();
-                thresholdMsgDiv.innerText = `⚡ Needs ${MIN_ENTRIES} results (0/${MIN_ENTRIES})`;
+                thresholdMsgDiv.innerText = ` Needs ${MIN_ENTRIES} results (0/${MIN_ENTRIES})`;
                 applyBars([0, 0, 0, 0]);
                 return;
             }
@@ -602,7 +621,7 @@
                 labelSpan.className = "waiting";
                 labelSpan.style.color = "#6b6a8a";
                 removeConfidenceChip();
-                thresholdMsgDiv.innerText = `⚡ Calibrating... ${len}/${MIN_ENTRIES} results needed`;
+                thresholdMsgDiv.innerText = ` Calibrating... ${len}/${MIN_ENTRIES} results needed`;
                 applyBars([0, 0, 0, 0]);
                 return;
             }
